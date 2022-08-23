@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.free4inno</groupId>
+    <groupId>com.free4inno.kubeiaas</groupId>
     <artifactId>kubeiaas-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>kubeiaas-demo</name>
@@ -19,6 +19,7 @@
     <modules>
         <module>iaas-core</module>
         <module>iaas-agent</module>
+        <module>api-common</module>
     </modules>
 
     <properties>
@@ -61,11 +62,11 @@
         </dependency>
 
         <!-- log4j -->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>log4j</groupId>-->
+<!--            <artifactId>log4j</artifactId>-->
+<!--            <version>${log4j.version}</version>-->
+<!--        </dependency>-->
 
         <!-- Spring Boot test -->
         <dependency>

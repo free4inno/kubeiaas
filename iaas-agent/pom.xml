@@ -3,12 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.free4inno</groupId>
+        <groupId>com.free4inno.kubeiaas</groupId>
         <artifactId>kubeiaas-demo</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.free4inno</groupId>
     <artifactId>iaas-agent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>iaas-agent</name>
@@ -33,7 +32,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.4.4</version>
                 <configuration>
-                    <mainClass>com.free4inno.iaasagent.IaasAgentApplication</mainClass>
+                    <mainClass>kubeiaas.iaasagent.IaasAgentApplication</mainClass>
                     <outputDirectory>${basedir}\target</outputDirectory>
                 </configuration>
                 <executions>
