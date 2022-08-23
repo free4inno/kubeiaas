@@ -1,12 +1,13 @@
 package kubeiaas.common.constants;
 
 /**
- * Constants for OpenAPI
+ * Constants for HTTP Request Mapping Constants
  */
-public class OpenAPIConstants {
+public class RequestMappingConstants {
     /* ===== Object ===== */
     public static final String VM = "vm";
 
     /* ===== Action ===== */
     public static final String TEST = "test";
+    public static final String CREATE = "create";
 }
