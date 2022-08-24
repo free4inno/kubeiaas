@@ -10,4 +10,5 @@ public class RequestMappingConstants {
     /* ===== Action ===== */
     public static final String TEST = "test";
     public static final String CREATE = "create";
+    public static final String QUERY_ALL = "query_all";
 }
