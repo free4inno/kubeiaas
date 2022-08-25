@@ -1,11 +1,15 @@
 package kubeiaas.iaascore.service;
 
+import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.constants.HostSelectStrategyConstants;
 import kubeiaas.common.constants.VmConstants;
+import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.scheduler.AgentScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +22,9 @@ public class VmService {
 
     @Resource
     private TableStorage tableStorage;
+
+    @Resource
+    private AgentScheduler agentScheduler;
 
     public String createVm(
             String name,
@@ -62,7 +69,7 @@ public class VmService {
         // （暂时不考虑 image 的可用性，在 2.ResourceOperator 时考虑）
         // （暂时不考虑 host 的可用性，在 2.ResourceOperator 中考虑）
         newVm.setImageUuid(imageUuid);
-        newVm.setHostUuid(VmConstants.NO_HOST);
+        newVm.setHostUuid(hostUUid);
 
         // 1.5. set createTime
         Timestamp createTime = new Timestamp(System.currentTimeMillis());
@@ -79,30 +86,51 @@ public class VmService {
         // 2.1. check image
         // available
         Image image = tableStorage.imageQueryByUuid(imageUuid);
-
-
-
+        if (image == null || image.getStatus() != ImageStatusEnum.AVAILABLE) {
+            return "ERROR: image not available!";
+        }
         // mem
-
+        if (newVm.getMemory() < image.getMinMem()) {
+            return "ERROR: memory too low for image!";
+        }
         // size
+        int imageMinDisk = image.getMinDisk();
+        int newVmDiskSize = newVm.getDiskSize();
+        if (newVmDiskSize < imageMinDisk) {
+            // 强制修改 diskSize，不终止
+            newVm.setDiskSize(imageMinDisk);
+        }
 
-
+        // 2.2. select host
+        Host selectedHost;
+        if (hostUUid != null && !hostUUid.isEmpty()) {
+            // 指定 host：检查可用性
+            selectedHost = tableStorage.vmSelectHostByAppoint(newVm.getUuid(), hostUUid);
+        } else {
+            // 未指定 host：主动选择
+            selectedHost = tableStorage.vmSelectHostByOperator(newVm.getUuid(), HostSelectStrategyConstants.ROUND_ROBIN);
+        }
+        if (selectedHost == null) {
+            return "ERROR: no available host.";
+        }
+        agentScheduler.setTargetHost(selectedHost);
 
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
 
+
         /* ---- 4. Volume ----
         Create system volume.
         （系统盘：使用 image 创建 system volume）
          */
 
+
         /* ---- 5. create VM ----
         Generate XML for libvirt & Attach volume
         （实际创建：生成 xml，挂载系统盘，启动）
          */
-
 
 
         return "success";

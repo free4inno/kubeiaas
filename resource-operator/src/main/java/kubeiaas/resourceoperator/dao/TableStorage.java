@@ -1,4 +1,4 @@
-package kubeiaas.iaascore.dao;
+package kubeiaas.resourceoperator.dao;
 
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Host;
@@ -6,10 +6,8 @@ import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.HostConstants;
 import kubeiaas.common.constants.ImageConstants;
-import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.VmConstants;
-import kubeiaas.iaascore.dao.feign.DbProxy;
-import kubeiaas.iaascore.dao.feign.ResourceOperator;
+import kubeiaas.resourceoperator.dao.feign.DbProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +20,6 @@ public class TableStorage {
 
     @Resource
     private DbProxy dbProxy;
-
-    @Resource
-    private ResourceOperator resourceOperator;
 
     // ========================= vm =========================
 
@@ -46,16 +41,6 @@ public class TableStorage {
     public void vmSave(Vm vm) {
         String vmObjectStr = JSON.toJSONString(vm);
         dbProxy.vmSave(vmObjectStr);
-    }
-
-    public Host vmSelectHostByAppoint(String vmUuid, String hostUuid) {
-        String hostObjectStr = resourceOperator.selectHostByAppoint(vmUuid, hostUuid);
-        return JSON.parseObject(hostObjectStr, Host.class);
-    }
-
-    public Host vmSelectHostByOperator(String vmUuid, String strategy) {
-        String hostObjectStr = resourceOperator.selectHostByOperator(vmUuid, strategy);
-        return JSON.parseObject(hostObjectStr, Host.class);
     }
 
     // ========================= image =========================

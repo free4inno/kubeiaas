@@ -10,11 +10,15 @@ public class RequestParamConstants {
 
     public static final String IMAGE_UUID = "image_uuid";
     public static final String HOST_UUID = "host_uuid";
+    public static final String VM_UUID = "vm_uuid";
 
     public static final String KEY_1 = "key_1";
     public static final String VALUE_1 = "value_1";
     public static final String KEY_2 = "key_2";
     public static final String VALUE_2 = "value_2";
+
+    public static final String STRATEGY = "strategy";
+    public static final String STATUS = "status";
 
     /* ===== VM ===== */
     public static final String VM_OBJECT = "vm_object";

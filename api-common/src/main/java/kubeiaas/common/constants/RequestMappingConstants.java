@@ -19,6 +19,10 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String SAVE = "save";
 
+    // -- Resource Operator
+    public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
+    public static final String SELECT_HOST_BY_OPERATOR = "select_host_by_operator";
+
     /* ===== produce ===== */
     public static final String APP_JSON = "application/json";
     public static final String APP_XML = "application/xml";

@@ -21,6 +21,7 @@
         <module>iaas-agent</module>
         <module>api-common</module>
         <module>db-proxy</module>
+        <module>resource-operator</module>
     </modules>
 
     <properties>
