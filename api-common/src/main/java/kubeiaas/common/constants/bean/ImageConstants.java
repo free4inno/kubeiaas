@@ -1,4 +1,4 @@
-package kubeiaas.common.constants;
+package kubeiaas.common.constants.bean;
 
 public class ImageConstants {
     /* DB key */

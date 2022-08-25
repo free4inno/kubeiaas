@@ -44,11 +44,12 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.CPUS) int cpus,
             @RequestParam(value = RequestParamConstants.MEMORY) int memory,
             @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) int ipSegmentId,
             @RequestParam(value = RequestParamConstants.DISK_SIZE, required = false) Integer diskSize,
             @RequestParam(value = RequestParamConstants.DESCRIPTION, required = false) String description,
             @RequestParam(value = RequestParamConstants.HOST_UUID, required = false) String hostUuid) {
         log.info("create ==== start ====");
-        vmService.createVm(name, cpus, memory, imageUuid, diskSize, description, hostUuid);
+        vmService.createVm(name, cpus, memory, imageUuid, ipSegmentId, diskSize, description, hostUuid);
         log.info("create ==== end ====");
         return "success";
     }

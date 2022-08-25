@@ -30,4 +30,10 @@ public class RequestParamConstants {
     /* ===== IMAGE ===== */
     public static final String IMAGE_OBJECT = "image_object";
 
+    /* ===== IP ===== */
+    public static final String IP_SEGMENT_ID = "ip_segment_id";
+    public static final String PRIVATE_IP_SEGMENT_ID = "private_ip_segment_id";
+    public static final String PUBLIC_IP_SEGMENT_ID = "public_ip_segment_id";
+    public static final String IP_USED_OBJECT = "ip_used_object";
+
 }

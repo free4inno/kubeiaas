@@ -1,13 +1,8 @@
 package kubeiaas.iaascore.dao;
 
 import com.alibaba.fastjson.JSON;
-import kubeiaas.common.bean.Host;
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.constants.HostConstants;
-import kubeiaas.common.constants.ImageConstants;
-import kubeiaas.common.constants.RequestParamConstants;
-import kubeiaas.common.constants.VmConstants;
+import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.bean.*;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ResourceOperator;
 import lombok.extern.slf4j.Slf4j;
@@ -85,6 +80,30 @@ public class TableStorage {
         } else {
             return null;
         }
+    }
+
+    // ========================= ip segment =========================
+
+    public IpSegment ipSegmentQueryById(int id) {
+        String jsonString = dbProxy.ipSegmentQueryAllBySingleKey(IpSegmentConstants.ID, Integer.toString(id));
+        List<IpSegment> ipSegmentList = JSON.parseArray(jsonString, IpSegment.class);
+        if (ipSegmentList != null && !ipSegmentList.isEmpty()) {
+            return ipSegmentList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    // ========================= ip used =========================
+
+    public List<IpUsed> ipUsedQueryAllByIpSegmentId(int ipSegmentId) {
+        String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.IP_SEGMENT_ID, Integer.toString(ipSegmentId));
+        return JSON.parseArray(jsonString, IpUsed.class);
+    }
+
+    public void ipUsedSave(IpUsed ipUsed) {
+        String ipUsedObjectStr = JSON.toJSONString(ipUsed);
+        dbProxy.ipUsedSave(ipUsedObjectStr);
     }
 
 }

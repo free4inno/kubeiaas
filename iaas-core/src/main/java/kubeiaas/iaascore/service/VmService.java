@@ -2,13 +2,15 @@ package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
+import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
-import kubeiaas.common.constants.VmConstants;
+import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.process.NetworkProcess;
 import kubeiaas.iaascore.scheduler.AgentScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,15 @@ public class VmService {
     @Resource
     private AgentScheduler agentScheduler;
 
+    @Resource
+    private NetworkProcess networkProcess;
+
     public String createVm(
             String name,
             int cpus,
             int memory,
             String imageUuid,
+            int ipSegmentId,
             Integer diskSize,
             String description,
             String hostUUid) {
@@ -72,8 +78,7 @@ public class VmService {
         newVm.setHostUuid(hostUUid);
 
         // 1.5. set createTime
-        Timestamp createTime = new Timestamp(System.currentTimeMillis());
-        newVm.setCreateTime(createTime);
+        newVm.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
         // 1.6. save into DB
         tableStorage.vmSave(newVm);
@@ -115,10 +120,23 @@ public class VmService {
         }
         agentScheduler.setTargetHost(selectedHost);
 
+
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
+        String newMac = networkProcess.getNewMac(ipSegmentId);
+        IpUsed newIpUsed = networkProcess.getNewIp(ipSegmentId);
+        if (newIpUsed == null) {
+            return "ERROR: ip allocated failed!";
+        }
+        // already set: ip, ip_segment_id, type.
+        newIpUsed.setMac(newMac);
+        newIpUsed.setInstanceUuid(newVm.getUuid());
+        newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        // save into DB
+        tableStorage.ipUsedSave(newIpUsed);
+        // bind in DHCP-Controller
 
 
         /* ---- 4. Volume ----

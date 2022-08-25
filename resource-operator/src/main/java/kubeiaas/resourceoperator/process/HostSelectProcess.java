@@ -26,7 +26,7 @@ public class HostSelectProcess {
         }
 
         Host resultHost = new Host();
-        for (int checkCount = 0; checkCount < hostList.size(); checkCount ++) {
+        for (int checkCount = 0; checkCount < hostList.size(); checkCount++) {
             roundRobinCount += 1;
             if (roundRobinCount >= hostList.size()) {
                 roundRobinCount = 0;

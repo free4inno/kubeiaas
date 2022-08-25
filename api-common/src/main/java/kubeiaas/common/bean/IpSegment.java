@@ -17,7 +17,7 @@ public class IpSegment {
     private String gateway;         // 网关
     private String dns;             // dns
 
-    private IpTypeEnum type;        // 公网或者私网，0表示私网，1表示公网
+    private IpTypeEnum type;        // 公网或者私网
 
     private String ipRangeStart;    // 网段起始地址
     private String ipRangeEnd;      // 网段结束地址

@@ -53,4 +53,28 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
+    // ========================= ip segment =========================
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
+    @ResponseBody
+    String ipSegmentQueryAllBySingleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1
+    );
+
+    // ========================= ip used =========================
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
+    @ResponseBody
+    String ipUsedQueryAllBySingleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    void ipUsedSave(
+            @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr
+    );
+
 }
