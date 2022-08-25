@@ -33,5 +33,4 @@ build/
 .vscode/
 
 ### KubeIaaS ###
-iaas-core/src/test/
-iaas-agent/src/test/
+**/src/test/
