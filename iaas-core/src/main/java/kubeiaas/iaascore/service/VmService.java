@@ -7,6 +7,7 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
+import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.dao.TableStorage;
@@ -41,15 +42,18 @@ public class VmService {
             String description,
             String hostUUid) {
 
+        // todo: 这些过程分散到各个 process 中，目前方便作为 demo 统一合并在这里
+
         /* ---- 1. pre create VM ----
         Generate and Set basic info of vm.
         （预处理：设置基础参数，保存虚拟机信息）
          */
+        log.info("createVm -- 1. pre create VM");
         Vm newVm = new Vm();
+        String newVmUuid = UuidUtils.getRandomUuid();
 
         // 1.1. set basic
-        String uuid = UuidUtils.getRandomUuid();
-        newVm.setUuid(uuid);
+        newVm.setUuid(newVmUuid);
         newVm.setName(name);
         if (description != null && !description.isEmpty()){
             newVm.setDescription(description);
@@ -88,6 +92,8 @@ public class VmService {
         Use Resource Operator to allocate Host and check available
         （资源调度：分配宿主机，检查资源合法性）
          */
+        log.info("createVm -- 2. Resource Operator");
+        newVm = tableStorage.vmQueryByUuid(newVmUuid);
         // 2.1. check image
         // available
         Image image = tableStorage.imageQueryByUuid(imageUuid);
@@ -118,13 +124,20 @@ public class VmService {
         if (selectedHost == null) {
             return "ERROR: no available host.";
         }
+        log.info("selected host: " + selectedHost.getName());
+        // set scheduler of iaas-agent
         agentScheduler.setTargetHost(selectedHost);
+        // save into DB
+        newVm.setHostUuid(selectedHost.getUuid());
+        tableStorage.vmSave(newVm);
 
 
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
+        log.info("createVm -- 3. Network");
+
         String newMac = networkProcess.getNewMac(ipSegmentId);
         IpUsed newIpUsed = networkProcess.getNewIp(ipSegmentId);
         if (newIpUsed == null) {
@@ -132,11 +145,18 @@ public class VmService {
         }
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
-        newIpUsed.setInstanceUuid(newVm.getUuid());
+        newIpUsed.setInstanceUuid(newVmUuid);
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        newIpUsed.setStatus(IpAttachEnum.DETACHED);
+
+        log.info("new mac: " + newIpUsed.getMac());
+        log.info("new ip: " + newIpUsed.getIp());
+
         // save into DB
         tableStorage.ipUsedSave(newIpUsed);
+
         // bind in DHCP-Controller
+
 
 
         /* ---- 4. Volume ----

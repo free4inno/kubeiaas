@@ -1,5 +1,6 @@
 package kubeiaas.iaascore.dao.feign;
 
+import kubeiaas.common.constants.ComponentConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@FeignClient(name = "null", url = "http://127.0.0.1:9092")
+@FeignClient(name = ComponentConstants.RESOURCE_OPERATOR, url = "http://127.0.0.1:9092")
 public interface ResourceOperator {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_APPOINT)

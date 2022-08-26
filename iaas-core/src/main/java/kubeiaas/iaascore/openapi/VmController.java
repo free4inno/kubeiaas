@@ -49,9 +49,9 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.DESCRIPTION, required = false) String description,
             @RequestParam(value = RequestParamConstants.HOST_UUID, required = false) String hostUuid) {
         log.info("create ==== start ====");
-        vmService.createVm(name, cpus, memory, imageUuid, ipSegmentId, diskSize, description, hostUuid);
+        String msg = vmService.createVm(name, cpus, memory, imageUuid, ipSegmentId, diskSize, description, hostUuid);
         log.info("create ==== end ====");
-        return "success";
+        return msg;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
