@@ -24,8 +24,8 @@ public class IpUsed {
     private int ipSegmentId;
 
     /* for attach */
-    private String instanceUuid;
-    private IpAttachEnum status;
+    private String instanceUuid;    // attach of: IP & VM
+    private IpAttachEnum status;    // attach of: IP & MAC
 
     /* timestamp */
     private Timestamp createTime;

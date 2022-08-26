@@ -13,6 +13,8 @@ import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.process.NetworkProcess;
 import kubeiaas.iaascore.scheduler.AgentScheduler;
+import kubeiaas.iaascore.scheduler.DhcpScheduler;
+import kubeiaas.iaascore.scheduler.ResourceScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,12 @@ public class VmService {
 
     @Resource
     private AgentScheduler agentScheduler;
+
+    @Resource
+    private ResourceScheduler resourceScheduler;
+
+    @Resource
+    private DhcpScheduler dhcpScheduler;
 
     @Resource
     private NetworkProcess networkProcess;
@@ -116,10 +124,10 @@ public class VmService {
         Host selectedHost;
         if (hostUUid != null && !hostUUid.isEmpty()) {
             // 指定 host：检查可用性
-            selectedHost = tableStorage.vmSelectHostByAppoint(newVm.getUuid(), hostUUid);
+            selectedHost = resourceScheduler.vmSelectHostByAppoint(newVm.getUuid(), hostUUid);
         } else {
             // 未指定 host：主动选择
-            selectedHost = tableStorage.vmSelectHostByOperator(newVm.getUuid(), HostSelectStrategyConstants.ROUND_ROBIN);
+            selectedHost = resourceScheduler.vmSelectHostByOperator(newVm.getUuid(), HostSelectStrategyConstants.ROUND_ROBIN);
         }
         if (selectedHost == null) {
             return "ERROR: no available host.";
@@ -156,7 +164,10 @@ public class VmService {
         tableStorage.ipUsedSave(newIpUsed);
 
         // bind in DHCP-Controller
-
+        newIpUsed = tableStorage.ipUsedQueryByIp(newIpUsed.getIp());  // 重新 query 拿到 id
+        if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
+            return "ERROR: dhcp bind mac & ip failed!";
+        }
 
 
         /* ---- 4. Volume ----

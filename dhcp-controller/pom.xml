@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.free4inno.kubeiaas</groupId>
@@ -8,10 +9,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>iaas-agent</artifactId>
+    <artifactId>dhcp-controller</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>iaas-agent</name>
-    <description>iaas-agent</description>
+    <name>dhcp-controller</name>
+    <description>dhcp-controller</description>
 
     <properties>
     </properties>
@@ -38,7 +39,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.4.4</version>
                 <configuration>
-                    <mainClass>kubeiaas.iaasagent.IaasAgentApplication</mainClass>
+                    <mainClass>kubeiaas.dhcpcontroller.DhcpControllerApplication</mainClass>
                     <outputDirectory>${basedir}\target</outputDirectory>
                 </configuration>
                 <executions>

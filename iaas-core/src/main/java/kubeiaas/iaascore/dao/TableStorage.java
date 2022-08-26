@@ -18,9 +18,6 @@ public class TableStorage {
     @Resource
     private DbProxy dbProxy;
 
-    @Resource
-    private ResourceOperator resourceOperator;
-
     // ========================= vm =========================
 
     public List<Vm> vmQueryAll() {
@@ -41,16 +38,6 @@ public class TableStorage {
     public void vmSave(Vm vm) {
         String vmObjectStr = JSON.toJSONString(vm);
         dbProxy.vmSave(vmObjectStr);
-    }
-
-    public Host vmSelectHostByAppoint(String vmUuid, String hostUuid) {
-        String hostObjectStr = resourceOperator.selectHostByAppoint(vmUuid, hostUuid);
-        return JSON.parseObject(hostObjectStr, Host.class);
-    }
-
-    public Host vmSelectHostByOperator(String vmUuid, String strategy) {
-        String hostObjectStr = resourceOperator.selectHostByOperator(vmUuid, strategy);
-        return JSON.parseObject(hostObjectStr, Host.class);
     }
 
     // ========================= image =========================
@@ -99,6 +86,26 @@ public class TableStorage {
     public List<IpUsed> ipUsedQueryAllByIpSegmentId(int ipSegmentId) {
         String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.IP_SEGMENT_ID, Integer.toString(ipSegmentId));
         return JSON.parseArray(jsonString, IpUsed.class);
+    }
+
+    public IpUsed ipUsedQueryById(int id) {
+        String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpSegmentConstants.ID, Integer.toString(id));
+        List<IpUsed> ipUsedList = JSON.parseArray(jsonString, IpUsed.class);
+        if (ipUsedList != null && !ipUsedList.isEmpty()) {
+            return ipUsedList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public IpUsed ipUsedQueryByIp(String ip) {
+        String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpSegmentConstants.IP, ip);
+        List<IpUsed> ipUsedList = JSON.parseArray(jsonString, IpUsed.class);
+        if (ipUsedList != null && !ipUsedList.isEmpty()) {
+            return ipUsedList.get(0);
+        } else {
+            return null;
+        }
     }
 
     public void ipUsedSave(IpUsed ipUsed) {

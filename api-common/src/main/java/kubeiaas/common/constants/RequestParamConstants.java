@@ -35,5 +35,7 @@ public class RequestParamConstants {
     public static final String PRIVATE_IP_SEGMENT_ID = "private_ip_segment_id";
     public static final String PUBLIC_IP_SEGMENT_ID = "public_ip_segment_id";
     public static final String IP_USED_OBJECT = "ip_used_object";
+    public static final String MAC = "mac";
+    public static final String IP = "ip";
 
 }
