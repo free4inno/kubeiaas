@@ -10,9 +10,10 @@ import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.process.NetworkProcess;
-import kubeiaas.iaascore.scheduler.AgentScheduler;
+import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import kubeiaas.iaascore.scheduler.DhcpScheduler;
 import kubeiaas.iaascore.scheduler.ResourceScheduler;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class VmService {
     private TableStorage tableStorage;
 
     @Resource
-    private AgentScheduler agentScheduler;
+    private VolumeScheduler volumeScheduler;
 
     @Resource
     private ResourceScheduler resourceScheduler;
@@ -134,7 +135,7 @@ public class VmService {
         }
         log.info("selected host: " + selectedHost.getName());
         // set scheduler of iaas-agent
-        agentScheduler.setTargetHost(selectedHost);
+        AgentConfig.setSelectedHost(selectedHost);
         // save into DB
         newVm.setHostUuid(selectedHost.getUuid());
         tableStorage.vmSave(newVm);
