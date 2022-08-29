@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.List;
  * 生成虚拟机对应的xml文件.
  */
 @Slf4j
-@Component
+@Configuration
 public class LibvirtConfig {
 
     private static final String MAX_MEMORY = "16";

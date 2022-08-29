@@ -6,6 +6,7 @@ import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.VmCUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -33,7 +34,7 @@ import java.util.regex.Pattern;
  * 1.0
  */
 @Slf4j
-@Service
+@Configuration
 public class XmlConfig {
 
     @Resource
