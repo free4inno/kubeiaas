@@ -112,7 +112,7 @@ public class VmService {
             // Step 3：改Linux虚拟机密码（选）-------------------------------------
             String newPassword = instance.getPassword();
             String oldPassword = VmConstants.DEFAULT_PASSWORD;
-            if (image.getOsType() == ImageOSTypeEnum.LINUX && newPassword != null && !newPassword.isEmpty()){
+            if (!oldPassword.equals(newPassword) && image.getOsType() == ImageOSTypeEnum.LINUX && newPassword != null && !newPassword.isEmpty()){
                 log.info("createVm -- 3. setting vm password");
                 TimeUnit.SECONDS.sleep(45);
 
