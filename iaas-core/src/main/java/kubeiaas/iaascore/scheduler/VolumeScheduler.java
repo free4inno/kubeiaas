@@ -30,7 +30,8 @@ public class VolumeScheduler {
     @Resource
     private VolumeController volumeController;
 
-    public String createSystemVolume(Vm vm) {
+    public String createSystemVolume(String vmUuid) {
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
 
         // 统一创建系统盘
@@ -71,6 +72,7 @@ public class VolumeScheduler {
             newVolume.setName(vm.getName());
         }
         newVolume.setDescription(vm.getDescription());
+        newVolume.setInstanceUuid(vm.getUuid());
         newVolume.setHostUuid(vm.getHostUuid());
         newVolume.setImageUuid(vm.getImageUuid());
         newVolume.setSize(vm.getDiskSize());

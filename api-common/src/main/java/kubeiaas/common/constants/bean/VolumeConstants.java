@@ -3,6 +3,7 @@ package kubeiaas.common.constants.bean;
 public class VolumeConstants {
     /* DB key */
     public static final String UUID = "uuid";
+    public static final String INSTANCE_UUID = "instance_uuid";
 
     /* config */
     public static final String SPILT = "/";
@@ -18,8 +19,13 @@ public class VolumeConstants {
     // suffix
     public static final String IMG_VOLUME_SUFFIX = ".img";
     public static final String WIN_VOLUME_SUFFIX = ".qcow2";
-
     // create loop
     public static final int CREATING_WAIT_LOOP = 20;
     public static final int CREATING_WAIT_TIME = 1;
+    // mount
+    public static final String DEV_PREFIX = "vd";    //这是硬盘挂载时的盘符名称，比如vda
+    public static final String WIN_PREFIX = "hd";    //这是硬盘挂载时的盘符名称，比如vda
+    public static final String TAP_PREFIX = "v_";
+    public static final String VOLUME_DEVICE_CDROM = "cdrom";
+    public static final String VOLUME_DEVICE_DISK = "disk";
 }

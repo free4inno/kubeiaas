@@ -23,6 +23,12 @@
             <artifactId>api-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <!-- libvirt -->
+        <dependency>
+            <groupId>org.libvirt</groupId>
+            <artifactId>libvirt</artifactId>
+            <version>0.5.2</version>
+        </dependency>
     </dependencies>
 
     <build>

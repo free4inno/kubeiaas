@@ -1,0 +1,38 @@
+package kubeiaas.iaasagent.controller;
+
+import kubeiaas.common.constants.RequestMappingConstants;
+import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.iaasagent.service.VmService;
+import kubeiaas.iaasagent.service.VolumeService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+
+@Slf4j
+@Controller
+@RequestMapping(value = RequestMappingConstants.VM_C)
+public class VmController {
+
+    @Resource
+    private VmService vmService;
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CREATE_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String createVmInstance(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        if (vmService.createVm(vmUuid)) {
+            log.info("createVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("createVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+}

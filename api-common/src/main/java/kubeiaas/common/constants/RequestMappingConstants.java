@@ -37,6 +37,7 @@ public class RequestMappingConstants {
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
 
     // -- Vm Controller
+    public static final String CREATE_VM_INSTANCE = "create_vm_instance";
 
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";

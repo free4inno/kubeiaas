@@ -82,4 +82,42 @@ public class ShellUtils {
         }
         return msg.toString();
     }
+
+    public static String getNohupCmd(String command) {
+        //String msg = "";
+        StringBuilder msg = new StringBuilder();
+        InputStream is = null;
+        BufferedReader br = null;
+        try {
+            String[] cmd = new String[]{"/bin/sh", "-c", command};
+            Process proc = Runtime.getRuntime().exec(cmd);
+            is = proc.getInputStream();
+            br = new BufferedReader(new InputStreamReader(is));
+            msg.append(br.readLine());
+            while (br.ready()) {
+                msg.append("\n");
+                msg.append(br.readLine());
+            }
+            // 不destroy，后台运行
+            // proc.destroy();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if (br != null) {
+            try {
+                br.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        if (is != null) {
+            try {
+                is.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return msg.toString();
+    }
 }

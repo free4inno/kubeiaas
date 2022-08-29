@@ -82,6 +82,11 @@ public class TableStorage {
 
     // ========================= ip used =========================
 
+    public List<IpUsed> ipUsedQueryAllByInstanceUuid(String instanceUuid) {
+        String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.INSTANCE_UUID, instanceUuid);
+        return JSON.parseArray(jsonString, IpUsed.class);
+    }
+
     public List<IpUsed> ipUsedQueryAllByIpSegmentId(int ipSegmentId) {
         String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.IP_SEGMENT_ID, Integer.toString(ipSegmentId));
         return JSON.parseArray(jsonString, IpUsed.class);
@@ -113,6 +118,11 @@ public class TableStorage {
     }
 
     // ========================= volume =========================
+
+    public List<Volume> volumeQueryAllByInstanceUuid(String instanceUuid) {
+        String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.INSTANCE_UUID, instanceUuid);
+        return JSON.parseArray(jsonString, Volume.class);
+    }
 
     public Volume volumeQueryByUuid(String uuid) {
         String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.UUID, uuid);

@@ -14,6 +14,7 @@ import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.VolumeController;
 import kubeiaas.iaascore.process.NetworkProcess;
+import kubeiaas.iaascore.scheduler.VmScheduler;
 import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import kubeiaas.iaascore.scheduler.DhcpScheduler;
 import kubeiaas.iaascore.scheduler.ResourceScheduler;
@@ -33,6 +34,9 @@ public class VmService {
 
     @Resource
     private VolumeScheduler volumeScheduler;
+
+    @Resource
+    private VmScheduler vmScheduler;
 
     @Resource
     private ResourceScheduler resourceScheduler;
@@ -185,7 +189,7 @@ public class VmService {
          */
         log.info("createVm -- 4. Volume");
 
-        String volumeUuid = volumeScheduler.createSystemVolume(newVm);
+        String volumeUuid = volumeScheduler.createSystemVolume(newVmUuid);
         if (volumeUuid.isEmpty()) {
             return "ERROR: create system volume failed! (pre error)";
         }
@@ -217,12 +221,9 @@ public class VmService {
             Generate XML for libvirt & Attach volume
             （实际创建：生成 xml，挂载系统盘，启动）
              */
-//            String newPassword = instance.getPassword();
-//            String oldPassword = "abc123";
-//            if (newPassword == null || newPassword.equals(oldPassword)) {
-//                newPassword = "";
-//            }
-//            vmScheduler.createVm(appKey, instance.getUuid(), instance.getCpus() + "", instance.getMemory() + "", oldPassword, newPassword);
+            if (!vmScheduler.createVmInstance(newVmUuid)) {
+                log.error("ERROR: create vm instance failed!");
+            }
         }).start();
 
         log.info("createVm -- newThread begin wait for volume creating...");
