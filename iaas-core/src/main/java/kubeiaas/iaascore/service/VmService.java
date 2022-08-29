@@ -204,15 +204,11 @@ public class VmService {
                 if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
                     // 规定时间内未复制完成或者复制失败
                     log.error("ERROR: create system volume failed! (time out)");
-                    volume.setStatus(VolumeStatusEnum.ERROR);
-                    tableStorage.volumeSave(volume);
                     return;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 log.error("ERROR: create system volume failed! (loop error)");
-                volume.setStatus(VolumeStatusEnum.ERROR);
-                tableStorage.volumeSave(volume);
                 return;
             }
             log.info("createVm -- 4. volume create success!");

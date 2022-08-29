@@ -1,6 +1,7 @@
 package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
+import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
@@ -59,6 +60,10 @@ public class VmController {
     public String queryAll() {
         log.info("queryAll ==== start ====");
         List<Vm> vmList = tableStorage.vmQueryAll();
+        for (Vm vm : vmList) {
+            List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
+            vm.setIps(ipUsedList);
+        }
         log.info("queryAll ==== end ====");
         return JSON.toJSONString(vmList);
     }

@@ -48,6 +48,7 @@ public class VolumeScheduler {
             log.info("createSystemVolume -- not WINDOWS");
         }
 
+        log.info("createSystemVolume -- done");
         return volumeUuid;
     }
 
