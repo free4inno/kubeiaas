@@ -33,6 +33,11 @@ public class RequestMappingConstants {
     // -- DHCP Controller
     public static final String BIND_MAC_IP = "bind_mac_ip";
 
+    // -- Volume Controller
+    public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
+
+    // -- Vm Controller
+
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";
     public static final String APP_XML = "application/xml";

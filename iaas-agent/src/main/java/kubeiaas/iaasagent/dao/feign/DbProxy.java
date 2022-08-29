@@ -1,4 +1,4 @@
-package kubeiaas.iaascore.dao.feign;
+package kubeiaas.iaasagent.dao.feign;
 
 import kubeiaas.common.constants.ComponentConstants;
 import kubeiaas.common.constants.RequestMappingConstants;

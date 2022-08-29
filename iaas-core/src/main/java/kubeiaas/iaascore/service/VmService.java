@@ -1,17 +1,18 @@
 package kubeiaas.iaascore.service;
 
-import kubeiaas.common.bean.Host;
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Vm;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
+import kubeiaas.common.enums.volume.VolumeStatusEnum;
+import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.dao.feign.VolumeController;
 import kubeiaas.iaascore.process.NetworkProcess;
 import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import kubeiaas.iaascore.scheduler.DhcpScheduler;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -96,6 +98,8 @@ public class VmService {
         // 1.6. save into DB
         tableStorage.vmSave(newVm);
 
+        log.info("createVm -- 1. pre create success!");
+
 
         /* ---- 2. Resource Operator ----
         Use Resource Operator to allocate Host and check available
@@ -140,6 +144,8 @@ public class VmService {
         newVm.setHostUuid(selectedHost.getUuid());
         tableStorage.vmSave(newVm);
 
+        log.info("createVm -- 2. Resource Operator success!");
+
 
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
@@ -170,19 +176,60 @@ public class VmService {
             return "ERROR: dhcp bind mac & ip failed!";
         }
 
+        log.info("createVm -- 3. network success!");
+
 
         /* ---- 4. Volume ----
         Create system volume.
         （系统盘：使用 image 创建 system volume）
          */
+        log.info("createVm -- 4. Volume");
 
+        String volumeUuid = volumeScheduler.createSystemVolume(newVm);
+        if (volumeUuid.isEmpty()) {
+            return "ERROR: create system volume failed! (pre error)";
+        }
+        // Attention: copying image is long-time operation, so start a new Thread to handle this.
+        new Thread(() -> {
+            Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+            int waitLoop = VolumeConstants.CREATING_WAIT_LOOP;
+            try {   // when copy is done, volume status will change in database, so query volume status at regular time.
+                while (!volume.getStatus().equals(VolumeStatusEnum.AVAILABLE) &&
+                        !volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE) &&
+                        waitLoop > 0) {
+                    waitLoop--;
+                    TimeUnit.SECONDS.sleep(VolumeConstants.CREATING_WAIT_TIME);
+                    volume = tableStorage.volumeQueryByUuid(volumeUuid);
+                }
+                if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
+                    // 规定时间内未复制完成或者复制失败
+                    log.error("ERROR: create system volume failed! (time out)");
+                    volume.setStatus(VolumeStatusEnum.ERROR);
+                    tableStorage.volumeSave(volume);
+                    return;
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.error("ERROR: create system volume failed! (loop error)");
+                volume.setStatus(VolumeStatusEnum.ERROR);
+                tableStorage.volumeSave(volume);
+                return;
+            }
+            log.info("createVm -- 4. volume create success!");
 
-        /* ---- 5. create VM ----
-        Generate XML for libvirt & Attach volume
-        （实际创建：生成 xml，挂载系统盘，启动）
-         */
+            /* ---- 5. create VM ----
+            Generate XML for libvirt & Attach volume
+            （实际创建：生成 xml，挂载系统盘，启动）
+             */
+//            String newPassword = instance.getPassword();
+//            String oldPassword = "abc123";
+//            if (newPassword == null || newPassword.equals(oldPassword)) {
+//                newPassword = "";
+//            }
+//            vmScheduler.createVm(appKey, instance.getUuid(), instance.getCpus() + "", instance.getMemory() + "", oldPassword, newPassword);
+        }).start();
 
-
-        return "success";
+        log.info("createVm -- newThread begin wait for volume creating...");
+        return "success, please wait for creating...";
     }
 }

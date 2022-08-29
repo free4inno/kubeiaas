@@ -1,10 +1,9 @@
-package kubeiaas.iaascore.dao;
+package kubeiaas.iaasagent.dao;
 
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
-import kubeiaas.iaascore.dao.feign.DbProxy;
-import kubeiaas.iaascore.dao.feign.ResourceOperator;
+import kubeiaas.iaasagent.dao.feign.DbProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

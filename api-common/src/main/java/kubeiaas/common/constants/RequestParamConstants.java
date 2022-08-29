@@ -11,6 +11,7 @@ public class RequestParamConstants {
     public static final String IMAGE_UUID = "image_uuid";
     public static final String HOST_UUID = "host_uuid";
     public static final String VM_UUID = "vm_uuid";
+    public static final String VOLUME_UUID = "volume_uuid";
 
     public static final String KEY_1 = "key_1";
     public static final String VALUE_1 = "value_1";
@@ -37,5 +38,11 @@ public class RequestParamConstants {
     public static final String IP_USED_OBJECT = "ip_used_object";
     public static final String MAC = "mac";
     public static final String IP = "ip";
+
+    /* ===== VOLUME ===== */
+    public static final String VOLUME_OBJECT = "volume_object";
+    public static final String EXTRA_SIZE = "extra_size";
+    public static final String IMAGE_PATH = "image_path";
+    public static final String VOLUME_PATH = "volume_path";
 
 }
