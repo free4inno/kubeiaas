@@ -52,7 +52,7 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr) {
         log.info("save ==== start ====");
         VmTable vmTable = JSON.parseObject(vmObjectStr, VmTable.class);
-        vmDao.save(vmTable);
+        vmDao.saveAndFlush(vmTable);
         log.info("save ==== end ====");
     }
 }

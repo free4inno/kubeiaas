@@ -53,7 +53,7 @@ public class ImageController {
             @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr) {
         log.info("save ==== start ====");
         ImageTable imageTable = JSON.parseObject(imageObjectStr, ImageTable.class);
-        imageDao.save(imageTable);
+        imageDao.saveAndFlush(imageTable);
         log.info("save ==== end ====");
     }
 }

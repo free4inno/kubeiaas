@@ -45,7 +45,7 @@ public class IpUsedController {
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr) {
         log.info("save ==== start ====");
         IpUsedTable ipUsedTable = JSON.parseObject(ipUsedObjectStr, IpUsedTable.class);
-        ipUsedDao.save(ipUsedTable);
+        ipUsedDao.saveAndFlush(ipUsedTable);
         log.info("save ==== end ====");
     }
 

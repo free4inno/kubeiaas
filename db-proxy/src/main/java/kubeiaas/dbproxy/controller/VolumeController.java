@@ -44,7 +44,7 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String volumeObjectStr) {
         log.info("save ==== start ====");
         VolumeTable volumeTable = JSON.parseObject(volumeObjectStr, VolumeTable.class);
-        volumeDao.save(volumeTable);
+        volumeDao.saveAndFlush(volumeTable);
         log.info("save ==== end ====");
     }
 
