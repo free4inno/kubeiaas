@@ -29,6 +29,12 @@
             <artifactId>libvirt</artifactId>
             <version>0.5.2</version>
         </dependency>
+        <!-- jna -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.5.0</version>
+        </dependency>
     </dependencies>
 
     <build>
