@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-@FeignClient(name = ComponentConstants.DHCP_CONTROLLER, url = "http://127.0.0.1:9090")
+@FeignClient(name = ComponentConstants.DHCP_CONTROLLER, url = "http://192.168.31.238:9090")
 public interface DhcpController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DHCP_C + "/" + RequestMappingConstants.BIND_MAC_IP)

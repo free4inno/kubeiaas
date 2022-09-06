@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @Controller
 @RequestMapping(value = RequestMappingConstants.VM)
-public class VmController {
+public class VmOpenAPI {
 
     @Resource
     private TableStorage tableStorage;

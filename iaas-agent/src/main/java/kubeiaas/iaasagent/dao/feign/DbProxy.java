@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 
-@FeignClient(name = ComponentConstants.DB_PROXY, url = "http://127.0.0.1:9091")
+@FeignClient(name = ComponentConstants.DB_PROXY, url = "http://192.168.31.77:9091")
 public interface DbProxy {
 
     // ========================= vm =========================

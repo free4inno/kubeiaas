@@ -3,7 +3,7 @@ package kubeiaas.common.constants.bean;
 public class VolumeConstants {
     /* DB key */
     public static final String UUID = "uuid";
-    public static final String INSTANCE_UUID = "instance_uuid";
+    public static final String INSTANCE_UUID = "instanceUuid";
 
     /* config */
     public static final String SPILT = "/";

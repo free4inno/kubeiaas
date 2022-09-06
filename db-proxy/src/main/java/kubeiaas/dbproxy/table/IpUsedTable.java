@@ -2,6 +2,7 @@ package kubeiaas.dbproxy.table;
 
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.enums.network.IpAttachEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -69,6 +70,16 @@ public class IpUsedTable extends IpUsed {
 
     public void setStatus(IpAttachEnum status) {
         super.setStatus(status);
+    }
+
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    public IpTypeEnum getType() {
+        return super.getType();
+    }
+
+    public void setType(IpTypeEnum type) {
+        super.setType(type);
     }
 
     @Column(name = "create_time")

@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Controller
-@RequestMapping(value = RequestMappingConstants.DHCP_C)
+@RequestMapping(value = RequestMappingConstants.VOLUME_C)
 public class VolumeController {
 
     @Resource

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@FeignClient(name = ComponentConstants.VM_CONTROLLER, url = "http://127.0.0.1:9090")
+@FeignClient(name = ComponentConstants.VM_CONTROLLER, url = "http://192.168.31.238:9090")
 public interface VmController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.CREATE_VM_INSTANCE)

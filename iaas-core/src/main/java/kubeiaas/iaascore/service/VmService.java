@@ -6,6 +6,7 @@ import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.network.IpAttachEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
@@ -167,6 +168,7 @@ public class VmService {
         newIpUsed.setInstanceUuid(newVmUuid);
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
+        newIpUsed.setType(IpTypeEnum.PRIVATE);
 
         log.info("new mac: " + newIpUsed.getMac());
         log.info("new ip: " + newIpUsed.getIp());

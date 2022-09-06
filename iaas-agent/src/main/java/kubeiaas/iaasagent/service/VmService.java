@@ -77,7 +77,6 @@ public class VmService {
             }
         } catch (LibvirtException e) {
             log.info("createVm -- 1. start creating Domain");
-            return false;
         }
 
         // confirm to run
