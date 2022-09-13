@@ -22,7 +22,6 @@
         <module>api-common</module>
         <module>db-proxy</module>
         <module>resource-operator</module>
-        <module>dhcp-controller</module>
     </modules>
 
     <properties>
