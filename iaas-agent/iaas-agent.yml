@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: iaas-agent
+spec:
+  selector:
+    matchLabels:
+      app: iaas-agent
+  template:
+    metadata:
+      labels:
+        app: iaas-agent
+    spec:
+      containers:
+        - name: iaas-agent
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              RUN_IAAS_AGENT.sh
+          image: USERNAME/iaas-agent:0.1.0
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 9090
+              hostPort: 9090
+              protocol: TCP
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: workdir
+              mountPath: /workdir
+      volumes:
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: workdir
+          hostPath:
+            path: /workdir
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-agent
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+  selector:
+    app: iaas-agent
