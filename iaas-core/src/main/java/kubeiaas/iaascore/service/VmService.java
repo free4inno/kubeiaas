@@ -144,7 +144,7 @@ public class VmService {
         }
         log.info("selected host: " + selectedHost.getName());
         // set scheduler of iaas-agent
-        AgentConfig.setSelectedHost(selectedHost);
+        AgentConfig.setSelectedHost(newVm.getUuid(), selectedHost);
         // save into DB
         newVm.setHostUuid(selectedHost.getUuid());
         tableStorage.vmSave(newVm);
@@ -226,6 +226,8 @@ public class VmService {
             if (!vmScheduler.createVmInstance(newVmUuid)) {
                 log.error("ERROR: create vm instance failed!");
             }
+            AgentConfig.clearSelectedHost(newVmUuid);
+
         }).start();
 
         log.info("createVm -- newThread begin wait for volume creating...");

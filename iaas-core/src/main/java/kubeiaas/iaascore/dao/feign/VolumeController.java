@@ -9,12 +9,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@FeignClient(name = ComponentConstants.VOLUME_CONTROLLER, url = "http://192.168.31.238:9090")
+import java.net.URI;
+
+//@FeignClient(name = ComponentConstants.VOLUME_CONTROLLER, url = "http://192.168.31.238:9090")
+@FeignClient(name = ComponentConstants.VOLUME_CONTROLLER, url = "EMPTY")
 public interface VolumeController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.CREATE_SYSTEM_VOLUME)
     @ResponseBody
     String createSystemVolume(
+            URI uri,
             @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
