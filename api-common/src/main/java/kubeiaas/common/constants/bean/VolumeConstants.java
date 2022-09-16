@@ -20,8 +20,8 @@ public class VolumeConstants {
     public static final String IMG_VOLUME_SUFFIX = ".img";
     public static final String WIN_VOLUME_SUFFIX = ".qcow2";
     // create loop
-    public static final int CREATING_WAIT_LOOP = 20;
-    public static final int CREATING_WAIT_TIME = 1;
+    public static final int CREATING_WAIT_LOOP = 60;
+    public static final int CREATING_WAIT_TIME = 5;
     // mount
     public static final String DEV_PREFIX = "vd";    //这是硬盘挂载时的盘符名称，比如vda
     public static final String WIN_PREFIX = "hd";    //这是硬盘挂载时的盘符名称，比如vda

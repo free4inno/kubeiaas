@@ -12,12 +12,15 @@ import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.common.utils.PathUtils;
 import kubeiaas.common.utils.UuidUtils;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.VolumeController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.Resource;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Timestamp;
 
 @Slf4j
@@ -93,7 +96,7 @@ public class VolumeScheduler {
         tableStorage.volumeSave(newVolume);
 
         // call Volume Controller
-        String res = volumeController.createSystemVolume(image.getDirectory(), newVolume.getProviderLocation(), volumeUuid, extraSize);
+        String res = volumeController.createSystemVolume(getSelectedUri(vm.getUuid()), image.getDirectory(), newVolume.getProviderLocation(), volumeUuid, extraSize);
         if (res.equals(ResponseMsgConstants.FAILED)) {
             return "";
         }
@@ -103,6 +106,16 @@ public class VolumeScheduler {
 
     private void newIsoVolume() {
 
+    }
+
+    private URI getSelectedUri(String vmUuid) {
+        try {
+            return new URI(AgentConfig.getSelectedUri(vmUuid));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            log.error("build URI failed!");
+            return null;
+        }
     }
 
 }

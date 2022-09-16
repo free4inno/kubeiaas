@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resource-operator
+  template:
+    metadata:
+      labels:
+        app: resource-operator
+    spec:
+      containers:
+        - name: resource-operator
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/resource-operator-0.0.1-SNAPSHOT.jar
+          image: USERNAME/resource-operator:0.1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9092
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resource-operator
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9092
+      targetPort: 9092
+      protocol: TCP
+  selector:
+    app: resource-operator

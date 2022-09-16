@@ -5,6 +5,7 @@ import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.service.VmService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class VmOpenAPI {
     public String test(HttpServletRequest request) {
         log.info("test ==== start ====");
         log.info("URI " + request.getRemoteAddr() + " " + request.getRemoteHost() + " " + request.getRemotePort());
+        log.info(AgentConfig.getDhcpUri());
         log.info("test ==== end ====");
         return "hello";
     }

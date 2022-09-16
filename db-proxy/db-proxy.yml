@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-proxy
+  template:
+    metadata:
+      labels:
+        app: db-proxy
+    spec:
+      containers:
+        - name: db-proxy
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/db-proxy-0.0.1-SNAPSHOT.jar
+          image: USERNAME/db-proxy:0.1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
+  selector:
+    app: db-proxy

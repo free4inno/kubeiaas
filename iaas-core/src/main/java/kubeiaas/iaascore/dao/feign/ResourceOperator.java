@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@FeignClient(name = ComponentConstants.RESOURCE_OPERATOR, url = "http://127.0.0.1:9092")
+@FeignClient(name = ComponentConstants.RESOURCE_OPERATOR, url = "http://resource-operator:9092")
 public interface ResourceOperator {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_APPOINT)

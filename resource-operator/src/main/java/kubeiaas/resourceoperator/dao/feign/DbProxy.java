@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
-@FeignClient(name = "null", url = "http://127.0.0.1:9091")
+@FeignClient(name = "null", url = "http://db-proxy:9091")
 public interface DbProxy {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.QUERY_ALL)
     @ResponseBody

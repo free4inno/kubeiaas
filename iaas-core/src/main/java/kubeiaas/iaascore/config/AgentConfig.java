@@ -15,8 +15,8 @@ public class AgentConfig {
     private static final String HTTP_URI = "http://";
     private static final String AGENT_PORT = ":9090";
 
-    private static final String DHCP_HOST_IP = "";
-    private static final String VNC_HOST_IP = "";
+    private static final String DHCP_HOST_IP = "DHCP_HOST_IP";
+    private static final String VNC_HOST_IP = "VNC_HOST_IP";
 
     /* select agent's host ip */
     // < vmUuid : hostIp >
