@@ -198,13 +198,21 @@ public class VmService {
         // Attention: copying image is long-time operation, so start a new Thread to handle this.
         new Thread(() -> {
             Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
-            int waitLoop = VolumeConstants.CREATING_WAIT_LOOP;
+
+            // TODO: Constants
+            // int waitLoop = VolumeConstants.CREATING_WAIT_LOOP;
+            int waitLoop = 60;
+
             try {   // when copy is done, volume status will change in database, so query volume status at regular time.
                 while (!volume.getStatus().equals(VolumeStatusEnum.AVAILABLE) &&
                         !volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE) &&
                         waitLoop > 0) {
                     waitLoop--;
-                    TimeUnit.SECONDS.sleep(VolumeConstants.CREATING_WAIT_TIME);
+
+                    // TODO: Constants
+                    // TimeUnit.SECONDS.sleep(VolumeConstants.CREATING_WAIT_TIME);
+                    TimeUnit.SECONDS.sleep(5);
+
                     volume = tableStorage.volumeQueryByUuid(volumeUuid);
                 }
                 if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {

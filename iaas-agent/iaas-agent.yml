@@ -19,13 +19,16 @@ spec:
             - "-c"
             - |
               /bin/bash /root/RUN_IAAS_AGENT.sh
-          image: USERNAME/iaas-agent:0.1.0
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:0.0.1-SNAPSHOT
           imagePullPolicy: Always
           securityContext:
             privileged: true
           ports:
             - containerPort: 9090
               hostPort: 9090
+              protocol: TCP
+            - containerPort: 9089
+              hostPort: 9089
               protocol: TCP
           env:
             - name: HOST_IP
@@ -50,10 +53,10 @@ kind: Service
 metadata:
   name: iaas-agent
 spec:
+  selector:
+    app: iaas-agent
   type: ClusterIP
   ports:
     - port: 9090
       targetPort: 9090
       protocol: TCP
-  selector:
-    app: iaas-agent

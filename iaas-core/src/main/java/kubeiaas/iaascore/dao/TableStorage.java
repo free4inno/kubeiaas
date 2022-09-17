@@ -121,7 +121,9 @@ public class TableStorage {
     // ========================= volume =========================
 
     public List<Volume> volumeQueryAllByInstanceUuid(String instanceUuid) {
-        String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.INSTANCE_UUID, instanceUuid);
+        // todo: INSTANCE_UUID
+//        String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.INSTANCE_UUID, instanceUuid);
+        String jsonString = dbProxy.volumeQueryAllBySingleKey("instanceUuid", instanceUuid);
         return JSON.parseArray(jsonString, Volume.class);
     }
 

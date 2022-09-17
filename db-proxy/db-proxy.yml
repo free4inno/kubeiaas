@@ -20,21 +20,24 @@ spec:
             - "-c"
             - |
               java -jar /root/db-proxy-0.0.1-SNAPSHOT.jar
-          image: USERNAME/db-proxy:0.1.0
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 9091
               protocol: TCP
+          env:
+            - name: MYSQL_IP
+              value: "192.168.31.238"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: db-proxy
 spec:
+  selector:
+    app: db-proxy
   type: ClusterIP
   ports:
     - port: 9091
       targetPort: 9091
       protocol: TCP
-  selector:
-    app: db-proxy

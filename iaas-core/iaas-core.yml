@@ -20,7 +20,7 @@ spec:
             - "-c"
             - |
               java -jar /root/iaas-core-0.0.1-SNAPSHOT.jar
-          image: USERNAME/iaas-core:0.1.0
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:0.0.1-SNAPSHOT
           imagePullPolicy: Always
           ports:
             - containerPort: 9080
@@ -37,10 +37,10 @@ kind: Service
 metadata:
   name: iaas-core
 spec:
+  selector:
+    app: iaas-core
   type: ClusterIP
   ports:
     - port: 9080
       targetPort: 9080
       protocol: TCP
-  selector:
-    app: iaas-core

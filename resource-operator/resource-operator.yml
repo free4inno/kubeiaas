@@ -20,7 +20,7 @@ spec:
             - "-c"
             - |
               java -jar /root/resource-operator-0.0.1-SNAPSHOT.jar
-          image: USERNAME/resource-operator:0.1.0
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/resource-operator:0.0.1-SNAPSHOT
           imagePullPolicy: Always
           ports:
             - containerPort: 9092
@@ -31,10 +31,10 @@ kind: Service
 metadata:
   name: resource-operator
 spec:
+  selector:
+    app: resource-operator
   type: ClusterIP
   ports:
     - port: 9092
       targetPort: 9092
       protocol: TCP
-  selector:
-    app: resource-operator

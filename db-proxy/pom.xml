@@ -78,7 +78,7 @@
 
                     <!-- =============== registry control =============== -->
                     <!-- registry地址,用于推送,拉取镜像,例如阿里的registry -->
-                    <!--                    <registry>registry.cn-shenzhen.aliyuncs.com</registry>-->
+                    <!--                    <registry>registry.cn-beijing.aliyuncs.com</registry>-->
                     <!-- 不填写即是官方 docker-hub -->
 
                     <!-- 认证配置,用于私有registry认证,如果忘记了可以去对应的registry查看-->
@@ -95,7 +95,7 @@
                         <!-- 单个镜像配置 -->
                         <image>
                             <!--镜像名(含版本号)-->
-                            <name>USERNAME/db-proxy:0.1.0</name>
+                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>
                             <!--镜像build相关配置-->
                             <build>
                                 <!--使用dockerFile文件-->
