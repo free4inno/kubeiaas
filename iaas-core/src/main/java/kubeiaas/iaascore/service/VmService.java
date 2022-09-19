@@ -153,6 +153,7 @@ public class VmService {
 
 
         /* ---- 3. Network ----
+        // TODO: 异步执行可能导致冲突，考虑分散到 process后通过 synchronized保证同步
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
