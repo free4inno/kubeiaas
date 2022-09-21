@@ -7,6 +7,7 @@ import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.service.VmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -52,9 +53,9 @@ public class VmOpenAPI {
             @RequestParam(value = RequestParamConstants.DESCRIPTION, required = false) String description,
             @RequestParam(value = RequestParamConstants.HOST_UUID, required = false) String hostUuid) {
         log.info("create ==== start ====");
-        String msg = vmService.createVm(name, cpus, memory, imageUuid, ipSegmentId, diskSize, description, hostUuid);
+        BaseResponse baseResponse = vmService.createVm(name, cpus, memory, imageUuid, ipSegmentId, diskSize, description, hostUuid);
         log.info("create ==== end ====");
-        return msg;
+        return JSON.toJSONString(baseResponse);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
