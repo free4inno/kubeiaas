@@ -23,7 +23,7 @@ public interface DbProxy {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
-    void vmSave(
+    String vmSave(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr
     );
 

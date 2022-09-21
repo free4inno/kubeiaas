@@ -40,7 +40,7 @@ public class VmOpenAPI {
         return "hello";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String create(
             @RequestParam(value = RequestParamConstants.NAME) String name,

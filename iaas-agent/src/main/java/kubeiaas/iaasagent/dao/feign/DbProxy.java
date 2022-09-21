@@ -27,7 +27,7 @@ public interface DbProxy {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
-    void vmSave(
+    String vmSave(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr
     );
 
@@ -73,7 +73,7 @@ public interface DbProxy {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
-    void ipUsedSave(
+    String ipUsedSave(
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr
     );
 
@@ -87,7 +87,7 @@ public interface DbProxy {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
-    void volumeSave(
+    String volumeSave(
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr
     );
 }

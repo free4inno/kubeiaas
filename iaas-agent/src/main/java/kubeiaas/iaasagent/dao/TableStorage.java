@@ -34,9 +34,10 @@ public class TableStorage {
         }
     }
 
-    public void vmSave(Vm vm) {
+    public Vm vmSave(Vm vm) {
         String vmObjectStr = JSON.toJSONString(vm);
-        dbProxy.vmSave(vmObjectStr);
+        vmObjectStr = dbProxy.vmSave(vmObjectStr);
+        return JSON.parseObject(vmObjectStr, Vm.class);
     }
 
     // ========================= image =========================
@@ -112,9 +113,10 @@ public class TableStorage {
         }
     }
 
-    public void ipUsedSave(IpUsed ipUsed) {
+    public IpUsed ipUsedSave(IpUsed ipUsed) {
         String ipUsedObjectStr = JSON.toJSONString(ipUsed);
-        dbProxy.ipUsedSave(ipUsedObjectStr);
+        ipUsedObjectStr = dbProxy.ipUsedSave(ipUsedObjectStr);
+        return JSON.parseObject(ipUsedObjectStr, IpUsed.class);
     }
 
     // ========================= volume =========================
@@ -136,9 +138,10 @@ public class TableStorage {
         }
     }
 
-    public void volumeSave(Volume volume) {
+    public Volume volumeSave(Volume volume) {
         String volumeObjectStr = JSON.toJSONString(volume);
-        dbProxy.volumeSave(volumeObjectStr);
+        volumeObjectStr = dbProxy.volumeSave(volumeObjectStr);
+        return JSON.parseObject(volumeObjectStr, Volume.class);
     }
 
 }

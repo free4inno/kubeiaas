@@ -101,7 +101,7 @@ public class VmService {
         newVm.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
         // 1.6. save into DB
-        tableStorage.vmSave(newVm);
+        newVm = tableStorage.vmSave(newVm);
 
         log.info("createVm -- 1. pre create success!");
 
@@ -111,7 +111,7 @@ public class VmService {
         （资源调度：分配宿主机，检查资源合法性）
          */
         log.info("createVm -- 2. Resource Operator");
-        newVm = tableStorage.vmQueryByUuid(newVmUuid);
+
         // 2.1. check image
         // available
         Image image = tableStorage.imageQueryByUuid(imageUuid);
@@ -175,10 +175,9 @@ public class VmService {
         log.info("new ip: " + newIpUsed.getIp());
 
         // save into DB
-        tableStorage.ipUsedSave(newIpUsed);
+        newIpUsed = tableStorage.ipUsedSave(newIpUsed);
 
         // bind in DHCP-Controller
-        newIpUsed = tableStorage.ipUsedQueryByIp(newIpUsed.getIp());  // 重新 query 拿到 id
         if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
             return "ERROR: dhcp bind mac & ip failed!";
         }
