@@ -40,12 +40,13 @@ public class VolumeController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void save(
+    public String save(
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
         log.info("save ==== start ====");
         VolumeTable volumeTable = JSON.parseObject(volumeObjectStr, VolumeTable.class);
         volumeDao.saveAndFlush(volumeTable);
         log.info("save ==== end ====");
+        return JSON.toJSONString(volumeTable);
     }
 
 }

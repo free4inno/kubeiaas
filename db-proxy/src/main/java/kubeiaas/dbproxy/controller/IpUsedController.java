@@ -41,12 +41,13 @@ public class IpUsedController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void save(
+    public String save(
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr) {
         log.info("save ==== start ====");
         IpUsedTable ipUsedTable = JSON.parseObject(ipUsedObjectStr, IpUsedTable.class);
         ipUsedDao.saveAndFlush(ipUsedTable);
         log.info("save ==== end ====");
+        return JSON.toJSONString(ipUsedTable);
     }
 
 }

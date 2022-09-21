@@ -48,11 +48,12 @@ public class VmController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void save(
+    public String save(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr) {
         log.info("save ==== start ====");
         VmTable vmTable = JSON.parseObject(vmObjectStr, VmTable.class);
         vmDao.saveAndFlush(vmTable);
         log.info("save ==== end ====");
+        return JSON.toJSONString(vmTable);
     }
 }
