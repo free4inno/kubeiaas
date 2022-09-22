@@ -1,22 +1,28 @@
 package kubeiaas.iaascore.process;
 
+import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
+import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.scheduler.ResourceScheduler;
+import kubeiaas.iaascore.scheduler.VmScheduler;
+import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -27,6 +33,12 @@ public class VmProcess {
 
     @Resource
     private ResourceScheduler resourceScheduler;
+
+    @Resource
+    private VmScheduler vmScheduler;
+
+    @Resource
+    private VolumeScheduler volumeScheduler;
 
     public Vm preCreate(
             String name,
@@ -125,4 +137,69 @@ public class VmProcess {
         log.info("createVm -- 2. Resource Operator success!");
         return newVm;
     }
+
+    public void createVolume(Vm newVm) throws BaseException {
+        log.info("createVm -- 4. Volume");
+
+        String volumeUuid = volumeScheduler.createSystemVolume(newVm.getUuid());
+        if (volumeUuid.isEmpty()) {
+            throw new BaseException("ERROR: create system volume failed! (pre error)");
+        }
+        String newVmUuid = newVm.getUuid();
+        // Attention: copying image is long-time operation, so start a new Thread to handle this.
+        new Thread(() -> {
+            Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+
+            // TODO: Constants
+            // int waitLoop = VolumeConstants.CREATING_WAIT_LOOP;
+            int waitLoop = 60;
+
+            try {   // when copy is done, volume status will change in database, so query volume status at regular time.
+                while (!volume.getStatus().equals(VolumeStatusEnum.AVAILABLE) &&
+                        !volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE) &&
+                        waitLoop > 0) {
+                    waitLoop--;
+
+                    // TODO: Constants
+                    // TimeUnit.SECONDS.sleep(VolumeConstants.CREATING_WAIT_TIME);
+                    TimeUnit.SECONDS.sleep(5);
+
+                    volume = tableStorage.volumeQueryByUuid(volumeUuid);
+                }
+                if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
+                    // 规定时间内未复制完成或者复制失败
+                    log.error("ERROR: create system volume failed! (time out)");
+                    return;
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.error("ERROR: create system volume failed! (loop error)");
+                return;
+            }
+            log.info("createVm -- 4. volume create success!");
+
+            /* ---- 5. create VM ----
+            Generate XML for libvirt & Attach volume
+            （实际创建：生成 xml，挂载系统盘，启动）
+             */
+            try {
+                createVM(newVmUuid);
+            }catch (BaseException e){
+                log.error(e.getMsg());
+                return;
+            }
+            AgentConfig.clearSelectedHost(newVmUuid);
+
+        }).start();
+        log.info("createVm -- newThread begin wait for volume creating...");
+    }
+
+    public void createVM(String newVmUuid) throws BaseException {
+        log.info("createVm -- 5. VM");
+        if (!vmScheduler.createVmInstance(newVmUuid)) {
+            throw new BaseException("ERROR: create vm instance failed!");
+        }
+        log.info("createVm -- 5. VM create success!");
+    }
+
 }

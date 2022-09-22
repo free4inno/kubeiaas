@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * OpenAPI 统一返回类
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,6 +32,4 @@ public class BaseResponse {
         response.setMessage(responseEnum.getMsg());
         return response;
     }
-
-
 }
