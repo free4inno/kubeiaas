@@ -43,6 +43,7 @@ echo "
     - /images
     - /sys-volumes
     - /data-volumes
+  - /libvirt
   - /vnc
     - /token
   - /mysql
@@ -67,6 +68,8 @@ check_and_make_dir workdir/log
 check_and_make_dir data/images
 check_and_make_dir data/sys-volumes
 check_and_make_dir data/data-volumes
+
+check_and_make_dir libvirt
 
 check_and_make_dir vnc/token
 
