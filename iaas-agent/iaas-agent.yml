@@ -18,7 +18,7 @@ spec:
           args:
             - "-c"
             - |
-              /bin/bash /root/RUN_IAAS_AGENT.sh
+              /bin/bash /kubeiaas/RUN.sh
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:0.0.1-SNAPSHOT
           imagePullPolicy: Always
           securityContext:
@@ -46,7 +46,7 @@ spec:
             path: /proc
         - name: workdir
           hostPath:
-            path: /workdir
+            path: /usr/local/kubeiaas/workdir
 ---
 apiVersion: v1
 kind: Service
