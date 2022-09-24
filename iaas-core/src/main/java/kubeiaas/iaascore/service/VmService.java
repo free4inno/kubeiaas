@@ -31,7 +31,7 @@ public class VmService {
     @Resource
     private VolumeProcess volumeProcess;
 
-    public BaseResponse createVm(
+    public Vm createVm(
             String name,
             int cpus,
             int memory,
@@ -39,7 +39,7 @@ public class VmService {
             int ipSegmentId,
             Integer diskSize,
             String description,
-            String hostUUid) {
+            String hostUUid) throws BaseException {
 
         /* ---- 1. pre create VM ----
         Generate and Set basic info of vm.
@@ -51,39 +51,24 @@ public class VmService {
         Use Resource Operator to allocate Host and check available
         （资源调度：分配宿主机，检查资源合法性）
          */
-        try {
-            newVm = resourceProcess.createVmOperate(newVm);
-        } catch (BaseException e) {
-            log.error(e.getMsg());
-            return BaseResponse.error(ResponseEnum.ERROR);
-        }
+        newVm = resourceProcess.createVmOperate(newVm);
 
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
-        try {
-            IpUsed newIpUsed = networkProcess.createVmNetwork(newVm, ipSegmentId);
-            // set into newVm
-            List<IpUsed> newIpUsedList = new ArrayList<>();
-            newIpUsedList.add(newIpUsed);
-            newVm.setIps(newIpUsedList);
-        } catch (BaseException e) {
-            log.error(e.getMsg());
-            return BaseResponse.error(ResponseEnum.ERROR);
-        }
+        IpUsed newIpUsed = networkProcess.createVmNetwork(newVm, ipSegmentId);
+        // set into newVm
+        List<IpUsed> newIpUsedList = new ArrayList<>();
+        newIpUsedList.add(newIpUsed);
+        newVm.setIps(newIpUsedList);
 
         /* ---- 4. Volume ----
         Create system volume.
         （系统盘：使用 image 创建 system volume）
          */
-        try {
-            volumeProcess.createVmVolume(newVm);
-        } catch (BaseException e) {
-            log.error(e.getMsg());
-            return BaseResponse.error(ResponseEnum.ERROR);
-        }
+        volumeProcess.createVmVolume(newVm);
 
-        return BaseResponse.success(newVm);
+        return newVm;
     }
 }

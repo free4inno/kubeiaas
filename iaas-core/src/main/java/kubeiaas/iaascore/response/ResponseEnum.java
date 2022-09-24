@@ -11,7 +11,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ResponseEnum {
     SUCCESS(200, "业务处理成功"),
-    ERROR(500, "业务处理失败");
+    WORK_ERROR(202, "业务处理失败"),
+    ARGS_ERROR(402, "验参失败"),
+    INTERNAL_ERROR(500, "内部错误");
 
     private Integer code;
     private String msg;
