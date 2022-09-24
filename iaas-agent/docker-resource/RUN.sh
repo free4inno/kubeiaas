@@ -52,7 +52,7 @@ echo "
 "
 
 function check_and_make_dir(){
-  res=$(host_sh "if [ -e /usr/local/kubeiaas/workdir/src ]; then echo '1'; else echo '0'; fi;")
+  res=$(host_sh "if [ -e /usr/local/kubeiaas/$1 ]; then echo '1'; else echo '0'; fi;")
   if [ $res == "0" ]; then
     host_sh "mkdir -p /usr/local/kubeiaas/$1"
     echo " + mkdir -p /usr/local/kubeiaas/$1"

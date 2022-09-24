@@ -70,10 +70,9 @@ function main(){
         echo "<1> UPDATE QEMU to 4.0.0 ---------------------"
         yum -y install glib2-devel zlib-devel pixman-devel libaio-devel
         curl -o /usr/local/kubeiaas/libvirt/qemu-4.0.0.tar.xz https://download.qemu.org/qemu-4.0.0.tar.xz
-        tar -xvf /usr/local/kubeiaas/libvirt/qemu-4.0.0.tar.xz
-        ./usr/local/kubeiaas/libvirt/qemu-4.0.0/configure --target-list=x86_64-softmmu --enable-linux-aio
-        make
-        make install
+        tar -xvf /usr/local/kubeiaas/libvirt/qemu-4.0.0.tar.xz -C /usr/local/kubeiaas/libvirt/
+        (cd /usr/local/kubeiaas/libvirt/qemu-4.0.0; ./configure --target-list=x86_64-softmmu --enable-linux-aio)
+        (cd /usr/local/kubeiaas/libvirt/qemu-4.0.0; make && make install)
 
         echo " - add lib path"
         echo -e "
@@ -110,12 +109,14 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
             libblkid-devel augeas systemd-devel libpciaccess-devel yajl-devel sanlock-devel libpcap-devel libnl3-devel \
             libselinux-devel dnsmasq radvd cyrus-sasl-devel libacl-devel parted-devel device-mapper-devel xfsprogs-devel \
             librados2-devel librbd1-devel glusterfs-api-devel glusterfs-devel numactl-devel libcap-ng-devel fuse-devel \
-            netcf-devel libcurl-devel audit-libs-devel systemtap-sdt-devel nfs-utils dbus-devel scrub numad
+            netcf-devel libcurl-devel audit-libs-devel systemtap-sdt-devel libtirpc-devel nfs-utils dbus-devel scrub numad
+        yum -y install libvirt-client
 
         # ===
 
         echo "<6> meson & ninja -------------------------------"
-        yum -y install meson
+        pip3 install meson
+        ln -s /usr/local/bin/meson /usr/bin/meson
         meson --version
         yum -y install ninja-build
         ninja --version
@@ -124,14 +125,21 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
 
         echo "<7> get libvirt-7.0.0 package ---------------------------------"
         curl -o /usr/local/kubeiaas/libvirt/libvirt-7.0.0.tar.xz https://libvirt.org/sources/libvirt-7.0.0.tar.xz
-        tar -xvf /usr/local/kubeiaas/libvirt/libvirt-7.0.0.tar.xz
+        tar -xvf /usr/local/kubeiaas/libvirt/libvirt-7.0.0.tar.xz -C /usr/local/kubeiaas/libvirt/
 
         # ===
 
         echo "<8> build & install -----------------------------"
-        meson /usr/local/kubeiaas/libvirt/libvirt-7.0.0/build --prefix=/usr/local/kubeiaas/libvirt
-        ninja -C /usr/local/kubeiaas/libvirt/libvirt-7.0.0/build
-        ninja -C /usr/local/kubeiaas/libvirt/libvirt-7.0.0/build install
+        pip3 install rst2html5
+        (cd /usr/local/kubeiaas/libvirt/libvirt-7.0.0; meson build --prefix=/usr)
+        pip3 uninstall -y rst2html5
+        (cd /usr/local/kubeiaas/libvirt/libvirt-7.0.0; meson build --wipe --prefix=/usr)
+
+        (cd /usr/local/kubeiaas/libvirt/libvirt-7.0.0; ninja -C build)
+        (cd /usr/local/kubeiaas/libvirt/libvirt-7.0.0; ninja -C build install)
+
+        systemctl daemon-reload
+        systemctl restart libvirtd
         virsh --version
 
         # recheck
@@ -171,6 +179,7 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
     # 2. check qemu support ===============
     echo "[3] check qemu support"
     res=$(virsh version)
+    echo $res
     if [[ $res =~ "QEMU" ]]; then
         echo " - libvirtd support qemu."
         echo ">>> success"
