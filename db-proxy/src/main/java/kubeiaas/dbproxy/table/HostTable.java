@@ -1,6 +1,7 @@
 package kubeiaas.dbproxy.table;
 
 import kubeiaas.common.bean.Host;
+import kubeiaas.common.enums.host.HostStatusEnum;
 
 import javax.persistence.*;
 
@@ -49,4 +50,33 @@ public class HostTable extends Host {
     public void setIp(String ip) {
         super.setIp(ip);
     }
+
+    @Column(name = "config")
+    public String getConfig() {
+        return super.getConfig();
+    }
+
+    public void setConfig(String config) {
+        super.setConfig(config);
+    }
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    public HostStatusEnum getStatus() {
+        return super.getStatus();
+    }
+
+    public void setStatus(HostStatusEnum status) {
+        super.setStatus(status);
+    }
+
+    @Column(name = "role")
+    public String getRole() {
+        return super.getRole();
+    }
+
+    public void setRole(String role) {
+        super.setRole(role);
+    }
+
 }

@@ -38,7 +38,12 @@ public class LibvirtConfig {
     public static String defaultNetwork = "bridge"; //net type
     public static String getVncPort = "virsh vncdisplay ";
 
-    public LibvirtConfig() {
+    /**
+     * old：使用构造函数在启动时调用
+     * now：在kvm操作前主动调用
+     * （为了启动时不依赖宿主机的libvirt安装，暂时不考虑额外造成的开销）
+     */
+    public void initEmulator() {
         emulatorName = getQemuKvmLocation();
     }
 
@@ -133,6 +138,7 @@ public class LibvirtConfig {
 
         //volume设置
         Element devices = domain.addElement("devices");
+        initEmulator();  // get emulator path
         if (emulatorName != null) {
             devices.addElement("emulator").setText(emulatorName);          //通过conf类加载，默认为 kvm 在Linux中的位置，可以在properties中更改
         }

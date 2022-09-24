@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: iaas-core
+  namespace: kubeiaas
 spec:
   replicas: 1
   selector:
@@ -13,6 +14,7 @@ spec:
       labels:
         app: iaas-core
     spec:
+      nodeName: hf-master-01
       containers:
         - name: iaas-core
           command: ["sh"]
@@ -28,14 +30,15 @@ spec:
               protocol: TCP
           env:
             - name: DHCP_HOST_IP
-              value: "192.168.31.238"
+              value: "192.168.33.6"
             - name: VNC_HOST_IP
-              value: "192.168.31.238"
+              value: "192.168.33.6"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: iaas-core
+  namespace: kubeiaas
 spec:
   selector:
     app: iaas-core

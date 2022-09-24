@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: resource-operator
+  namespace: kubeiaas
 spec:
   replicas: 1
   selector:
@@ -30,6 +31,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: resource-operator
+  namespace: kubeiaas
 spec:
   selector:
     app: resource-operator
