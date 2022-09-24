@@ -30,7 +30,12 @@ public class NetworkProcess {
     @Resource
     private DhcpScheduler dhcpScheduler;
 
-    public IpUsed createNetwork(Vm newVm, int ipSegmentId) throws BaseException {
+    /**
+     * Create VM.
+     * 3. Network
+     * use synchronized to ensure synchronous execution, avoid ip allocation conflicts.
+     */
+    public synchronized IpUsed createVmNetwork(Vm newVm, int ipSegmentId) throws BaseException {
         log.info("createVm -- 3. Network");
 
         String newMac = getNewMac(ipSegmentId);
@@ -59,6 +64,7 @@ public class NetworkProcess {
         return newIpUsed;
     }
 
+
     public String getNewMac(int ipSegmentId) {
         if (ipSegmentId <= 0 || ipSegmentId >= 4096) {
             // when id <= 0, illegal;
@@ -74,6 +80,7 @@ public class NetworkProcess {
         }
     }
 
+
     public IpUsed getNewIp(int ipSegmentId) {
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
         if (ipSegment == null) {
@@ -81,6 +88,7 @@ public class NetworkProcess {
         }
         return IpUtils.getIpAddress(getAllUsedIp(ipSegmentId), ipSegment);
     }
+
 
     // 已经使用的ip地址，通过Map方式存放，key是Ip
     public Map<String, IpUsed> getAllUsedIp(int ipSegmentId) {
