@@ -151,6 +151,7 @@ $KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_MNT_TARGET(rw,no_root_squash)
 
         # recheck
         echo "[-] recheck exports"
+        res=$(cat /etc/exports)
         if [[ $res =~ "$KUBEIAAS_PATH_IMAGES $KUBEIAAS_MNT_TARGET" && $res =~ "$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_MNT_TARGET" ]]; then
             echo "[-] exports config wrote success."
             echo ">>> success"

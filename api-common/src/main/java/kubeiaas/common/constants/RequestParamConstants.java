@@ -20,6 +20,7 @@ public class RequestParamConstants {
 
     public static final String STRATEGY = "strategy";
     public static final String STATUS = "status";
+    public static final String ADDRESS = "address";
 
     /* ===== VM ===== */
     public static final String VM_OBJECT = "vm_object";

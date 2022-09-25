@@ -39,6 +39,9 @@ public class RequestMappingConstants {
     // -- Vm Controller
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";
 
+    // -- Vnc Controller
+    public static final String ADD_VNC_TOKEN = "add_vnc_token";
+
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";
     public static final String APP_XML = "application/xml";

@@ -1,9 +1,6 @@
 package kubeiaas.iaasagent.service;
 
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
@@ -31,6 +28,9 @@ public class VmService {
     private TableStorage tableStorage;
 
     @Resource
+    private VncService vncService;
+
+    @Resource
     private LibvirtConfig libvirtConfig;
 
     public VmService() {
@@ -50,6 +50,7 @@ public class VmService {
 
         Vm instance = tableStorage.vmQueryByUuid(vmUuid);
         Image image = tableStorage.imageQueryByUuid(instance.getImageUuid());
+        Host host = tableStorage.hostQueryByUuid(instance.getHostUuid());
         List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
         List<IpUsed> ips = tableStorage.ipUsedQueryAllByInstanceUuid(vmUuid);
 
@@ -102,8 +103,7 @@ public class VmService {
             log.info("portGot: " + vncPort);
             String vncPasswd = VmCUtils.getVNCPasswd(instance.getId(), instance.getUuid());    //获取新建虚拟机的密码
 
-            // TODO: vnc controller
-            // vncController.addVncToken(appKey, instance.getUuid(), host.getIp() + ":" + (Integer.parseInt(vncPort) + 5900));
+            vncService.addVncToken(instance.getUuid(), host.getIp() + ":" + (Integer.parseInt(vncPort) + 5900));
 
             instance.setVncPort(vncPort);
             instance.setVncPassword(vncPasswd);
