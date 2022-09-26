@@ -46,7 +46,11 @@ public class VmCUtils {
      * @return.
      */
     public static String generateName(String uuid, String name) {
-        return uuid + "-" + name;
+        if (name == null || name.isEmpty()) {
+            return uuid;
+        } else {
+            return uuid + "-" + name;
+        }
     }
 
     /**

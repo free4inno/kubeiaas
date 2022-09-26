@@ -26,7 +26,7 @@
 # return：
 #   - is_install (0-n, 1-y)
 function is_service_install(){
-    res=$(systemctl status $1)
+    res=$(systemctl status $1 2>&1)
     if [[ $res =~ "could not be found" || $res =~ "Loaded: not-found" ]]; then
         echo "0"
     else

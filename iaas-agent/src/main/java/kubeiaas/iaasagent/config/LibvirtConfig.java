@@ -90,7 +90,7 @@ public class LibvirtConfig {
         Document document = DocumentHelper.createDocument();
         Element domain = document.addElement("domain").addAttribute("type", "kvm")
                 .addNamespace("qemu", "http://libvirt.org/schemas/domain/qemu/1.0");
-        String vmName = VmCUtils.generateName(instance.getUuid(), instance.getName());
+        String vmName = VmCUtils.generateName(instance.getUuid(), "");
         domain.addElement("name")
                 .setText(vmName);
         domain.addElement("uuid")

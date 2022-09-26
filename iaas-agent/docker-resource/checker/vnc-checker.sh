@@ -69,7 +69,7 @@ function main(){
         echo "[-] ...start to install Websockify"
 
         tar -xzvf /usr/local/kubeiaas/workdir/src/websockify-0.10.0.tar.gz -C /usr/local/kubeiaas/vnc/
-        python3 /usr/local/kubeiaas/vnc/websockify-0.10.0/setup.py install
+        (cd /usr/local/kubeiaas/vnc/websockify-0.10.0; python3 setup.py install)
         echo "[-] Websockify is installed at '/usr/local/kubeiaas/vnc/websockify-0.10.0'."
     fi
 
