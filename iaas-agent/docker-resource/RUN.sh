@@ -90,11 +90,25 @@ cp -r /kubeiaas/src/* /workdir/src/
 echo " - cp checker/*"
 cp -r /kubeiaas/checker/* /workdir/checker/
 
-# 3. RUN agent-proxy in container -----------------
-echo "[3] RUN agent-proxy in container "
+# 3. wait for DB-proxy ---------------------
+echo "[3] loop wait for DB-proxy "
+count=0
+while [[ ! $(curl http://db-proxy:9091/heartbeat) =~ heartbeat ]]
+do
+  sleep 5
+  count=$((count+1))
+  echo "... try times $count"
+  if [ $count -ge 60 ]; then
+    echo " - wait for db-proxy timeout! exit."
+    exit
+  fi
+done
+
+# 4. RUN agent-proxy in container -----------------
+echo "[4] RUN agent-proxy in container "
 nohup java -jar /kubeiaas/iaas-agent-proxy-1.0-SNAPSHOT.jar > /workdir/log/iaas-agent-proxy.log 2>&1 &
 
-# 4. RUN agent on host ----------------------------
-echo "[4] RUN agent on host "
+# 5. RUN agent on host ----------------------------
+echo "[5] RUN agent on host "
 host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent-0.0.1-SNAPSHOT.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
 tail -f /workdir/log/iaas-agent.log

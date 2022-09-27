@@ -25,6 +25,7 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String SAVE = "save";
+    public static final String HEARTBEAT = "heartbeat";
 
     // -- Resource Operator
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";

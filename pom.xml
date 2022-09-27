@@ -10,10 +10,10 @@
     </parent>
 
     <groupId>com.free4inno.kubeiaas</groupId>
-    <artifactId>kubeiaas-demo</artifactId>
+    <artifactId>kubeiaas</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>kubeiaas-demo</name>
-    <description>kubeiaas-demo</description>
+    <name>kubeiaas</name>
+    <description>kubeiaas</description>
     <packaging>pom</packaging>
 
     <modules>

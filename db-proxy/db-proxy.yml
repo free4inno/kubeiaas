@@ -28,10 +28,11 @@ spec:
               protocol: TCP
           env:
             - name: MYSQL_IP
-              # value: "iaas-mysql" # deploy by K8S, use service name.
-              value: "192.168.33.1"
+              value: "iaas-mysql" # deploy by K8S, use service name.
+#              value: "192.168.33.1"
             - name: MYSQL_ROOT_PASSWORD
-              value: "telestar"
+              value: "MYSQL@free"
+#              value: "telestar"
 ---
 apiVersion: v1
 kind: Service
