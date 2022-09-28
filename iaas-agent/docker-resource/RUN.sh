@@ -89,6 +89,7 @@ cp -r /kubeiaas/src/* /workdir/src/
 
 echo " - cp checker/*"
 cp -r /kubeiaas/checker/* /workdir/checker/
+chmod 755 /workdir/checker/*
 
 # 3. wait for DB-proxy ---------------------
 echo "[3] loop wait for DB-proxy "
@@ -103,6 +104,7 @@ do
     exit
   fi
 done
+echo " - db-proxy is ready."
 
 # 4. RUN agent-proxy in container -----------------
 echo "[4] RUN agent-proxy in container "

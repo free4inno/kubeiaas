@@ -5,37 +5,37 @@ metadata:
   name: iaas-mysql
   namespace: kubeiaas
 spec:
-  replicas: 1 #副本数量
-  selector: #标签选择器，与上面的标签共同作用
-    matchLabels: #选择包含标签app:nginx的资源
+  replicas: 1
+  selector:
+    matchLabels:
       app: iaas-mysql
-  template: #这是选择或创建的Pod的模板
-    metadata: #Pod的元数据
-      labels: #Pod的标签，上面的selector即选择包含标签app:nginx的Pod
+  template:
+    metadata:
+      labels:
         app: iaas-mysql
-    spec: #期望Pod实现的功能（即在pod中部署）
-      nodeName: node2
-      containers: #生成container，与docker中的container是同一种
+    spec:
+      nodeName: node2   # appointed node
+      containers:
         - name: iaas-mysql
-          image: mysql:8.0.27 #使用镜像mysql: 创建container，该container默认3306端口可访问
+          image: mysql:8.0.27
           ports:
-            - containerPort: 3306  # 开启本容器的3306端口可访问
+            - containerPort: 3306
               hostPort: 3306
           env:
             - name: MYSQL_ROOT_PASSWORD
-              value: MYSQL@free
-          volumeMounts: #挂载持久存储卷
-            - name: iaas-mysql-data  #挂载设备的名字，与volumes[*].name 需要对应
-              mountPath: /var/lib/mysql  #挂载到容器的某个路径下
+              value: MYSQL@free   # password
+          volumeMounts:
+            - name: iaas-mysql-data
+              mountPath: /var/lib/mysql
             - name: iaas-mysql-conf
               mountPath: /var/lib/mysql-files
       volumes:
-        - name: iaas-mysql-data  #和上面保持一致 这是本地的文件路径，上面是容器内部的路径
+        - name: iaas-mysql-data
           hostPath:
-            path: /usr/local/kubeiaas/mysql/data  #此路径需要实现创建
+            path: /usr/local/kubeiaas/mysql/data
         - name: iaas-mysql-conf
           hostPath:
-            path: /usr/local/kubeiaas/mysql/cnf   #此路径需要实现创建
+            path: /usr/local/kubeiaas/mysql/cnf
 ---
 apiVersion: v1
 kind: Service

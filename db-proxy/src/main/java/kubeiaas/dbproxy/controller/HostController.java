@@ -7,6 +7,7 @@ import kubeiaas.dbproxy.dao.HostDao;
 import kubeiaas.dbproxy.dao.ImageDao;
 import kubeiaas.dbproxy.table.HostTable;
 import kubeiaas.dbproxy.table.ImageTable;
+import kubeiaas.dbproxy.table.VmTable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
@@ -45,5 +46,16 @@ public class HostController {
         List<HostTable> hostTableList = hostDao.findAll(specification);
         log.info("queryAllBySingleKey ==== end ====");
         return JSON.toJSONString(hostTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String save(
+            @RequestParam(value = RequestParamConstants.HOST_OBJECT) String hostObjectStr) {
+        log.info("save ==== start ====");
+        HostTable hostTable = JSON.parseObject(hostObjectStr, HostTable.class);
+        hostDao.saveAndFlush(hostTable);
+        log.info("save ==== end ====");
+        return JSON.toJSONString(hostTable);
     }
 }

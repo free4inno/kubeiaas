@@ -21,6 +21,7 @@ public class RequestParamConstants {
     public static final String STRATEGY = "strategy";
     public static final String STATUS = "status";
     public static final String ADDRESS = "address";
+    public static final String TYPE = "type";
 
     /* ===== VM ===== */
     public static final String VM_OBJECT = "vm_object";
@@ -45,5 +46,8 @@ public class RequestParamConstants {
     public static final String EXTRA_SIZE = "extra_size";
     public static final String IMAGE_PATH = "image_path";
     public static final String VOLUME_PATH = "volume_path";
+
+    /* ===== HOST ===== */
+    public static final String HOST_OBJECT = "host_object";
 
 }

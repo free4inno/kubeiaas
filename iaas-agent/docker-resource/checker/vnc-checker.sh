@@ -54,6 +54,7 @@ function main(){
     else
         echo "[-] Python3 install failed!"
         echo ">>> failed"
+        echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-vnc.log
         echo ""
         exit
     fi
@@ -98,6 +99,7 @@ function main(){
         echo $res
         echo "[-] noVNC is already active (port: 8787)."
         echo ">>> success"
+        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-vnc.log
         echo ""
         exit
     else
@@ -113,11 +115,13 @@ function main(){
         echo $res
         echo "[-] novnc is now active (port: 8787)."
         echo ">>> success"
+        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-vnc.log
         echo ""
     else 
         echo $res
         echo "[-] novnc run failed!"
         echo ">>> failed"
+        echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-vnc.log
         echo ""
     fi
 }

@@ -150,6 +150,7 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
             # --- libvirtd is not founded ---
             echo " - libvirtd is installed failed! Please install libvirtd-7.0.0 manually..."
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
             echo ""
             exit
         fi
@@ -171,6 +172,7 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
         # --- libvirtd is not started ---
         echo " - libvirtd is failed to start! Please start libvirtd-7.0.0 manually..."
         echo ">>> failed"
+        echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
         echo ""
         exit
     fi
@@ -183,11 +185,13 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
     if [[ $res =~ "QEMU" ]]; then
         echo " - libvirtd support qemu."
         echo ">>> success"
+        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
         echo ""
         exit
     else
         echo " - libvirtd API error! No QEMU found or libvirt connection error, please Check it manually..."
         echo ">>> failed"
+        echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
         echo ""
         exit
     fi

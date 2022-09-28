@@ -18,6 +18,7 @@ public class RequestMappingConstants {
     public static final String IMAGE_C = "image_c";
     public static final String VM_C = "vm_c";
     public static final String VOLUME_C = "volume_c";
+    public static final String HOST_C = "host_c";
 
     /* =============== action =============== */
     public static final String TEST = "test";
@@ -42,6 +43,9 @@ public class RequestMappingConstants {
 
     // -- Vnc Controller
     public static final String ADD_VNC_TOKEN = "add_vnc_token";
+
+    // -- host Controller
+    public static final String CHECK_ENV = "check_env";
 
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";

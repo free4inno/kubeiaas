@@ -92,6 +92,7 @@ function main(){
             # --- nfs not found ---
             echo "[-] nfs could not be installed!"
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
             echo ""
             exit
         fi
@@ -117,6 +118,7 @@ function main(){
             echo "[-] nfs still have not started!"
             echo "[+] please check manually..."
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
             echo ""
             exit
         fi
@@ -150,6 +152,7 @@ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nf
     if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
         echo "[-] mount is OK."
         echo ">>> success"
+        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
         echo ""
         exit
     else
@@ -166,11 +169,13 @@ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nf
         if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
             echo "[-] mount success."
             echo ">>> success"
+            echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
             echo ""
             exit
         else
             echo "[-] mount failed!"
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
             echo ""
             exit
         fi

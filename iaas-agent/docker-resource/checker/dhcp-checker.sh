@@ -119,10 +119,12 @@ shared-network "$KUBEIAAS_NETWORK_BRIDGE" {
     if [ $res == "1" ]; then
         echo "[-] dhcpd is active."
         echo ">>> success"
+        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-dhcp.log
     else
         echo "[-] dhcpd have not started!"
         echo "[+] please check manually..."
         echo ">>> failed"
+        echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-dhcp.log
     fi
 }
 

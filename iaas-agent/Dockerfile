@@ -1,4 +1,4 @@
-FROM java:8
+FROM openjdk:8
 
 RUN mkdir -p /kubeiaas \
     && mkdir -p /kubeiaas/src/ \

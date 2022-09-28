@@ -16,6 +16,7 @@
 # Example:
 #
 #   sh mnt-export-checker.sh -m 192.168.33.7
+#   sh mnt-export-checker.sh -m *
 #
 
 # ----------------------- Function -----------------------
@@ -92,6 +93,7 @@ function main(){
             # --- nfs not found ---
             echo "[-] nfs could not be installed!"
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt-export.log
             echo ""
             exit
         fi
@@ -117,6 +119,7 @@ function main(){
             echo "[-] nfs still have not started!"
             echo "[+] please check manually..."
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt-export.log
             echo ""
             exit
         fi
@@ -128,6 +131,7 @@ function main(){
     if [[ $res =~ "$KUBEIAAS_PATH_IMAGES $KUBEIAAS_MNT_TARGET" && $res =~ "$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_MNT_TARGET" ]]; then
         echo "[-] exports config is OK."
         echo ">>> success"
+        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt-export.log
         echo ""
         exit
     else 
@@ -155,11 +159,13 @@ $KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_MNT_TARGET(rw,no_root_squash)
         if [[ $res =~ "$KUBEIAAS_PATH_IMAGES $KUBEIAAS_MNT_TARGET" && $res =~ "$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_MNT_TARGET" ]]; then
             echo "[-] exports config wrote success."
             echo ">>> success"
+            echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt-export.log
             echo ""
             exit
         else 
             echo "[-] exports config wrote failed!"
             echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt-export.log
             echo ""
             exit
         fi

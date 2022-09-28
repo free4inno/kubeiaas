@@ -72,7 +72,7 @@
                 <configuration>
                     <!-- =============== docker control =============== -->
                     <!-- docker主机地址,用于完成docker各项功能,注意是tcp不是http -->
-                    <dockerHost>tcp://192.168.36.12:2375</dockerHost>
+                    <dockerHost>tcp://192.168.31.27:2375</dockerHost>
                     <!--docker远程访问所需证书地址,如果docker远程主机没有启用TLS验证则不需要配证书-->
                     <!--                    <certPath>${project.basedir}/docker/ssh</certPath>-->
 

@@ -63,6 +63,7 @@ function main(){
     check_and_make_dir mysql/cnf
 
     echo ">>> success"
+    echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-dir.log
 }
 
 # --------------------------------------------------
