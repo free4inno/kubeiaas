@@ -23,4 +23,10 @@ public interface DhcpController {
             @RequestParam(value = RequestParamConstants.MAC) String mac,
             @RequestParam(value = RequestParamConstants.IP) String ip);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DHCP_C + "/" + RequestMappingConstants.UNBIND_MAC_IP)
+    @ResponseBody
+    String unbindMacAndIp(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
 }

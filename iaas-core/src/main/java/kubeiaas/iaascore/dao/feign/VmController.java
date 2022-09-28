@@ -21,4 +21,10 @@ public interface VmController {
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.DELETE_VM_INSTANCE)
+    @ResponseBody
+    String deleteVmInstance(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
 }

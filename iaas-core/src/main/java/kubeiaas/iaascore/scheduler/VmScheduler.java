@@ -2,6 +2,7 @@ package kubeiaas.iaascore.scheduler;
 
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.VmController;
@@ -40,6 +41,19 @@ public class VmScheduler {
         vmController.createVmInstance(getSelectedUri(vmUuid), vmUuid);
 
         return true;
+    }
+
+    public boolean deleteVmInstance(String vmUuid){
+        //调用 agent 执行 delete
+        if(vmController.deleteVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public void deleteVmInDataBase(String vmUuid){
+        tableStorage.vmDeleteByUuid(vmUuid);
     }
 
     private URI getSelectedUri(String vmUuid) {

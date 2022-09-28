@@ -108,6 +108,21 @@ public class VolumeScheduler {
 
     }
 
+    public boolean deleteSystemVolume(String vmUuid,String volumeUuid,String volumePath){
+        log.info("deleteVolume ==== start ====  volumeUuid: " + volumeUuid);
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        //删除Linux主机中的物理硬盘
+        if(volumeController.deleteSystemVolume(getSelectedUri(vmUuid), volumePath).equals(ResponseMsgConstants.SUCCESS)){
+            tableStorage.volumeDelete(volumeUuid);
+            log.info("deleteVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else{
+            log.info("deleteVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
+
     private URI getSelectedUri(String vmUuid) {
         try {
             return new URI(AgentConfig.getSelectedUri(vmUuid));

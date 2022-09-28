@@ -41,4 +41,19 @@ public class VolumeController {
         }
     }
 
+    //TODO:目前只完成了删除系统盘操作
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String deleteSystemVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath) {
+        log.info("deleteSystemVolume ==== " + " VOLUME_PATH: " + volumePath);
+        if (volumeService.deleteVolume(volumePath)) {
+            log.info("deleteSystemVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("deleteSystemVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
 }

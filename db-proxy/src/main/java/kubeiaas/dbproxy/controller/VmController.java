@@ -56,4 +56,13 @@ public class VmController {
         log.info("save ==== end ====");
         return JSON.toJSONString(vmTable);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteByUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("deleteInstanceByUuid ==== start ==== vmUuid:" + vmUuid);
+        vmDao.deleteByUuid(vmUuid);
+        log.info("deleteInstanceByUuid ==== end ====");
+    }
 }

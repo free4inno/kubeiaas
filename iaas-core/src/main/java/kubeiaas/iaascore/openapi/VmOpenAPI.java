@@ -4,11 +4,14 @@ import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
+import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.request.CreateVmForm;
+import kubeiaas.iaascore.request.DeleteVmForm;
 import kubeiaas.iaascore.response.BaseResponse;
+import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.service.VmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -47,6 +50,25 @@ public class VmOpenAPI {
         Vm newVm = vmService.createVm(f.getName(), f.getCpus(), f.getMemory(), f.getImageUuid(), f.getIpSegmentId(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
         log.info("create ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newVm));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException {
+        log.info("delete ==== start ====");
+        String result;
+        if (f.getDeleteType().equals("force")){
+            result = vmService.forceDeleteVm(f.getVmUuid());
+        }else{
+            result = vmService.deleteVM(f.getVmUuid());
+        }
+        if (result.equals(ResponseMsgConstants.SUCCESS)){
+            log.info("delete ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Delete VM Success"));
+        }else{
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DELETE_ERROR));
+        }
+
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)

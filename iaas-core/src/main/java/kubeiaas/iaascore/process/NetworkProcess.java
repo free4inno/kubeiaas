@@ -99,4 +99,17 @@ public class NetworkProcess {
         }
         return allUsedIp;
     }
+
+    public void deleteIps(String vmUuid) throws BaseException {
+        log.info("deleteIps ==== start ====  vmUuid: " + vmUuid);
+
+        //DHCP中解绑
+        if (!dhcpScheduler.unbindMacAndIp(vmUuid)){
+            throw new BaseException("ERROR: dhcp unbind failed!");
+        }
+
+        //数据库中删除
+        tableStorage.ipUsedDeleteByVmUuid(vmUuid);
+        log.info("deleteIps ==== end ====");
+    }
 }

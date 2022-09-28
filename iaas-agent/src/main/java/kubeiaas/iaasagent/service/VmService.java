@@ -142,4 +142,56 @@ public class VmService {
         log.info("createVm ---- end ----");
         return true;
     }
+
+    public boolean deleteVm(String vmUuid){
+        log.info("deleteVm ---- start ---- instanceUuid: " + vmUuid);
+        try {
+            Domain domain = getDomainByUuid(vmUuid);
+            log.info("destroyDomain ---- start ----");
+            if (domain.isActive() > 0) {
+                domain.destroy();
+            }
+            new Thread(() -> {
+                try {
+                    int waitLoop = 3;
+                    while (domain.isActive() > 0 && waitLoop > 0) {
+                        waitLoop--;
+                        Thread.sleep(1000);
+                    }
+                    if (domain.isActive() > 0) {
+                        throw new Exception("destroyDomain -- destroy error!");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+            domain.undefine();
+
+//            vncService.deleteVncToken(vmUuid);
+
+            log.info("deleteVm ---- end ---- Delete Domain Successfully.");
+        } catch (Exception e) {
+            log.error("deleteVm ---- end ---- Delete Domain Error!");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private Domain getDomainByUuid(String vmUuid) throws Exception {
+        log.info("getDomainByUuid ---- start ----");
+        if (vmUuid == null) {
+            log.info("getDomainByUuid ---- throws ---- vm uuid is empty");
+            throw new Exception("vm uuid is empty");
+        }
+
+        Domain d = virtCon.domainLookupByUUIDString(vmUuid);
+        if (d == null) {
+            log.info("getDomainByUuid ---- throws ---- no domain with uuid: " + vmUuid);
+            throw new Exception("no domain with uuid: " + vmUuid);
+        }
+        log.info("getDomainByUuid ---- end ----");
+        return d;
+    }
 }

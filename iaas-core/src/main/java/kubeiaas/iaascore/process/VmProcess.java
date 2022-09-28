@@ -4,6 +4,7 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.scheduler.VmScheduler;
@@ -93,4 +94,30 @@ public class VmProcess {
         log.info("createVm -- 5. VM create success!");
     }
 
+    public Vm queryVMByUuid(String vmUuid){
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        return vm;
+    }
+
+    /**
+     * Delete VM
+     */
+    public void deleteVM(String vmUuid) throws BaseException {
+        log.info("deleteVm --  VM");
+        //先停止，否则无法删除正在使用的磁盘文件
+        if (!vmScheduler.deleteVmInstance(vmUuid)){
+            throw new BaseException("ERROR: delete vm instance failed!");
+        }
+        log.info("deleteVm success!");
+    }
+
+    /**
+     * Delete VM in dataBase
+     */
+    public void deleteVMInDataBase(String vmUuid){
+        log.info("deleteVm --  VM in dataBase");
+        vmScheduler.deleteVmInDataBase(vmUuid);
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("deleteVm in dataBase success!");
+    }
 }

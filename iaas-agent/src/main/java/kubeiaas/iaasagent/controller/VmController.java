@@ -35,4 +35,18 @@ public class VmController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String deleteVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("deleteVm ==== start ==== vmUuid: " + vmUuid);
+        // log.info("This is Vm Controller: " + routingKey);
+        if (vmService.deleteVm(vmUuid)){
+            log.info("deleteVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.error("deleteVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
 }

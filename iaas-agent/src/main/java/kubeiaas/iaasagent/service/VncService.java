@@ -16,4 +16,13 @@ public class VncService {
         log.info("result: " + result);
         log.info("addVncToken ---- end ----");
     }
+
+    public void deleteVncToken(String uuid) {
+        log.info("deleteVncToken ---- start ---- uuid:" + uuid);
+        String cmd = "sed -i \'/" + uuid + "/d\' " + VncConfig.TOKEN_FILE_PATH;
+        String result = ShellUtils.getCmd(cmd);
+        log.debug("deleteVncToken -- Command: " + cmd + " executed");
+        log.debug("deleteVncToken -- Result: " + result);
+        log.info("deleteVncToken ---- end ----");
+    }
 }
