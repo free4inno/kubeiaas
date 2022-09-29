@@ -23,7 +23,7 @@ spec:
             - "-c"
             - |
               /bin/bash /kubeiaas/RUN.sh
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:0.0.1-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:0.1.1-SNAPSHOT
           imagePullPolicy: Always
           securityContext:
             privileged: true

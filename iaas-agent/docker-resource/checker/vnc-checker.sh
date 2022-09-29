@@ -133,6 +133,10 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ vnc-checker            #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
+echo ""
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-vnc.log
 
 echo ""
 main

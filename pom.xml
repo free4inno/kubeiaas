@@ -11,7 +11,7 @@
 
     <groupId>com.free4inno.kubeiaas</groupId>
     <artifactId>kubeiaas</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>kubeiaas</name>
     <description>kubeiaas</description>
     <packaging>pom</packaging>
@@ -28,6 +28,7 @@
         <java.version>1.8</java.version>
         <spring.boot.version>2.2.2.RELEASE</spring.boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.version>0.0.1-SNAPSHOT</project.version>
     </properties>
 
     <dependencies>

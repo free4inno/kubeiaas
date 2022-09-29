@@ -179,6 +179,10 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ mnt-export-checker     #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
+echo ""
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt-export.log
 
 KUBEIAAS_PATH_IMAGES=/usr/local/kubeiaas/data/images
 KUBEIAAS_PATH_DATA_VOLUMES=/usr/local/kubeiaas/data/data-volumes

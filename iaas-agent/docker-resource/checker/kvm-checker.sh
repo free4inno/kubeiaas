@@ -86,6 +86,9 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ kvm-checker            #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-kvm.log
 
 echo ""
 main

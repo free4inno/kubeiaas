@@ -6,11 +6,10 @@
     <parent>
         <groupId>com.free4inno.kubeiaas</groupId>
         <artifactId>kubeiaas</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>db-proxy</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>db-proxy</name>
     <description>db-proxy</description>
 

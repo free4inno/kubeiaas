@@ -6,11 +6,10 @@
     <parent>
         <groupId>com.free4inno.kubeiaas</groupId>
         <artifactId>kubeiaas</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>resource-operator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>resource-operator</name>
     <description>resource-operator</description>
 

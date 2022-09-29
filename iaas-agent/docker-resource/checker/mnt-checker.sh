@@ -127,7 +127,7 @@ function main(){
     # 3. check `/etc/fstab` ==================
     echo "[3] check '/etc/fstab' config"
     res=$(cat /etc/fstab)
-    if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
+    if [[ $res =~ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES ]]; then
         echo "[-] fstab config is OK."
     else 
         echo "[-] fstab config have not writen!"
@@ -189,6 +189,10 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ mnt-checker            #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
+echo ""
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
 
 KUBEIAAS_PATH_IMAGES=/usr/local/kubeiaas/data/images
 KUBEIAAS_PATH_DATA_VOLUMES=/usr/local/kubeiaas/data/data-volumes

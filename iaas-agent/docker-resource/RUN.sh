@@ -82,7 +82,7 @@ echo ""
 echo "[2] prepare files to /workdir "
 
 echo " - cp iaas-agent jar"
-cp /kubeiaas/iaas-agent-0.0.1-SNAPSHOT.jar /workdir/src/
+cp /kubeiaas/iaas-agent.jar /workdir/src/
 
 echo " - cp src/*"
 cp -r /kubeiaas/src/* /workdir/src/
@@ -108,9 +108,9 @@ echo " - db-proxy is ready."
 
 # 4. RUN agent-proxy in container -----------------
 echo "[4] RUN agent-proxy in container "
-nohup java -jar /kubeiaas/iaas-agent-proxy-1.0-SNAPSHOT.jar > /workdir/log/iaas-agent-proxy.log 2>&1 &
+nohup java -jar /kubeiaas/iaas-agent-proxy.jar > /workdir/log/iaas-agent-proxy.log 2>&1 &
 
 # 5. RUN agent on host ----------------------------
 echo "[5] RUN agent on host "
-host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent-0.0.1-SNAPSHOT.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
+host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
 tail -f /workdir/log/iaas-agent.log

@@ -135,7 +135,10 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ dhcp-checker           #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
 echo ""
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-dhcp.log
 
 KUBEIAAS_NETWORK_BRIDGE=""
 KUBEIAAS_NETWORK_SUBNET=""

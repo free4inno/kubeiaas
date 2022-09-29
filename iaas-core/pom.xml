@@ -5,11 +5,10 @@
     <parent>
         <groupId>com.free4inno.kubeiaas</groupId>
         <artifactId>kubeiaas</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>iaas-core</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>iaas-core</name>
     <description>iaas-core</description>
 

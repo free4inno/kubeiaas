@@ -73,6 +73,9 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ dir-checker            #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-dir.log
 
 echo ""
 main

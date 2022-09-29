@@ -26,54 +26,74 @@ public class HostService {
     @Resource
     private HostConfig hostConfig;
 
-    public void checkEnv(String type) {
+    public boolean checkEnv(String type) {
         switch (type) {
             case HostConstants.CHECKER_DIR:
-                ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_DIR, ""));
-                break;
+                ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_DIR));
+                ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_DIR, ""));
+                return true;
 
             case HostConstants.CHECKER_KVM:
-                ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_KVM, ""));
-                break;
+                ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_KVM));
+                ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_KVM, ""));
+                return true;
 
             case HostConstants.CHECKER_LIBVIRT:
-                ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_LIBVIRT, ""));
-                break;
+                ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_LIBVIRT));
+                ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_LIBVIRT, ""));
+                return true;
 
             case HostConstants.CHECKER_MNT:
-            case HostConstants.CHECKER_MNT_EXPORT:
                 if (hasHostRole(HostConstants.ROLE_MNT)) {
                     // mount root
-                    ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_MNT_EXPORT, "-m " + hostConfig.getNetwork_subnet_with_mask()));
+                    return false;
                 } else {
                     // not mnt
                     Host host = getHostByRole(HostConstants.ROLE_MNT);
                     String mntIp = (host == null) ? "" : host.getIp();
-                    ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_MNT, "-m " + mntIp));
+                    ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_MNT));
+                    String cmd = String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_MNT, "-m " + mntIp);
+                    log.info(cmd);
+                    ShellUtils.run(cmd);
+                    return true;
                 }
-                break;
+
+            case HostConstants.CHECKER_MNT_EXPORT:
+                if (hasHostRole(HostConstants.ROLE_MNT)) {
+                    // mount root
+                    ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_MNT_EXPORT));
+                    ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_MNT_EXPORT, "-m " + hostConfig.getNetwork_subnet_with_mask()));
+                    return true;
+                } else {
+                    // not mnt
+                    return false;
+                }
 
             case HostConstants.CHECKER_DHCP:
                 if (hasHostRole(HostConstants.ROLE_DHCP)) {
-                    ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_DHCP, "-b " +
+                    ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_DHCP));
+                    ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_DHCP, "-b " +
                             LibvirtConfig.privateNetwork + " -s " + hostConfig.getNetwork_subnet() + " -m " +
                             hostConfig.getNetwork_netmask() + " -g " + hostConfig.getNetwork_gateway()));
+                    return true;
                 } else {
                     log.info("this node not support dhcp");
+                    return false;
                 }
-                break;
 
             case HostConstants.CHECKER_VNC:
                 if (hasHostRole(HostConstants.ROLE_VNC)) {
-                    ShellUtils.getCmd(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_VNC));
+                    ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_VNC));
+                    ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_VNC));
+                    return true;
                 } else {
                     log.info("this node not support vnc");
+                    return false;
                 }
-                break;
 
             default:
                 log.error("Unknown check type!");
-                break;
+                return false;
         }
     }
 
@@ -84,7 +104,7 @@ public class HostService {
             while (res == -1) {
                 res = getEnvCheckRes(type);
                 TimeUnit.SECONDS.sleep(5);
-                log.info("...wait for checking, res code " + res);
+                log.info("......wait for checking [{}], res code {}", type, res);
             }
             return res == 1;
         } catch (InterruptedException e) {

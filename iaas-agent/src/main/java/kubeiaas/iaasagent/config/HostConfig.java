@@ -39,7 +39,9 @@ public class HostConfig {
     public static String CMD_DISK_GB = "df | grep '/$' | awk '{print int($2*1/1024/1024)}'";
     public static String CMD_VERSION = "cat /etc/redhat-release";
 
-    public static String CMD_RUN_CHECKER = "sh -c /usr/local/kubeiaas/workdir/checker/%s-checker.sh %s >> /usr/local/kubeiaas/workdir/log/iaas-agent.log";
+    public static String CMD_RUN_CHECKER = "sh /usr/local/kubeiaas/workdir/checker/%s-checker.sh %s >> /usr/local/kubeiaas/workdir/log/iaas-agent-checker.log";
+    public static String CMD_REFRESH_RES = "echo \"result=unknown\" > /usr/local/kubeiaas/workdir/log/checkResult-%s.log";
+    public static String CMD_REFRESH_LOG = "echo \"---\" > /usr/local/kubeiaas/workdir/log/iaas-agent-checker.log";
     public static String RESULT_CHECKER = "/usr/local/kubeiaas/workdir/log/checkResult-%s.log";
 
     public void hostRegister() {
@@ -86,9 +88,11 @@ public class HostConfig {
 
             // check and install in the first time
             boolean totalSuccessFlag;
+            ShellUtils.getCmd(CMD_REFRESH_LOG);
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_DIR);
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_KVM) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             if (totalSuccessFlag) {
                 host.setStatus(HostStatusEnum.READY);
@@ -103,9 +107,11 @@ public class HostConfig {
             log.info("this host is registered.");
             // check only
             boolean totalSuccessFlag;
+            ShellUtils.getCmd(CMD_REFRESH_LOG);
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_DIR);
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_KVM) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_DHCP) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_VNC) && totalSuccessFlag;
@@ -121,12 +127,17 @@ public class HostConfig {
     }
 
     private boolean checkHostEnv(String type) {
-        hostService.checkEnv(type);
+        log.info(" ┏━ start to check [{}] ==", type);
+        if (! hostService.checkEnv(type)) {
+            // return false: refers no need to run, so no need to check.
+            log.info(" ┗━ host checking done, no need to check [{}]", type);
+            return true;
+        }
         if (hostService.checkEnvRes(type)) {
-            log.info("...host checking, [{}] success.", type);
+            log.info(" ┗━ host checking done, [{}] success.", type);
             return true;
         } else {
-            log.warn("...host checking, [{}] failed!", type);
+            log.warn(" ┗━ host checking done, [{}] failed!", type);
             return false;
         }
     }

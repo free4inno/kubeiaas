@@ -146,6 +146,11 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
         res=$(virsh -version)
         if [[ $res =~ 7.0.0 ]]; then
             echo " - libvirtd is successfully installed."
+
+            echo " - restart libvirtd..."
+            # >>> start <<<
+            service libvirtd restart
+
         else
             # --- libvirtd is not founded ---
             echo " - libvirtd is installed failed! Please install libvirtd-7.0.0 manually..."
@@ -158,23 +163,27 @@ include /usr/local/lib" | tee -a /etc/ld.so.conf
 
     # 2. check libvirtd status ===============
     echo "[2] restart libvirtd"
-    echo " - restart libvirtd..."
-
-    # >>> start <<<
-    service libvirtd restart
-
-    # recheck
     res=$(is_service_active $LIBVIRTD)
     if [ $res == "1" ]; then
         # --- libvirtd active ---
         echo " - libvirtd is active now."
     else
         # --- libvirtd is not started ---
-        echo " - libvirtd is failed to start! Please start libvirtd-7.0.0 manually..."
-        echo ">>> failed"
-        echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
-        echo ""
-        exit
+        echo " - restart libvirtd..."
+        # >>> start <<<
+        service libvirtd restart
+
+        # recheck
+        if [ $res == "1" ]; then
+            # --- libvirtd active ---
+            echo " - libvirtd is active now."
+        else
+            echo " - libvirtd is failed to start! Please start libvirtd-7.0.0 manually..."
+            echo ">>> failed"
+            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
+            echo ""
+            exit
+        fi
     fi
 
 
@@ -204,7 +213,10 @@ echo "# ========================== #"
 echo "#   KubeIaaS - Env Checker   #"
 echo "#   @ libvirt-checker        #"
 echo "# ========================== #"
+echo $(date +%Y-%m-%d\ %H:%M:%S)
 echo ""
+
+echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-libvirt.log
 
 echo ""
 main

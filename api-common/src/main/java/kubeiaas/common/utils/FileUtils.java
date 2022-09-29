@@ -174,15 +174,17 @@ public class FileUtils {
         Properties properties = new Properties();
         File file = new File(filePath);
         if (!file.exists()) {
-            log.warn("Configuration file is not exist, use default setting");
+            // log.warn("Configuration file is not exist, use default setting");
             return properties;
         }
         try {
             InputStream in = new BufferedInputStream(new FileInputStream(file));
             properties.load(in);     ///加载属性列表
+            /*
             for (String key : properties.stringPropertyNames()) {
                 log.info("read info of " + filePath + " is: " + key + " " + properties.getProperty(key));
             }
+            */
             in.close();
         } catch (IOException e) {
             e.printStackTrace();
