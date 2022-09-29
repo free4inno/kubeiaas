@@ -17,7 +17,7 @@
 #
 
 function check_and_make_dir(){
-    if [ -e /usr/local/kubeiaas/$1 ]; then
+    if [[ -e /usr/local/kubeiaas/$1 || -d /usr/local/kubeiaas/$1 ]]; then
         echo " - /usr/local/kubeiaas/$1 already exist."
     else
         mkdir -p /usr/local/kubeiaas/$1

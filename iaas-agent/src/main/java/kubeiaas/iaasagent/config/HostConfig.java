@@ -44,7 +44,7 @@ public class HostConfig {
     public static String CMD_REFRESH_LOG = "echo \"---\" > /usr/local/kubeiaas/workdir/log/iaas-agent-checker.log";
     public static String RESULT_CHECKER = "/usr/local/kubeiaas/workdir/log/checkResult-%s.log";
 
-    public void hostRegister() {
+    public void hostInitialize() {
         // get localhost hostIp & hostName
         hostIp = System.getenv("HOST_IP");
         hostName = System.getenv("HOST_NAME");
@@ -89,11 +89,11 @@ public class HostConfig {
             // check and install in the first time
             boolean totalSuccessFlag;
             ShellUtils.getCmd(CMD_REFRESH_LOG);
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_DIR);
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_KVM) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DIR);
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_KVM) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             if (totalSuccessFlag) {
                 host.setStatus(HostStatusEnum.READY);
                 log.info("host check done, total success.");
@@ -108,13 +108,13 @@ public class HostConfig {
             // check only
             boolean totalSuccessFlag;
             ShellUtils.getCmd(CMD_REFRESH_LOG);
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_DIR);
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_KVM) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_DHCP) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnv(HostConstants.CHECKER_VNC) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DIR);
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_KVM) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DHCP) && totalSuccessFlag;
+            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_VNC) && totalSuccessFlag;
             if (totalSuccessFlag) {
                 host.setStatus(HostStatusEnum.READY);
                 log.info("host check done, total success.");
@@ -126,9 +126,15 @@ public class HostConfig {
         }
     }
 
-    private boolean checkHostEnv(String type) {
+
+    /**
+     * 同步检查：适合用于启动自检
+     * @param type 检查类型
+     * @return 同步完成后直接返回结果，不直接改库
+     */
+    public boolean checkHostEnvSync(String type) {
         log.info(" ┏━ start to check [{}] ==", type);
-        if (! hostService.checkEnv(type)) {
+        if (!hostService.checkEnv(type)) {
             // return false: refers no need to run, so no need to check.
             log.info(" ┗━ host checking done, no need to check [{}]", type);
             return true;
@@ -140,6 +146,33 @@ public class HostConfig {
             log.warn(" ┗━ host checking done, [{}] failed!", type);
             return false;
         }
+    }
+
+
+    /**
+     * 异步检查：适合用于用户调用
+     * @param type 检查类型
+     * 异步执行修改数据库，不返回
+     */
+    public void checkHostEnvAsync(String type) {
+        log.info(" ┏━ start to check [{}] ==", type);
+        if (!hostService.checkEnv(type)) {
+            // return false: refers no need to run, so no need to check.
+            log.info(" ┗━ host checking done, no need to check [{}]", type);
+            return;
+        }
+        new Thread(() -> {
+            // get res in thread, then write DB host status.
+            if (hostService.checkEnvRes(type)) {
+                log.info(" ┗━ host checking done, [{}] success.", type);
+                // write `READY` into DB
+                hostService.setHostStatus(HostStatusEnum.READY);
+            } else {
+                log.warn(" ┗━ host checking done, [{}] failed!", type);
+                // write `ERROR` into DB
+                hostService.setHostStatus(HostStatusEnum.ERROR);
+            }
+        }).start();
     }
 
     public String getHostIp() {

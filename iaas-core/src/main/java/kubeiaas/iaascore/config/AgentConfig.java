@@ -68,8 +68,16 @@ public class AgentConfig {
      * @return uri
      */
     public static String getVncUri() {
-        String dhcpHostIp = System.getenv(VNC_HOST_IP);
+        String vncHostIp = System.getenv(VNC_HOST_IP);
         // todo: use targetHostIp 选择目标 agent. <pod_ip>
-        return HTTP_URI + dhcpHostIp + AGENT_PORT;
+        return HTTP_URI + vncHostIp + AGENT_PORT;
+    }
+
+    /**
+     * 获取 agent uri - host
+     * @return uri
+     */
+    public static String getHostUri(String hostIp) {
+        return HTTP_URI + hostIp + AGENT_PORT;
     }
 }

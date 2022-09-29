@@ -2,6 +2,8 @@ package kubeiaas.iaasagent.controller;
 
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.enums.host.HostStatusEnum;
+import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.service.HostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -20,11 +22,30 @@ public class HostController {
     @Resource
     private HostService hostService;
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CHECK_ENV, produces = RequestMappingConstants.APP_JSON)
+    @Resource
+    private HostConfig hostConfig;
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CONFIG_ENV, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String checkEnv(
+    public void configEnv(
             @RequestParam(value = RequestParamConstants.TYPE) String type) {
-        return "";
+        log.info("configEnv ==== start ==== type:" + type);
+        // write `CONFIGURING` into DB
+        hostService.setHostStatus(HostStatusEnum.CONFIGURING);
+        // do check but not return res
+        hostConfig.checkHostEnvAsync(type);
+        log.info("configEnv ==== end ====");
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CHECK_ENV, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void checkEnv(
+            @RequestParam(value = RequestParamConstants.TYPE) String type) {
+        log.info("checkEnv ==== start ==== type:" + type);
+        // write `CHECKING` into DB
+        hostService.setHostStatus(HostStatusEnum.CHECKING);
+        // do check but not return res
+        hostConfig.checkHostEnvAsync(type);
+        log.info("checkEnv ==== end ====");
+    }
 }

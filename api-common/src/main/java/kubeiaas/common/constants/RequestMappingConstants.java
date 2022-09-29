@@ -27,6 +27,7 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String SAVE = "save";
     public static final String HEARTBEAT = "heartbeat";
+    public static final String SET_ROLE = "set_role";
 
     // -- Resource Operator
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
@@ -46,6 +47,7 @@ public class RequestMappingConstants {
 
     // -- host Controller
     public static final String CHECK_ENV = "check_env";
+    public static final String CONFIG_ENV = "config_env";
 
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";

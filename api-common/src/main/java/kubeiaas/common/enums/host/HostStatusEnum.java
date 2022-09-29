@@ -1,7 +1,7 @@
 package kubeiaas.common.enums.host;
 
 public enum HostStatusEnum {
-    PREPARING, READY, ERROR, CHECKING, OFFLINE;
+    PREPARING, READY, ERROR, CHECKING, OFFLINE, CONFIGURING;
 
     public String toString() {
         switch (this) {
@@ -15,6 +15,8 @@ public enum HostStatusEnum {
                 return "checking";
             case OFFLINE:
                 return "offline";
+            case CONFIGURING:
+                return "configuring";
         }
 
         return super.toString();

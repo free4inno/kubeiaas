@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.HostConstants;
+import kubeiaas.common.enums.host.HostStatusEnum;
 import kubeiaas.common.utils.FileUtils;
 import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.iaasagent.config.HostConfig;
@@ -141,6 +142,12 @@ public class HostService {
             }
         }
         return null;
+    }
+
+    public Host setHostStatus(HostStatusEnum hostStatus) {
+        Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        host.setStatus(hostStatus);
+        return tableStorage.hostSave(host);
     }
 
 }

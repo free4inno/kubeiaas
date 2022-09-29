@@ -54,6 +54,12 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String hostSave(
+            @RequestParam(value = RequestParamConstants.HOST_OBJECT) String hostObjectStr
+    );
+
     // ========================= ip segment =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)

@@ -15,8 +15,6 @@ public class IaasAgentRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-
-        hostConfig.hostRegister();
-
+        hostConfig.hostInitialize();
     }
 }

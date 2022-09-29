@@ -70,6 +70,12 @@ public class TableStorage {
         }
     }
 
+    public Host hostSave(Host host) {
+        String hostObjectStr = JSON.toJSONString(host);
+        hostObjectStr = dbProxy.hostSave(hostObjectStr);
+        return JSON.parseObject(hostObjectStr, Host.class);
+    }
+
     // ========================= ip segment =========================
 
     public IpSegment ipSegmentQueryById(int id) {
