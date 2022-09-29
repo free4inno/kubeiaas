@@ -28,6 +28,8 @@ public class VolumeProcess {
     @Resource
     private VmProcess vmProcess;
 
+    @Resource VncProcess vncProcess;
+
 
     /**
      * Create VM.
@@ -74,6 +76,9 @@ public class VolumeProcess {
                 return;
             }
             AgentConfig.clearSelectedHost(newVmUuid);
+
+            //Step 6 . Configuring VNC Service.
+            vncProcess.addVncToken(newVm);
 
         }).start();
         log.info("createVm -- newThread begin wait for volume creating...");

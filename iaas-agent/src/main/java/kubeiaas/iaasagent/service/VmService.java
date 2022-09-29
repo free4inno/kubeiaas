@@ -98,12 +98,12 @@ public class VmService {
                 }
             }
             // Step 2：配置vnc服务 ---------------------------------------------
-            log.info("createVm -- 2. setting VNC");
+            log.info("createVm -- 2. presetting setting VNC");
             String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");          //获取新建虚拟机的VncPort；这个字符串操作是拿到了上面xml里配置的domain的uuid
-            log.info("portGot: " + vncPort);
+            log.info("portSet: " + vncPort);
             String vncPasswd = VmCUtils.getVNCPasswd(instance.getId(), instance.getUuid());    //获取新建虚拟机的密码
 
-            vncService.addVncToken(instance.getUuid(), host.getIp() + ":" + (Integer.parseInt(vncPort) + 5900));
+//            vncService.addVncToken(instance.getUuid(), host.getIp() + ":" + (Integer.parseInt(vncPort) + 5900));
 
             instance.setVncPort(vncPort);
             instance.setVncPassword(vncPasswd);

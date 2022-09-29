@@ -4,10 +4,7 @@ import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.process.NetworkProcess;
-import kubeiaas.iaascore.process.ResourceProcess;
-import kubeiaas.iaascore.process.VmProcess;
-import kubeiaas.iaascore.process.VolumeProcess;
+import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +29,9 @@ public class VmService {
 
     @Resource
     private VolumeProcess volumeProcess;
+
+    @Resource
+    private VncProcess vncProcess;
 
     public Vm createVm(
             String name,
@@ -106,6 +106,11 @@ public class VmService {
         */
             vmProcess.deleteVMInDataBase(vmUuid);
 
+        /* -----6. delete vnc ----
+        delete vnc in token.config
+        */
+            vncProcess.deleteVncToken(vmUuid);
+
             return ResponseMsgConstants.SUCCESS;
         }
     }
@@ -134,6 +139,11 @@ public class VmService {
         Delete VM records from the database
         */
         vmProcess.deleteVMInDataBase(vmUuid);
+
+        /* -----6. delete vnc ----
+        delete vnc in token.config
+        */
+        vncProcess.deleteVncToken(vmUuid);
 
         return ResponseMsgConstants.SUCCESS;
     }
