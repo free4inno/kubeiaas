@@ -78,7 +78,7 @@ public class HostService {
                             hostConfig.getNetwork_netmask() + " -g " + hostConfig.getNetwork_gateway()));
                     return true;
                 } else {
-                    log.info("this node not support dhcp");
+                    log.info("`dhcp` is not in this host's roles.");
                     return false;
                 }
 
@@ -88,7 +88,7 @@ public class HostService {
                     ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_VNC, ""));
                     return true;
                 } else {
-                    log.info("this node not support vnc");
+                    log.info("`vnc` is not in this host's roles.");
                     return false;
                 }
 

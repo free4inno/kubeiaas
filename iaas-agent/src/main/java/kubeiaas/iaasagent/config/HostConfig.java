@@ -155,20 +155,22 @@ public class HostConfig {
      * 异步执行修改数据库，不返回
      */
     public void checkHostEnvAsync(String type) {
-        log.info(" ┏━ start to check [{}] ==", type);
+        log.info(" ┏━ [{}] == start to check", type);
         if (!hostService.checkEnv(type)) {
             // return false: refers no need to run, so no need to check.
-            log.info(" ┗━ host checking done, no need to check [{}]", type);
+            log.info(" ┗━ SKIP: host checking done, no need to check [{}].", type);
+            // write `READY` into DB
+            hostService.setHostStatus(HostStatusEnum.READY);
             return;
         }
         new Thread(() -> {
             // get res in thread, then write DB host status.
             if (hostService.checkEnvRes(type)) {
-                log.info(" ┗━ host checking done, [{}] success.", type);
+                log.info(" ┗━ SUCCESS: host checking done, [{}] success.", type);
                 // write `READY` into DB
                 hostService.setHostStatus(HostStatusEnum.READY);
             } else {
-                log.warn(" ┗━ host checking done, [{}] failed!", type);
+                log.warn(" ┗━ FAILED: host checking done, [{}] failed!", type);
                 // write `ERROR` into DB
                 hostService.setHostStatus(HostStatusEnum.ERROR);
             }
