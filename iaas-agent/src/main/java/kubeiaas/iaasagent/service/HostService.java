@@ -85,7 +85,7 @@ public class HostService {
             case HostConstants.CHECKER_VNC:
                 if (hasHostRole(HostConstants.ROLE_VNC)) {
                     ShellUtils.getCmd(String.format(HostConfig.CMD_REFRESH_RES, HostConstants.CHECKER_VNC));
-                    ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_VNC));
+                    ShellUtils.run(String.format(HostConfig.CMD_RUN_CHECKER, HostConstants.CHECKER_VNC, ""));
                     return true;
                 } else {
                     log.info("this node not support vnc");
