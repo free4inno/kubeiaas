@@ -33,6 +33,17 @@ public class DhcpScheduler {
         }
     }
 
+    public Boolean unbindMacAndIp(String vmUuid){
+        if (dhcpController.unbindMacAndIp(getDhcpUri(),vmUuid)
+                .equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+
     private URI getDhcpUri() {
         try {
             return new URI(AgentConfig.getDhcpUri());

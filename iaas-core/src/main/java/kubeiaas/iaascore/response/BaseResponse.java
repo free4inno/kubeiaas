@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class BaseResponse {
     private Object data;
     private String message;
-    private Integer code;
+    private Float code;
 
     public static BaseResponse success(Object data){
         BaseResponse response = new BaseResponse();

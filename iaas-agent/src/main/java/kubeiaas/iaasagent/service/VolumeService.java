@@ -66,4 +66,24 @@ public class VolumeService {
         }).start();
         return true;
     }
+
+    public boolean deleteVolume(String volumePath) {
+        log.info("deleteVolume ==== start ==== volumePath: " + volumePath);
+        if (FileUtils.isEmptyString(volumePath)) {
+            log.error("Lack of volumePath Params :" + volumePath);
+        }
+        volumePath = PathUtils.genFullPath(volumePath);
+        if (!FileUtils.exists(volumePath)) {
+            log.error("Delete volume Error!!! " + volumePath + "is not exists");
+            return false;
+        }
+        log.info("volumePath" + volumePath);
+        boolean result = new File(volumePath).delete();
+        if (!result) {
+            log.error("Delete volume Error!!! " + volumePath);
+            return false;
+        }
+        log.info("deleteVolume ==== end ====");
+        return true;
+    }
 }

@@ -41,6 +41,10 @@ public class TableStorage {
         return JSON.parseObject(vmObjectStr, Vm.class);
     }
 
+    public void vmDeleteByUuid(String vmUuid){
+        dbProxy.vmDeleteByUuid(vmUuid);
+    }
+
     // ========================= image =========================
 
     public Image imageQueryByUuid(String uuid) {
@@ -126,6 +130,10 @@ public class TableStorage {
         return JSON.parseObject(ipUsedObjectStr, IpUsed.class);
     }
 
+    public void ipUsedDeleteByVmUuid(String vmUuid){
+        dbProxy.ipUsedDeleteByVmUuid(vmUuid);
+    }
+
     // ========================= volume =========================
 
     public List<Volume> volumeQueryAllByInstanceUuid(String instanceUuid) {
@@ -149,6 +157,10 @@ public class TableStorage {
         String volumeObjectStr = JSON.toJSONString(volume);
         volumeObjectStr = dbProxy.volumeSave(volumeObjectStr);
         return JSON.parseObject(volumeObjectStr, Volume.class);
+    }
+
+    public void volumeDelete(String volumeUuid){
+        dbProxy.volumeDeleteByUuid(volumeUuid);
     }
 
 }

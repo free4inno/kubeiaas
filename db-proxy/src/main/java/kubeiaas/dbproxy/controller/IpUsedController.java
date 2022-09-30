@@ -50,4 +50,13 @@ public class IpUsedController {
         return JSON.toJSONString(ipUsedTable);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_ALL_BY_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteByVmUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("deleteUsedIpsByInstanceUuid ==== start ==== vmUuid:" + vmUuid);
+        ipUsedDao.deleteAllByInstanceUuid(vmUuid);
+        log.info("deleteUsedIpsByInstanceUuid ==== end ==== ");
+    }
+
 }

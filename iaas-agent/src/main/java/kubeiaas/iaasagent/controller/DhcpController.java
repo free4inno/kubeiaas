@@ -37,4 +37,16 @@ public class DhcpController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.UNBIND_MAC_IP, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String unbindMacAndIp(
+            @RequestParam(value = RequestParamConstants.VM_UUID) @NotNull @NotEmpty String vmUuid) {
+        log.info("bindMacAndIp ==== " + "instanceUuid: " + vmUuid);
+        if (dhcpService.unbindMacAndIp(vmUuid)) {
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
 }

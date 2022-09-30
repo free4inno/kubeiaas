@@ -32,6 +32,11 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.DELETE_BY_UUID)
+    void vmDeleteByUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid
+    );
+
     // ========================= image =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
@@ -84,6 +89,12 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.DELETE_ALL_BY_UUID)
+    @ResponseBody
+    String ipUsedDeleteByVmUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid
+    );
+
     // ========================= volume =========================
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
     @ResponseBody
@@ -96,5 +107,11 @@ public interface DbProxy {
     @ResponseBody
     String volumeSave(
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.DELETE_BY_UUID)
+    @ResponseBody
+    String volumeDeleteByUuid(
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid
     );
 }

@@ -1,11 +1,10 @@
 package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.process.NetworkProcess;
-import kubeiaas.iaascore.process.ResourceProcess;
-import kubeiaas.iaascore.process.VmProcess;
-import kubeiaas.iaascore.process.VolumeProcess;
+import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +29,9 @@ public class VmService {
 
     @Resource
     private VolumeProcess volumeProcess;
+
+    @Resource
+    private VncProcess vncProcess;
 
     public Vm createVm(
             String name,
@@ -71,4 +73,79 @@ public class VmService {
 
         return newVm;
     }
+
+    public String deleteVM(String vmUuid) throws BaseException {
+        /* -----judge status ----
+        Check the VM status
+        */
+        Vm vm = vmProcess.queryVMByUuid(vmUuid);
+        if (vm.getStatus().equals(VmStatusEnum.ACTIVE)){
+            return ResponseMsgConstants.FAILED;
+        }else {
+
+        /* -----1. choose host ----
+        Select the host where the VM to be deleted resides
+        */
+            resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. delete VM ----
+        Delete the VM and then delete other information
+        */
+            vmProcess.deleteVM(vmUuid);
+        /* -----3. Delete Volume ----
+        Delete disks, including Linux files and database information
+        */
+            volumeProcess.deleteVolume(vmUuid);
+        /* -----4. Delete Ip ----
+        Delete Ip information
+        */
+            networkProcess.deleteIps(vmUuid);
+
+        /* -----5. delete in database ----
+        Delete VM records from the database
+        */
+            vmProcess.deleteVMInDataBase(vmUuid);
+
+        /* -----6. delete vnc ----
+        delete vnc in token.config
+        */
+            vncProcess.deleteVncToken(vmUuid);
+
+            return ResponseMsgConstants.SUCCESS;
+        }
+    }
+
+    public String forceDeleteVm(String vmUuid) throws BaseException {
+
+        /* -----1. choose host ----
+        Select the host where the VM to be deleted resides
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. delete VM ----
+        Delete the VM and then delete other information
+        */
+        vmProcess.deleteVM(vmUuid);
+        /* -----3. Delete Volume ----
+        Delete disks, including Linux files and database information
+        */
+        volumeProcess.deleteVolume(vmUuid);
+        /* -----4. Delete Ip ----
+        Delete Ip information
+        */
+        networkProcess.deleteIps(vmUuid);
+
+        /* -----5. delete in database ----
+        Delete VM records from the database
+        */
+        vmProcess.deleteVMInDataBase(vmUuid);
+
+        /* -----6. delete vnc ----
+        delete vnc in token.config
+        */
+        vncProcess.deleteVncToken(vmUuid);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
 }

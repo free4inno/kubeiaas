@@ -23,6 +23,9 @@ public class RequestMappingConstants {
     /* =============== action =============== */
     public static final String TEST = "test";
     public static final String CREATE = "create";
+    public static final String DELETE = "delete";
+    public static final String DELETE_BY_UUID = "delete_by_uuid";
+    public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String SAVE = "save";
@@ -35,15 +38,19 @@ public class RequestMappingConstants {
 
     // -- DHCP Controller
     public static final String BIND_MAC_IP = "bind_mac_ip";
+    public static final String UNBIND_MAC_IP = "unbind_mac_ip";
 
     // -- Volume Controller
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
+    public static final String DELETE_SYSTEM_VOLUME = "delete_system_volume";
 
     // -- Vm Controller
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";
+    public static final String DELETE_VM_INSTANCE = "delete_vm_instance";
 
     // -- Vnc Controller
     public static final String ADD_VNC_TOKEN = "add_vnc_token";
+    public static final String DELETE_VNC_TOKEN = "delete_vnc_token";
 
     // -- host Controller
     public static final String CHECK_ENV = "check_env";

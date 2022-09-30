@@ -49,4 +49,12 @@ public class VolumeController {
         return JSON.toJSONString(volumeTable);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteByUuid(
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid) {
+        log.info("deleteVolumeByUuid ==== start ==== uuid:" + volumeUuid);
+        volumeDao.deleteByUuid(volumeUuid);
+        log.info("deleteVolumeByUuid ==== end ====");
+    }
 }

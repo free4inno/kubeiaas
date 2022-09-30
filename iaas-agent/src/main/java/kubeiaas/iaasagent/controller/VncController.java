@@ -30,4 +30,13 @@ public class VncController {
         vncService.addVncToken(uuid, address);
         log.info("addVncToken ==== end ==== ");
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_VNC_TOKEN, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteVncToken(
+            @RequestParam(RequestParamConstants.VM_UUID) String uuid) {
+        log.info("addVncToken ==== start ==== uuid:" + uuid);
+        vncService.deleteVncToken(uuid);
+        log.info("addVncToken ==== end ==== ");
+    }
 }

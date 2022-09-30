@@ -93,4 +93,23 @@ public class DhcpService {
             return true;
         }
     }
+
+    /**
+     * 解绑待删除虚拟机mac地址和其Ip地址
+     */
+    public boolean unbindMacAndIp(String instanceUuid){
+        log.info("unbindMacAndIp ---- start ---- instanceUuid: " + instanceUuid);
+        if (instanceUuid == null || instanceUuid.equals("")) {
+            log.error("restartDHCP -- DHCP Controller unbind mac and ip error, Because mac and ip params is null");
+            return false;
+        }
+        String cmd = "sed -i '/" + instanceUuid + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
+        ShellUtils.getCmd(cmd);
+        if (!restartDHCP()) {
+            log.error("unbindMacAndIp -- restart dhcp server error!");
+            return false;
+        }
+        log.info("unbindMacAndIp ---- end ----");
+        return true;
+    }
 }

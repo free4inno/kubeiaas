@@ -98,12 +98,12 @@ public class VmService {
                 }
             }
             // Step 2：配置vnc服务 ---------------------------------------------
-            log.info("createVm -- 2. setting VNC");
+            log.info("createVm -- 2. presetting setting VNC");
             String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");          //获取新建虚拟机的VncPort；这个字符串操作是拿到了上面xml里配置的domain的uuid
-            log.info("portGot: " + vncPort);
+            log.info("portSet: " + vncPort);
             String vncPasswd = VmCUtils.getVNCPasswd(instance.getId(), instance.getUuid());    //获取新建虚拟机的密码
 
-            vncService.addVncToken(instance.getUuid(), host.getIp() + ":" + (Integer.parseInt(vncPort) + 5900));
+//            vncService.addVncToken(instance.getUuid(), host.getIp() + ":" + (Integer.parseInt(vncPort) + 5900));
 
             instance.setVncPort(vncPort);
             instance.setVncPassword(vncPasswd);
@@ -141,5 +141,57 @@ public class VmService {
         }
         log.info("createVm ---- end ----");
         return true;
+    }
+
+    public boolean deleteVm(String vmUuid){
+        log.info("deleteVm ---- start ---- instanceUuid: " + vmUuid);
+        try {
+            Domain domain = getDomainByUuid(vmUuid);
+            log.info("destroyDomain ---- start ----");
+            if (domain.isActive() > 0) {
+                domain.destroy();
+            }
+            new Thread(() -> {
+                try {
+                    int waitLoop = 3;
+                    while (domain.isActive() > 0 && waitLoop > 0) {
+                        waitLoop--;
+                        Thread.sleep(1000);
+                    }
+                    if (domain.isActive() > 0) {
+                        throw new Exception("destroyDomain -- destroy error!");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+            domain.undefine();
+
+//            vncService.deleteVncToken(vmUuid);
+
+            log.info("deleteVm ---- end ---- Delete Domain Successfully.");
+        } catch (Exception e) {
+            log.error("deleteVm ---- end ---- Delete Domain Error!");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private Domain getDomainByUuid(String vmUuid) throws Exception {
+        log.info("getDomainByUuid ---- start ----");
+        if (vmUuid == null) {
+            log.info("getDomainByUuid ---- throws ---- vm uuid is empty");
+            throw new Exception("vm uuid is empty");
+        }
+
+        Domain d = virtCon.domainLookupByUUIDString(vmUuid);
+        if (d == null) {
+            log.info("getDomainByUuid ---- throws ---- no domain with uuid: " + vmUuid);
+            throw new Exception("no domain with uuid: " + vmUuid);
+        }
+        log.info("getDomainByUuid ---- end ----");
+        return d;
     }
 }

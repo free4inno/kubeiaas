@@ -42,6 +42,7 @@ public class RequestParamConstants {
     public static final String IP = "ip";
 
     /* ===== VOLUME ===== */
+    public static final String VOLUME_ID = "volume_id";
     public static final String VOLUME_OBJECT = "volume_object";
     public static final String EXTRA_SIZE = "extra_size";
     public static final String IMAGE_PATH = "image_path";

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -26,6 +27,8 @@ public class VolumeProcess {
 
     @Resource
     private VmProcess vmProcess;
+
+    @Resource VncProcess vncProcess;
 
 
     /**
@@ -74,8 +77,22 @@ public class VolumeProcess {
             }
             AgentConfig.clearSelectedHost(newVmUuid);
 
+            //Step 6 . Configuring VNC Service.
+            vncProcess.addVncToken(newVm);
+
         }).start();
         log.info("createVm -- newThread begin wait for volume creating...");
+    }
+
+    public void deleteVolume(String vmUuid) throws BaseException {
+        log.info("deleteVolume ==== start ====  vmUuid: " + vmUuid);
+        List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
+        for (Volume volume : volumes) {
+            if (!volumeScheduler.deleteSystemVolume(vmUuid,volume.getUuid(),volume.getProviderLocation())){
+                throw new BaseException("ERROR: delete volume:"+volume.getUuid()+" failed!");
+            }
+        }
+        log.info("deleteVolume ==== end ==== vmUuid:" + vmUuid);
     }
 
 }

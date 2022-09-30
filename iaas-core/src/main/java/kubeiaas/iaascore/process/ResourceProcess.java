@@ -75,4 +75,31 @@ public class ResourceProcess {
         return newVm;
     }
 
+    /**
+    * SelectHost by VmUuid
+     */
+    public void selectHostByVmUuid(String VmUuid) throws BaseException {
+
+        //get Vm By VmUuid
+        Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+
+        //SelectHost
+        Host selectedHost;
+        String hostUUid = vm.getHostUuid();
+        if (hostUUid != null && !hostUUid.isEmpty()) {
+            // 获取Vm所在的Host
+            selectedHost = resourceScheduler.vmSelectHostByAppoint(vm.getUuid(), hostUUid);
+        } else {
+            // 若不存在，抛出服务器异常错误
+            throw new BaseException("Error: HostUuid error!");
+        }
+        if (selectedHost == null) {
+            throw new BaseException("ERROR: no available host.");
+        }
+
+        log.info("selected host: " + selectedHost.getName());
+        AgentConfig.setSelectedHost(vm.getUuid(), selectedHost);
+
+    }
+
 }
