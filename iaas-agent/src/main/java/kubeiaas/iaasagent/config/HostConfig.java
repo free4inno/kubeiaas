@@ -133,17 +133,17 @@ public class HostConfig {
      * @return 同步完成后直接返回结果，不直接改库
      */
     public boolean checkHostEnvSync(String type) {
-        log.info(" ┏━ start to check [{}] ==", type);
+        log.info(" ┏━ [{}] == start to check", type);
         if (!hostService.checkEnv(type)) {
             // return false: refers no need to run, so no need to check.
-            log.info(" ┗━ host checking done, no need to check [{}]", type);
+            log.info(" ┗━ SKIP: host checking done, no need to check [{}].", type);
             return true;
         }
         if (hostService.checkEnvRes(type)) {
-            log.info(" ┗━ host checking done, [{}] success.", type);
+            log.info(" ┗━ SUCCESS: host checking done, [{}] success.", type);
             return true;
         } else {
-            log.warn(" ┗━ host checking done, [{}] failed!", type);
+            log.warn(" ┗━ FAILED: host checking done, [{}] failed!", type);
             return false;
         }
     }

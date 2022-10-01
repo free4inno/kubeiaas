@@ -1,6 +1,5 @@
-package kubeiaas.iaascore.openapi;
+package kubeiaas.iaascore.exception;
 
-import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;

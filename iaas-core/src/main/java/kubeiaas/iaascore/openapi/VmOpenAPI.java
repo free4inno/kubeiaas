@@ -5,11 +5,12 @@ import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.request.CreateVmForm;
-import kubeiaas.iaascore.request.DeleteVmForm;
+import kubeiaas.iaascore.request.vm.CreateVmForm;
+import kubeiaas.iaascore.request.vm.DeleteVmForm;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.service.VmService;
@@ -57,15 +58,15 @@ public class VmOpenAPI {
     public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException {
         log.info("delete ==== start ====");
         String result;
-        if (f.getDeleteType().equals("force")){
+        if (f.getDeleteType().equals(VmConstants.DELETE_FORCE)) {
             result = vmService.forceDeleteVm(f.getVmUuid());
-        }else{
+        } else {
             result = vmService.deleteVM(f.getVmUuid());
         }
-        if (result.equals(ResponseMsgConstants.SUCCESS)){
+        if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("delete ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Delete VM Success"));
-        }else{
+        } else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DELETE_ERROR));
         }
 
@@ -81,7 +82,7 @@ public class VmOpenAPI {
             vm.setIps(ipUsedList);
         }
         log.info("queryAll ==== end ====");
-        return JSON.toJSONString(vmList);
+        return JSON.toJSONString(BaseResponse.success(vmList));
     }
 
 }

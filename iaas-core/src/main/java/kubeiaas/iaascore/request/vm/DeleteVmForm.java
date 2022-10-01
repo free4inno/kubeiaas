@@ -1,4 +1,4 @@
-package kubeiaas.iaascore.request;
+package kubeiaas.iaascore.request.vm;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

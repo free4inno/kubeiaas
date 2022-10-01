@@ -1,4 +1,4 @@
-package kubeiaas.iaascore.request;
+package kubeiaas.iaascore.request.host;
 
 import lombok.Data;
 
