@@ -39,7 +39,6 @@ public class VmOpenAPI {
     public String test(HttpServletRequest request) {
         log.info("test ==== start ====");
         log.info("URI " + request.getRemoteAddr() + " " + request.getRemoteHost() + " " + request.getRemotePort());
-        log.info(AgentConfig.getDhcpUri());
         log.info("test ==== end ====");
         return "hello";
     }

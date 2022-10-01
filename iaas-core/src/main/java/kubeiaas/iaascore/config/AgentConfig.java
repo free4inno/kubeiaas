@@ -1,16 +1,22 @@
 package kubeiaas.iaascore.config;
 
 import kubeiaas.common.bean.Host;
+import kubeiaas.common.constants.bean.HostConstants;
+import kubeiaas.iaascore.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
-
 @Slf4j
+@Configuration
 public class AgentConfig {
+
+    @Resource
+    private TableStorage tableStorage;
+
     /* constants */
     private static final String HTTP_URI = "http://";
     private static final String AGENT_PORT = ":9090";
@@ -44,7 +50,6 @@ public class AgentConfig {
      * @return uri
      */
     public static String getSelectedUri(String vmUuid) {
-        // todo: use targetHostIp 选择目标 agent. <pod_ip>
         String selectedIp = selected_host_ip.get(vmUuid);
         if (selectedIp == null || selectedIp.isEmpty()) {
             log.error("getSelectedUri -- no selected ip for " + vmUuid);
@@ -57,20 +62,28 @@ public class AgentConfig {
      * 获取 agent uri - dhcp
      * @return uri
      */
-    public static String getDhcpUri() {
-        String dhcpHostIp = System.getenv(DHCP_HOST_IP);
-        // todo: use targetHostIp 选择目标 agent. <pod_ip>
-        return HTTP_URI + dhcpHostIp + AGENT_PORT;
+    public String getDhcpUri() {
+        // [old] direct from ENV variable.
+        //String dhcpHostIp = System.getenv(DHCP_HOST_IP);
+
+        // [new] analyze from DB hostRoles.
+        Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_DHCP);
+
+        return HTTP_URI + host.getIp() + AGENT_PORT;
     }
 
     /**
      * 获取 agent uri - vnc
      * @return uri
      */
-    public static String getVncUri() {
-        String vncHostIp = System.getenv(VNC_HOST_IP);
-        // todo: use targetHostIp 选择目标 agent. <pod_ip>
-        return HTTP_URI + vncHostIp + AGENT_PORT;
+    public String getVncUri() {
+        // [old] direct from ENV variable.
+        //String dhcpHostIp = System.getenv(VNC_HOST_IP);
+
+        // [new] analyze from DB hostRoles.
+        Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
+
+        return HTTP_URI + host.getIp() + AGENT_PORT;
     }
 
     /**

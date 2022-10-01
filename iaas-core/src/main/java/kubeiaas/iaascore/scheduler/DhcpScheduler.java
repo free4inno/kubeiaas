@@ -20,6 +20,9 @@ public class DhcpScheduler {
     private DhcpController dhcpController;
 
     @Resource
+    private AgentConfig agentConfig;
+
+    @Resource
     private TableStorage tableStorage;
 
     public Boolean bindMacAndIp(IpUsed ipUsed) {
@@ -42,11 +45,9 @@ public class DhcpScheduler {
         }
     }
 
-
-
     private URI getDhcpUri() {
         try {
-            return new URI(AgentConfig.getDhcpUri());
+            return new URI(agentConfig.getDhcpUri());
         } catch (URISyntaxException e) {
             e.printStackTrace();
             log.error("build URI failed!");

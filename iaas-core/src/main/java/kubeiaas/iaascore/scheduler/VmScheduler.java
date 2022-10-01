@@ -44,10 +44,10 @@ public class VmScheduler {
     }
 
     public boolean deleteVmInstance(String vmUuid){
-        //调用 agent 执行 delete
-        if(vmController.deleteVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)){
+        // 调用 agent 执行 delete
+        if (vmController.deleteVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

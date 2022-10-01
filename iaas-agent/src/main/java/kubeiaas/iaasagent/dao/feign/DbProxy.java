@@ -53,6 +53,13 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST + "/" + RequestMappingConstants.QUERY_ALL_LIKE_BY_SINGLE_KEY)
+    @ResponseBody
+    String hostQueryAllLikeBySingleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1
+    );
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
     String hostSave(

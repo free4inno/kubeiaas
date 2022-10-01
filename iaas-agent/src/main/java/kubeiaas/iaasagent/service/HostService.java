@@ -27,6 +27,12 @@ public class HostService {
     @Resource
     private HostConfig hostConfig;
 
+
+    /**
+     * 执行环境检查操作
+     * @param type 检查类型 (eg：dir、kvm、libvirt、mnt...)
+     * @return boolean result (true: 已执行脚本；false：未执行脚本）
+     */
     public boolean checkEnv(String type) {
         switch (type) {
             case HostConstants.CHECKER_DIR:
@@ -98,6 +104,12 @@ public class HostService {
         }
     }
 
+
+    /**
+     * 获取环境检查结果
+     * @param type 检查类型 (eg：dir、kvm、libvirt、mnt...)
+     * @return boolean result (true: 成功；false：失败）
+     */
     public boolean checkEnvRes(String type) {
         try {
             int res;
@@ -127,23 +139,25 @@ public class HostService {
         }
     }
 
+    /**
+     * 判断当前节点 host 是否具有该角色 role
+     */
     public boolean hasHostRole(String roleName) {
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
         JSONArray roles = JSONArray.parseArray(host.getRole());
         return roles.contains(roleName);
     }
 
+    /**
+     * 获取对应角色的节点 host
+     */
     public Host getHostByRole(String roleName) {
-        List<Host> hostList = tableStorage.hostQueryAll();
-        for (Host host : hostList) {
-            JSONArray roles = JSONArray.parseArray(host.getRole());
-            if (roles.contains(roleName)) {
-                return host;
-            }
-        }
-        return null;
+        return tableStorage.hostQueryByRole(roleName);
     }
 
+    /**
+     * 设置当前节点 host 状态
+     */
     public Host setHostStatus(HostStatusEnum hostStatus) {
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
         host.setStatus(hostStatus);

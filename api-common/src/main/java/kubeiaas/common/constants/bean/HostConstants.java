@@ -4,6 +4,7 @@ public class HostConstants {
     /* DB key */
     public static final String UUID = "uuid";
     public static final String IP = "ip";
+    public static final String ROLE = "role";
 
     // roles
     public static final String ROLE_DHCP = "dhcp";

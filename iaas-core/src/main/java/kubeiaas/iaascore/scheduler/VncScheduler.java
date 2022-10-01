@@ -17,6 +17,9 @@ public class VncScheduler {
     @Resource
     private VncController vncController;
 
+    @Resource
+    private AgentConfig agentConfig;
+
     public void addVncToken(String uuid, String address){
         vncController.addVncToken(getVncUri(),uuid,address);
     }
@@ -27,7 +30,7 @@ public class VncScheduler {
 
     private URI getVncUri() {
         try {
-            return new URI(AgentConfig.getVncUri());
+            return new URI(agentConfig.getVncUri());
         } catch (URISyntaxException e) {
             e.printStackTrace();
             log.error("build URI failed!");
