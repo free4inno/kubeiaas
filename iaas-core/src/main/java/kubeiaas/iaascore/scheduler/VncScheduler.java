@@ -21,11 +21,11 @@ public class VncScheduler {
     private AgentConfig agentConfig;
 
     public void addVncToken(String uuid, String address){
-        vncController.addVncToken(getVncUri(),uuid,address);
+        vncController.addVncToken(getVncUri(), uuid, address);
     }
 
     public void deleteVncToken(String vmUuid){
-        vncController.deleteVncToken(getVncUri(),vmUuid);
+        vncController.deleteVncToken(getVncUri(), vmUuid);
     }
 
     private URI getVncUri() {
