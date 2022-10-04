@@ -149,6 +149,28 @@ public class HostService {
     }
 
     /**
+     * 为当前节点 host 加入角色 role
+     */
+    public void setHostRole(String roleName) {
+        Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        JSONArray roles = JSONArray.parseArray(host.getRole());
+        roles.add(roleName);
+        host.setRole(roles.toJSONString());
+        tableStorage.hostSave(host);
+    }
+
+    /**
+     * 为当前节点 host 删除角色 role
+     */
+    public void delHostRole(String roleName) {
+        Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        JSONArray roles = JSONArray.parseArray(host.getRole());
+        roles.remove(roleName);
+        host.setRole(roles.toJSONString());
+        tableStorage.hostSave(host);
+    }
+
+    /**
      * 获取对应角色的节点 host
      */
     public Host getHostByRole(String roleName) {

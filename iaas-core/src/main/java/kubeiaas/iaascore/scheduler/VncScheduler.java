@@ -3,6 +3,7 @@ package kubeiaas.iaascore.scheduler;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.feign.VmController;
 import kubeiaas.iaascore.dao.feign.VncController;
+import kubeiaas.iaascore.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,7 +32,7 @@ public class VncScheduler {
     private URI getVncUri() {
         try {
             return new URI(agentConfig.getVncUri());
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | BaseException e) {
             e.printStackTrace();
             log.error("build URI failed!");
             return null;

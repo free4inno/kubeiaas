@@ -6,6 +6,7 @@ import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.DhcpController;
+import kubeiaas.iaascore.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,7 +38,7 @@ public class DhcpScheduler {
     }
 
     public Boolean unbindMacAndIp(String vmUuid){
-        if (dhcpController.unbindMacAndIp(getDhcpUri(),vmUuid)
+        if (dhcpController.unbindMacAndIp(getDhcpUri(), vmUuid)
                 .equals(ResponseMsgConstants.SUCCESS)) {
             return true;
         } else {
@@ -48,7 +49,7 @@ public class DhcpScheduler {
     private URI getDhcpUri() {
         try {
             return new URI(agentConfig.getDhcpUri());
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | BaseException e) {
             e.printStackTrace();
             log.error("build URI failed!");
             return null;

@@ -3,6 +3,7 @@ package kubeiaas.iaascore.config;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -62,12 +63,15 @@ public class AgentConfig {
      * 获取 agent uri - dhcp
      * @return uri
      */
-    public String getDhcpUri() {
+    public String getDhcpUri() throws BaseException {
         // [old] direct from ENV variable.
         //String dhcpHostIp = System.getenv(DHCP_HOST_IP);
 
         // [new] analyze from DB hostRoles.
         Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_DHCP);
+        if (host == null) {
+            throw new BaseException("getDhcpUri -- dhcp host not found!");
+        }
 
         return HTTP_URI + host.getIp() + AGENT_PORT;
     }
@@ -76,12 +80,15 @@ public class AgentConfig {
      * 获取 agent uri - vnc
      * @return uri
      */
-    public String getVncUri() {
+    public String getVncUri() throws BaseException {
         // [old] direct from ENV variable.
         //String dhcpHostIp = System.getenv(VNC_HOST_IP);
 
         // [new] analyze from DB hostRoles.
         Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
+        if (host == null) {
+            throw new BaseException("getVncUri -- vnc host not found!");
+        }
 
         return HTTP_URI + host.getIp() + AGENT_PORT;
     }

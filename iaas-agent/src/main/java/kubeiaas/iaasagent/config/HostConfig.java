@@ -9,6 +9,7 @@ import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaasagent.dao.TableStorage;
 import kubeiaas.iaasagent.service.HostService;
+import kubeiaas.iaasagent.service.VncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,6 +25,9 @@ public class HostConfig {
 
     @Resource
     private HostService hostService;
+
+    @Resource
+    private VncService vncService;
 
     private String hostIp = "";
     private String hostName = "";
@@ -96,12 +100,15 @@ public class HostConfig {
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             if (totalSuccessFlag) {
                 host.setStatus(HostStatusEnum.READY);
-                log.info("host check done, total success.");
+                log.info(" == host check done, total success. == ");
             } else {
                 host.setStatus(HostStatusEnum.ERROR);
-                log.error("host check done, total failed!");
+                log.error(" == host check done, total failed! == ");
             }
             tableStorage.hostSave(host);
+
+            // check vnc
+            vncService.checkVncStatus();
 
         } else {
             log.info("this host is registered.");
@@ -114,15 +121,19 @@ public class HostConfig {
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DHCP) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_VNC) && totalSuccessFlag;
+            // totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_VNC) && totalSuccessFlag;
+            // use container run vnc, only check is vnc running on this host.
             if (totalSuccessFlag) {
                 host.setStatus(HostStatusEnum.READY);
-                log.info("host check done, total success.");
+                log.info(" == host check done, total success. == ");
             } else {
                 host.setStatus(HostStatusEnum.ERROR);
-                log.error("host check done, total failed!");
+                log.error(" == host check done, total failed! == ");
             }
             tableStorage.hostSave(host);
+
+            // check vnc
+            vncService.checkVncStatus();
         }
     }
 

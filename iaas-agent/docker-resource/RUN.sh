@@ -106,11 +106,22 @@ do
 done
 echo " - db-proxy is ready."
 
-# 4. RUN agent-proxy in container -----------------
-echo "[4] RUN agent-proxy in container "
+# 4. check noVNC port `8787` -----------------
+echo "[4] check noVNC status "
+res=$(host_sh "ps -ef | grep noVNC")
+if [[ $res =~ "websockify" ]]; then
+  echo " - noVNC is on this host! "
+  echo -e "result=success" | tee /workdir/log/checkResult-novnc.log
+else
+  echo " - noVNC is not on this host... "
+  echo -e "result=failed" | tee /workdir/log/checkResult-novnc.log
+fi
+
+# 5. RUN agent-proxy in container -----------------
+echo "[5] RUN agent-proxy in container "
 nohup java -jar /kubeiaas/iaas-agent-proxy.jar > /workdir/log/iaas-agent-proxy.log 2>&1 &
 
-# 5. RUN agent on host ----------------------------
-echo "[5] RUN agent on host "
+# 6. RUN agent on host ----------------------------
+echo "[6] RUN agent on host "
 host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
 tail -f /workdir/log/iaas-agent.log

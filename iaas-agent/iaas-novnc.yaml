@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-novnc
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iaas-novnc
+  template:
+    metadata:
+      labels:
+        app: iaas-novnc
+    spec:
+      nodeName: hf-node-01   # appointed node
+      containers:
+        - name: iaas-novnc
+          command: [ "sh" ]
+          args:
+            - "-c"
+            - |
+              python3 /usr/local/vnc/websockify-0.10.0/websockify --web=/usr/local/vnc/noVNC-1.3.0/ 8787 --target-config=/usr/local/vnc/token/token.conf
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/novnc:1.3.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8787
+              hostPort: 8787
+          volumeMounts:
+            - name: novnc-token
+              mountPath: /usr/local/vnc/token
+      volumes:
+        - name: novnc-token
+          hostPath:
+            path: /usr/local/kubeiaas/vnc/token
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-novnc
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-novnc
+  type: ClusterIP
+  ports:
+    - port: 8787
+      targetPort: 8787
+      protocol: TCP
