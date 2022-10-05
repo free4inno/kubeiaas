@@ -32,6 +32,12 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.UPDATE)
+    @ResponseBody
+    String updateVm(
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr
+    );
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.DELETE_BY_UUID)
     void vmDeleteByUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid

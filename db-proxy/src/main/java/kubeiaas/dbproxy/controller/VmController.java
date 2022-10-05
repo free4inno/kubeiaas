@@ -57,6 +57,17 @@ public class VmController {
         return JSON.toJSONString(vmTable);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.UPDATE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String update(
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr) {
+        log.info("update ==== start ====");
+        VmTable vmTable = JSON.parseObject(vmObjectStr, VmTable.class);
+        vmDao.saveAndFlush(vmTable);
+        log.info("update ==== end ====");
+        return JSON.toJSONString(vmTable);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_UUID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public void deleteByUuid(

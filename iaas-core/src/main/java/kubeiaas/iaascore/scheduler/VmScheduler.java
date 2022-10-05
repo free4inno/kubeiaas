@@ -52,6 +52,15 @@ public class VmScheduler {
         }
     }
 
+    public boolean modifyVmInstance(String vmUuid){
+        // 调用 agent 执行 delete
+        if (vmController.modifyVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void deleteVmInDataBase(String vmUuid){
         tableStorage.vmDeleteByUuid(vmUuid);
     }
