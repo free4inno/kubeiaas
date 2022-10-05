@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-proxy
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-proxy
+  template:
+    metadata:
+      labels:
+        app: db-proxy
+    spec:
+      nodeName: hf-master-01
+      containers:
+        - name: db-proxy
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/db-proxy.jar
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.1-sqlite
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /db
+      volumes:
+        - name: sqlite-data
+          hostPath:
+            path: /usr/local/kubeiaas/sqlite
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-proxy
+  namespace: kubeiaas
+spec:
+  selector:
+    app: db-proxy
+  type: ClusterIP
+  ports:
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
