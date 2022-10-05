@@ -11,6 +11,7 @@ import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.request.vm.CreateVmForm;
 import kubeiaas.iaascore.request.vm.DeleteVmForm;
+import kubeiaas.iaascore.request.vm.ModifyVmForm;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.service.VmService;
@@ -66,9 +67,20 @@ public class VmOpenAPI {
             log.info("delete ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Delete VM Success"));
         } else {
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DELETE_ERROR));
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_DELETE_ERROR));
         }
+    }
 
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPDATE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String modify(@Valid @RequestBody ModifyVmForm f) throws BaseException {
+        log.info("modify ==== start ====");
+        if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("modify ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Modify VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)

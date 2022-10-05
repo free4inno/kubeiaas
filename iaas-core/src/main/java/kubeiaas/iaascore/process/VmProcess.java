@@ -120,4 +120,34 @@ public class VmProcess {
         AgentConfig.clearSelectedHost(vmUuid);
         log.info("deleteVm in dataBase success!");
     }
+
+    /**
+     * Modify  VM
+     */
+    public void modifyVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
+        log.info("modifyVm --  VM");
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        Boolean cpuMemFlag = false;
+        if (cpus != null && cpus != 0 &&  cpus != vm.getCpus()) {
+            vm.setCpus(cpus);
+            cpuMemFlag = true;
+        }
+        if (memory != null && memory != 0 &&  memory != vm.getMemory()) {
+            vm.setMemory(memory);
+            cpuMemFlag = true;
+        }
+        if (vm.getUuid() != null) {
+            tableStorage.updateVm(vm);
+        } else {
+            log.error("instance with Uuid: " + vmUuid + "is not existed");
+            throw new BaseException("ERROR: vm is not existed!");
+        }
+        log.info("cpuMemFlag --"+ cpuMemFlag);
+        if (cpuMemFlag) {
+            if (!vmScheduler.modifyVmInstance(vmUuid)){
+                throw new BaseException("ERROR: modiify vm instance failed!");
+            }
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+    }
 }

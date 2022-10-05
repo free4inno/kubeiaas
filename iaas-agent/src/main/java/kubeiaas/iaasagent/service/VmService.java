@@ -179,6 +179,34 @@ public class VmService {
         return true;
     }
 
+    /**
+     * 修改虚拟机cpu和memory
+     * @param VmUuid
+     */
+    public Boolean modifyVm(String VmUuid){
+        log.info("modifyVm ---- start ---- VmUuid: " + VmUuid );
+        Vm instance = tableStorage.vmQueryByUuid(VmUuid);
+        int cpu = instance.getCpus();
+        int memory = instance.getMemory();
+        try {
+            long memories = VmCUtils.memUnitConvert(memory);
+            Domain domain = virtCon.domainLookupByUUIDString(VmUuid);
+            if (cpu != 0) {
+                domain.setVcpus(cpu);
+                log.info("modifyVm -- domain set cpu: " + cpu);
+            }
+            if (memory != 0) {
+                domain.setMemory(memories);
+                log.info("modifyVm -- domain set memory: " + memory);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        log.info("modifyVm ---- end ----");
+        return true;
+    }
+
     private Domain getDomainByUuid(String vmUuid) throws Exception {
         log.info("getDomainByUuid ---- start ----");
         if (vmUuid == null) {

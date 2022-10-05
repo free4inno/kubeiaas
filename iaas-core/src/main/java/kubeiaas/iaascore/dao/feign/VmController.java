@@ -27,4 +27,10 @@ public interface VmController {
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.MODIFY_VM_INSTANCE)
+    @ResponseBody
+    String modifyVmInstance(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
 }

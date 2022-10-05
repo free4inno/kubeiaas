@@ -148,4 +148,18 @@ public class VmService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    public String modifyVm(String vmUuid, Integer cpus, Integer memory) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be modified
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. modify VM ----
+        Modify cpu and memory
+        */
+        vmProcess.modifyVM(vmUuid, cpus, memory);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
 }

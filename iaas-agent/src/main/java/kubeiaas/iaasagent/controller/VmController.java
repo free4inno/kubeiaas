@@ -49,4 +49,18 @@ public class VmController {
             return ResponseMsgConstants.FAILED;
         }
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MODIFY_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String modifyVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("modifyVm ==== start ==== vmUuid: " + vmUuid);
+        if (vmService.modifyVm(vmUuid)){
+            log.info("modifyVm ==== success");
+            return ResponseMsgConstants.SUCCESS;
+        }else{
+            log.info("modifyVm ==== failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
 }

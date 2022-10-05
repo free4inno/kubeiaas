@@ -30,6 +30,7 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String SAVE = "save";
+    public static final String UPDATE = "update";
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
 
@@ -48,6 +49,7 @@ public class RequestMappingConstants {
     // -- Vm Controller
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";
     public static final String DELETE_VM_INSTANCE = "delete_vm_instance";
+    public static final String MODIFY_VM_INSTANCE = "modify_vm_instance";
 
     // -- Vnc Controller
     public static final String ADD_VNC_TOKEN = "add_vnc_token";
