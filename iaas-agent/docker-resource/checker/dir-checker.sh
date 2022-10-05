@@ -45,6 +45,7 @@ function main(){
       - /mysql
         - /data
         - /cnf
+      - /sqlite
     "
 
     check_and_make_dir workdir/src
@@ -61,6 +62,8 @@ function main(){
 
     check_and_make_dir mysql/data
     check_and_make_dir mysql/cnf
+
+    check_and_make_dir sqlite
 
     echo ">>> success"
     echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-dir.log

@@ -49,6 +49,7 @@ echo "
   - /mysql
     - /data
     - /cnf
+  - /sqlite
 "
 
 function check_and_make_dir(){
@@ -75,6 +76,8 @@ check_and_make_dir vnc/token
 
 check_and_make_dir mysql/data
 check_and_make_dir mysql/cnf
+
+check_and_make_dir sqlite
 
 echo ""
 
