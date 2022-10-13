@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlite-tunnel
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlite-tunnel
+  template:
+    metadata:
+      labels:
+        app: sqlite-tunnel
+    spec:
+      nodeName: hf-master-01
+      containers:
+        - name: sqlite-tunnel
+          image: free4inno/sqlite-tunnel:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8011
+              hostPort: 8011
+              protocol: TCP
+          volumeMounts:
+            - name: sqlite-db
+              mountPath: /db
+      volumes:
+        - name: sqlite-db
+          hostPath:
+            path: /usr/local/kubeiaas/sqlite
