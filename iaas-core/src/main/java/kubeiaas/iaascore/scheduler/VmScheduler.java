@@ -52,6 +52,52 @@ public class VmScheduler {
         }
     }
 
+    public boolean stopVmInstance(String vmUuid){
+        // 调用 agent 执行 delete
+        if (vmController.stopVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean startVmInstance(String vmUuid){
+        // 调用 agent 执行 delete
+        if (vmController.startVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean rebootVmInstance(String vmUuid){
+        // 调用 agent 执行 reboot
+        if (vmController.rebootVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean suspendVmInstance(String vmUuid){
+        // 调用 agent 执行 suspend
+        if (vmController.suspendVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean resumeVmInstance(String vmUuid){
+        // 调用 agent 执行 resume
+        if (vmController.resumeVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     public boolean modifyVmInstance(String vmUuid){
         // 调用 agent 执行 delete
         if (vmController.modifyVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS)) {

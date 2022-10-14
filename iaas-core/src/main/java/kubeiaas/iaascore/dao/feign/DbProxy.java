@@ -52,6 +52,10 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String imageQueryAll();
+
     // ========================= host =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST + "/" + RequestMappingConstants.QUERY_ALL)
@@ -86,6 +90,10 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String ipSegmentQueryAll();
 
     // ========================= ip used =========================
 

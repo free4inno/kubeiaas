@@ -6,12 +6,9 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VmConstants;
-import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.request.vm.CreateVmForm;
-import kubeiaas.iaascore.request.vm.DeleteVmForm;
-import kubeiaas.iaascore.request.vm.ModifyVmForm;
+import kubeiaas.iaascore.request.vm.*;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.service.VmService;
@@ -71,6 +68,65 @@ public class VmOpenAPI {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.STOP, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String stop(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        log.info("stop ==== start ====");
+        if (vmService.stopVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("stop ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Stop VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_STOP_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.START, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String start(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        log.info("startVm ==== start ====");
+        if (vmService.startVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("startVm ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Start VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_START_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REBOOT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String reboot(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        log.info("rebootVm  ==== start ====");
+        if (vmService.rebootVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("rebootVm ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Reboot VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SUSPEND, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String suspend(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        log.info("suspendVm  ==== start ====");
+        if (vmService.suspendVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("suspendVm ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Suspend VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
+        }
+    }
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String resume(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        log.info("resumeVm  ==== start ====");
+        if (vmService.resumeVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("resumeVm ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("Resume VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
+        }
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPDATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String modify(@Valid @RequestBody ModifyVmForm f) throws BaseException {
@@ -78,6 +134,17 @@ public class VmOpenAPI {
         if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory()).equals(ResponseMsgConstants.SUCCESS)){
             log.info("modify ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Modify VM Success"));
+        }else {
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
+        }
+    }
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REDUCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String reduce(@Valid @RequestBody ModifyVmForm f) throws BaseException {
+        log.info("reduce ==== start ====");
+        if (vmService.reduceVm(f.getVmUuid(), f.getCpus(), f.getMemory()).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("reduce ==== end ====");
+            return JSON.toJSONString(BaseResponse.success("reduce VM Success"));
         }else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }

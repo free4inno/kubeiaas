@@ -30,6 +30,14 @@ public class VncService {
         log.info("deleteVncToken ---- end ----");
     }
 
+    public void flushVncToken(String uuid, String address){
+        log.info("flushVncToken ---- start ---- uuid:" + uuid + " address:" + address);
+        deleteVncToken(uuid);
+        addVncToken(uuid, address);
+        log.debug("flushVncToken -- Vnc Token for " + uuid + " has been flushed.");
+        log.info("flushVncToken ---- end ----");
+    }
+
     @Resource
     private HostService hostService;
 

@@ -44,5 +44,26 @@ public class VncProcess {
         vncScheduler.deleteVncToken(vmUuid);
         log.info("deleteVm --  delete VNC end");
     }
+
+    public void flushVncToken(String vmUuid){
+        log.info("flush VNC start");
+
+        // 异步执行 vmCreate 需要重新查库获取 vnc port & password
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+
+        // 2. GET VNC PORT
+        String vncPort = vm.getVncPort();
+
+        // 3. GET HOST IP
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        String vncIp = host.getIp();
+
+        // 4. BUILD ADDRESS AND ADD
+        String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
+        vncScheduler.flushVncToken(vmUuid, address);
+        log.info("flush VNC end");
+    }
+
+
 }
 

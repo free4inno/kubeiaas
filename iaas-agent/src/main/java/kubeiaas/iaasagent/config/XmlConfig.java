@@ -57,6 +57,8 @@ public class XmlConfig {
         return res;
     }
 
+    /*
+
     public String modifyXml(String originXML, int newCores, int newMemory) {
         log.info("modifyXml ---- start ----");
         //1、判断newCores是否为空，不为空再进行修改之后返回String类型的修改结果
@@ -78,6 +80,30 @@ public class XmlConfig {
             Element memoryElement = (Element) memory;
             Element currentMemoryElement = (Element) currentMemory;
             memoryElement.setTextContent(memoryString);
+            currentMemoryElement.setTextContent(memoryString);
+        }
+        resultXml = documentToString(document);
+        log.info("modifyXml ---- end ----");
+        return resultXml;
+    }
+     */
+
+    public String modifyXml(String originXML, int newCores, int newMemory) {
+        log.info("modifyXml ---- start ----");
+        //1、判断newCores是否为空，不为空再进行修改之后返回String类型的修改结果
+        String resultXml = null;
+        Document document = stringToDocument(originXML);
+        if (newCores > 0) {
+            String coreString = String.valueOf(newCores);
+            Node cpu = document.getElementsByTagName("vcpu").item(0);
+            NamedNodeMap topologyNodeMap = cpu.getAttributes();
+            Node cores = topologyNodeMap.getNamedItem("current");
+            cores.setTextContent(coreString);
+        }
+        if (newMemory > 0) {
+            String memoryString = String.valueOf(VmCUtils.memUnitConvert(newMemory));
+            Node currentMemory = document.getElementsByTagName("currentMemory").item(0);
+            Element currentMemoryElement = (Element) currentMemory;
             currentMemoryElement.setTextContent(memoryString);
         }
         resultXml = documentToString(document);
