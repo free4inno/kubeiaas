@@ -108,7 +108,6 @@ public class VmProcess {
         if (!vmScheduler.deleteVmInstance(vmUuid)){
             throw new BaseException("ERROR: delete vm instance failed!");
         }
-        AgentConfig.clearSelectedHost(vmUuid);
         log.info("deleteVm success!");
     }
 

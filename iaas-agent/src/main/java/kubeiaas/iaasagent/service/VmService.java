@@ -149,16 +149,22 @@ public class VmService {
 
     public boolean deleteVm(String vmUuid){
         log.info("deleteVm ---- start ---- instanceUuid: " + vmUuid);
+        Domain domain = null;
         try {
-            Domain domain = getDomainByUuid(vmUuid);
+            domain = getDomainByUuid(vmUuid);
             destroyDomain(domain);
             domain.undefine();
 //            vncService.deleteVncToken(vmUuid);
             log.info("deleteVm ---- end ---- Delete Domain Successfully.");
         } catch (Exception e) {
-            log.error("deleteVm ---- end ---- Delete Domain Error!");
             e.printStackTrace();
-            return false;
+            if (domain == null) {
+                log.error("deleteVm ---- end ---- Domain NotFound!");
+                return true;
+            } else {
+                log.error("deleteVm ---- end ---- Delete Domain Error!");
+                return false;
+            }
         }
         return true;
     }
