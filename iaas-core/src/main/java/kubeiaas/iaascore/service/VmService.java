@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -158,6 +159,110 @@ public class VmService {
         Modify cpu and memory
         */
         vmProcess.modifyVM(vmUuid, cpus, memory);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String reduceVm(String vmUuid, Integer cpus, Integer memory) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be modified
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. modify VM ----
+        Modify cpu and memory
+        */
+        vmProcess.reduceVM(vmUuid, cpus, memory);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String stopVm(String vmUuid) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be stopped
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. Stop VM ----
+        StopVm
+        */
+        vmProcess.stopVM(vmUuid);
+
+        /* -----3. Save VM Info into DataBase----
+        Save Vm Status int DataBase
+        */
+        vmProcess.stopVMInDataBase(vmUuid);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String startVm(String vmUuid) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be stopped
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. start VM ----
+        startVM
+        */
+        vmProcess.startVM(vmUuid);
+
+        /* -----3. flush vnc ----
+        flush vnc in token.config
+        */
+        vncProcess.flushVncToken(vmUuid);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String rebootVm(String vmUuid) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be stopped
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. reboot VM ----
+        rebootVM
+        */
+        vmProcess.rebootVM(vmUuid);
+
+        /* -----3. flush vnc ----
+        flush vnc in token.config
+        */
+        vncProcess.flushVncToken(vmUuid);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String suspendVm(String vmUuid) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be stopped
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. suspend VM ----
+        suspendVm
+        */
+        vmProcess.suspendVM(vmUuid);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String resumeVm(String vmUuid) throws BaseException {
+        /* -----1. choose host ----
+        Select the host where the VM to be stopped
+        */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. resume VM ----
+        resumeVM
+        */
+        vmProcess.resumeVM(vmUuid);
+
+        /* -----3. flush vnc ----
+        flush vnc in token.config
+        */
+        vncProcess.flushVncToken(vmUuid);
 
         return ResponseMsgConstants.SUCCESS;
     }

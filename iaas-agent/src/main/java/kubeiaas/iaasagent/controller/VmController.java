@@ -50,6 +50,81 @@ public class VmController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STOP_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String stopVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("stopVm ==== start ==== vmUuid: " + vmUuid);
+        // log.info("This is Vm Controller: " + routingKey);
+        if (vmService.stopVm(vmUuid)){
+            log.info("stopVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.error("stopVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.START_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String startVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("startVm ==== start ==== vmUuid: " + vmUuid);
+        // log.info("This is Vm Controller: " + routingKey);
+        if (vmService.startVm(vmUuid)){
+            log.info("startVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.error("startVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.REBOOT_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String rebootVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("rebootVm ==== start ==== vmUuid: " + vmUuid);
+        // log.info("This is Vm Controller: " + routingKey);
+        if (vmService.rebootVm(vmUuid)){
+            log.info("rebootVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.error("rebootVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SUSPEND_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String suspendVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("suspend ==== start ==== vmUuid: " + vmUuid);
+        // log.info("This is Vm Controller: " + routingKey);
+        if (vmService.suspendVm(vmUuid)){
+            log.info("suspendVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.error("suspendVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.RESUME_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String resumeVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("resume ==== start ==== vmUuid: " + vmUuid);
+        // log.info("This is Vm Controller: " + routingKey);
+        if (vmService.resumeVm(vmUuid)){
+            log.info("resumeVmInstance -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.error("resumeVmInstance -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MODIFY_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String modifyVm(

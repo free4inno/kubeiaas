@@ -27,4 +27,10 @@ public interface VncController {
             URI uri,
             @RequestParam(RequestParamConstants.VM_UUID) String uuid);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VNC_C + "/" + RequestMappingConstants.FLUSH_VNC_TOKEN)
+    @ResponseBody
+    void flushVncToken(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(RequestParamConstants.ADDRESS) String address);
 }

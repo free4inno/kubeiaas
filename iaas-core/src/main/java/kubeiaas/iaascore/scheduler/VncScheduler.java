@@ -29,6 +29,10 @@ public class VncScheduler {
         vncController.deleteVncToken(getVncUri(), vmUuid);
     }
 
+    public void flushVncToken(String vmUuid, String address){
+        vncController.flushVncToken(getVncUri(), vmUuid, address);
+    }
+
     private URI getVncUri() {
         try {
             return new URI(agentConfig.getVncUri());

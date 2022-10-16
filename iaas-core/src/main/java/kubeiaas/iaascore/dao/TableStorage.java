@@ -63,6 +63,11 @@ public class TableStorage {
         }
     }
 
+    public List<Image> imageQueryAll() {
+        String jsonString = dbProxy.imageQueryAll();
+        return JSON.parseArray(jsonString, Image.class);
+    }
+
     // ========================= host =========================
 
     public List<Host> hostQueryAll() {
@@ -106,6 +111,11 @@ public class TableStorage {
         } else {
             return null;
         }
+    }
+
+    public List<IpSegment> ipSegmentQueryAll() {
+        String jsonString = dbProxy.ipSegmentQueryAll();
+        return JSON.parseArray(jsonString, IpSegment.class);
     }
 
     // ========================= ip used =========================

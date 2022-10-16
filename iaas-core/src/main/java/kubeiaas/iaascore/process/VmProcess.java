@@ -111,6 +111,51 @@ public class VmProcess {
         log.info("deleteVm success!");
     }
 
+    public void stopVM(String vmUuid) throws BaseException {
+        log.info("stopVm ==== start ====  vmUuid: " + vmUuid);
+        if (!vmScheduler.stopVmInstance(vmUuid)){
+            throw new BaseException("ERROR: stop vm instance failed!");
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("stopVm ==== end ==== ");
+    }
+
+    public void startVM(String vmUuid) throws BaseException {
+        log.info("startVm ==== start ====  vmUuid: " + vmUuid);
+        if (!vmScheduler.startVmInstance(vmUuid)){
+            throw new BaseException("ERROR: start vm instance failed!");
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("stopVm ==== end ==== ");
+    }
+
+    public void rebootVM(String vmUuid) throws BaseException {
+        log.info("rebootVm ==== start ====  vmUuid: " + vmUuid);
+        if (!vmScheduler.rebootVmInstance(vmUuid)){
+            throw new BaseException("ERROR: reboot vm instance failed!");
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("rebootVm ==== end ==== ");
+    }
+
+    public void resumeVM(String vmUuid) throws BaseException {
+        log.info("resumeVM ==== start ====  vmUuid: " + vmUuid);
+        if (!vmScheduler.resumeVmInstance(vmUuid)){
+            throw new BaseException("ERROR: resume vm instance failed!");
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("resumeVM ==== end ==== ");
+    }
+
+    public void suspendVM(String vmUuid) throws BaseException {
+        log.info("suspendVM ==== start ====  vmUuid: " + vmUuid);
+        if (!vmScheduler.suspendVmInstance(vmUuid)){
+            throw new BaseException("ERROR: suspend vm instance failed!");
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("suspendVM ==== end ==== ");
+    }
+
     /**
      * Delete VM in dataBase
      */
@@ -119,6 +164,18 @@ public class VmProcess {
         vmScheduler.deleteVmInDataBase(vmUuid);
         AgentConfig.clearSelectedHost(vmUuid);
         log.info("deleteVm in dataBase success!");
+    }
+
+    /**
+     * Save VM Statue in dataBase
+     */
+    public void stopVMInDataBase(String vmUuid){
+        log.info("stopVm --  VM in dataBase");
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        vm.setStatus(VmStatusEnum.STOPPED);
+        tableStorage.vmSave(vm);
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("stopVm in dataBase success!");
     }
 
     /**
@@ -146,6 +203,46 @@ public class VmProcess {
         if (cpuMemFlag) {
             if (!vmScheduler.modifyVmInstance(vmUuid)){
                 throw new BaseException("ERROR: modiify vm instance failed!");
+            }
+        }
+        AgentConfig.clearSelectedHost(vmUuid);
+    }
+
+    /**
+     * Modify  VM
+     */
+    public void reduceVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
+        log.info("reduce --  VM");
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+
+        //judge cpus and memory reduce or not
+        if (cpus >= vm.getCpus() && memory >= vm.getMemory()){
+            throw new BaseException("ERROR: vm is not reducing");
+        }
+
+        if (vm.getStatus() != VmStatusEnum.STOPPED){
+            throw new BaseException("ERROR: vm is still active");
+        }
+
+        Boolean cpuMemFlag = false;
+        if (cpus != null && cpus != 0 &&  cpus != vm.getCpus()) {
+            vm.setCpus(cpus);
+            cpuMemFlag = true;
+        }
+        if (memory != null && memory != 0 &&  memory != vm.getMemory()) {
+            vm.setMemory(memory);
+            cpuMemFlag = true;
+        }
+        if (vm.getUuid() != null) {
+            tableStorage.updateVm(vm);
+        } else {
+            log.error("instance with Uuid: " + vmUuid + "is not existed");
+            throw new BaseException("ERROR: vm is not existed!");
+        }
+        log.info("cpuMemFlag --"+ cpuMemFlag);
+        if (cpuMemFlag) {
+            if (!vmScheduler.modifyVmInstance(vmUuid)){
+                throw new BaseException("ERROR: reduce vm instance failed!");
             }
         }
         AgentConfig.clearSelectedHost(vmUuid);
