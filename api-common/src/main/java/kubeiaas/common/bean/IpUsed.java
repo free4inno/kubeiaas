@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IpUsed {
-    private int id;
+    private Integer id;
 
     /* basic info */
     private String ip;
@@ -21,7 +21,7 @@ public class IpUsed {
     private IpTypeEnum type;
 
     /* related */
-    private int ipSegmentId;
+    private Integer ipSegmentId;
 
     /* for attach */
     private String instanceUuid;    // attach of: IP & VM

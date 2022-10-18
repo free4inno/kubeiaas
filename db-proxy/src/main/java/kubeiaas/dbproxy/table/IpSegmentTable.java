@@ -15,7 +15,7 @@ public class IpSegmentTable extends IpSegment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    public int getId() {
+    public Integer getId() {
         return super.getId();
     }
 

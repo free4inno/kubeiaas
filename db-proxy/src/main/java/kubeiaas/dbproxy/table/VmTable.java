@@ -17,11 +17,11 @@ public class VmTable extends Vm {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    public int getId() {
+    public Integer getId() {
         return super.getId();
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         super.setId(id);
     }
 
@@ -62,29 +62,29 @@ public class VmTable extends Vm {
     }
 
     @Column(name = "cpus")
-    public int getCpus() {
+    public Integer getCpus() {
         return super.getCpus();
     }
 
-    public void setCpus(int cpus) {
+    public void setCpus(Integer cpus) {
         super.setCpus(cpus);
     }
 
     @Column(name = "memory")
-    public int getMemory() {
+    public Integer getMemory() {
         return super.getMemory();
     }
 
-    public void setMemory(int memory) {
+    public void setMemory(Integer memory) {
         super.setMemory(memory);
     }
 
     @Column(name = "disk_size")
-    public int getDiskSize() {
+    public Integer getDiskSize() {
         return super.getDiskSize();
     }
 
-    public void setDiskSize(int diskSize) {
+    public void setDiskSize(Integer diskSize) {
         super.setDiskSize(diskSize);
     }
 

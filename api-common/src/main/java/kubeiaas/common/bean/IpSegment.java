@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IpSegment {
-    private int id;
+    private Integer id;
 
     /* basic info */
     private String netmask;         // 掩码

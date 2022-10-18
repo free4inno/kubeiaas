@@ -18,11 +18,11 @@ public class VolumeTable extends Volume {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    public int getId() {
+    public Integer getId() {
         return super.getId();
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         super.setId(id);
     }
 
@@ -72,11 +72,11 @@ public class VolumeTable extends Volume {
     }
 
     @Column(name = "size")
-    public int getSize() {
+    public Integer getSize() {
         return super.getSize();
     }
 
-    public void setSize(int size) {
+    public void setSize(Integer size) {
         super.setSize(size);
     }
 

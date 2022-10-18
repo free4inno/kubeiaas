@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Volume {
-    private int id;                            //自增主键
+    private Integer id;                            //自增主键
     private String uuid;                     //全局唯一的标识
     private String name;                           //名称
     private String description;
@@ -21,7 +21,7 @@ public class Volume {
     /* for create. */
     private String hostUuid;
     private String imageUuid;
-    private int size;                               // size (GB)
+    private Integer size;                               // size (GB)
     private String providerLocation;                // IP:/srv/nfs4/:volumes/a/z/uuid.img
 
     /* type */

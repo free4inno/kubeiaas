@@ -1,6 +1,7 @@
 package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
+import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -138,6 +141,7 @@ public class VmOpenAPI {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
+
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REDUCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reduce(@Valid @RequestBody ModifyVmForm f) throws BaseException {
@@ -150,15 +154,35 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 获取 vm 列表
+     */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
         log.info("queryAll ==== start ====");
+
+        // 1. 构造 imageMap，根据 uuid 索引
+        List<Image> imageList = tableStorage.imageQueryAll();
+        Map<String, Image> imageMap = new HashMap<>();
+        for (Image image : imageList) {
+            imageMap.put(image.getUuid(), image);
+        }
+
+        // 2. 逐个处理 vm，填入 ips & image
         List<Vm> vmList = tableStorage.vmQueryAll();
         for (Vm vm : vmList) {
             List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
             vm.setIps(ipUsedList);
+            // use new Variable to avoid Pointer
+            Image image = imageMap.get(vm.getImageUuid());
+            vm.setImage(new Image(image.getUuid(), image.getName(), image.getOsType()));
+            // remove useless/sensitive info
+            vm.setPassword(null);
+            vm.setVncPassword(null);
+            vm.setVncPort(null);
         }
+
         log.info("queryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(vmList));
     }

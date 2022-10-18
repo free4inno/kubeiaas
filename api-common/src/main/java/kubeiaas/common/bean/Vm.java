@@ -12,16 +12,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vm {
-    private int id;
+    private Integer id;
     private String uuid;
     private String name;
     private String description;
     private String password;
 
     /* basic info */
-    private int cpus;
-    private int memory;
-    private int diskSize;
+    private Integer cpus;
+    private Integer memory;
+    private Integer diskSize;
 
     private String vncPort;
     private String vncPassword;
@@ -37,4 +37,5 @@ public class Vm {
 
     /* !NOT_IN_DB */
     private List<IpUsed> ips;
+    private Image image;
 }

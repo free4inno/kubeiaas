@@ -16,11 +16,11 @@ public class HostTable extends Host {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    public int getId() {
+    public Integer getId() {
         return super.getId();
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         super.setId(id);
     }
 

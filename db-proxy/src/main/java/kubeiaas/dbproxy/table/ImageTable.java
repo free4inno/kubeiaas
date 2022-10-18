@@ -16,11 +16,11 @@ public class ImageTable extends Image {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    public int getId() {
+    public Integer getId() {
         return super.getId();
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         super.setId(id);
     }
 
@@ -73,11 +73,11 @@ public class ImageTable extends Image {
     }
 
     @Column(name = "size")
-    public float getSize() {
+    public Float getSize() {
         return super.getSize();
     }
 
-    public void setSize(float size) {
+    public void setSize(Float size) {
         super.setSize(size);
     }
 
@@ -92,20 +92,20 @@ public class ImageTable extends Image {
     }
 
     @Column(name = "min_mem")
-    public int getMinMem() {
+    public Integer getMinMem() {
         return super.getMinMem();
     }
 
-    public void setMinMem(int minMem) {
+    public void setMinMem(Integer minMem) {
         super.setMinMem(minMem);
     }
 
     @Column(name = "min_disk")
-    public int getMinDisk() {
+    public Integer getMinDisk() {
         return super.getMinDisk();
     }
 
-    public void setMinDisk(int minDisk) {
+    public void setMinDisk(Integer minDisk) {
         super.setMinDisk(minDisk);
     }
 
