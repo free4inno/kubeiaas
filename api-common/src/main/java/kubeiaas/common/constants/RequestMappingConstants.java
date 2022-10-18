@@ -27,6 +27,7 @@ public class RequestMappingConstants {
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
     public static final String QUERY_ALL = "query_all";
+    public static final String QUERY_BY_UUID = "query_by_uuid";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String SAVE = "save";
@@ -39,6 +40,7 @@ public class RequestMappingConstants {
     public static final String RESUME = "resume";
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
+    public static final String VNC_URL = "vnc_url";
 
     // -- Resource Operator
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";

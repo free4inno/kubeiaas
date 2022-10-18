@@ -17,4 +17,10 @@ public class Host {
     private String config;          // 节点信息
     private HostStatusEnum status;  // 节点状态
     private String role;            // 节点角色，例如：["dhcp","vnc","mnt"]
+
+
+    public Host(String name, String ip) {
+        this.name = name;
+        this.ip = ip;
+    }
 }

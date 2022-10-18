@@ -1,12 +1,12 @@
 package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
+import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.request.vm.*;
@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +30,6 @@ import java.util.Map;
 @Controller
 @RequestMapping(value = RequestMappingConstants.VM)
 public class VmOpenAPI {
-
-    @Resource
-    private TableStorage tableStorage;
 
     @Resource
     private VmService vmService;
@@ -59,9 +58,9 @@ public class VmOpenAPI {
         log.info("delete ==== start ====");
         String result;
         if (f.getDeleteType().equals(VmConstants.DELETE_FORCE)) {
-            result = vmService.forceDeleteVm(f.getVmUuid());
+            result = vmService.deleteVM(f.getVmUuid(), true);
         } else {
-            result = vmService.deleteVM(f.getVmUuid());
+            result = vmService.deleteVM(f.getVmUuid(), false);
         }
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("delete ==== end ====");
@@ -75,7 +74,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String stop(@Valid @RequestBody OperateVmForm f) throws BaseException {
         log.info("stop ==== start ====");
-        if (vmService.stopVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.STOP).equals(ResponseMsgConstants.SUCCESS)){
             log.info("stop ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Stop VM Success"));
         }else {
@@ -87,7 +86,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String start(@Valid @RequestBody OperateVmForm f) throws BaseException {
         log.info("startVm ==== start ====");
-        if (vmService.startVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.START).equals(ResponseMsgConstants.SUCCESS)){
             log.info("startVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Start VM Success"));
         }else {
@@ -99,7 +98,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String reboot(@Valid @RequestBody OperateVmForm f) throws BaseException {
         log.info("rebootVm  ==== start ====");
-        if (vmService.rebootVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.REBOOT).equals(ResponseMsgConstants.SUCCESS)){
             log.info("rebootVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Reboot VM Success"));
         }else {
@@ -111,18 +110,19 @@ public class VmOpenAPI {
     @ResponseBody
     public String suspend(@Valid @RequestBody OperateVmForm f) throws BaseException {
         log.info("suspendVm  ==== start ====");
-        if (vmService.suspendVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.SUSPEND).equals(ResponseMsgConstants.SUCCESS)){
             log.info("suspendVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Suspend VM Success"));
         }else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
         }
     }
+
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String resume(@Valid @RequestBody OperateVmForm f) throws BaseException {
         log.info("resumeVm  ==== start ====");
-        if (vmService.resumeVm(f.getVmUuid()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.RESUME).equals(ResponseMsgConstants.SUCCESS)){
             log.info("resumeVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Resume VM Success"));
         }else {
@@ -134,7 +134,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String modify(@Valid @RequestBody ModifyVmForm f) throws BaseException {
         log.info("modify ==== start ====");
-        if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory(), false).equals(ResponseMsgConstants.SUCCESS)){
             log.info("modify ==== end ====");
             return JSON.toJSONString(BaseResponse.success("Modify VM Success"));
         }else {
@@ -146,7 +146,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String reduce(@Valid @RequestBody ModifyVmForm f) throws BaseException {
         log.info("reduce ==== start ====");
-        if (vmService.reduceVm(f.getVmUuid(), f.getCpus(), f.getMemory()).equals(ResponseMsgConstants.SUCCESS)){
+        if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory(), true).equals(ResponseMsgConstants.SUCCESS)){
             log.info("reduce ==== end ====");
             return JSON.toJSONString(BaseResponse.success("reduce VM Success"));
         }else {
@@ -161,30 +161,35 @@ public class VmOpenAPI {
     @ResponseBody
     public String queryAll() {
         log.info("queryAll ==== start ====");
-
-        // 1. 构造 imageMap，根据 uuid 索引
-        List<Image> imageList = tableStorage.imageQueryAll();
-        Map<String, Image> imageMap = new HashMap<>();
-        for (Image image : imageList) {
-            imageMap.put(image.getUuid(), image);
-        }
-
-        // 2. 逐个处理 vm，填入 ips & image
-        List<Vm> vmList = tableStorage.vmQueryAll();
-        for (Vm vm : vmList) {
-            List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
-            vm.setIps(ipUsedList);
-            // use new Variable to avoid Pointer
-            Image image = imageMap.get(vm.getImageUuid());
-            vm.setImage(new Image(image.getUuid(), image.getName(), image.getOsType()));
-            // remove useless/sensitive info
-            vm.setPassword(null);
-            vm.setVncPassword(null);
-            vm.setVncPort(null);
-        }
-
+        List<Vm> vmList = vmService.queryAll();
         log.info("queryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(vmList));
+    }
+
+    /**
+     * 获取 vm 详情
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryByUuid(
+            @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) {
+        log.info("queryByUuid ==== start ====");
+        Vm vm = vmService.queryByUuid(uuid);
+        log.info("queryByUuid ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(vm));
+    }
+
+    /**
+     * 获取 vnc 访问链接
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VNC_URL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String vncUrl(
+            @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) {
+        String url = vmService.getVncUrl(uuid);
+        Map<String, String> resMap = new HashMap<>();
+        resMap.put(RequestMappingConstants.VNC_URL, url);
+        return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
 }

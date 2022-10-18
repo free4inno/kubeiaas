@@ -38,4 +38,6 @@ public class Vm {
     /* !NOT_IN_DB */
     private List<IpUsed> ips;
     private Image image;
+    private List<Volume> volumes;
+    private Host host;
 }

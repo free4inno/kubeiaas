@@ -14,7 +14,7 @@ spec:
       labels:
         app: iaas-core
     spec:
-      nodeName: hf-master-01
+      nodeName: hf-node-01
       containers:
         - name: iaas-core
           command: ["sh"]

@@ -116,7 +116,6 @@ public class VmProcess {
         if (!vmScheduler.stopVmInstance(vmUuid)){
             throw new BaseException("ERROR: stop vm instance failed!");
         }
-        AgentConfig.clearSelectedHost(vmUuid);
         log.info("stopVm ==== end ==== ");
     }
 
@@ -125,7 +124,6 @@ public class VmProcess {
         if (!vmScheduler.startVmInstance(vmUuid)){
             throw new BaseException("ERROR: start vm instance failed!");
         }
-        AgentConfig.clearSelectedHost(vmUuid);
         log.info("stopVm ==== end ==== ");
     }
 
@@ -134,7 +132,6 @@ public class VmProcess {
         if (!vmScheduler.rebootVmInstance(vmUuid)){
             throw new BaseException("ERROR: reboot vm instance failed!");
         }
-        AgentConfig.clearSelectedHost(vmUuid);
         log.info("rebootVm ==== end ==== ");
     }
 
@@ -143,7 +140,6 @@ public class VmProcess {
         if (!vmScheduler.resumeVmInstance(vmUuid)){
             throw new BaseException("ERROR: resume vm instance failed!");
         }
-        AgentConfig.clearSelectedHost(vmUuid);
         log.info("resumeVM ==== end ==== ");
     }
 
@@ -152,7 +148,6 @@ public class VmProcess {
         if (!vmScheduler.suspendVmInstance(vmUuid)){
             throw new BaseException("ERROR: suspend vm instance failed!");
         }
-        AgentConfig.clearSelectedHost(vmUuid);
         log.info("suspendVM ==== end ==== ");
     }
 
@@ -167,7 +162,7 @@ public class VmProcess {
     }
 
     /**
-     * Save VM Statue in dataBase
+     * Save VM Statue in dataBase (ABANDON)
      */
     public void stopVMInDataBase(String vmUuid){
         log.info("stopVm --  VM in dataBase");
@@ -179,7 +174,7 @@ public class VmProcess {
     }
 
     /**
-     * Modify  VM
+     * Modify VM
      */
     public void modifyVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
         log.info("modifyVm --  VM");

@@ -214,7 +214,7 @@ public class VmService {
             log.info("shutdownDomain ---- start ----");
             if (d.isActive() > 0) {
                 d.shutdown();
-            }else{
+            } else {
                 log.error("shutdownDomain -- The domain is already dead. Shutdown failed!");
             }
             new Thread(() -> {
@@ -235,6 +235,14 @@ public class VmService {
                 }
             }).start();
             log.info("shutdownDomain ---- end ----");
+
+            // status
+            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+            vm.setStatus(VmStatusEnum.STOPPED);
+
+            // save
+            tableStorage.vmSave(vm);
+
             log.info("stopVm ---- end ---- Shutdown Domain Successfully.");
         } catch (Exception e) {
             log.info("stopVm ---- end ---- Shutdown Domain Error!");
@@ -281,10 +289,16 @@ public class VmService {
             } else {
                 log.info("startDomain ---- end ---- Failed to start Domain in 20 secs!!");
             }
+
+            // status
             Vm vm = tableStorage.vmQueryByUuid(VmUuid);
             vm.setStatus(VmStatusEnum.ACTIVE);
+
+            // new vnc port
             String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + d.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");          //获取新建虚拟机的VncPort
             vm.setVncPort(vncPort);
+
+            // save
             tableStorage.vmSave(vm);
         } catch (Exception e) {
             e.printStackTrace();

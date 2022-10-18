@@ -12,4 +12,8 @@ public class VmConstants {
     /* deleteVm type */
     public static final String DELETE_FORCE = "force";
     public static final String DELETE_NORMAL = "normal";
+
+    /* vnc config */
+    public static final String VNC_URL_TEMPLATE = "http://%s:8787/vnc.html?path=?token=%s";
+
 }
