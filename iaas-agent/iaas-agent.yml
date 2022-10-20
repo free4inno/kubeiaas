@@ -16,6 +16,24 @@ spec:
       nodeSelector:
         kubeiaas: node   # 指定节点标签
         # 打标签：kubectl label node hf-node-01 kubeiaas=node
+      initContainers:
+        - name: init-nfs
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/init-nfs:0.1
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MNT_HOST_NAME
+              value: "hf-node-02"
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: checker
+              mountPath: /checker
       containers:
         - name: iaas-agent
           command: ["sh"]
@@ -63,6 +81,9 @@ spec:
         - name: workdir
           hostPath:
             path: /usr/local/kubeiaas/workdir
+        - name: checker
+          hostPath:
+            path: /usr/local/kubeiaas/workdir/checker
 ---
 apiVersion: v1
 kind: Service

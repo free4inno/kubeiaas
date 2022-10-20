@@ -95,8 +95,8 @@ public class HostConfig {
             ShellUtils.getCmd(CMD_REFRESH_LOG);
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DIR);
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_KVM) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
+//            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT) && totalSuccessFlag;
+//            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             if (totalSuccessFlag) {
                 host.setStatus(HostStatusEnum.READY);
@@ -117,8 +117,8 @@ public class HostConfig {
             ShellUtils.getCmd(CMD_REFRESH_LOG);
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DIR);
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_KVM) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT) && totalSuccessFlag;
-            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
+//            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT) && totalSuccessFlag;
+//            totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_MNT_EXPORT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_LIBVIRT) && totalSuccessFlag;
             totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_DHCP) && totalSuccessFlag;
             // totalSuccessFlag = checkHostEnvSync(HostConstants.CHECKER_VNC) && totalSuccessFlag;
