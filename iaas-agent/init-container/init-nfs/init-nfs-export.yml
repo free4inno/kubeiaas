@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: init-nfs-export
+  namespace: kubeiaas
+spec:
+  selector:
+    matchLabels:
+      app: init-nfs-export
+  template:
+    metadata:
+      labels:
+        app: init-nfs-export
+    spec:
+      #restartPolicy: Never
+      nodeSelector:
+        kubeiaas/node: "true"
+      containers:
+        - name: init-nfs-export
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/init-nfs:0.1-export
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: checker
+              mountPath: /checker
+      volumes:
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: checker
+          hostPath:
+            path: /usr/local/kubeiaas/workdir/checker

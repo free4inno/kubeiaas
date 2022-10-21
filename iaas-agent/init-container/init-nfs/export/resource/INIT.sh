@@ -19,12 +19,20 @@ function get_env(){
   echo "${value}"
 }
 
+# FUNCTION: parse_json
+function parse_json(){
+    echo "${1//\"/}" | sed "s/.*$2:\([^,}]*\).*/\1/"
+}
+
 # ------ 0. Get env config -----------------------------------
 echo "[0] Check env config"
 
 host_name=$(get_env HOST_NAME)
-mnt_host_name=$(get_env MNT_HOST_NAME)
 echo " - host_name:${host_name}"
+
+json_data=$(wget -O - "http://db-proxy:9091/host/query_all_like_by_single_key?key_1=role&value_1=mnt")
+value=`echo $json_data | sed s/[[:space:]]//g`
+mnt_host_name=$(parse_json $value "name")
 echo " - mnt_host_name:${mnt_host_name}"
 
 #network_subnet_with_mask=$(get_env NETWORK_SUBNET_WITH_MASK)
@@ -38,11 +46,8 @@ echo " - mnt_host_name:${mnt_host_name}"
 # ------ 1. prepare files to host-workdir ---------------------
 echo "[1] prepare files to /workdir "
 
-echo " - cp mnt-checker.sh"
-cp /src/mnt-checker.sh /checker/
-
 echo " - cp mnt-export-checker.sh"
-cp /src/mnt-export-checker.sh /checker/
+cp /workdir/mnt-export-checker.sh /checker/
 
 chmod 755 /checker/*
 
@@ -82,6 +87,10 @@ if [[ $host_name == $mnt_host_name ]]; then
   echo " - this node is mnt node, run \`mnt-export-checker.sh\`"
   host_sh "./usr/local/kubeiaas/workdir/checker/mnt-export-checker.sh -m \*"
 else
-  echo " - this node is normal node, run \`mnt-checker.sh\`"
-  host_sh "./usr/local/kubeiaas/workdir/checker/mnt-checker.sh -m $mnt_host_name"
+  echo " - this node is normal node. NO NEED TO RUN."
 fi
+
+while [ 1 ]
+do
+  sleep 60
+done
