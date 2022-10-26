@@ -46,6 +46,10 @@ public class RequestMappingConstants {
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
     public static final String SELECT_HOST_BY_OPERATOR = "select_host_by_operator";
 
+    // -- Image Operator
+    public static final String QUERY_IMAGE_BY_UUID = "query_image_by_uuid";
+    public static final String QUERY_IMAGE_ALL = "query_image_all";
+
     // -- DHCP Controller
     public static final String BIND_MAC_IP = "bind_mac_ip";
     public static final String UNBIND_MAC_IP = "unbind_mac_ip";

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.free4inno.kubeiaas</groupId>
+        <artifactId>kubeiaas</artifactId>
+        <version>0.1.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>image-operator</artifactId>
+    <name>image-operator</name>
+    <description>image-operator</description>
+
+    <properties>
+    </properties>
+
+    <dependencies>
+        <!-- api-common -->
+        <dependency>
+            <groupId>com.free4inno.kubeiaas</groupId>
+            <artifactId>api-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!-- yaml -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.26</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- springBoot -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.4.4</version>
+                <configuration>
+                    <mainClass>kubeiaas.imageoperator.ImageOperatorApplication</mainClass>
+                    <outputDirectory>${basedir}\target</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- docker -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.26.0</version>
+
+                <!-- global -->
+                <configuration>
+                    <!-- =============== docker control =============== -->
+                    <dockerHost>tcp://192.168.36.12:2375</dockerHost>
+
+                    <!-- =============== registry control =============== -->
+                    <authConfig>
+                        <push>
+                            <username>USERNAME</username>
+                            <password>PASSWORD</password>
+                        </push>
+                    </authConfig>
+
+                    <!-- =============== image control =============== -->
+                    <images>
+                        <image>
+                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>
+                            <build>
+                                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
+                            </build>
+                            <run>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                        <version>1.11</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

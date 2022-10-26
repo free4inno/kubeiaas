@@ -22,6 +22,7 @@
         <module>api-common</module>
         <module>db-proxy</module>
         <module>resource-operator</module>
+        <module>image-operator</module>
     </modules>
 
     <properties>
