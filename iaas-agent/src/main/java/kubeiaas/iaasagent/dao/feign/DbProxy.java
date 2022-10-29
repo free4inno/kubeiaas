@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @FeignClient(name = ComponentConstants.DB_PROXY, url = "http://127.0.0.1:9089")
+@RequestMapping(value = "db_proxy")
 public interface DbProxy {
 
     // ========================= vm =========================
@@ -33,12 +34,14 @@ public interface DbProxy {
 
     // ========================= image =========================
 
+    /*
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
     @ResponseBody
     String imageQueryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
+     */
 
     // ========================= host =========================
 

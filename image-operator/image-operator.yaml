@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-operator
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-operator
+  template:
+    metadata:
+      labels:
+        app: image-operator
+    spec:
+      nodeSelector:
+        kubeiaas/node: "true"   # 指定节点标签
+      containers:
+        - name: image-operator
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/image-operator.jar
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/image-operator:0.1.1-SNAPSHOT
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9093
+              protocol: TCP
+          volumeMounts:
+            - name: host-image
+              mountPath: /host-images
+      volumes:
+        - name: host-image
+          hostPath:
+            path: /usr/local/kubeiaas/data/images
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-operator
+  namespace: kubeiaas
+spec:
+  selector:
+    app: image-operator
+  type: ClusterIP
+  ports:
+    - port: 9093
+      targetPort: 9093
+      protocol: TCP

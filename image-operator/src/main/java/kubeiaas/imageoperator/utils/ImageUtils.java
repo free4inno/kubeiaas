@@ -27,7 +27,7 @@ public class ImageUtils {
             String name = (String) imageMap.get("name");
             String uuid = (String) imageMap.get("uuid");
             String description = (String) imageMap.get("description");
-            String directory = ImageConfig.STORAGE_IMAGE_PATH + imageMap.get("filename");
+            String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + imageMap.get("filename");
 
             Map<String, Object> config = (Map<String, Object>) imageMap.get("config");
             Float size = ((Double) config.get("size")).floatValue();

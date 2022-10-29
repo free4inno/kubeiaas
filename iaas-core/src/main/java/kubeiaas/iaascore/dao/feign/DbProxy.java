@@ -46,6 +46,7 @@ public interface DbProxy {
 
     // ========================= image =========================
 
+    /*
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
     @ResponseBody
     String imageQueryAllBySingleKey(
@@ -56,6 +57,7 @@ public interface DbProxy {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE + "/" + RequestMappingConstants.QUERY_ALL)
     @ResponseBody
     String imageQueryAll();
+     */
 
     // ========================= host =========================
 

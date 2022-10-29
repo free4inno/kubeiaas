@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.iaascore.dao.feign.DbProxy;
-import kubeiaas.iaascore.dao.feign.ResourceOperator;
+import kubeiaas.iaascore.dao.feign.ImageOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,9 @@ public class TableStorage {
 
     @Resource
     private DbProxy dbProxy;
+
+    @Resource
+    private ImageOperator imageOperator;
 
     // ========================= vm =========================
 
@@ -53,6 +56,31 @@ public class TableStorage {
 
     // ========================= image =========================
 
+    /**
+     * !!! ATTENTION !!!
+     *
+     * - 关于 image 的管理起初是在数据库内进行存储，feign interface 位于 dbProxy，
+     *   因此通过本 tableStorage 进行聚合处理。
+     *
+     * - 引入 imageOperator 镜像管理模块 后，feign interface 位于 resourceOperator，
+     *   但为了屏蔽对各处上层代码调用的影响，且在逻辑上保持单纯的 镜像信息持久化 概念，特在 tableStorage 调用了该 operator。
+     */
+
+    public List<Image> imageQueryAll() {
+        String jsonString = imageOperator.imageQueryAll();
+        return JSON.parseArray(jsonString, Image.class);
+    }
+
+    public Image imageQueryByUuid(String uuid) {
+        String jsonString = imageOperator.imageQueryByUuid(uuid);
+        if (jsonString == null || jsonString.isEmpty()) {
+            return null;
+        } else {
+            return JSON.parseObject(jsonString, Image.class);
+        }
+    }
+
+    /*
     public Image imageQueryByUuid(String uuid) {
         String jsonString = dbProxy.imageQueryAllBySingleKey(ImageConstants.UUID, uuid);
         List<Image> imageList = JSON.parseArray(jsonString, Image.class);
@@ -67,6 +95,7 @@ public class TableStorage {
         String jsonString = dbProxy.imageQueryAll();
         return JSON.parseArray(jsonString, Image.class);
     }
+     */
 
     // ========================= host =========================
 

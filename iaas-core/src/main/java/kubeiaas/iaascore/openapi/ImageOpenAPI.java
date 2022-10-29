@@ -25,11 +25,9 @@ public class ImageOpenAPI {
     @Resource
     private TableStorage tableStorage;
 
-
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-
         log.info("image queryAll ==== start ====");
         List<Image> imageList = tableStorage.imageQueryAll();
         log.info("image queryAll ==== end ====");
