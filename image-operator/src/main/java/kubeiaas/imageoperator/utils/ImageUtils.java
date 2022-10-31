@@ -9,7 +9,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -29,17 +28,17 @@ public class ImageUtils {
             String description = (String) imageMap.get("description");
             String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + imageMap.get("filename");
 
-            Map<String, Object> config = (Map<String, Object>) imageMap.get("config");
-            Float size = ((Double) config.get("size")).floatValue();
-
-            ImageFormatEnum format = getEnumFromString(ImageFormatEnum.class, (String) config.get("format"));
-            ImageOSTypeEnum osType = getEnumFromString(ImageOSTypeEnum.class, (String) config.get("os_type"));
-            ImageOSModeEnum osMode = getEnumFromString(ImageOSModeEnum.class, (String) config.get("os_mode"));
-            ImageOSArchEnum osArch = getEnumFromString(ImageOSArchEnum.class, (String) config.get("os_arch"));
-
             Map<String, Object> spec = (Map<String, Object>) imageMap.get("spec");
-            Integer minDisk = (Integer) spec.get("min_disk");
-            Integer minMem = (Integer) spec.get("min_mem");
+            Float size = ((Double) spec.get("size")).floatValue();
+
+            ImageFormatEnum format = getEnumFromString(ImageFormatEnum.class, (String) spec.get("format"));
+            ImageOSTypeEnum osType = getEnumFromString(ImageOSTypeEnum.class, (String) spec.get("os_type"));
+            ImageOSModeEnum osMode = getEnumFromString(ImageOSModeEnum.class, (String) spec.get("os_mode"));
+            ImageOSArchEnum osArch = getEnumFromString(ImageOSArchEnum.class, (String) spec.get("os_arch"));
+
+            Map<String, Object> config = (Map<String, Object>) imageMap.get("config");
+            Integer minDisk = (Integer) config.get("min_disk");
+            Integer minMem = (Integer) config.get("min_mem");
 
             Image image = new Image(id + 1, uuid, name, description, directory, format, size,
                     ImageStatusEnum.AVAILABLE, minMem, minDisk, osType, osArch, osMode, null);
