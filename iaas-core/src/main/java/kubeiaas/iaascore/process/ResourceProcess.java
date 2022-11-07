@@ -8,6 +8,7 @@ import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.scheduler.ResourceScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,18 +30,18 @@ public class ResourceProcess {
      * Create VM.
      * 2. Resource Operator
      */
-    public Vm createVmOperate(Vm newVm) throws BaseException {
+    public Vm createVmOperate(Vm newVm) throws VmException {
         log.info("createVm -- 2. Resource Operator");
 
         // 2.1. check image
         // available
         Image image = tableStorage.imageQueryByUuid(newVm.getImageUuid());
         if (image == null || image.getStatus() != ImageStatusEnum.AVAILABLE) {
-            throw new BaseException("ERROR: image not available!");
+            throw new VmException(newVm,"ERROR: image not available!");
         }
         // mem
         if (newVm.getMemory() < image.getMinMem()) {
-            throw new BaseException("ERROR: memory too low for image!");
+            throw new VmException(newVm,"ERROR: memory too low for image!");
         }
         // size
         int imageMinDisk = image.getMinDisk();
@@ -62,7 +63,7 @@ public class ResourceProcess {
             selectedHost = resourceScheduler.vmSelectHostByOperator(newVm.getUuid(), HostSelectStrategyConstants.ROUND_ROBIN);
         }
         if (selectedHost == null) {
-            throw new BaseException("ERROR: no available host.");
+            throw new VmException(newVm,"ERROR: no available host.");
         }
         log.info("selected host: " + selectedHost.getName());
         // set scheduler of iaas-agent

@@ -10,6 +10,7 @@ import kubeiaas.common.utils.IpUtils;
 import kubeiaas.common.utils.MacUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.scheduler.DhcpScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,13 @@ public class NetworkProcess {
      * 3. Network
      * use synchronized to ensure synchronous execution, avoid ip allocation conflicts.
      */
-    public synchronized IpUsed createVmNetwork(Vm newVm, int ipSegmentId) throws BaseException {
+    public synchronized IpUsed createVmNetwork(Vm newVm, int ipSegmentId) throws VmException {
         log.info("createVm -- 3. Network");
 
         String newMac = getNewMac(ipSegmentId);
         IpUsed newIpUsed = getNewIp(ipSegmentId);
         if (newIpUsed == null) {
-            throw new BaseException("ERROR: ip allocated failed!");
+            throw new VmException(newVm,"ERROR: ip allocated failed!");
         }
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
@@ -58,7 +59,7 @@ public class NetworkProcess {
 
         // bind in DHCP-Controller
         if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
-            throw new BaseException("ERROR: dhcp bind mac & ip failed!");
+            throw new VmException(newVm,"ERROR: dhcp bind mac & ip failed!");
         }
         log.info("createVm -- 3. network success!");
         return newIpUsed;

@@ -9,6 +9,7 @@ import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.request.vm.*;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
@@ -45,7 +46,7 @@ public class VmOpenAPI {
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String create(@Valid @RequestBody CreateVmForm f) throws BaseException {
+    public String create(@Valid @RequestBody CreateVmForm f) throws VmException {
         log.info("create ==== start ====");
         Vm newVm = vmService.createVm(f.getName(), f.getCpus(), f.getMemory(), f.getImageUuid(), f.getIpSegmentId(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
         log.info("create ==== end ====");

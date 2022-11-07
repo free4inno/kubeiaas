@@ -5,13 +5,15 @@ package kubeiaas.common.enums.vm;
  */
 public enum VmStatusEnum {
 
-    ACTIVE, APPLYING, BUILDING, REBUILDING, PAUSED, SUSPENDED, RESCUED, DELETED, STOPPED,
-    MIGRATING, RESIZING, ERROR, REJECTED;
+    ACTIVE, STARTING ,APPLYING, BUILDING, REBUILDING, PAUSED, SUSPENDED, RESCUED, DELETED, STOPPED, STOPPING,
+    MIGRATING, RESIZING, ERROR, REJECTED, REBOOTING, SUSPENDING ,RESUMING;
 
     public String toString() {
         switch (this) {
             case ACTIVE:
                 return "active";
+            case STARTING:
+                return "starting";
             case APPLYING:
                 return "applying";
             case BUILDING:
@@ -20,12 +22,16 @@ public enum VmStatusEnum {
                 return "rebuilding";
             case PAUSED:
                 return "paused";
+            case SUSPENDING:
+                return "suspending";
             case SUSPENDED:
                 return "suspended";
             case RESCUED:
                 return "rescued";
             case DELETED:
                 return "deleted";
+            case STOPPING:
+                return "stopping";
             case STOPPED:
                 return "stopped";
             case MIGRATING:
@@ -36,6 +42,10 @@ public enum VmStatusEnum {
                 return "error";
             case REJECTED:
                 return "rejected";
+            case REBOOTING:
+                return "rebooting";
+            case RESUMING:
+                return "resuming";
         }
         return super.toString();
     }

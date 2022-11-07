@@ -1,5 +1,8 @@
 package kubeiaas.iaascore.exception;
 
+import kubeiaas.common.bean.Vm;
+import kubeiaas.common.enums.vm.VmStatusEnum;
+import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.validation.ConstraintViolationException;
 
 /**
@@ -21,10 +25,19 @@ import javax.validation.ConstraintViolationException;
 @ControllerAdvice("kubeiaas.iaascore.openapi")
 public class OpenAPIExceptionHandle {
 
+    @Resource
+    private TableStorage tableStorage;
+
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public BaseResponse handle(Exception e) {
         if (e instanceof BaseException) {
+            log.error(((BaseException) e).getMsg());
+            return BaseResponse.error(ResponseEnum.WORK_ERROR);
+        }  else if (e instanceof VmException){
+            Vm vm = ((VmException) e).getVm();
+            vm.setStatus(VmStatusEnum.ERROR);
+            tableStorage.vmSave(vm);
             log.error(((BaseException) e).getMsg());
             return BaseResponse.error(ResponseEnum.WORK_ERROR);
         } else if (e instanceof ConstraintViolationException ||

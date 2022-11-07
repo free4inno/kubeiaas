@@ -113,6 +113,7 @@ public class VmProcess {
 
     public void stopVM(String vmUuid) throws BaseException {
         log.info("stopVm ==== start ====  vmUuid: " + vmUuid);
+        setVmStatus(vmUuid, VmStatusEnum.STOPPING);
         if (!vmScheduler.stopVmInstance(vmUuid)){
             throw new BaseException("ERROR: stop vm instance failed!");
         }
@@ -121,6 +122,7 @@ public class VmProcess {
 
     public void startVM(String vmUuid) throws BaseException {
         log.info("startVm ==== start ====  vmUuid: " + vmUuid);
+        setVmStatus(vmUuid, VmStatusEnum.STARTING);
         if (!vmScheduler.startVmInstance(vmUuid)){
             throw new BaseException("ERROR: start vm instance failed!");
         }
@@ -129,6 +131,8 @@ public class VmProcess {
 
     public void rebootVM(String vmUuid) throws BaseException {
         log.info("rebootVm ==== start ====  vmUuid: " + vmUuid);
+        //将虚拟机状态设置为rebooting
+        setVmStatus(vmUuid, VmStatusEnum.REBOOTING);
         if (!vmScheduler.rebootVmInstance(vmUuid)){
             throw new BaseException("ERROR: reboot vm instance failed!");
         }
@@ -137,6 +141,8 @@ public class VmProcess {
 
     public void resumeVM(String vmUuid) throws BaseException {
         log.info("resumeVM ==== start ====  vmUuid: " + vmUuid);
+        //将虚拟机状态设置为resuming
+        setVmStatus(vmUuid, VmStatusEnum.RESUMING);
         if (!vmScheduler.resumeVmInstance(vmUuid)){
             throw new BaseException("ERROR: resume vm instance failed!");
         }
@@ -145,6 +151,8 @@ public class VmProcess {
 
     public void suspendVM(String vmUuid) throws BaseException {
         log.info("suspendVM ==== start ====  vmUuid: " + vmUuid);
+        //将虚拟机状态设置为suspending
+        setVmStatus(vmUuid, VmStatusEnum.SUSPENDING);
         if (!vmScheduler.suspendVmInstance(vmUuid)){
             throw new BaseException("ERROR: suspend vm instance failed!");
         }
@@ -241,5 +249,14 @@ public class VmProcess {
             }
         }
         AgentConfig.clearSelectedHost(vmUuid);
+    }
+
+    /**
+     * Set VM Status in DB
+     */
+    private void setVmStatus(String VmUuid, VmStatusEnum status){
+        Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+        vm.setStatus(status);
+        tableStorage.vmSave(vm);
     }
 }

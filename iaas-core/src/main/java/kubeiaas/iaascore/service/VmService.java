@@ -9,6 +9,7 @@ import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.process.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class VmService {
             int ipSegmentId,
             Integer diskSize,
             String description,
-            String hostUUid) throws BaseException {
+            String hostUUid) throws VmException {
 
         /* ---- 1. pre create VM ----
         Generate and Set basic info of vm.

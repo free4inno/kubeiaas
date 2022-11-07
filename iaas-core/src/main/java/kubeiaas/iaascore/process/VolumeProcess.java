@@ -3,10 +3,12 @@ package kubeiaas.iaascore.process;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,12 +37,12 @@ public class VolumeProcess {
      * Create VM.
      * 2. Create Sys Volume
      */
-    public void createVmVolume(Vm newVm) throws BaseException {
+    public void createVmVolume(Vm newVm) throws VmException {
         log.info("createVm -- 4. Volume");
 
         String volumeUuid = volumeScheduler.createSystemVolume(newVm.getUuid());
         if (volumeUuid.isEmpty()) {
-            throw new BaseException("ERROR: create system volume failed! (pre error)");
+            throw new VmException(newVm,"ERROR: create system volume failed! (pre error)");
         }
         String newVmUuid = newVm.getUuid();
         // Attention: copying image is long-time operation, so start a new Thread to handle this.
@@ -59,10 +61,14 @@ public class VolumeProcess {
                 if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
                     // timeout || volume controller set ERROR to DB
                     log.error("ERROR: create system volume failed! (time out)");
+                    newVm.setStatus(VmStatusEnum.ERROR);
+                    tableStorage.vmSave(newVm);
                     return;
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                newVm.setStatus(VmStatusEnum.ERROR);
+                tableStorage.vmSave(newVm);
                 log.error("ERROR: create system volume failed! (loop error)");
                 return;
             }
@@ -72,6 +78,8 @@ public class VolumeProcess {
             try {
                 vmProcess.createVM(newVmUuid);
             } catch (BaseException e) {
+                newVm.setStatus(VmStatusEnum.ERROR);
+                tableStorage.vmSave(newVm);
                 log.error(e.getMsg());
                 return;
             }
