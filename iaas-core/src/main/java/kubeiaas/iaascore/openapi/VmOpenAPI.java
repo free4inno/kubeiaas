@@ -7,7 +7,6 @@ import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.vm.VmOperateEnum;
-import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.request.vm.*;
@@ -55,7 +54,7 @@ public class VmOpenAPI {
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException {
+    public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException, VmException {
         log.info("delete ==== start ====");
         String result;
         if (f.getDeleteType().equals(VmConstants.DELETE_FORCE)) {

@@ -83,11 +83,11 @@ public class VmService {
         return newVm;
     }
 
-    public String deleteVM(String vmUuid, boolean isForce) throws BaseException {
+    public String deleteVM(String vmUuid, boolean isForce) throws BaseException, VmException {
         // ----- check if exist -----
         Vm vm = vmProcess.queryVMByUuid(vmUuid);
         if (vm == null) {
-            throw new BaseException("ERR: vm not found (uuid: " + vmUuid + ")");
+            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")");
         }
 
         /* ----- judge status ----
@@ -99,35 +99,41 @@ public class VmService {
             }
         }
 
-        /* -----1. choose host ----
-        Select the host where the VM to be deleted resides
-        */
-        resourceProcess.selectHostByVmUuid(vmUuid);
+        try {
+            /* -----1. choose host ----
+            Select the host where the VM to be deleted resides
+            */
+            resourceProcess.selectHostByVmUuid(vmUuid);
 
-        /* -----2. delete VM ----
-        Delete the VM and then delete other information
-        */
-        vmProcess.deleteVM(vmUuid);
+            /* -----2. delete VM ----
+            Delete the VM and then delete other information
+            */
+            vmProcess.deleteVM(vmUuid);
 
-        /* -----3. Delete Volume ----
-        Delete disks, including Linux files and database information
-        */
-        volumeProcess.deleteVolume(vmUuid);
+            /* -----3. Delete Volume ----
+            Delete disks, including Linux files and database information
+            */
+            volumeProcess.deleteVolume(vmUuid);
 
-        /* -----4. Delete Ip ----
-        Delete Ip information
-        */
-        networkProcess.deleteIps(vmUuid);
+            /* -----4. Delete Ip ----
+            Delete Ip information
+            */
+            networkProcess.deleteIps(vmUuid);
 
-        /* -----5. delete in database ----
-        Delete VM records from the database
-        */
-        vmProcess.deleteVMInDataBase(vmUuid);
+            /* -----5. delete in database ----
+            Delete VM records from the database
+            */
+            vmProcess.deleteVMInDataBase(vmUuid);
 
-        /* -----6. delete vnc ----
-        delete vnc in token.config
-        */
-        vncProcess.deleteVncToken(vmUuid);
+            /* -----6. delete vnc ----
+            delete vnc in token.config
+            */
+            vncProcess.deleteVncToken(vmUuid);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new VmException(vm, "ERR: error while delete! (uuid: " + vmUuid + ")");
+        }
 
         return ResponseMsgConstants.SUCCESS;
     }
