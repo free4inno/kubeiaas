@@ -44,7 +44,9 @@ public class ImageService {
         List<Image> imageList = new ArrayList<>();
         for (int id = 0; id < yamlList.size(); id++) {
             Image image = ImageUtils.getImageFromYaml(yamlList.get(id), id);
-            imageList.add(image);
+            if (image != null) {
+                imageList.add(image);
+            }
         }
         log.info("imageList: " + JSON.toJSONString(imageList));
 
@@ -53,9 +55,14 @@ public class ImageService {
 
     private List<String> getYamlList() {
         List<String> yamlList = new ArrayList<>();
-        // test: "C:\\Users\\74723\\Desktop\\kubeiaas-镜像管理"
-        // prod: ImageConfig.STORAGE_BASE_DIR + ImageConfig.STORAGE_IMAGE_PATH
-        // prod-container: ImageConfig.CONTAINER_STORAGE_PATH
+        /*
+         - env: test
+           filesWalkPath: "C:\\Users\\74723\\Desktop\\kubeiaas-镜像管理"
+         - env: prod
+           filesWalkPath: ImageConfig.STORAGE_BASE_DIR + ImageConfig.STORAGE_IMAGE_PATH
+         - env: prod-container
+           filesWalkPath: ImageConfig.CONTAINER_STORAGE_PATH
+         */
         try (Stream<Path> paths = Files.walk(Paths.get(ImageConfig.CONTAINER_STORAGE_PATH), 1)) {
             paths.map(Path::toString).filter(f -> f.endsWith(".yaml"))
                     .forEach(yamlList::add);

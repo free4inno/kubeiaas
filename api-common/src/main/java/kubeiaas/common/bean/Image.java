@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,11 +33,17 @@ public class Image {
 
     /* related */
     private String parentImageUuid;
+    private List<Image> childImages;
 
 
     public Image(String uuid, String name, ImageOSTypeEnum osType) {
         this.uuid = uuid;
         this.name = name;
         this.osType = osType;
+    }
+
+    public Image(String uuid, String directory) {
+        this.uuid = uuid;
+        this.directory = directory;
     }
 }

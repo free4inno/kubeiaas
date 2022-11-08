@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -47,7 +48,11 @@ public class VolumeScheduler {
         // 特判 windows 镜像
         if (image.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
             log.info("createSystemVolume -- WINDOWS");
-            // todo：获取子镜像，并 newIsoVolume()
+            // -- 获取子镜像，并 newIsoVolume()
+            List<Image> childImages = image.getChildImages();
+            for (Image child : childImages) {
+                newIsoVolume(child, vm);
+            }
         } else {
             log.info("createSystemVolume -- not WINDOWS");
         }
@@ -107,23 +112,52 @@ public class VolumeScheduler {
         return volumeUuid;
     }
 
-    private void newIsoVolume() {
+    private void newIsoVolume(Image image, Vm vm) {
+        String volumeUuid = UuidUtils.getRandomUuid();
+        Volume newVolume = new Volume();
+        // 1. basic
+        newVolume.setUuid(volumeUuid);
+        newVolume.setDescription(vm.getDescription());
+        newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        if (vm.getName() == null || vm.getName().isEmpty()) {
+            newVolume.setName(volumeUuid);
+        } else {
+            newVolume.setName(vm.getName());
+        }
+        // 2. info
+        newVolume.setInstanceUuid(vm.getUuid());
+        newVolume.setHostUuid(vm.getHostUuid());
+        newVolume.setImageUuid(image.getUuid());
+        // 3. spec
+        newVolume.setProviderLocation(image.getDirectory());
+        newVolume.setSize(vm.getDiskSize());
+        newVolume.setUsageType(VolumeUsageEnum.ISO);
+        newVolume.setFormatType(VolumeFormatEnum.ISO);
+        newVolume.setStatus(VolumeStatusEnum.CREATING);
 
+        // save into DB
+        tableStorage.volumeSave(newVolume);
     }
 
-    public boolean deleteSystemVolume(String vmUuid,String volumeUuid,String volumePath){
-        log.info("deleteVolume ==== start ====  volumeUuid: " + volumeUuid);
-        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+    public boolean deleteSystemVolume(String vmUuid, String volumeUuid, String volumePath){
+        log.info("deleteSysVolume ==== start ====  volumeUuid: " + volumeUuid);
         //删除Linux主机中的物理硬盘
-        if (volumeController.deleteSystemVolume(getSelectedUri(vmUuid), volumePath)
+        if (volumeController.deleteSystemVolume(getSelectedUri(vmUuid), volumeUuid, volumePath)
                 .equals(ResponseMsgConstants.SUCCESS)){
             tableStorage.volumeDelete(volumeUuid);
-            log.info("deleteVolume ==== end ====  volumeUuid: " + volumeUuid);
+            log.info("deleteSysVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
         } else {
-            log.info("deleteVolume ==== error ====  volumeUuid: " + volumeUuid);
+            log.info("deleteSysVolume ==== error ====  volumeUuid: " + volumeUuid);
             return false;
         }
+    }
+
+    public boolean deleteIsoVolume(String vmUuid, String volumeUuid){
+        log.info("deleteIsoVolume ==== start ====  volumeUuid: " + volumeUuid);
+        tableStorage.volumeDelete(volumeUuid);
+        log.info("deleteIsoVolume ==== end ====  volumeUuid: " + volumeUuid);
+        return true;
     }
 
 

@@ -45,9 +45,10 @@ public class VolumeController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteSystemVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath) {
         log.info("deleteSystemVolume ==== " + " VOLUME_PATH: " + volumePath);
-        if (volumeService.deleteVolume(volumePath)) {
+        if (volumeService.deleteVolume(volumeUuid, volumePath)) {
             log.info("deleteSystemVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {

@@ -67,22 +67,37 @@ public class VolumeService {
         return true;
     }
 
-    public boolean deleteVolume(String volumePath) {
+    public boolean deleteVolume(String volumeUuid, String volumePath) {
         log.info("deleteVolume ==== start ==== volumePath: " + volumePath);
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+
+        // 1. check path not empty
         if (FileUtils.isEmptyString(volumePath)) {
             log.error("Lack of volumePath Params :" + volumePath);
-        }
-        volumePath = PathUtils.genFullPath(volumePath);
-        if (!FileUtils.exists(volumePath)) {
-            log.error("Delete volume Error!!! " + volumePath + "is not exists");
             return false;
         }
+
+        // 2. check file exist
+        volumePath = PathUtils.genFullPath(volumePath);
+        if (!FileUtils.exists(volumePath)) {
+            if (volume.getStatus().equals(VolumeStatusEnum.CREATING)
+                    || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
+                log.info("no file need to delete");
+                return true;
+            } else {
+                log.error("Delete volume Error!!! " + volumePath + "is not exists");
+                return false;
+            }
+        }
+
+        // 3. delete
         log.info("volumePath" + volumePath);
         boolean result = new File(volumePath).delete();
         if (!result) {
             log.error("Delete volume Error!!! " + volumePath);
             return false;
         }
+
         log.info("deleteVolume ==== end ====");
         return true;
     }

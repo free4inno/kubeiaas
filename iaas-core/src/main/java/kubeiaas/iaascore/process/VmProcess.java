@@ -254,7 +254,7 @@ public class VmProcess {
     /**
      * Set VM Status in DB
      */
-    private void setVmStatus(String VmUuid, VmStatusEnum status){
+    public void setVmStatus(String VmUuid, VmStatusEnum status){
         Vm vm = tableStorage.vmQueryByUuid(VmUuid);
         vm.setStatus(status);
         tableStorage.vmSave(vm);

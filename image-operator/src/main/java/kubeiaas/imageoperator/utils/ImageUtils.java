@@ -9,6 +9,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -40,8 +42,19 @@ public class ImageUtils {
             Integer minDisk = (Integer) config.get("min_disk");
             Integer minMem = (Integer) config.get("min_mem");
 
+            List<Image> childImageList = new ArrayList<>();
+            List<Object> childImages = (List<Object>) objectMap.get("child_images");
+            if (childImages != null) {
+                for (Object child : childImages) {
+                    Map<String, String> childImageMap = (Map<String, String>) child;
+                    String childUuid = childImageMap.get("uuid");
+                    String childFilename = childImageMap.get("filename");
+                    childImageList.add(new Image(childUuid, ImageConfig.HOST_STORAGE_IMAGE_PATH + childFilename));
+                }
+            }
+
             Image image = new Image(id + 1, uuid, name, description, directory, format, size,
-                    ImageStatusEnum.AVAILABLE, minMem, minDisk, osType, osArch, osMode, null);
+                    ImageStatusEnum.AVAILABLE, minMem, minDisk, osType, osArch, osMode, null, childImageList);
 
             log.info("image: " + JSON.toJSONString(image));
             return image;

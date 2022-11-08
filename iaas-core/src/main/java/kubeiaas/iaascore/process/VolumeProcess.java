@@ -5,6 +5,7 @@ import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
+import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
@@ -93,14 +94,29 @@ public class VolumeProcess {
     }
 
     public void deleteVolume(String vmUuid) throws BaseException {
-        log.info("deleteVolume ==== start ====  vmUuid: " + vmUuid);
+        log.info("deleteVolume ==== start ==== vmUuid: " + vmUuid);
         List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
         for (Volume volume : volumes) {
-            if (!volumeScheduler.deleteSystemVolume(vmUuid,volume.getUuid(),volume.getProviderLocation())){
-                throw new BaseException("ERROR: delete volume:"+volume.getUuid()+" failed!");
+            VolumeUsageEnum usage = volume.getUsageType();
+            switch (usage) {
+                case SYSTEM:
+                    if (!volumeScheduler.deleteSystemVolume(vmUuid, volume.getUuid(), volume.getProviderLocation())){
+                        throw new BaseException("ERROR: delete sys volume:" + volume.getUuid() + " failed!");
+                    }
+                    break;
+                case ISO:
+                    if (!volumeScheduler.deleteIsoVolume(vmUuid, volume.getUuid())){
+                        throw new BaseException("ERROR: delete iso volume:" + volume.getUuid() + " failed!");
+                    }
+                    break;
+                case DATA:
+                    // todo: data volume delete
+                    break;
+                default:
+                    log.warn("unknown volume type");
+                    break;
             }
         }
         log.info("deleteVolume ==== end ==== vmUuid:" + vmUuid);
     }
-
 }

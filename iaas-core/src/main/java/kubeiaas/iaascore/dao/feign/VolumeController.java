@@ -28,6 +28,7 @@ public interface VolumeController {
     @ResponseBody
     String deleteSystemVolume(
             URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath);
 
 }

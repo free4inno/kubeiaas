@@ -100,6 +100,11 @@ public class VmService {
         }
 
         try {
+            /* -----0. set status -----
+            Set deleting status
+             */
+            vmProcess.setVmStatus(vmUuid, VmStatusEnum.DELETING);
+
             /* -----1. choose host ----
             Select the host where the VM to be deleted resides
             */
