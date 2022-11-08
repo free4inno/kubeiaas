@@ -84,11 +84,16 @@ public class VmService {
     }
 
     public String deleteVM(String vmUuid, boolean isForce) throws BaseException {
-        /* -----judge status ----
+        // ----- check if exist -----
+        Vm vm = vmProcess.queryVMByUuid(vmUuid);
+        if (vm == null) {
+            throw new BaseException("ERR: vm not found (uuid: " + vmUuid + ")");
+        }
+
+        /* ----- judge status ----
         Check the VM status
         */
         if (!isForce) {
-            Vm vm = vmProcess.queryVMByUuid(vmUuid);
             if (vm.getStatus().equals(VmStatusEnum.ACTIVE)) {
                 return ResponseMsgConstants.FAILED;
             }

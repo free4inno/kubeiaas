@@ -56,6 +56,9 @@ public class VolumeScheduler {
         return volumeUuid;
     }
 
+    /**
+     * new a volume at host's /sys-volumes
+     */
     private String newSystemVolume(Image image, Vm vm) {
         // 检查镜像
         if (!image.getStatus().equals(ImageStatusEnum.AVAILABLE)) {
@@ -112,11 +115,12 @@ public class VolumeScheduler {
         log.info("deleteVolume ==== start ====  volumeUuid: " + volumeUuid);
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         //删除Linux主机中的物理硬盘
-        if(volumeController.deleteSystemVolume(getSelectedUri(vmUuid), volumePath).equals(ResponseMsgConstants.SUCCESS)){
+        if (volumeController.deleteSystemVolume(getSelectedUri(vmUuid), volumePath)
+                .equals(ResponseMsgConstants.SUCCESS)){
             tableStorage.volumeDelete(volumeUuid);
             log.info("deleteVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
-        }else{
+        } else {
             log.info("deleteVolume ==== error ====  volumeUuid: " + volumeUuid);
             return false;
         }

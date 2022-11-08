@@ -27,21 +27,27 @@ public class DhcpScheduler {
     private TableStorage tableStorage;
 
     public Boolean bindMacAndIp(IpUsed ipUsed) {
-        if (dhcpController.bindMacAndIp(getDhcpUri(), ipUsed.getInstanceUuid(), ipUsed.getMac(), ipUsed.getIp())
-                .equals(ResponseMsgConstants.SUCCESS)) {
-            ipUsed.setStatus(IpAttachEnum.ATTACHED);
-            tableStorage.ipUsedSave(ipUsed);
-            return true;
-        } else {
+        try {
+            if (dhcpController.bindMacAndIp(getDhcpUri(), ipUsed.getInstanceUuid(), ipUsed.getMac(), ipUsed.getIp())
+                    .equals(ResponseMsgConstants.SUCCESS)) {
+                ipUsed.setStatus(IpAttachEnum.ATTACHED);
+                tableStorage.ipUsedSave(ipUsed);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
 
     public Boolean unbindMacAndIp(String vmUuid){
-        if (dhcpController.unbindMacAndIp(getDhcpUri(), vmUuid)
-                .equals(ResponseMsgConstants.SUCCESS)) {
-            return true;
-        } else {
+        try {
+            return dhcpController.unbindMacAndIp(getDhcpUri(), vmUuid)
+                    .equals(ResponseMsgConstants.SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

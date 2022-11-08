@@ -15,12 +15,22 @@ public class ResourceScheduler {
     private ResourceOperator resourceOperator;
 
     public Host vmSelectHostByAppoint(String vmUuid, String hostUuid) {
-        String hostObjectStr = resourceOperator.selectHostByAppoint(vmUuid, hostUuid);
-        return JSON.parseObject(hostObjectStr, Host.class);
+        try {
+            String hostObjectStr = resourceOperator.selectHostByAppoint(vmUuid, hostUuid);
+            return JSON.parseObject(hostObjectStr, Host.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public Host vmSelectHostByOperator(String vmUuid, String strategy) {
-        String hostObjectStr = resourceOperator.selectHostByOperator(vmUuid, strategy);
-        return JSON.parseObject(hostObjectStr, Host.class);
+        try {
+            String hostObjectStr = resourceOperator.selectHostByOperator(vmUuid, strategy);
+            return JSON.parseObject(hostObjectStr, Host.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
