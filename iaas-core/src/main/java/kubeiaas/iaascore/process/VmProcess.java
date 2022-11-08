@@ -187,12 +187,12 @@ public class VmProcess {
     public void modifyVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
         log.info("modifyVm --  VM");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
-        Boolean cpuMemFlag = false;
-        if (cpus != null && cpus != 0 &&  cpus != vm.getCpus()) {
+        boolean cpuMemFlag = false;
+        if (cpus != null && cpus != 0 && !cpus.equals(vm.getCpus())) {
             vm.setCpus(cpus);
             cpuMemFlag = true;
         }
-        if (memory != null && memory != 0 &&  memory != vm.getMemory()) {
+        if (memory != null && memory != 0 && !memory.equals(vm.getMemory())) {
             vm.setMemory(memory);
             cpuMemFlag = true;
         }
@@ -227,12 +227,12 @@ public class VmProcess {
             throw new BaseException("ERROR: vm is still active");
         }
 
-        Boolean cpuMemFlag = false;
-        if (cpus != null && cpus != 0 &&  cpus != vm.getCpus()) {
+        boolean cpuMemFlag = false;
+        if (cpus != null && cpus != 0 && !cpus.equals(vm.getCpus())) {
             vm.setCpus(cpus);
             cpuMemFlag = true;
         }
-        if (memory != null && memory != 0 &&  memory != vm.getMemory()) {
+        if (memory != null && memory != 0 && !memory.equals(vm.getMemory())) {
             vm.setMemory(memory);
             cpuMemFlag = true;
         }
@@ -242,7 +242,7 @@ public class VmProcess {
             log.error("instance with Uuid: " + vmUuid + "is not existed");
             throw new BaseException("ERROR: vm is not existed!");
         }
-        log.info("cpuMemFlag --"+ cpuMemFlag);
+        log.info("cpuMemFlag --" + cpuMemFlag);
         if (cpuMemFlag) {
             if (!vmScheduler.modifyVmInstance(vmUuid)){
                 throw new BaseException("ERROR: reduce vm instance failed!");
