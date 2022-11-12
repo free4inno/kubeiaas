@@ -17,6 +17,8 @@ public enum ResponseEnum {
     VM_START_ERROR(202.3F,"虚拟机启动失败"),
     VM_STOP_ERROR(202.4F,"虚拟机停止失败"),
     VM_REBOOT_ERROR(202.5F,"虚拟机重启失败"),
+    VM_SUSPEND_ERROR(202.6F,"虚拟机暂停失败"),
+    VM_RESUME_ERROR(202.7F,"虚拟机恢复失败"),
     ARGS_ERROR(402f, "验参失败"),
     INTERNAL_ERROR(500f, "内部错误");
 

@@ -36,8 +36,7 @@ public class VmProcess {
             String imageUuid,
             Integer diskSize,
             String description,
-            String hostUUid)
-    {
+            String hostUUid) {
         log.info("createVm -- 1. pre create VM");
         Vm newVm = new Vm();
         String newVmUuid = UuidUtils.getRandomUuid();

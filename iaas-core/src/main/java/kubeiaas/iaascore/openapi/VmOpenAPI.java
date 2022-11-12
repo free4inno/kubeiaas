@@ -34,6 +34,9 @@ public class VmOpenAPI {
     @Resource
     private VmService vmService;
 
+    /**
+     * 测试接口
+     */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.TEST, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String test(HttpServletRequest request) {
@@ -43,6 +46,9 @@ public class VmOpenAPI {
         return "hello";
     }
 
+    /**
+     * 创建
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String create(@Valid @RequestBody CreateVmForm f) throws VmException {
@@ -52,6 +58,9 @@ public class VmOpenAPI {
         return JSON.toJSONString(BaseResponse.success(newVm));
     }
 
+    /**
+     * 删除
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException, VmException {
@@ -72,6 +81,9 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 停止
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.STOP, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String stop(@Valid @RequestBody OperateVmForm f) throws BaseException {
@@ -86,6 +98,9 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 启动
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.START, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String start(@Valid @RequestBody OperateVmForm f) throws BaseException {
@@ -100,6 +115,9 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 重启
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REBOOT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reboot(@Valid @RequestBody OperateVmForm f) throws BaseException {
@@ -114,6 +132,9 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 暂停
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SUSPEND, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String suspend(@Valid @RequestBody OperateVmForm f) throws BaseException {
@@ -124,10 +145,13 @@ public class VmOpenAPI {
             log.info("suspendVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success(resData));
         }else {
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_SUSPEND_ERROR));
         }
     }
 
+    /**
+     * 恢复
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String resume(@Valid @RequestBody OperateVmForm f) throws BaseException {
@@ -138,10 +162,13 @@ public class VmOpenAPI {
             log.info("resumeVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success(resData));
         }else {
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_RESUME_ERROR));
         }
     }
 
+    /**
+     * 增加 cpu/mem 配置
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPDATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String modify(@Valid @RequestBody ModifyVmForm f) throws BaseException {
@@ -156,6 +183,9 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 减少 cpu/mem 配置
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REDUCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reduce(@Valid @RequestBody ModifyVmForm f) throws BaseException {
