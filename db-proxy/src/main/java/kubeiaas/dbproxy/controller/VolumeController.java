@@ -3,9 +3,9 @@ package kubeiaas.dbproxy.controller;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
-import kubeiaas.dbproxy.dao.IpUsedDao;
+import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.dbproxy.dao.VolumeDao;
-import kubeiaas.dbproxy.table.IpUsedTable;
 import kubeiaas.dbproxy.table.VolumeTable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,6 +35,17 @@ public class VolumeController {
                 cb.and(cb.equal(root.get(key1), value1));
         List<VolumeTable> volumeTableList = volumeDao.findAll(specification);
         log.info("queryAllBySingleKey ==== end ====");
+        return JSON.toJSONString(volumeTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAllDataVolume() {
+        log.info("queryAllDataVolume ==== start ====");
+        Specification<VolumeTable> specification = (root, cq, cb) ->
+                cb.and(cb.equal(root.get(VolumeConstants.USAGE_TYPE), VolumeUsageEnum.DATA));
+        List<VolumeTable> volumeTableList = volumeDao.findAll(specification);
+        log.info("queryAllDataVolume ==== end ====");
         return JSON.toJSONString(volumeTableList);
     }
 

@@ -127,6 +127,10 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.QUERY_ALL_DATA_VOLUME)
+    @ResponseBody
+    String volumeQueryAllDataVolume();
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
     String volumeSave(

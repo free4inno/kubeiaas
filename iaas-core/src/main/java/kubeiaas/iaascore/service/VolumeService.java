@@ -4,7 +4,6 @@ import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.process.ResourceProcess;
 import kubeiaas.iaascore.process.VolumeProcess;
@@ -12,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -35,13 +35,13 @@ public class VolumeService {
         Generate and Set basic info of volume.
         （预处理：设置基础参数，保存云硬盘信息）
          */
-        Volume newVolume= volumeProcess.preCreateVolume(name,description,hostUUid,diskSize);
+        Volume newVolume= volumeProcess.preCreateVolume(name, description, hostUUid, diskSize);
 
         /* ---- 2. check host ----
         Use Resource Operator to allocate Host
         （资源调度：分配宿主机）
          */
-        newVolume = resourceProcess.createVolmeOperate(newVolume);
+        newVolume = resourceProcess.createVolumeOperate(newVolume);
 
         /* ---- 3. create volume ----
         （创建虚拟机数据盘）
@@ -56,7 +56,7 @@ public class VolumeService {
         （判断数据盘状态）
          */
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
-        if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)){
+        if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)) {
             return ResponseMsgConstants.FAILED;
         }
 
@@ -74,8 +74,6 @@ public class VolumeService {
     }
 
     public String attachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
-
-
         /* -----1. choose host ----
         Select the host where the VM to be attached
         */
@@ -96,13 +94,10 @@ public class VolumeService {
     }
 
     public String detachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
-
-
         /* -----1. choose host ----
         Select the host where the VM to be detached
         */
         resourceProcess.selectHostByVmUuid(vmUuid);
-
 
         /* -----2. detach data Volume ----
          */
@@ -111,5 +106,8 @@ public class VolumeService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    public List<Volume> queryAllDataVolume() {
+        return tableStorage.volumeQueryAllDataVolume();
+    }
 
 }

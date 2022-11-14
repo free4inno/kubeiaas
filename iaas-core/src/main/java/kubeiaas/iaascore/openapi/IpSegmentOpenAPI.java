@@ -1,7 +1,6 @@
 package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
-import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.iaascore.dao.TableStorage;
@@ -19,14 +18,13 @@ import java.util.List;
 @Controller
 @RequestMapping(value = RequestMappingConstants.IP_SEGMENT)
 public class IpSegmentOpenAPI {
+
     @Resource
     private TableStorage tableStorage;
-
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-
         log.info("ip_segment queryAll ==== start ====");
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
         log.info("ip_segment queryAll ==== end ====");

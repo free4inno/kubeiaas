@@ -13,7 +13,6 @@ import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.scheduler.ResourceScheduler;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -79,7 +78,7 @@ public class ResourceProcess {
         return newVm;
     }
 
-    public Volume createVolmeOperate(Volume newVolume) throws VolumeException {
+    public Volume createVolumeOperate(Volume newVolume) throws VolumeException {
         Host selectedHost;
         String hostUUid = newVolume.getHostUuid();
 
@@ -109,10 +108,10 @@ public class ResourceProcess {
      */
     public void selectHostByVmUuid(String VmUuid) throws BaseException {
 
-        //get Vm By VmUuid
+        // get Vm By VmUuid
         Vm vm = tableStorage.vmQueryByUuid(VmUuid);
 
-        //SelectHost
+        // SelectHost
         Host selectedHost;
         String hostUUid = vm.getHostUuid();
         if (hostUUid != null && !hostUUid.isEmpty()) {
@@ -133,12 +132,12 @@ public class ResourceProcess {
     /**
      * SelectHost by VolumeUuid
      */
-    public Volume selectHostByVolumeUuid(String volumeUuid) throws BaseException {
+    public void selectHostByVolumeUuid(String volumeUuid) throws BaseException {
 
-        //get Volme By volumeUuid
+        // get Volume By volumeUuid
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
 
-        //SelectHost
+        // SelectHost
         Host selectedHost;
         String hostUUid = volume.getHostUuid();
         if (hostUUid != null && !hostUUid.isEmpty()) {
@@ -154,8 +153,6 @@ public class ResourceProcess {
 
         log.info("selected host: " + selectedHost.getName());
         AgentConfig.setVolumeSelectedHost(volume.getUuid(), selectedHost);
-
-        return volume;
     }
 
 }

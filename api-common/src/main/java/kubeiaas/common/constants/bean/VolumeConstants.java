@@ -4,6 +4,7 @@ public class VolumeConstants {
     /* DB key */
     public static final String UUID = "uuid";
     public static final String INSTANCE_UUID = "instanceUuid";
+    public static final String USAGE_TYPE = "usageType";
 
     /* config */
     public static final String SPILT = "/";

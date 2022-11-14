@@ -32,6 +32,7 @@ public class RequestMappingConstants {
     public static final String QUERY_BY_UUID = "query_by_uuid";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
+    public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
     public static final String SAVE = "save";
     public static final String UPDATE = "update";
     public static final String REDUCE = "reduce";

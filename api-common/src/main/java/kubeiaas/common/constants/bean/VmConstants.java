@@ -14,6 +14,6 @@ public class VmConstants {
     public static final String DELETE_NORMAL = "normal";
 
     /* vnc config */
-    public static final String VNC_URL_TEMPLATE = "http://%s:8787/vnc.html?path=?token=%s";
-
+    // public static final String VNC_URL_TEMPLATE = "http://%s:8787/vnc.html?path=?token=%s";
+    public static final String VNC_URL_TEMPLATE = "http://kubeiaasvnc.free4inno.com/vnc.html?path=?token=%s";
 }

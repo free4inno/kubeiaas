@@ -192,9 +192,12 @@ public class TableStorage {
     // ========================= volume =========================
 
     public List<Volume> volumeQueryAllByInstanceUuid(String instanceUuid) {
-        // todo: INSTANCE_UUID
-//        String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.INSTANCE_UUID, instanceUuid);
-        String jsonString = dbProxy.volumeQueryAllBySingleKey("instanceUuid", instanceUuid);
+        String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.INSTANCE_UUID, instanceUuid);
+        return JSON.parseArray(jsonString, Volume.class);
+    }
+
+    public List<Volume> volumeQueryAllDataVolume() {
+        String jsonString = dbProxy.volumeQueryAllDataVolume();
         return JSON.parseArray(jsonString, Volume.class);
     }
 

@@ -26,7 +26,8 @@ public class AgentConfig {
     private static final String VNC_HOST_IP = "VNC_HOST_IP";
 
     /* select agent's host ip */
-    // < vmUuid : hostIp >
+    // < vmUuid     : hostIp >
+    // < volumeUuid : hostIp >
     private static Map<String, String> selected_host_ip = new HashMap<>();
 
     /**
@@ -61,20 +62,6 @@ public class AgentConfig {
      */
     public static void clearVolumeSelectedHost(String volumeUuid) {
         selected_host_ip.remove(volumeUuid);
-    }
-
-
-    /**
-     * 获取 agent uri - 主动选择
-     * @return uri
-     */
-    public static String getSelectedUriByVolumeUuid(String volumeUuid) {
-        String selectedIp = selected_host_ip.get(volumeUuid);
-        if (selectedIp == null || selectedIp.isEmpty()) {
-            log.error("getSelectedUri -- no selected ip for " + volumeUuid);
-            return "";
-        }
-        return HTTP_URI + selectedIp + AGENT_PORT;
     }
 
     /**

@@ -151,18 +151,18 @@ public class VolumeProcess {
     }
 
     public void attachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
-        log.info("attachDataVolume ==== start ====  volumeUuid: " + volumeUuid+"vmUuid:"+vmUuid);
-        if (!volumeScheduler.attachDataVolume(vmUuid, volumeUuid)){
-            throw new BaseException("ERROR: attach data volume:"+volumeUuid+" failed!");
+        log.info("attachDataVolume ==== start ====  volumeUuid: " + volumeUuid + "vmUuid:" + vmUuid);
+        if (!volumeScheduler.attachDataVolume(vmUuid, volumeUuid)) {
+            throw new BaseException("ERROR: attach data volume:" + volumeUuid + " failed!");
         }
         log.info("attachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
         AgentConfig.clearVolumeSelectedHost(volumeUuid);
     }
 
     public void detachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
-        log.info("detachDataVolume ==== start ====  volumeUuid: " + volumeUuid+"vmUuid:"+vmUuid);
-        if (!volumeScheduler.detachDataVolume(vmUuid, volumeUuid)){
-            throw new BaseException("ERROR: detach data volume:"+volumeUuid+" failed!");
+        log.info("detachDataVolume ==== start ====  volumeUuid: " + volumeUuid + "vmUuid:" + vmUuid);
+        if (!volumeScheduler.detachDataVolume(vmUuid, volumeUuid)) {
+            throw new BaseException("ERROR: detach data volume:" + volumeUuid + " failed!");
         }
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         volume.setInstanceUuid("");

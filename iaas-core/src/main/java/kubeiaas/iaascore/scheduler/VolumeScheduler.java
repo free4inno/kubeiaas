@@ -146,7 +146,7 @@ public class VolumeScheduler {
 
     public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
         log.info("createDataVolume ==== start ====  volumeUuid: " + volumeUuid);
-        if (volumeController.createDataVolume(getSelectedUriByVolumeUuid(volumeUuid), volumePath,
+        if (volumeController.createDataVolume(getSelectedUri(volumeUuid), volumePath,
                 volumeUuid, extraSize).equals(ResponseMsgConstants.SUCCESS)){
             log.info("createDataVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
@@ -177,16 +177,16 @@ public class VolumeScheduler {
         return true;
     }
 
-
     public boolean deleteDataVolume(String volumeUuid,String volumePath){
         log.info("deleteDataVolume ==== start ====  volumeUuid: " + volumeUuid);
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         //删除Linux主机中的物理硬盘
-        if(volumeController.deleteDataVolume(getSelectedUriByVolumeUuid(volumeUuid), volumePath).equals(ResponseMsgConstants.SUCCESS)){
+        if (volumeController.deleteDataVolume(getSelectedUri(volumeUuid), volumeUuid, volumePath)
+                .equals(ResponseMsgConstants.SUCCESS)){
             tableStorage.volumeDelete(volumeUuid);
             log.info("deleteDataVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
-        }else{
+        } else {
             log.info("deleteDataVolume ==== error ====  volumeUuid: " + volumeUuid);
             return false;
         }
@@ -205,10 +205,11 @@ public class VolumeScheduler {
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         String vmObjectStr = JSON.toJSONString(vm);
         String volumeObjectStr = JSON.toJSONString(volume);
-        if(volumeController.attachDataVolume(getSelectedUri(vm.getUuid()), vmObjectStr, volumeObjectStr).equals(ResponseMsgConstants.SUCCESS)){
+        if (volumeController.attachDataVolume(getSelectedUri(vm.getUuid()), vmObjectStr, volumeObjectStr)
+                .equals(ResponseMsgConstants.SUCCESS)){
             log.info("attachDataVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
-        }else{
+        } else {
             log.info("attachDataVolume ==== error ====  volumeUuid: " + volumeUuid);
             return false;
         }
@@ -220,10 +221,11 @@ public class VolumeScheduler {
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         String vmObjectStr = JSON.toJSONString(vm);
         String volumeObjectStr = JSON.toJSONString(volume);
-        if(volumeController.detachDataVolume(getSelectedUri(vmUuid), vmObjectStr, volumeObjectStr).equals(ResponseMsgConstants.SUCCESS)){
+        if (volumeController.detachDataVolume(getSelectedUri(vmUuid), vmObjectStr, volumeObjectStr)
+                .equals(ResponseMsgConstants.SUCCESS)){
             log.info("detachDataVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
-        }else{
+        } else {
             log.info("detachDataVolume ==== error ====  volumeUuid: " + volumeUuid);
             return false;
         }
@@ -232,16 +234,6 @@ public class VolumeScheduler {
     private URI getSelectedUri(String vmUuid) {
         try {
             return new URI(AgentConfig.getSelectedUri(vmUuid));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            log.error("build URI failed!");
-            return null;
-        }
-    }
-
-    private URI getSelectedUriByVolumeUuid(String volumeUuid) {
-        try {
-            return new URI(AgentConfig.getSelectedUriByVolumeUuid(volumeUuid));
         } catch (URISyntaxException e) {
             e.printStackTrace();
             log.error("build URI failed!");

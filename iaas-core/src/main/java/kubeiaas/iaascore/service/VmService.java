@@ -267,9 +267,12 @@ public class VmService {
     }
 
     public String getVncUrl(String vmUuid) {
-        // Analyze `vnc` host from DB hostRoles.
-        Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
-        return String.format(VmConstants.VNC_URL_TEMPLATE, host.getIp(), vmUuid);
+        // 1. Analyze `vnc` host from DB hostRoles.
+        // Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
+        // return String.format(VmConstants.VNC_URL_TEMPLATE, host.getIp(), vmUuid);
+
+        // 2. Analyze `vnc` host from Domain Name.
+        return String.format(VmConstants.VNC_URL_TEMPLATE, vmUuid);
     }
 
 }

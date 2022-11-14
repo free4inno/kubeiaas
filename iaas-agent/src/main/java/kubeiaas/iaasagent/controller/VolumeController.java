@@ -29,9 +29,6 @@ public class VolumeController {
     @Resource
     private VolumeService volumeService;
 
-    @Resource
-    private ObjectMapper objectMapper;
-
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CREATE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createSystemVolume(
@@ -65,7 +62,6 @@ public class VolumeController {
         }
     }
 
-    //TODO:目前只完成了删除系统盘操作
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteSystemVolume(
@@ -84,9 +80,10 @@ public class VolumeController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteDataVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath) {
         log.info("deleteDataVolume ==== " + " VOLUME_PATH: " + volumePath);
-        if (volumeService.deleteVolume(volumePath)) {
+        if (volumeService.deleteVolume(volumeUuid, volumePath)) {
             log.info("deleteDataVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {

@@ -43,6 +43,7 @@ public interface VolumeController {
     @ResponseBody
     String deleteDataVolume(
             URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath);
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.ATTACH_DATA_VOLUME)
