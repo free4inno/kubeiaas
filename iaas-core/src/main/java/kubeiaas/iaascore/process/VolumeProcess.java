@@ -4,16 +4,22 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
+import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
+import kubeiaas.common.enums.volume.VolumeUsageEnum;
+import kubeiaas.common.utils.PathUtils;
+import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
+import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -92,7 +98,21 @@ public class VolumeProcess {
         log.info("createVm -- newThread begin wait for volume creating...");
     }
 
-    public void deleteVolume(String vmUuid) throws BaseException {
+    public void createDataVolume(Volume newVolume) throws VolumeException {
+        log.info("createVm -- Volume");
+
+        String volumeUuid = newVolume.getUuid();
+        if (volumeUuid.isEmpty()) {
+            throw new VolumeException(newVolume,"ERROR: create Data volume failed! (pre error)");
+        }
+        int diskSize = newVolume.getSize();
+        if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, diskSize)){
+            throw new VolumeException(newVolume, "ERROR create Data volume:"+newVolume.getUuid()+" failed!");
+        }
+        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+    }
+
+    public void deleteSystemVolume(String vmUuid) throws BaseException {
         log.info("deleteVolume ==== start ====  vmUuid: " + vmUuid);
         List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
         for (Volume volume : volumes) {
@@ -102,5 +122,71 @@ public class VolumeProcess {
         }
         log.info("deleteVolume ==== end ==== vmUuid:" + vmUuid);
     }
+
+    public void deleteDataVolume(String volumeUuid) throws BaseException {
+        log.info("deleteDataVolume ==== start ====  volumeUuid: " + volumeUuid);
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        if (!volumeScheduler.deleteDataVolume(volumeUuid,volume.getProviderLocation())){
+            throw new BaseException("ERROR: delete data volume:"+volume.getUuid()+" failed!");
+        }
+        log.info("deleteDataVolume ==== end ==== volumeUuid:" + volumeUuid);
+        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+    }
+
+    public void attachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
+        log.info("attachDataVolume ==== start ====  volumeUuid: " + volumeUuid+"vmUuid:"+vmUuid);
+        if (!volumeScheduler.attachDataVolume(vmUuid, volumeUuid)){
+            throw new BaseException("ERROR: attach data volume:"+volumeUuid+" failed!");
+        }
+        log.info("attachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
+        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+    }
+
+    public void detachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
+        log.info("detachDataVolume ==== start ====  volumeUuid: " + volumeUuid+"vmUuid:"+vmUuid);
+        if (!volumeScheduler.detachDataVolume(vmUuid, volumeUuid)){
+            throw new BaseException("ERROR: detach data volume:"+volumeUuid+" failed!");
+        }
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        volume.setInstanceUuid("");
+        volume.setMountPoint("");
+        volume.setBus("");
+        tableStorage.volumeSave(volume);
+        log.info("detachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
+        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+    }
+
+    /**
+     * preCreate Volume.
+     */
+    public Volume preCreateVolume(
+            String name,
+            String description,
+            String hostUUid,
+            Integer diskSize
+    ){
+        String volumeUuid = UuidUtils.getRandomUuid();
+        Volume newVolume = new Volume();
+        newVolume.setUuid(volumeUuid);
+        newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        if (name == null || name.isEmpty()) {
+            newVolume.setName(volumeUuid);
+        } else {
+            newVolume.setName(name);
+        }
+        newVolume.setDescription(description);
+        newVolume.setHostUuid(hostUUid);
+        newVolume.setSize(diskSize);
+        newVolume.setProviderLocation(PathUtils.genDataVolumeDirectoryByUuid(volumeUuid, null));
+        newVolume.setUsageType(VolumeUsageEnum.DATA);
+        newVolume.setFormatType(VolumeFormatEnum.QCOW2);
+        newVolume.setStatus(VolumeStatusEnum.CREATING);
+
+        // save into DB
+        newVolume = tableStorage.volumeSave(newVolume);
+        return newVolume;
+    }
+
+
 
 }

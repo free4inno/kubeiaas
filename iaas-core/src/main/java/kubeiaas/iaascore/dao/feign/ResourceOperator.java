@@ -18,10 +18,24 @@ public interface ResourceOperator {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid);
 
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_HOST_UUID)
+    @ResponseBody
+    String selectHostByHostUuid(
+            @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid);
+
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_OPERATOR)
     @ResponseBody
     String selectHostByOperator(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.STRATEGY) String strategy);
+
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_HOST_OPERATOR)
+    @ResponseBody
+    String selectHostByHostOperator(
+            @RequestParam(value = RequestParamConstants.STRATEGY) String strategy);
+
 
 }

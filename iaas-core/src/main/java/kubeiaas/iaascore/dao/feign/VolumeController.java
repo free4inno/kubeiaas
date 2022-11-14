@@ -24,10 +24,37 @@ public interface VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.CREATE_DATA_VOLUME)
+    @ResponseBody
+    String createDataVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize);
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DELETE_SYSTEM_VOLUME)
     @ResponseBody
     String deleteSystemVolume(
             URI uri,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DELETE_DATA_VOLUME)
+    @ResponseBody
+    String deleteDataVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.ATTACH_DATA_VOLUME)
+    @ResponseBody
+    String attachDataVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
+            @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DETACH_DATA_VOLUME)
+    @ResponseBody
+    String detachDataVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
+            @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr);
 }

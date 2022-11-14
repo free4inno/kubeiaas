@@ -1,5 +1,10 @@
 package kubeiaas.iaasagent.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import kubeiaas.common.bean.Vm;
+import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
@@ -24,6 +29,9 @@ public class VolumeController {
     @Resource
     private VolumeService volumeService;
 
+    @Resource
+    private ObjectMapper objectMapper;
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CREATE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createSystemVolume(
@@ -37,6 +45,22 @@ public class VolumeController {
             return ResponseMsgConstants.SUCCESS;
         } else {
             log.error("createSystemVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CREATE_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String createDataVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize) {
+        log.info("createDataVolume ==== "  + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        if (volumeService.createDataVolume(volumePath, volumeUuid, extraSize)) {
+            log.info("createDataVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("createDataVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -56,4 +80,51 @@ public class VolumeController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String deleteDataVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath) {
+        log.info("deleteDataVolume ==== " + " VOLUME_PATH: " + volumePath);
+        if (volumeService.deleteVolume(volumePath)) {
+            log.info("deleteDataVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("deleteDataVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ATTACH_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String attachDataVolume(
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
+            @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
+        log.info("attachVolume ==== start ==== volume: " + volumeObjectStr + " vm: " + vmObjectStr);
+        Vm vm = JSON.parseObject(vmObjectStr, Vm.class);
+        Volume volume = JSON.parseObject(volumeObjectStr, Volume.class);
+        if(volumeService.attachVolume(vm,volume)){
+            log.info("attachDataVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.info("attachDataVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DETACH_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String detachDataVolume(
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
+            @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
+        log.info("detachVolume ==== start ==== volume: " + volumeObjectStr + " vm: " + vmObjectStr);
+        Vm vm = JSON.parseObject(vmObjectStr, Vm.class);
+        Volume volume = JSON.parseObject(volumeObjectStr, Volume.class);
+        if(volumeService.detachVolume(vm,volume)){
+            log.info("detachVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        }else {
+            log.info("detachVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
 }

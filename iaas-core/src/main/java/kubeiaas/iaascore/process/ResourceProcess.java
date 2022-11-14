@@ -3,14 +3,17 @@ package kubeiaas.iaascore.process;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
+import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.scheduler.ResourceScheduler;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -76,6 +79,31 @@ public class ResourceProcess {
         return newVm;
     }
 
+    public Volume createVolmeOperate(Volume newVolume) throws VolumeException {
+        Host selectedHost;
+        String hostUUid = newVolume.getHostUuid();
+
+        if (hostUUid != null && !hostUUid.isEmpty()) {
+            // 指定 host：检查可用性
+            selectedHost = resourceScheduler.vmSelectHostByHostUuid(hostUUid);
+        } else {
+            // 未指定 host：主动选择
+            selectedHost = resourceScheduler.selectHostByHostOperator(HostSelectStrategyConstants.ROUND_ROBIN);
+        }
+        if (selectedHost == null) {
+            throw new VolumeException(newVolume,"ERROR: no available host.");
+        }
+        log.info("selected host: " + selectedHost.getName());
+        // set scheduler of iaas-agent
+        AgentConfig.setVolumeSelectedHost(newVolume.getUuid(), selectedHost);
+        // save into DB
+        newVolume.setHostUuid(selectedHost.getUuid());
+        newVolume = tableStorage.volumeSave(newVolume);
+
+        log.info("createVolume -- Resource Operator success!");
+        return newVolume;
+    }
+
     /**
     * SelectHost by VmUuid
      */
@@ -100,7 +128,34 @@ public class ResourceProcess {
 
         log.info("selected host: " + selectedHost.getName());
         AgentConfig.setSelectedHost(vm.getUuid(), selectedHost);
+    }
 
+    /**
+     * SelectHost by VolumeUuid
+     */
+    public Volume selectHostByVolumeUuid(String volumeUuid) throws BaseException {
+
+        //get Volme By volumeUuid
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+
+        //SelectHost
+        Host selectedHost;
+        String hostUUid = volume.getHostUuid();
+        if (hostUUid != null && !hostUUid.isEmpty()) {
+            // 获取Volume所在的Host
+            selectedHost = resourceScheduler.vmSelectHostByHostUuid(hostUUid);
+        } else {
+            // 若不存在，抛出服务器异常错误
+            throw new BaseException("Error: HostUuid error!");
+        }
+        if (selectedHost == null) {
+            throw new BaseException("ERROR: no available host.");
+        }
+
+        log.info("selected host: " + selectedHost.getName());
+        AgentConfig.setVolumeSelectedHost(volume.getUuid(), selectedHost);
+
+        return volume;
     }
 
 }

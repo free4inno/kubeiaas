@@ -2,7 +2,7 @@ package kubeiaas.common.enums.volume;
 
 public enum VolumeStatusEnum {
 
-    DEFINED, AVAILABLE, ATTACHED, APPLYING, CREATING, DELETING, ERROR, ERROR_PREPARE, ERROR_DELETING, DELETED, USED, REJECTED;
+    DEFINED, AVAILABLE, DETACHED, ATTACHED, APPLYING, CREATING, DELETING, ERROR, ERROR_PREPARE, ERROR_DELETING, DELETED, USED, REJECTED;
 
     public String toString() {
         switch (this) {
@@ -12,6 +12,8 @@ public enum VolumeStatusEnum {
                 return "available";
             case ATTACHED:
                 return "attached";
+            case DETACHED:
+                return "detached";
             case APPLYING:
                 return "applying";
             case CREATING:

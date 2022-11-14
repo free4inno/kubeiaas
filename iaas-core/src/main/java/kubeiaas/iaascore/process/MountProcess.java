@@ -40,8 +40,8 @@ public class MountProcess {
             } else {
                 volume.setBus(VolumeConstants.VOLUME_BUS_VIRTIO);
             }
-            volume.setStatus(VolumeStatusEnum.ATTACHED);
             volume.setInstanceUuid(vm.getUuid());
+            volume.setStatus(VolumeStatusEnum.ATTACHED);
             // save into DB
             tableStorage.volumeSave(volume);
         }
@@ -55,7 +55,7 @@ public class MountProcess {
         Image systemImage = tableStorage.imageQueryByUuid(vm.getImageUuid());
         for (Volume volume : volumeList) {
             // 逐个分配挂载点
-            String mountPoint;
+            String mountPoint = null;
             if (volume.getUsageType().equals(VolumeUsageEnum.SYSTEM)) {
                 // 1. 挂载系统盘
                 if (systemImage.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
@@ -74,6 +74,8 @@ public class MountProcess {
                 }
             }
             volume.setMountPoint(mountPoint);
+            log.info("volume: " + volume.getUuid() + "'s mount point: " + volume.getMountPoint());
         }
+
     }
 }
