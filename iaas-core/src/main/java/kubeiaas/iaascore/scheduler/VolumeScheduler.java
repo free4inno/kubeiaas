@@ -1,5 +1,6 @@
 package kubeiaas.iaascore.scheduler;
 
+import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
@@ -15,6 +16,7 @@ import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.VolumeController;
+import kubeiaas.iaascore.process.MountProcess;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,6 +35,9 @@ public class VolumeScheduler {
 
     @Resource
     private VolumeController volumeController;
+
+    @Resource
+    private MountProcess mountProcess;
 
     public String createSystemVolume(String vmUuid) {
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
@@ -139,6 +144,18 @@ public class VolumeScheduler {
         tableStorage.volumeSave(newVolume);
     }
 
+    public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
+        log.info("createDataVolume ==== start ====  volumeUuid: " + volumeUuid);
+        if (volumeController.createDataVolume(getSelectedUriByVolumeUuid(volumeUuid), volumePath,
+                volumeUuid, extraSize).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("createDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else {
+            log.info("createDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
     public boolean deleteSystemVolume(String vmUuid, String volumeUuid, String volumePath){
         log.info("deleteSysVolume ==== start ====  volumeUuid: " + volumeUuid);
         //删除Linux主机中的物理硬盘
@@ -161,9 +178,70 @@ public class VolumeScheduler {
     }
 
 
+    public boolean deleteDataVolume(String volumeUuid,String volumePath){
+        log.info("deleteDataVolume ==== start ====  volumeUuid: " + volumeUuid);
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        //删除Linux主机中的物理硬盘
+        if(volumeController.deleteDataVolume(getSelectedUriByVolumeUuid(volumeUuid), volumePath).equals(ResponseMsgConstants.SUCCESS)){
+            tableStorage.volumeDelete(volumeUuid);
+            log.info("deleteDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else{
+            log.info("deleteDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
+    public boolean attachDataVolume(String vmUuid, String volumeUuid){
+        log.info("attachVolume ==== start ====  vmUuid: " + vmUuid + " volumeUuid: " + volumeUuid);
+        //获取已经挂载的volumes
+        List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
+        log.info("attachVolume ====  volumeList: " + volumeList);
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        //设置新volume的盘符等信息
+        if (!mountProcess.attachVolumes(volumeList, vm)) {
+            return false;
+        }
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        String vmObjectStr = JSON.toJSONString(vm);
+        String volumeObjectStr = JSON.toJSONString(volume);
+        if(volumeController.attachDataVolume(getSelectedUri(vm.getUuid()), vmObjectStr, volumeObjectStr).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("attachDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else{
+            log.info("attachDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
+    public boolean detachDataVolume(String vmUuid, String volumeUuid){
+        log.info("detachDataVolume ==== start ====  vmUuid: " + vmUuid + " volumeUuid: " + volumeUuid);
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        String vmObjectStr = JSON.toJSONString(vm);
+        String volumeObjectStr = JSON.toJSONString(volume);
+        if(volumeController.detachDataVolume(getSelectedUri(vmUuid), vmObjectStr, volumeObjectStr).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("detachDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else{
+            log.info("detachDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
     private URI getSelectedUri(String vmUuid) {
         try {
             return new URI(AgentConfig.getSelectedUri(vmUuid));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            log.error("build URI failed!");
+            return null;
+        }
+    }
+
+    private URI getSelectedUriByVolumeUuid(String volumeUuid) {
+        try {
+            return new URI(AgentConfig.getSelectedUriByVolumeUuid(volumeUuid));
         } catch (URISyntaxException e) {
             e.printStackTrace();
             log.error("build URI failed!");

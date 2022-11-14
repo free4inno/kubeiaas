@@ -19,6 +19,9 @@ public enum ResponseEnum {
     VM_REBOOT_ERROR(202.5F,"虚拟机重启失败"),
     VM_SUSPEND_ERROR(202.6F,"虚拟机暂停失败"),
     VM_RESUME_ERROR(202.7F,"虚拟机恢复失败"),
+    VOLUME_DELETE_ERROR(202.6f,"云硬盘删除失败"),
+    VOLUME_ATTACH_ERROR(202.7f,"云硬盘挂载失败"),
+    VOLUME_DETACH_ERROR(202.8f,"云硬盘卸载失败"),
     ARGS_ERROR(402f, "验参失败"),
     INTERNAL_ERROR(500f, "内部错误");
 

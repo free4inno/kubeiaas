@@ -47,6 +47,37 @@ public class AgentConfig {
     }
 
     /**
+     * 设置 target host
+     * @param volumeUuid
+     * @param host 目标 agent 所在 host
+     */
+    public static void setVolumeSelectedHost(String volumeUuid, Host host) {
+        selected_host_ip.put(volumeUuid, host.getIp());
+    }
+
+    /**
+     * 清除 target host
+     * @param volumeUuid
+     */
+    public static void clearVolumeSelectedHost(String volumeUuid) {
+        selected_host_ip.remove(volumeUuid);
+    }
+
+
+    /**
+     * 获取 agent uri - 主动选择
+     * @return uri
+     */
+    public static String getSelectedUriByVolumeUuid(String volumeUuid) {
+        String selectedIp = selected_host_ip.get(volumeUuid);
+        if (selectedIp == null || selectedIp.isEmpty()) {
+            log.error("getSelectedUri -- no selected ip for " + volumeUuid);
+            return "";
+        }
+        return HTTP_URI + selectedIp + AGENT_PORT;
+    }
+
+    /**
      * 获取 agent uri - 主动选择
      * @return uri
      */

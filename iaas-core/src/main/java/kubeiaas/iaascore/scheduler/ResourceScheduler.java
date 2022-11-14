@@ -24,6 +24,11 @@ public class ResourceScheduler {
         }
     }
 
+    public Host vmSelectHostByHostUuid(String hostUuid) {
+        String hostObjectStr = resourceOperator.selectHostByHostUuid(hostUuid);
+        return JSON.parseObject(hostObjectStr, Host.class);
+    }
+
     public Host vmSelectHostByOperator(String vmUuid, String strategy) {
         try {
             String hostObjectStr = resourceOperator.selectHostByOperator(vmUuid, strategy);
@@ -33,4 +38,10 @@ public class ResourceScheduler {
             return null;
         }
     }
+
+    public Host selectHostByHostOperator(String strategy) {
+        String hostObjectStr = resourceOperator.selectHostByHostOperator(strategy);
+        return JSON.parseObject(hostObjectStr, Host.class);
+    }
+
 }

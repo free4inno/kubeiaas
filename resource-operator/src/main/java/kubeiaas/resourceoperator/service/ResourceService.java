@@ -36,6 +36,17 @@ public class ResourceService {
         return host;
     }
 
+    public Host selectHostByHostUuid(String hostUuid) {
+        Host host = tableStorage.hostQueryByUuid(hostUuid);
+
+        if (host == null) {
+            log.info("host 不存在");
+            return null;
+        }
+        log.info("host 可用");
+        return host;
+    }
+
     public Host selectHostByStrategy(String vmUuid, String strategy) {
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
 
@@ -47,7 +58,18 @@ public class ResourceService {
             // 0. fall in Default RoundRobin
             resultHost = hostSelectProcess.RoundRobin(vm);
         }
+        return resultHost;
+    }
 
+    public Host selectHostByStrategy(String strategy) {
+        Host resultHost = new Host();
+        if (strategy.equals(HostSelectStrategyConstants.ROUND_ROBIN)) {
+            // 1. RoundRobin
+            resultHost = hostSelectProcess.RoundRobin();
+        } else {
+            // 0. fall in Default RoundRobin
+            resultHost = hostSelectProcess.RoundRobin();
+        }
         return resultHost;
     }
 

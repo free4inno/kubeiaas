@@ -118,7 +118,7 @@ public class VmService {
             /* -----3. Delete Volume ----
             Delete disks, including Linux files and database information
             */
-            volumeProcess.deleteVolume(vmUuid);
+            volumeProcess.deleteSystemVolume(vmUuid);
 
             /* -----4. Delete Ip ----
             Delete Ip information

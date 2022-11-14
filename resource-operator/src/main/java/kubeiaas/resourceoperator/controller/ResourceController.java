@@ -32,6 +32,16 @@ public class ResourceController {
         return JSON.toJSONString(host);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_HOST_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String selectHostByHostUuid(
+            @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid) {
+        log.info("selectHostByAppoint ==== start ====");
+        Host host = resourceService.selectHostByHostUuid(hostUuid);
+        log.info("selectHostByAppoint ==== end ====");
+        return JSON.toJSONString(host);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_OPERATOR, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String selectHostByOperator(
@@ -39,6 +49,16 @@ public class ResourceController {
             @RequestParam(value = RequestParamConstants.STRATEGY) String strategy) {
         log.info("selectHostByOperator ==== start ====");
         Host host = resourceService.selectHostByStrategy(vmUuid, strategy);
+        log.info("selectHostByOperator ==== end ====");
+        return JSON.toJSONString(host);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SELECT_HOST_BY_HOST_OPERATOR, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String selectHostByHostOperator(
+            @RequestParam(value = RequestParamConstants.STRATEGY) String strategy) {
+        log.info("selectHostByOperator ==== start ====");
+        Host host = resourceService.selectHostByStrategy(strategy);
         log.info("selectHostByOperator ==== end ====");
         return JSON.toJSONString(host);
     }

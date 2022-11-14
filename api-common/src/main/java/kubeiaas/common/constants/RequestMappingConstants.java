@@ -24,6 +24,8 @@ public class RequestMappingConstants {
     public static final String TEST = "test";
     public static final String CREATE = "create";
     public static final String DELETE = "delete";
+    public static final String ATTACH = "attach";
+    public static final String DETACH = "detach";
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
     public static final String QUERY_ALL = "query_all";
@@ -44,7 +46,9 @@ public class RequestMappingConstants {
 
     // -- Resource Operator
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
+    public static final String SELECT_HOST_BY_HOST_UUID = "select_host_by_host_uuid";
     public static final String SELECT_HOST_BY_OPERATOR = "select_host_by_operator";
+    public static final String SELECT_HOST_BY_HOST_OPERATOR = "select_host_by_host_operator";
 
     // -- Image Operator
     public static final String QUERY_IMAGE_BY_UUID = "query_image_by_uuid";
@@ -56,7 +60,11 @@ public class RequestMappingConstants {
 
     // -- Volume Controller
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
+    public static final String CREATE_DATA_VOLUME = "create_data_volume";
     public static final String DELETE_SYSTEM_VOLUME = "delete_system_volume";
+    public static final String DELETE_DATA_VOLUME = "delete_data_volume";
+    public static final String ATTACH_DATA_VOLUME = "attach_data_volume";
+    public static final String DETACH_DATA_VOLUME = "detach_data_volume";
 
     // -- Vm Controller
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";

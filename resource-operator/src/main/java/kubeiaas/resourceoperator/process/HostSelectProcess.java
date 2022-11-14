@@ -18,6 +18,26 @@ public class HostSelectProcess {
 
     private static int roundRobinCount = 0;
 
+
+    // 选择宿主机算法
+    public Host RoundRobin() {
+        List<Host> hostList = tableStorage.hostQueryAll();
+        if (hostList == null || hostList.isEmpty()) {
+            return null;
+        }
+
+        Host resultHost = new Host();
+        for (int checkCount = 0; checkCount < hostList.size(); checkCount++) {
+            roundRobinCount += 1;
+            if (roundRobinCount >= hostList.size()) {
+                roundRobinCount = 0;
+            }
+            resultHost = hostList.get(roundRobinCount);
+            return resultHost;
+        }
+        return null;
+    }
+
     // 选择宿主机算法
     public Host RoundRobin(Vm vm) {
         List<Host> hostList = tableStorage.hostQueryAll();

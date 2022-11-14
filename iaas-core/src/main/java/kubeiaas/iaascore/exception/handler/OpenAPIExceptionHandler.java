@@ -1,7 +1,9 @@
 package kubeiaas.iaascore.exception.handler;
 
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.bean.Volume;
 import kubeiaas.common.enums.vm.VmStatusEnum;
+import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
@@ -45,8 +47,15 @@ public class OpenAPIExceptionHandler {
             tableStorage.vmSave(vm);
             log.error(((VmException) e).getMsg());
             return BaseResponse.error(ResponseEnum.WORK_ERROR);
-
-        } else if (e instanceof ConstraintViolationException ||
+        }
+        else if (e instanceof VolumeException){
+            Volume volume = ((VolumeException) e).getVolume();
+            volume.setStatus(VolumeStatusEnum.ERROR_PREPARE.ERROR);
+            tableStorage.volumeSave(volume);
+            log.error(((VolumeException) e).getMsg());
+            return BaseResponse.error(ResponseEnum.WORK_ERROR);
+        }
+        else if (e instanceof ConstraintViolationException ||
                 e instanceof MethodArgumentNotValidException ||
                 e instanceof MissingServletRequestParameterException) {
             // ----- args error -----
