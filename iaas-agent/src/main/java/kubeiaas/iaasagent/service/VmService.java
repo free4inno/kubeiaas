@@ -178,11 +178,9 @@ public class VmService {
      * 修改虚拟机cpu和memory
      * @param VmUuid
      */
-    public Boolean modifyVm(String VmUuid){
+    public Boolean modifyVm(String VmUuid, int cpu, int memory) {
         log.info("modifyVm ---- start ---- VmUuid: " + VmUuid );
         Vm instance = tableStorage.vmQueryByUuid(VmUuid);
-        int cpu = instance.getCpus();
-        int memory = instance.getMemory();
         try {
             long memories = VmCUtils.memUnitConvert(memory);
             Domain domain = virtCon.domainLookupByUUIDString(VmUuid);

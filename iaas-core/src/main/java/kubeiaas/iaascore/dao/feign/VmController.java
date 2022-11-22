@@ -61,6 +61,8 @@ public interface VmController {
     @ResponseBody
     String modifyVmInstance(
             URI uri,
-            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.CPUS) Integer cpus,
+            @RequestParam(value = RequestParamConstants.MEMORY) Integer memory);
 
 }

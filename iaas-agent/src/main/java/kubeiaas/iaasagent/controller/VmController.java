@@ -41,10 +41,10 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("deleteVm ==== start ==== vmUuid: " + vmUuid);
         // log.info("This is Vm Controller: " + routingKey);
-        if (vmService.deleteVm(vmUuid)){
+        if (vmService.deleteVm(vmUuid)) {
             log.info("deleteVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
-        }else {
+        } else {
             log.error("deleteVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
@@ -56,10 +56,10 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("stopVm ==== start ==== vmUuid: " + vmUuid);
         // log.info("This is Vm Controller: " + routingKey);
-        if (vmService.stopVm(vmUuid)){
+        if (vmService.stopVm(vmUuid)) {
             log.info("stopVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
-        }else {
+        } else {
             log.error("stopVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
@@ -71,10 +71,10 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("startVm ==== start ==== vmUuid: " + vmUuid);
         // log.info("This is Vm Controller: " + routingKey);
-        if (vmService.startVm(vmUuid)){
+        if (vmService.startVm(vmUuid)) {
             log.info("startVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
-        }else {
+        } else {
             log.error("startVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
@@ -86,10 +86,10 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("rebootVm ==== start ==== vmUuid: " + vmUuid);
         // log.info("This is Vm Controller: " + routingKey);
-        if (vmService.rebootVm(vmUuid)){
+        if (vmService.rebootVm(vmUuid)) {
             log.info("rebootVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
-        }else {
+        } else {
             log.error("rebootVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
@@ -101,10 +101,10 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("suspend ==== start ==== vmUuid: " + vmUuid);
         // log.info("This is Vm Controller: " + routingKey);
-        if (vmService.suspendVm(vmUuid)){
+        if (vmService.suspendVm(vmUuid)) {
             log.info("suspendVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
-        }else {
+        } else {
             log.error("suspendVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
@@ -119,7 +119,7 @@ public class VmController {
         if (vmService.resumeVm(vmUuid)){
             log.info("resumeVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
-        }else {
+        } else {
             log.error("resumeVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
@@ -128,12 +128,14 @@ public class VmController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MODIFY_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String modifyVm(
-            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.CPUS) Integer cpus,
+            @RequestParam(value = RequestParamConstants.MEMORY) Integer memory) {
         log.info("modifyVm ==== start ==== vmUuid: " + vmUuid);
-        if (vmService.modifyVm(vmUuid)){
+        if (vmService.modifyVm(vmUuid, cpus, memory)) {
             log.info("modifyVm ==== success");
             return ResponseMsgConstants.SUCCESS;
-        }else{
+        } else {
             log.info("modifyVm ==== failed");
             return ResponseMsgConstants.FAILED;
         }

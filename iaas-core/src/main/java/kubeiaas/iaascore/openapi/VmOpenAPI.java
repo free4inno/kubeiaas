@@ -144,7 +144,7 @@ public class VmOpenAPI {
             resData.put("message", "Suspend VM Success");
             log.info("suspendVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success(resData));
-        }else {
+        } else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_SUSPEND_ERROR));
         }
     }
@@ -161,7 +161,7 @@ public class VmOpenAPI {
             resData.put("message", "Resume VM Success");
             log.info("resumeVm ==== end ====");
             return JSON.toJSONString(BaseResponse.success(resData));
-        }else {
+        } else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_RESUME_ERROR));
         }
     }
@@ -178,7 +178,7 @@ public class VmOpenAPI {
             resData.put("message", "Modify VM Success");
             log.info("modify ==== end ====");
             return JSON.toJSONString(BaseResponse.success(resData));
-        }else {
+        } else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
@@ -195,7 +195,7 @@ public class VmOpenAPI {
             resData.put("message", "reduce VM Success");
             log.info("reduce ==== end ====");
             return JSON.toJSONString(BaseResponse.success(resData));
-        }else {
+        } else {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
@@ -236,6 +236,18 @@ public class VmOpenAPI {
         Map<String, String> resMap = new HashMap<>();
         resMap.put(RequestMappingConstants.VNC_URL, url);
         return JSON.toJSONString(BaseResponse.success(resMap));
+    }
+
+    /**
+     * 修改：名称、描述
+     */
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String edit(@Valid @RequestBody EditVmForm f) throws BaseException {
+        log.info("edit ==== start ====");
+        Vm vm = vmService.editVm(f.getVmUuid(), f.getName(), f.getDescription());
+        log.info("edit ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(vm));
     }
 
 }

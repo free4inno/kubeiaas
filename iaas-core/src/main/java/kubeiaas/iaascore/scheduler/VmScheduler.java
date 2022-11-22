@@ -105,9 +105,9 @@ public class VmScheduler {
     }
 
 
-    public boolean modifyVmInstance(String vmUuid){
+    public boolean modifyVmInstance(String vmUuid, Integer cpus, Integer memory) {
         try {
-            return vmController.modifyVmInstance(getSelectedUri(vmUuid), vmUuid)
+            return vmController.modifyVmInstance(getSelectedUri(vmUuid), vmUuid, cpus, memory)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();

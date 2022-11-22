@@ -185,7 +185,14 @@ public class VmProcess {
      */
     public void modifyVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
         log.info("modifyVm --  VM");
+
+        // 1. find VM
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        if (vm == null) {
+            throw new BaseException("ERROR: vm is not found!");
+        }
+
+        // 2. check CPU & MEM
         boolean cpuMemFlag = false;
         if (cpus != null && cpus != 0 && !cpus.equals(vm.getCpus())) {
             vm.setCpus(cpus);
@@ -195,18 +202,18 @@ public class VmProcess {
             vm.setMemory(memory);
             cpuMemFlag = true;
         }
-        if (vm.getUuid() != null) {
-            tableStorage.updateVm(vm);
-        } else {
-            log.error("instance with Uuid: " + vmUuid + "is not existed");
-            throw new BaseException("ERROR: vm is not existed!");
-        }
-        log.info("cpuMemFlag --"+ cpuMemFlag);
+        log.info("cpuMemFlag --" + cpuMemFlag);
+
         if (cpuMemFlag) {
-            if (!vmScheduler.modifyVmInstance(vmUuid)){
-                throw new BaseException("ERROR: modiify vm instance failed!");
+            // 3. iaas-agent do
+            if (!vmScheduler.modifyVmInstance(vmUuid, cpus, memory)) {
+                throw new BaseException("ERROR: modify vm instance failed!");
             }
+            // 4. update DB
+            vm = tableStorage.vmUpdate(vm);
         }
+
+        // 5. clear select cache
         AgentConfig.clearSelectedHost(vmUuid);
     }
 
@@ -215,38 +222,50 @@ public class VmProcess {
      */
     public void reduceVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
         log.info("reduce --  VM");
-        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
 
-        //judge cpus and memory reduce or not
-        if (cpus >= vm.getCpus() && memory >= vm.getMemory()){
-            throw new BaseException("ERROR: vm is not reducing");
+        // 1. find VM
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        if (vm == null) {
+            throw new BaseException("ERROR: vm is not found!");
         }
 
+        // 2. only STOPPED can be reduced
         if (vm.getStatus() != VmStatusEnum.STOPPED){
             throw new BaseException("ERROR: vm is still active");
         }
 
+        // 3. check CPU & MEM
         boolean cpuMemFlag = false;
         if (cpus != null && cpus != 0 && !cpus.equals(vm.getCpus())) {
+            // 3.1. must be larger
+            if (cpus >= vm.getCpus()) {
+                throw new BaseException("ERROR: vm is not reducing");
+            }
+            // 3.2. adjust
             vm.setCpus(cpus);
             cpuMemFlag = true;
         }
         if (memory != null && memory != 0 && !memory.equals(vm.getMemory())) {
+            // 3.1. must be larger
+            if (memory >= vm.getMemory()) {
+                throw new BaseException("ERROR: vm is not reducing");
+            }
+            // 3.2. adjust
             vm.setMemory(memory);
             cpuMemFlag = true;
         }
-        if (vm.getUuid() != null) {
-            tableStorage.updateVm(vm);
-        } else {
-            log.error("instance with Uuid: " + vmUuid + "is not existed");
-            throw new BaseException("ERROR: vm is not existed!");
-        }
         log.info("cpuMemFlag --" + cpuMemFlag);
+
         if (cpuMemFlag) {
-            if (!vmScheduler.modifyVmInstance(vmUuid)){
+            // 4. iaas-agent do
+            if (!vmScheduler.modifyVmInstance(vmUuid, cpus, memory)) {
                 throw new BaseException("ERROR: reduce vm instance failed!");
             }
+            // 5. update DB
+            vm = tableStorage.vmUpdate(vm);
         }
+
+        // 6. clear select cache
         AgentConfig.clearSelectedHost(vmUuid);
     }
 

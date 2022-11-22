@@ -48,7 +48,7 @@ public class TableStorage {
         dbProxy.vmDeleteByUuid(vmUuid);
     }
 
-    public Vm updateVm(Vm vm){
+    public Vm vmUpdate(Vm vm){
         String vmObjectStr = JSON.toJSONString(vm);
         vmObjectStr = dbProxy.vmSave(vmObjectStr);
         return JSON.parseObject(vmObjectStr, Vm.class);

@@ -36,6 +36,7 @@ public class RequestMappingConstants {
     public static final String SAVE = "save";
     public static final String UPDATE = "update";
     public static final String REDUCE = "reduce";
+    public static final String EDIT = "edit";
     public static final String STOP = "stop";
     public static final String START = "start";
     public static final String REBOOT = "reboot";

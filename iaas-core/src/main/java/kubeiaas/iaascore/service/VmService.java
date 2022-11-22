@@ -251,18 +251,23 @@ public class VmService {
 
     public Vm queryByUuid(String uuid) {
         Vm vm = tableStorage.vmQueryByUuid(uuid);
+
         // get ips
         List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
         vm.setIps(ipUsedList);
+
         // get images
         Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
         vm.setImage(image);
+
         // get volumes
         List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
         vm.setVolumes(volumeList);
+
         // get hosts
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
         vm.setHost(host);
+
         return vm;
     }
 
@@ -273,6 +278,32 @@ public class VmService {
 
         // 2. Analyze `vnc` host from Domain Name.
         return String.format(VmConstants.VNC_URL_TEMPLATE, vmUuid);
+    }
+
+    public Vm editVm(String vmUuid, String name, String description) throws BaseException {
+        // 1. find VM
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        if (vm == null) {
+            throw new BaseException("ERROR: vm is not found!");
+        }
+
+        // 2. check is edit changed
+        boolean editFlag = false;
+        if (name != null && !name.isEmpty() && !name.equals(vm.getName())) {
+            vm.setName(name);
+            editFlag = true;
+        }
+        if (description != null && !description.isEmpty() && !description.equals(vm.getDescription())) {
+            vm.setDescription(description);
+            editFlag = true;
+        }
+
+        // 3. save into DB
+        if (editFlag) {
+            vm = tableStorage.vmUpdate(vm);
+        }
+
+        return vm;
     }
 
 }

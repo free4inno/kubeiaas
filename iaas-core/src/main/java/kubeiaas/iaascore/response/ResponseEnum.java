@@ -13,7 +13,7 @@ public enum ResponseEnum {
     SUCCESS(200f, "业务处理成功"),
     WORK_ERROR(202f, "业务处理失败"),
     VM_DELETE_ERROR(202.01f,"虚拟机删除失败"),
-    VM_MODIFY_ERROR(202.02F,"虚拟机修改cpu/mem失败"),
+    VM_MODIFY_ERROR(202.02F,"虚拟机修改CPU/内存失败"),
     VM_START_ERROR(202.03F,"虚拟机启动失败"),
     VM_STOP_ERROR(202.04F,"虚拟机停止失败"),
     VM_REBOOT_ERROR(202.05F,"虚拟机重启失败"),
