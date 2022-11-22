@@ -186,7 +186,7 @@ public class VmService {
         try {
             long memories = VmCUtils.memUnitConvert(memory);
             Domain domain = virtCon.domainLookupByUUIDString(VmUuid);
-            if (instance.getStatus().equals(VmStatusEnum.ACTIVE)){
+            if (instance.getStatus().equals(VmStatusEnum.ACTIVE)) {
                 if (cpu != 0) {
                     domain.setVcpus(cpu);
                     log.info("modifyVm -- domain set cpu: " + cpu);
@@ -240,7 +240,7 @@ public class VmService {
                         e.printStackTrace();
                     }
                 }).start();
-            }catch (Exception e){
+            } catch (Exception e) {
                 setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
                 e.printStackTrace();
                 return false;
@@ -294,7 +294,7 @@ public class VmService {
                         e.printStackTrace();
                     }
                 }).start();
-            }catch (Exception e){
+            } catch (Exception e) {
                 setVmStatus(VmUuid, VmStatusEnum.STOPPED);
                 e.printStackTrace();
                 return false;
@@ -343,7 +343,7 @@ public class VmService {
                     vm.setVncPort(vncPort);
                     vm.setStatus(VmStatusEnum.ACTIVE);
                     tableStorage.vmSave(vm);
-                }catch (Exception e){
+                } catch (Exception e) {
                     log.error("rebootVm ---- end ---- Domain Starting failed!");
                     setVmStatus(VmUuid, VmStatusEnum.STOPPED);
                     e.printStackTrace();
@@ -357,7 +357,7 @@ public class VmService {
                     vm.setVncPort(vncPort);
                     vm.setStatus(VmStatusEnum.ACTIVE);
                     tableStorage.vmSave(vm);
-                }catch (Exception e){
+                } catch (Exception e) {
                     log.error("rebootVm ---- end ---- Domain Starting failed!");
                     setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
                     e.printStackTrace();
@@ -384,10 +384,10 @@ public class VmService {
         try {
             Domain domain = getDomainByUuid(VmUuid);
             if (domain.isActive() > 0) {
-                try{
+                try {
                     domain.suspend();
                     setVmStatus(VmUuid, VmStatusEnum.SUSPENDED);
-                }catch (Exception e){
+                } catch (Exception e) {
                     log.error("suspendVm ---- end ---- Domain suspend failed!");
                     setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
                     e.printStackTrace();

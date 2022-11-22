@@ -1,4 +1,5 @@
 package kubeiaas.iaascore.service;
+import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
@@ -107,7 +108,14 @@ public class VolumeService {
     }
 
     public List<Volume> queryAllDataVolume() {
-        return tableStorage.volumeQueryAllDataVolume();
+        List<Volume> volumeList = tableStorage.volumeQueryAllDataVolume();
+        for (Volume volume : volumeList) {
+            if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)) {
+                Vm vm = tableStorage.vmQueryByUuid(volume.getInstanceUuid());
+                volume.setInstanceVm(vm);
+            }
+        }
+        return volumeList;
     }
 
 }

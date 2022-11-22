@@ -44,4 +44,6 @@ public class Volume {
     private String nfsRoot;                         // not in database
     private String imageFilePath;                   // not in database
     private String message;                         // not in database
+
+    private Vm instanceVm;
 }
