@@ -241,6 +241,10 @@ public class VmService {
             Host host = hostMap.get(vm.getHostUuid());
             vm.setHost(new Host(host.getName(), host.getIp()));
 
+            // set volume
+            List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
+            vm.setVolumes(volumeList);
+
             // remove useless/sensitive info
             vm.setPassword(null);
             vm.setVncPassword(null);
