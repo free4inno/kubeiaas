@@ -1,5 +1,4 @@
 package kubeiaas.iaascore.service;
-import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
