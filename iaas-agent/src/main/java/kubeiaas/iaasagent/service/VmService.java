@@ -406,35 +406,6 @@ public class VmService {
         return true;
     }
 
-/*  public Boolean suspendVm(String VmUuid) {
-        log.info("suspendVm ---- start ---- VmUuid: " + VmUuid);
-        try {
-            Domain domain = getDomainByUuid(VmUuid);
-            if (domain.isActive() > 0) {
-                try {
-                    domain.suspend();
-                    setVmStatus(VmUuid, VmStatusEnum.SUSPENDED);
-                } catch (Exception e) {
-                    log.error("suspendVm ---- end ---- Domain suspend failed!");
-                    setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
-                    e.printStackTrace();
-                    return false;
-                }
-            } else {
-                log.error("suspendDomain -- The domain is already dead. suspend failed!");
-                setVmStatus(VmUuid, VmStatusEnum.STOPPED);
-                return false;
-            }
-            log.info("suspendVm ---- end ---- Domain is suspending.");
-        } catch (Exception e) {
-            log.error("suspendVm ---- end ---- Domain Starting failed!");
-            setVmStatus(VmUuid, VmStatusEnum.ERROR);
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }*/
-
     /**
      * 恢复虚拟机
      * @param VmUuid
@@ -466,33 +437,68 @@ public class VmService {
         return true;
     }
 
+    // ===== 已废弃 =====
+    // 暂停虚拟机（已废弃）
+    /*
+    public Boolean suspendVm(String VmUuid) {
+        log.info("suspendVm ---- start ---- VmUuid: " + VmUuid);
+        try {
+            Domain domain = getDomainByUuid(VmUuid);
+            if (domain.isActive() > 0) {
+                try {
+                    domain.suspend();
+                    setVmStatus(VmUuid, VmStatusEnum.SUSPENDED);
+                } catch (Exception e) {
+                    log.error("suspendVm ---- end ---- Domain suspend failed!");
+                    setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                log.error("suspendDomain -- The domain is already dead. suspend failed!");
+                setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+                return false;
+            }
+            log.info("suspendVm ---- end ---- Domain is suspending.");
+        } catch (Exception e) {
+            log.error("suspendVm ---- end ---- Domain Starting failed!");
+            setVmStatus(VmUuid, VmStatusEnum.ERROR);
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+     */
 
-//    public Boolean resumeVm(String VmUuid) {
-//        log.info("resumeVm ---- start ---- VmUuid: " + VmUuid);
-//        try {
-//            Domain domain = getDomainByUuid(VmUuid);
-//            if (domain.isActive() > 0){
-//                log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is still active");
-//                setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
-//                return false;
-//            }
-//            domain.resume();
-//            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
-//            String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");      //获取新建虚拟机的VncPort
-//            vm.setStatus(VmStatusEnum.ACTIVE);
-//            vm.setVncPort(vncPort);
-//            tableStorage.vmSave(vm);
-//            log.info("resumeVm ---- end ---- Domain is resuming.");
-//        } catch (Exception e) {
-//            log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is dead");
-//            setVmStatus(VmUuid, VmStatusEnum.STOPPED);
-//            log.error("resumeVm ---- end ---- Domain resume failed!");
-//            e.printStackTrace();
-//            return false;
-//        }
-//        return true;
-//    }
-
+    // ===== 已废弃 =====
+    // 恢复（暂停的虚拟机）
+    /*
+    public Boolean resumeVm(String VmUuid) {
+        log.info("resumeVm ---- start ---- VmUuid: " + VmUuid);
+        try {
+            Domain domain = getDomainByUuid(VmUuid);
+            if (domain.isActive() > 0){
+                log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is still active");
+                setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                return false;
+            }
+            domain.resume();
+            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+            String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");      //获取新建虚拟机的VncPort
+            vm.setStatus(VmStatusEnum.ACTIVE);
+            vm.setVncPort(vncPort);
+            tableStorage.vmSave(vm);
+            log.info("resumeVm ---- end ---- Domain is resuming.");
+        } catch (Exception e) {
+            log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is dead");
+            setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+            log.error("resumeVm ---- end ---- Domain resume failed!");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+     */
 
     /**
      * 强制关闭虚拟机
