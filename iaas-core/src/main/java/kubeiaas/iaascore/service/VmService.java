@@ -2,7 +2,6 @@ package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.ResponseMsgConstants;
-import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
@@ -11,6 +10,7 @@ import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.process.*;
+import kubeiaas.iaascore.response.VmPageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +42,9 @@ public class VmService {
     @Resource
     private VncProcess vncProcess;
 
+    /**
+     * 创建虚拟机
+     */
     public Vm createVm(
             String name,
             int cpus,
@@ -83,9 +86,12 @@ public class VmService {
         return newVm;
     }
 
+    /**
+     * 删除虚拟机
+     */
     public String deleteVM(String vmUuid, boolean isForce) throws BaseException, VmException {
         // ----- check if exist -----
-        Vm vm = vmProcess.queryVMByUuid(vmUuid);
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         if (vm == null) {
             throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")");
         }
@@ -128,7 +134,7 @@ public class VmService {
             /* -----5. delete in database ----
             Delete VM records from the database
             */
-            vmProcess.deleteVMInDataBase(vmUuid);
+            vmProcess.deleteVmInDataBase(vmUuid);
 
             /* -----6. delete vnc ----
             delete vnc in token.config
@@ -143,6 +149,10 @@ public class VmService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    /**
+     * ====== 修改系列 ======
+     * 支持：CPU、内存
+     */
     public String modifyVm(String vmUuid, Integer cpus, Integer memory, boolean isReduce) throws BaseException {
         /* -----1. choose host ----
         Select the host where the VM to be modified
@@ -161,6 +171,10 @@ public class VmService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    /**
+     * ====== 操作系列 ======
+     * 支持：STOP、START、REBOOT、RESUME、SUSPEND
+     */
     public String operateVm(String vmUuid, VmOperateEnum operation) throws BaseException {
         /* -----1. choose host ----
         Select the host where the VM to be modified
@@ -211,46 +225,44 @@ public class VmService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+
+    /**
+     * ============ QUERY 查询  ============
+     *
+     * 1. QUERY_ALL 查询全部
+     *    - param:
+     *    - return: List
+     *
+     * 2. PAGE_QUERY_ALL 分页查询全部
+     *    - param: Integer pageNum, Integer pageSize
+     *    - return: VmPageResponse
+     *
+     * 3. QUERY_FUZZY 模糊查询
+     *    - param: String keyWords, VmStatusEnum status, String hostUuid, String imageUuid
+     *    - return: List
+     *
+     * 4. PAGE_QUERY_FUZZY 分页模糊查询
+     *    - param: String keyWords, VmStatusEnum status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize
+     *    - return: VmPageResponse
+     *
+     * 5. QUERY_BY_XXX 特定查询
+     *
+     */
+
     public List<Vm> queryAll() {
-        // 1.1. 构造 imageMap，根据 uuid 索引
-        List<Image> imageList = tableStorage.imageQueryAll();
-        Map<String, Image> imageMap = new HashMap<>();
-        for (Image image : imageList) {
-            imageMap.put(image.getUuid(), image);
-        }
-
-        // 1.2. 构造 hostMap，根据 uuid 索引
-        List<Host> hostList = tableStorage.hostQueryAll();
-        Map<String, Host> hostMap = new HashMap<>();
-        for (Host host : hostList) {
-            hostMap.put(host.getUuid(), host);
-        }
-
-        // 2. 逐个处理 vm，填入 ips & image
+        // 1. get from DB
         List<Vm> vmList = tableStorage.vmQueryAll();
-        for (Vm vm : vmList) {
-            List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
-            vm.setIps(ipUsedList);
+        // 2. build & return
+        return vmProcess.buildVmList(vmList);
+    }
 
-            // set image
-            // (use new Variable to avoid Pointer)
-            Image image = imageMap.get(vm.getImageUuid());
-            vm.setImage(new Image(image.getUuid(), image.getName(), image.getOsType()));
-
-            // set host
-            Host host = hostMap.get(vm.getHostUuid());
-            vm.setHost(new Host(host.getName(), host.getIp()));
-
-            // set volume
-            List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
-            vm.setVolumes(volumeList);
-
-            // remove useless/sensitive info
-            vm.setPassword(null);
-            vm.setVncPassword(null);
-            vm.setVncPort(null);
-        }
-        return vmList;
+    public VmPageResponse pageQueryAll(Integer pageNum, Integer pageSize) {
+        // 1. get from DB
+        VmPageResponse vmPage = tableStorage.vmPageQueryAll(pageNum, pageSize);
+        // 2. build & return
+        List<Vm> vmList = vmPage.getContent();
+        vmPage.setContent(vmProcess.buildVmList(vmList));
+        return vmPage;
     }
 
     public Vm queryByUuid(String uuid) {
@@ -275,6 +287,11 @@ public class VmService {
         return vm;
     }
 
+    /**
+     * 获取 Vnc 链接
+     * 1. 根据数据库中 host IP
+     * 2. 根据配置中获取 Domain 域名模板
+     */
     public String getVncUrl(String vmUuid) {
         // 1. Analyze `vnc` host from DB hostRoles.
         // Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
@@ -284,6 +301,10 @@ public class VmService {
         return String.format(VmConstants.VNC_URL_TEMPLATE, vmUuid);
     }
 
+    /**
+     * 编辑基本信息
+     * 支持字段：名称、描述
+     */
     public Vm editVm(String vmUuid, String name, String description) throws BaseException {
         // 1. find VM
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);

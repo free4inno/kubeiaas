@@ -28,6 +28,8 @@ public class RequestMappingConstants {
     public static final String DETACH = "detach";
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
+    public static final String PAGE_QUERY_ALL = "page_query_all";
+    public static final String PAGE_QUERY_ALL_DATA_VOLUME = "page_query_all_data_volume";
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_BY_UUID = "query_by_uuid";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";

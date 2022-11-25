@@ -5,6 +5,8 @@ import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
+import kubeiaas.iaascore.response.VmPageResponse;
+import kubeiaas.iaascore.response.VolumePageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,11 @@ public class TableStorage {
         } else {
             return null;
         }
+    }
+
+    public VmPageResponse vmPageQueryAll(Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.vmPageQueryAll(pageNum, pageSize);
+        return JSON.parseObject(jsonString, VmPageResponse.class);
     }
 
     public Vm vmSave(Vm vm) {
@@ -199,6 +206,11 @@ public class TableStorage {
     public List<Volume> volumeQueryAllDataVolume() {
         String jsonString = dbProxy.volumeQueryAllDataVolume();
         return JSON.parseArray(jsonString, Volume.class);
+    }
+
+    public VolumePageResponse volumePageQueryAll(Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.volumePageQueryAllDataVolume(pageNum, pageSize);
+        return JSON.parseObject(jsonString, VolumePageResponse.class);
     }
 
     public Volume volumeQueryByUuid(String uuid) {

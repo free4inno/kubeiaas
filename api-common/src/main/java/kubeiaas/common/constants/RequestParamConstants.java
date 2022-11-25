@@ -23,6 +23,9 @@ public class RequestParamConstants {
     public static final String ADDRESS = "address";
     public static final String TYPE = "type";
 
+    public static final String PAGE_NUM = "page_num";
+    public static final String PAGE_SIZE = "page_size";
+
     /* ===== VM ===== */
     public static final String VM_OBJECT = "vm_object";
 

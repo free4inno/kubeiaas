@@ -25,6 +25,6 @@ public enum ResponseEnum {
     ARGS_ERROR(402f, "验参失败"),
     INTERNAL_ERROR(500f, "内部错误");
 
-    private Float code;
-    private String msg;
+    private final Float code;
+    private final String msg;
 }

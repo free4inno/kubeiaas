@@ -3,6 +3,7 @@ package kubeiaas.iaascore.openapi;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
+import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
@@ -11,22 +12,23 @@ import kubeiaas.iaascore.request.volume.CreateVolumeForm;
 import kubeiaas.iaascore.request.volume.DeleteVolumeForm;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
+import kubeiaas.iaascore.response.SingleMsgResponse;
+import kubeiaas.iaascore.response.VolumePageResponse;
 import kubeiaas.iaascore.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
-import java.util.HashMap;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 
 @Slf4j
+@Validated
 @Controller
 @RequestMapping(value = RequestMappingConstants.VOLUME)
 public class VolumeOpenAPI {
@@ -55,11 +57,10 @@ public class VolumeOpenAPI {
         log.info("delete ==== start ====");
         String result = volumeService.deleteDataVolume(f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            Map<String, String> resData = new HashMap<>();
-            resData.put("message", "Delete Data Volume Success");
             log.info("delete ==== end ====");
-            return JSON.toJSONString(BaseResponse.success(resData));
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
+            log.info("delete ==== error ====");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DELETE_ERROR));
         }
     }
@@ -73,11 +74,10 @@ public class VolumeOpenAPI {
         log.info("attach ==== start ====");
         String result = volumeService.attachDataVolume(f.getVmUuid(),f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            Map<String, String> resData = new HashMap<>();
-            resData.put("message", "attach Data Volume Success");
             log.info("attach ==== end ====");
-            return JSON.toJSONString(BaseResponse.success(resData));
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
+            log.info("attach ==== error ====");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_ATTACH_ERROR));
         }
     }
@@ -91,17 +91,16 @@ public class VolumeOpenAPI {
         log.info("detach ==== start ====");
         String result = volumeService.detachDataVolume(f.getVmUuid(),f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            Map<String, String> resData = new HashMap<>();
-            resData.put("message", "detach Data Volume Success");
             log.info("detach ==== end ====");
-            return JSON.toJSONString(BaseResponse.success(resData));
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
+            log.info("detach ==== success ====");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DETACH_ERROR));
         }
     }
 
     /**
-     * 获取 “云硬盘”列表
+     * 获取 “云硬盘” 列表
      */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
@@ -110,5 +109,19 @@ public class VolumeOpenAPI {
         List<Volume> dataVolumeList = volumeService.queryAllDataVolume();
         log.info("queryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(dataVolumeList));
+    }
+
+    /**
+     * 分页获取 “云硬盘” 列表
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String pageQueryAll(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+        log.info("pageQueryAll ==== start ====");
+        VolumePageResponse res = volumeService.pageQueryAllDataVolume(pageNum, pageSize);
+        log.info("pageQueryAll ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(res));
     }
 }

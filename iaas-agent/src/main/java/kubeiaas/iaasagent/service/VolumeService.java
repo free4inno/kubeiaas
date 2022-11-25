@@ -152,7 +152,8 @@ public class VolumeService {
         volumePath = PathUtils.genFullPath(volumePath);
         if (!FileUtils.exists(volumePath)) {
             if (volume.getStatus().equals(VolumeStatusEnum.CREATING)
-                    || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
+                    || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)
+                    || volume.getStatus().equals(VolumeStatusEnum.ERROR)) {
                 log.info("no file need to delete");
                 return true;
             } else {

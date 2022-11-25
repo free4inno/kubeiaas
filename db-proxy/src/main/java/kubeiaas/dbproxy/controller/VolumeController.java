@@ -8,6 +8,9 @@ import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.dbproxy.dao.VolumeDao;
 import kubeiaas.dbproxy.table.VolumeTable;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +50,23 @@ public class VolumeController {
         List<VolumeTable> volumeTableList = volumeDao.findAll(specification);
         log.info("queryAllDataVolume ==== end ====");
         return JSON.toJSONString(volumeTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_ALL_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String pageQueryAllDataVolume(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
+        log.info("pageQueryAllDataVolume ==== start ====");
+        Specification<VolumeTable> specification = (root, cq, cb) ->
+                cb.and(cb.equal(root.get(VolumeConstants.USAGE_TYPE), VolumeUsageEnum.DATA));
+        // 1. build pageable
+        // (pageNum in Pageable is from 0-n, so we need to `pageNum - 1`)
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        // 2. do query
+        Page<VolumeTable> volumePage = volumeDao.findAll(specification, pageable);
+        log.info("pageQueryAllDataVolume ==== end ====");
+        return JSON.toJSONString(volumePage);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)

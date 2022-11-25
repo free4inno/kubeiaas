@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.dbproxy.dao.VmDao;
-import kubeiaas.dbproxy.table.HostTable;
 import kubeiaas.dbproxy.table.VmTable;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +46,21 @@ public class VmController {
         List<VmTable> vmTableList = vmDao.findAll(specification);
         log.info("queryAllBySingleKey ==== end ====");
         return JSON.toJSONString(vmTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String pageQueryAll(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
+        log.info("pageQueryAll ==== start ====");
+        // 1. build pageable
+        // (pageNum in Pageable is from 0-n, so we need to `pageNum - 1`)
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        // 2. do query
+        Page<VmTable> vmPage = vmDao.findAll(pageable);
+        log.info("pageQueryAll ==== end ====");
+        return JSON.toJSONString(vmPage);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)

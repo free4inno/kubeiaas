@@ -143,8 +143,8 @@ public class VolumeProcess {
     public void deleteDataVolume(String volumeUuid) throws BaseException {
         log.info("deleteDataVolume ==== start ====  volumeUuid: " + volumeUuid);
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
-        if (!volumeScheduler.deleteDataVolume(volumeUuid,volume.getProviderLocation())){
-            throw new BaseException("ERROR: delete data volume:"+volume.getUuid()+" failed!");
+        if (!volumeScheduler.deleteDataVolume(volumeUuid, volume.getProviderLocation())) {
+            throw new BaseException("ERROR: delete data volume:" + volume.getUuid() + " failed!");
         }
         log.info("deleteDataVolume ==== end ==== volumeUuid:" + volumeUuid);
         AgentConfig.clearVolumeSelectedHost(volumeUuid);
@@ -204,6 +204,17 @@ public class VolumeProcess {
         return newVolume;
     }
 
-
+    /**
+     * build Volume List with full info (append attach Vm info)
+     */
+    public List<Volume> buildVolumeList(List<Volume> volumeList) {
+        for (Volume volume : volumeList) {
+            if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)) {
+                Vm vm = tableStorage.vmQueryByUuid(volume.getInstanceUuid());
+                volume.setInstanceVm(vm);
+            }
+        }
+        return volumeList;
+    }
 
 }

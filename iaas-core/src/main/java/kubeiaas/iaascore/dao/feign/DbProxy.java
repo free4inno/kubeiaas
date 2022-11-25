@@ -27,6 +27,13 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.PAGE_QUERY_ALL)
+    @ResponseBody
+    String vmPageQueryAll(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
+    );
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
     String vmSave(
@@ -124,6 +131,13 @@ public interface DbProxy {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.QUERY_ALL_DATA_VOLUME)
     @ResponseBody
     String volumeQueryAllDataVolume();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.PAGE_QUERY_ALL_DATA_VOLUME)
+    @ResponseBody
+    String volumePageQueryAllDataVolume(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
+    );
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.SAVE)
     @ResponseBody

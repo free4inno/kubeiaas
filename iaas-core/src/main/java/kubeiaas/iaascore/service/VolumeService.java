@@ -8,6 +8,7 @@ import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.process.ResourceProcess;
 import kubeiaas.iaascore.process.VolumeProcess;
+import kubeiaas.iaascore.response.VolumePageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -107,15 +108,43 @@ public class VolumeService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    /**
+     * ============ QUERY 查询  ============
+     *
+     * 1. QUERY_ALL 查询全部
+     *    - param:
+     *    - return: List
+     *
+     * 2. PAGE_QUERY_ALL 分页查询全部
+     *    - param: Integer pageNum, Integer pageSize
+     *    - return: VolumePageResponse
+     *
+     * 3. QUERY_FUZZY 模糊查询
+     *    - param: String keyWords, VmStatusEnum status
+     *    - return: List
+     *
+     * 4. PAGE_QUERY_FUZZY 分页模糊查询
+     *    - param: String keyWords, VolumeStatusEnum status, Integer pageNum, Integer pageSize
+     *    - return: VolumePageResponse
+     *
+     * 5. QUERY_BY_XXX 特定查询
+     *
+     */
+
     public List<Volume> queryAllDataVolume() {
+        // 1. get list from DB
         List<Volume> volumeList = tableStorage.volumeQueryAllDataVolume();
-        for (Volume volume : volumeList) {
-            if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)) {
-                Vm vm = tableStorage.vmQueryByUuid(volume.getInstanceUuid());
-                volume.setInstanceVm(vm);
-            }
-        }
-        return volumeList;
+        // 2. build & return
+        return volumeProcess.buildVolumeList(volumeList);
+    }
+
+    public VolumePageResponse pageQueryAllDataVolume(Integer pageNum, Integer pageSize) {
+        // 1. get list from DB
+        VolumePageResponse volumePage = tableStorage.volumePageQueryAll(pageNum, pageSize);
+        // 2. build & return
+        List<Volume> volumeList = volumePage.getContent();
+        volumePage.setContent(volumeProcess.buildVolumeList(volumeList));
+        return volumePage;
     }
 
 }

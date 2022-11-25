@@ -1,6 +1,6 @@
 package kubeiaas.iaascore.process;
 
-import kubeiaas.common.bean.Vm;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -93,10 +96,6 @@ public class VmProcess {
         log.info("createVm -- 5. VM create success!");
     }
 
-    public Vm queryVMByUuid(String vmUuid){
-        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
-        return vm;
-    }
 
     /**
      * Delete VM
@@ -161,7 +160,7 @@ public class VmProcess {
     /**
      * Delete VM in dataBase
      */
-    public void deleteVMInDataBase(String vmUuid){
+    public void deleteVmInDataBase(String vmUuid){
         log.info("deleteVm --  VM in dataBase");
         vmScheduler.deleteVmInDataBase(vmUuid);
         AgentConfig.clearSelectedHost(vmUuid);
@@ -171,7 +170,7 @@ public class VmProcess {
     /**
      * Save VM Statue in dataBase (ABANDON)
      */
-    public void stopVMInDataBase(String vmUuid){
+    public void stopVmInDataBase(String vmUuid){
         log.info("stopVm --  VM in dataBase");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         vm.setStatus(VmStatusEnum.STOPPED);
@@ -272,9 +271,55 @@ public class VmProcess {
     /**
      * Set VM Status in DB
      */
-    public void setVmStatus(String VmUuid, VmStatusEnum status){
+    public void setVmStatus(String VmUuid, VmStatusEnum status) {
         Vm vm = tableStorage.vmQueryByUuid(VmUuid);
         vm.setStatus(status);
         tableStorage.vmSave(vm);
+    }
+
+
+    /**
+     * Build VM list with full info
+     * Used By QUERY_ALL / PAGE_QUERY_ALL / QUERY / PAGE_QUERY
+     */
+    public List<Vm> buildVmList(List<Vm> vmList) {
+        // 1.1. 构造 imageMap，根据 uuid 索引
+        List<Image> imageList = tableStorage.imageQueryAll();
+        Map<String, Image> imageMap = new HashMap<>();
+        for (Image image : imageList) {
+            imageMap.put(image.getUuid(), image);
+        }
+
+        // 1.2. 构造 hostMap，根据 uuid 索引
+        List<Host> hostList = tableStorage.hostQueryAll();
+        Map<String, Host> hostMap = new HashMap<>();
+        for (Host host : hostList) {
+            hostMap.put(host.getUuid(), host);
+        }
+
+        // 3. 逐个处理 vm，填入 ips & image
+        for (Vm vm : vmList) {
+            List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
+            vm.setIps(ipUsedList);
+
+            // set image
+            // (use new Variable to avoid Pointer)
+            Image image = imageMap.get(vm.getImageUuid());
+            vm.setImage(new Image(image.getUuid(), image.getName(), image.getOsType()));
+
+            // set host
+            Host host = hostMap.get(vm.getHostUuid());
+            vm.setHost(new Host(host.getName(), host.getIp()));
+
+            // set volume
+            List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
+            vm.setVolumes(volumeList);
+
+            // remove useless/sensitive info
+            vm.setPassword(null);
+            vm.setVncPassword(null);
+            vm.setVncPort(null);
+        }
+        return vmList;
     }
 }
