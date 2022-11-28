@@ -1,6 +1,7 @@
 package kubeiaas.iaascore.service;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
@@ -136,6 +137,25 @@ public class VolumeService {
         // 2. build & return
         return volumeProcess.buildVolumeList(volumeList);
     }
+
+    public List<Volume> FuzzyQueryDataVolume(String keyWords, String status){
+        // 1. get list from DB
+        // String volumeStatus = status.toString();
+        log.info(keyWords + "--------------------" + status);
+        List<Volume> volumeList = tableStorage.fuzzyQueryDataVolume(keyWords, status);
+        // 2. build & return
+        return volumeProcess.buildVolumeList(volumeList);
+    }
+
+    public VolumePageResponse pageFuzzyQueryDataVolume(String keyWords, String status, Integer pageNum, Integer pageSize) {
+        // 1. get list from DB
+        VolumePageResponse volumePage = tableStorage.pageFuzzyQueryDataVolume(keyWords, status, pageNum, pageSize);
+        // 2. build & return
+        List<Volume> volumeList = volumePage.getContent();
+        volumePage.setContent(volumeProcess.buildVolumeList(volumeList));
+        return volumePage;
+    }
+
 
     public VolumePageResponse pageQueryAllDataVolume(Integer pageNum, Integer pageSize) {
         // 1. get list from DB

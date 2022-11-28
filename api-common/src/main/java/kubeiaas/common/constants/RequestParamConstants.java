@@ -17,6 +17,7 @@ public class RequestParamConstants {
     public static final String VALUE_1 = "value_1";
     public static final String KEY_2 = "key_2";
     public static final String VALUE_2 = "value_2";
+    public static final String KEYWORDS = "keywords";
 
     public static final String STRATEGY = "strategy";
     public static final String STATUS = "status";

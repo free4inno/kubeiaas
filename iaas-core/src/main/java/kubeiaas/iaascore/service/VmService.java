@@ -254,6 +254,22 @@ public class VmService {
         return vmProcess.buildVmList(vmList);
     }
 
+    public List<Vm> fuzzyQueryVm(String param, String status, String hostUuid, String imageUuid) {
+        // 1. get from DB
+        List<Vm> vmList = tableStorage.fuzzyQueryVm(param, status, hostUuid, imageUuid);
+        // 2. build & return
+        return vmProcess.buildVmList(vmList);
+    }
+
+    public VmPageResponse pageFuzzyQueryVm(String param, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+        // 1. get from DB
+        VmPageResponse vmPage = tableStorage.pageFuzzyQueryVm(param, status, hostUuid, imageUuid, pageNum, pageSize);
+        // 2. build & return
+        List<Vm> vmList = vmPage.getContent();
+        vmPage.setContent(vmProcess.buildVmList(vmList));
+        return vmPage;
+    }
+
     public VmPageResponse pageQueryAll(Integer pageNum, Integer pageSize) {
         // 1. get from DB
         VmPageResponse vmPage = tableStorage.vmPageQueryAll(pageNum, pageSize);

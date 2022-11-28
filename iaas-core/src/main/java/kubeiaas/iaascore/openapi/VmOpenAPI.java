@@ -217,6 +217,42 @@ public class VmOpenAPI {
     }
 
     /**
+     * 模糊搜索获取 vm
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String fuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+            @RequestParam(value = RequestParamConstants.STATUS) String status,
+            @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
+            @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid) {
+        log.info("fuzzyQuery ==== start ====");
+        List<Vm> vmList = vmService.fuzzyQueryVm(keywords,status,hostUuid,imageUuid);
+        log.info("fuzzyQuery ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(vmList));
+    }
+
+    /**
+     * 分页获取 vm 列表
+     * @return pageTotal, vmTotal, vmList
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String pageFuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+            @RequestParam(value = RequestParamConstants.STATUS) String status,
+            @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
+            @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+        log.info("pageFuzzyQuery ==== start ====");
+        VmPageResponse res = vmService.pageFuzzyQueryVm(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
+        log.info("pageFuzzyQuery ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(res));
+    }
+
+
+    /**
      * 分页获取 vm 列表
      * @return pageTotal, vmTotal, vmList
      */
