@@ -119,15 +119,11 @@ public class VolumeService {
      *    - param: Integer pageNum, Integer pageSize
      *    - return: VolumePageResponse
      *
-     * 3. QUERY_FUZZY 模糊查询
-     *    - param: String keyWords, VmStatusEnum status
-     *    - return: List
-     *
-     * 4. PAGE_QUERY_FUZZY 分页模糊查询
+     * 3. FUZZY_QUERY 分页模糊查询
      *    - param: String keyWords, VolumeStatusEnum status, Integer pageNum, Integer pageSize
      *    - return: VolumePageResponse
      *
-     * 5. QUERY_BY_XXX 特定查询
+     * 4. QUERY_BY_XXX 特定查询
      *
      */
 
@@ -138,28 +134,18 @@ public class VolumeService {
         return volumeProcess.buildVolumeList(volumeList);
     }
 
-    public List<Volume> FuzzyQueryDataVolume(String keyWords, String status){
+    public VolumePageResponse pageQueryAllDataVolume(Integer pageNum, Integer pageSize) {
         // 1. get list from DB
-        // String volumeStatus = status.toString();
-        log.info(keyWords + "--------------------" + status);
-        List<Volume> volumeList = tableStorage.fuzzyQueryDataVolume(keyWords, status);
-        // 2. build & return
-        return volumeProcess.buildVolumeList(volumeList);
-    }
-
-    public VolumePageResponse pageFuzzyQueryDataVolume(String keyWords, String status, Integer pageNum, Integer pageSize) {
-        // 1. get list from DB
-        VolumePageResponse volumePage = tableStorage.pageFuzzyQueryDataVolume(keyWords, status, pageNum, pageSize);
+        VolumePageResponse volumePage = tableStorage.volumePageQueryAll(pageNum, pageSize);
         // 2. build & return
         List<Volume> volumeList = volumePage.getContent();
         volumePage.setContent(volumeProcess.buildVolumeList(volumeList));
         return volumePage;
     }
 
-
-    public VolumePageResponse pageQueryAllDataVolume(Integer pageNum, Integer pageSize) {
+    public VolumePageResponse fuzzyQueryDataVolume(String keywords, String status, Integer pageNum, Integer pageSize) {
         // 1. get list from DB
-        VolumePageResponse volumePage = tableStorage.volumePageQueryAll(pageNum, pageSize);
+        VolumePageResponse volumePage = tableStorage.volumeFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
         // 2. build & return
         List<Volume> volumeList = volumePage.getContent();
         volumePage.setContent(volumeProcess.buildVolumeList(volumeList));

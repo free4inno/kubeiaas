@@ -2,6 +2,9 @@ package kubeiaas.common.constants.bean;
 
 public class VolumeConstants {
     /* DB key */
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+    public static final String STATUS = "status";
     public static final String UUID = "uuid";
     public static final String INSTANCE_UUID = "instanceUuid";
     public static final String USAGE_TYPE = "usageType";

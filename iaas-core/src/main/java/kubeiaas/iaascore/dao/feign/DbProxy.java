@@ -27,19 +27,10 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.FUZZY_QUERY_VM)
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.FUZZY_QUERY)
     @ResponseBody
-    String fuzzyQueryVm(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String param,
-            @RequestParam(value = RequestParamConstants.STATUS) String status,
-            @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
-            @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid
-    );
-
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.PAGE_FUZZY_QUERY_VM)
-    @ResponseBody
-    String pageFuzzyQueryVm(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String param,
+    String vmFuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
             @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
@@ -154,16 +145,9 @@ public interface DbProxy {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.FUZZY_QUERY_DATA_VOLUME)
     @ResponseBody
-    String fuzzyQueryDataVolume(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String value1,
-            @RequestParam(value = RequestParamConstants.VALUE_2) String value2
-    );
-
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.PAGE_FUZZY_QUERY_DATA_VOLUME)
-    @ResponseBody
-    String pageFuzzyQueryDataVolume(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String param,
-            @RequestParam(value = RequestParamConstants.VALUE_2) String value2,
+    String volumeFuzzyQueryDataVolume(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
+            @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
     );

@@ -30,13 +30,8 @@ public class TableStorage {
         return JSON.parseArray(jsonString, Vm.class);
     }
 
-    public List<Vm> fuzzyQueryVm(String param, String status, String hostUuid, String imageUuid) {
-        String jsonString = dbProxy.fuzzyQueryVm(param, status, hostUuid, imageUuid);
-        return JSON.parseArray(jsonString, Vm.class);
-    }
-
-    public VmPageResponse pageFuzzyQueryVm(String param, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
-        String jsonString = dbProxy.pageFuzzyQueryVm(param, status, hostUuid, imageUuid, pageNum, pageSize);
+    public VmPageResponse vmFuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
         return JSON.parseObject(jsonString, VmPageResponse.class);
     }
 
@@ -218,13 +213,8 @@ public class TableStorage {
         return JSON.parseArray(jsonString, Volume.class);
     }
 
-    public List<Volume> fuzzyQueryDataVolume(String param, String status) {
-        String jsonString = dbProxy.fuzzyQueryDataVolume(param, status);
-        return JSON.parseArray(jsonString, Volume.class);
-    }
-
-    public VolumePageResponse pageFuzzyQueryDataVolume(String param, String status ,Integer pageNum, Integer pageSize) {
-        String jsonString = dbProxy.pageFuzzyQueryDataVolume(param, status, pageNum, pageSize);
+    public VolumePageResponse volumeFuzzyQueryDataVolume(String keywords, String status ,Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.volumeFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
         return JSON.parseObject(jsonString, VolumePageResponse.class);
     }
 
