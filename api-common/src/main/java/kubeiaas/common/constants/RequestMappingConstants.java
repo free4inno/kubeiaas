@@ -30,11 +30,17 @@ public class RequestMappingConstants {
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
     public static final String PAGE_QUERY_ALL = "page_query_all";
     public static final String PAGE_QUERY_ALL_DATA_VOLUME = "page_query_all_data_volume";
+    public static final String PAGE_FUZZY_QUERY_DATA_VOLUME = "page_fuzzy_query_data_volume";
     public static final String QUERY_ALL = "query_all";
+    public static final String FUZZY_QUERY = "fuzzy_query";
+    public static final String PAGE_FUZZY_QUERY = "page_fuzzy_query";
     public static final String QUERY_BY_UUID = "query_by_uuid";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
+    public static final String FUZZY_QUERY_DATA_VOLUME = "fuzzy_query_data_volume";
+    public static final String FUZZY_QUERY_VM = "fuzzy_query_vm";
+    public static final String PAGE_FUZZY_QUERY_VM = "page_fuzzy_query_vm";
     public static final String SAVE = "save";
     public static final String UPDATE = "update";
     public static final String REDUCE = "reduce";
