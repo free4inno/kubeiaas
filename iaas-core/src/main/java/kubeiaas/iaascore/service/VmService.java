@@ -268,6 +268,15 @@ public class VmService {
         return vmPage;
     }
 
+    public VmPageResponse fuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+        // 1. get from DB
+        VmPageResponse vmPage = tableStorage.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
+        // 2. build & return
+        List<Vm> vmList = vmPage.getContent();
+        vmPage.setContent(vmProcess.buildVmList(vmList));
+        return vmPage;
+    }
+
     public Vm queryByUuid(String uuid) {
         Vm vm = tableStorage.vmQueryByUuid(uuid);
 

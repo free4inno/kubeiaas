@@ -49,6 +49,7 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
     // -- fuzzy query
     public static final String FUZZY_QUERY = "fuzzy_query";
+    public static final String FUZZY_QUERY_ATTACH = "fuzzy_query_attach";
     public static final String FUZZY_QUERY_DATA_VOLUME = "fuzzy_query_data_volume";
     // -- page query
     public static final String PAGE_QUERY_ALL = "page_query_all";

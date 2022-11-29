@@ -39,6 +39,14 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.FUZZY_QUERY_ATTACH)
+    @ResponseBody
+    String vmFuzzyQueryAttach(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
+    );
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.PAGE_QUERY_ALL)
     @ResponseBody
     String vmPageQueryAll(

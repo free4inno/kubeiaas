@@ -36,6 +36,11 @@ public class TableStorage {
         return JSON.parseObject(jsonString, VmPageResponse.class);
     }
 
+    public VmPageResponse vmFuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
+        return JSON.parseObject(jsonString, VmPageResponse.class);
+    }
+
     public Vm vmQueryByUuid(String uuid) {
         String jsonString = dbProxy.vmQueryAllBySingleKey(VmConstants.UUID, uuid);
         List<Vm> vmList = JSON.parseArray(jsonString, Vm.class);

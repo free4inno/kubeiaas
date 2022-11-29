@@ -251,6 +251,22 @@ public class VmOpenAPI {
     }
 
     /**
+     * 分页模糊搜索（可进行挂载的云主机）
+     * @return pageTotal, vmTotal, vmList
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY_ATTACH, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String fuzzyQueryAttach(
+            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+        log.info("fuzzyQueryAttach ==== start ====");
+        VmPageResponse res = vmService.fuzzyQueryAttach(keywords, pageNum, pageSize);
+        log.info("fuzzyQueryAttach ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(res));
+    }
+
+    /**
      * 获取 vm 详情
      */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_UUID, produces = RequestMappingConstants.APP_JSON)

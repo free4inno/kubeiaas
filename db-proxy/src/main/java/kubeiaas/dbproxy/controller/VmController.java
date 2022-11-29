@@ -88,10 +88,28 @@ public class VmController {
         if (isNullParam(keywords) && isNullParam(status) && isNullParam(hostUuid) && isNullParam(imageUuid)){
             vmPage = vmDao.findAll(pageable);
         } else {
-            Specification<VmTable> specification = buildFuzzySpec(keywords, status, hostUuid, imageUuid);
+            Specification<VmTable> specification = buildFuzzySpec(keywords, status, hostUuid, imageUuid, false);
             vmPage = vmDao.findAll(specification, pageable);
         }
         log.info("pageQueryFuzzy ==== end ====");
+        return JSON.toJSONString(vmPage);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY_ATTACH, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String fuzzyQueryAttach(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
+        log.info("fuzzyQueryAttach ==== start ====");
+        // 1. build pageable
+        //    - pageNum in Pageable is from 0-n, so we need to `pageNum - 1`
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        // 2. build specification
+        Specification<VmTable> specification = buildFuzzySpec(keywords, null, null, null, true);
+        // 3. do query
+        Page<VmTable> vmPage = vmDao.findAll(specification, pageable);
+        log.info("fuzzyQueryAttach ==== end ====");
         return JSON.toJSONString(vmPage);
     }
 
@@ -117,7 +135,7 @@ public class VmController {
 
     // =================================================================================================================
 
-    private Specification<VmTable> buildFuzzySpec(String keywords, String status, String hostUuid, String imageUuid) {
+    private Specification<VmTable> buildFuzzySpec(String keywords, String status, String hostUuid, String imageUuid, boolean queryAttach) {
         return (root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             List<Predicate> keywords_predicates = new ArrayList<>();
@@ -135,9 +153,20 @@ public class VmController {
                 predicates.add(cb.or(keywords_predicates.toArray(new Predicate[0])));
             }
             // 2. status
-            if (!isNullParam(status)){
+            if (!isNullParam(status) && !queryAttach){
+                // 2.1. query status
                 VmStatusEnum vmStatus = EnumUtils.getEnumFromString(VmStatusEnum.class, status);
                 predicates.add(cb.equal(root.get(VmConstants.STATUS), vmStatus));
+            }
+            if (queryAttach) {
+                // 2.2. query attach
+                predicates.add(
+                    cb.or(
+                        cb.equal(root.get(VmConstants.STATUS), VmStatusEnum.ACTIVE),
+                        cb.equal(root.get(VmConstants.STATUS), VmStatusEnum.STOPPED),
+                        cb.equal(root.get(VmConstants.STATUS), VmStatusEnum.SUSPENDED)
+                    )
+                );
             }
             // 4. host
             if (!isNullParam(hostUuid)){
