@@ -3,6 +3,7 @@ package kubeiaas.iaascore.dao.feign;
 import kubeiaas.common.constants.ComponentConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -169,5 +170,13 @@ public interface DbProxy {
     @ResponseBody
     String volumeDeleteByUuid(
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid
+    );
+
+    // ========================= specConfig =========================
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SPEC_CONFIG + "/" + RequestMappingConstants.QUERY_ALL_BY_TYPE)
+    @ResponseBody
+    String specConfigQueryAllByType(
+            @RequestParam(value = RequestParamConstants.TYPE) SpecTypeEnum type
     );
 }

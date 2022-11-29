@@ -11,6 +11,7 @@ public class RequestMappingConstants {
     public static final String VOLUME = "volume";
     public static final String IP_SEGMENT = "ip_segment";
     public static final String IP_USED = "ip_used";
+    public static final String SPEC_CONFIG = "spec_config";
 
     // -- agent component
     public static final String DHCP_C = "dhcp_c";
@@ -43,6 +44,7 @@ public class RequestMappingConstants {
     // -- query all
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
+    public static final String QUERY_ALL_BY_TYPE = "query_all_by_type";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
     // -- fuzzy query

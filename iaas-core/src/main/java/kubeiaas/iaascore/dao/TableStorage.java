@@ -3,6 +3,7 @@ package kubeiaas.iaascore.dao;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.response.VmPageResponse;
@@ -243,4 +244,10 @@ public class TableStorage {
         dbProxy.volumeDeleteByUuid(volumeUuid);
     }
 
+    // ========================= specConfig =========================
+
+    public List<SpecConfig> specConfigQueryAllByType(SpecTypeEnum type) {
+        String jsonString = dbProxy.specConfigQueryAllByType(type);
+        return JSON.parseArray(jsonString, SpecConfig.class);
+    }
 }

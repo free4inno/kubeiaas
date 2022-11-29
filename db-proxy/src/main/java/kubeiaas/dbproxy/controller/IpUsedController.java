@@ -1,13 +1,10 @@
 package kubeiaas.dbproxy.controller;
 
 import com.alibaba.fastjson.JSON;
-import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.dbproxy.dao.IpUsedDao;
-import kubeiaas.dbproxy.table.IpSegmentTable;
 import kubeiaas.dbproxy.table.IpUsedTable;
-import kubeiaas.dbproxy.table.VmTable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
