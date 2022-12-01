@@ -74,14 +74,15 @@ public class VolumeController {
         // 1. build pageable
         //    - pageNum in Pageable is from 0-n, so we need to `pageNum - 1`
         // 2. build specification
-        Page<VolumeTable> volumePage;
         Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        Specification<VolumeTable> specification;
         if (isNullParam(keywords) && isNullParam(status)) {
-            volumePage = volumeDao.findAll(pageable);
+            specification = (root, cq, cb) ->
+                    cb.and(cb.equal(root.get(VolumeConstants.USAGE_TYPE), VolumeUsageEnum.DATA));
         } else {
-            Specification<VolumeTable> specification = buildFuzzySpec(keywords, status);
-            volumePage = volumeDao.findAll(specification, pageable);
+            specification = buildFuzzySpec(keywords, status);
         }
+        Page<VolumeTable> volumePage = volumeDao.findAll(specification, pageable);
         log.info("fuzzyQueryDataVolume ==== end ====");
         return JSON.toJSONString(volumePage);
     }
