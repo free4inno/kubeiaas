@@ -3,6 +3,7 @@ package kubeiaas.iaascore.dao;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.response.VmPageResponse;
@@ -30,13 +31,13 @@ public class TableStorage {
         return JSON.parseArray(jsonString, Vm.class);
     }
 
-    public List<Vm> fuzzyQueryVm(String param, String status, String hostUuid, String imageUuid) {
-        String jsonString = dbProxy.fuzzyQueryVm(param, status, hostUuid, imageUuid);
-        return JSON.parseArray(jsonString, Vm.class);
+    public VmPageResponse vmFuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
+        return JSON.parseObject(jsonString, VmPageResponse.class);
     }
 
-    public VmPageResponse pageFuzzyQueryVm(String param, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
-        String jsonString = dbProxy.pageFuzzyQueryVm(param, status, hostUuid, imageUuid, pageNum, pageSize);
+    public VmPageResponse vmFuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
         return JSON.parseObject(jsonString, VmPageResponse.class);
     }
 
@@ -218,13 +219,8 @@ public class TableStorage {
         return JSON.parseArray(jsonString, Volume.class);
     }
 
-    public List<Volume> fuzzyQueryDataVolume(String param, String status) {
-        String jsonString = dbProxy.fuzzyQueryDataVolume(param, status);
-        return JSON.parseArray(jsonString, Volume.class);
-    }
-
-    public VolumePageResponse pageFuzzyQueryDataVolume(String param, String status ,Integer pageNum, Integer pageSize) {
-        String jsonString = dbProxy.pageFuzzyQueryDataVolume(param, status, pageNum, pageSize);
+    public VolumePageResponse volumeFuzzyQueryDataVolume(String keywords, String status ,Integer pageNum, Integer pageSize) {
+        String jsonString = dbProxy.volumeFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
         return JSON.parseObject(jsonString, VolumePageResponse.class);
     }
 
@@ -253,4 +249,10 @@ public class TableStorage {
         dbProxy.volumeDeleteByUuid(volumeUuid);
     }
 
+    // ========================= specConfig =========================
+
+    public List<SpecConfig> specConfigQueryAllByType(SpecTypeEnum type) {
+        String jsonString = dbProxy.specConfigQueryAllByType(type);
+        return JSON.parseArray(jsonString, SpecConfig.class);
+    }
 }

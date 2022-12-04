@@ -153,4 +153,20 @@ public class VolumeOpenAPI {
         log.info("pageQueryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }
+
+    /**
+     * 分页模糊搜索获取 “云硬盘” 列表
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String fuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+            @RequestParam(value = RequestParamConstants.STATUS) String status,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+        log.info("fuzzyQuery ==== start ====");
+        VolumePageResponse res = volumeService.fuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
+        log.info("fuzzyQuery ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(res));
+    }
 }

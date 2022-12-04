@@ -235,15 +235,11 @@ public class VmService {
      *    - param: Integer pageNum, Integer pageSize
      *    - return: VmPageResponse
      *
-     * 3. QUERY_FUZZY 模糊查询
-     *    - param: String keyWords, VmStatusEnum status, String hostUuid, String imageUuid
-     *    - return: List
-     *
-     * 4. PAGE_QUERY_FUZZY 分页模糊查询
+     * 3. FUZZY_QUERY 分页模糊查询
      *    - param: String keyWords, VmStatusEnum status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize
      *    - return: VmPageResponse
      *
-     * 5. QUERY_BY_XXX 特定查询
+     * 4. QUERY_BY_XXX 特定查询
      *
      */
 
@@ -273,6 +269,24 @@ public class VmService {
     public VmPageResponse pageQueryAll(Integer pageNum, Integer pageSize) {
         // 1. get from DB
         VmPageResponse vmPage = tableStorage.vmPageQueryAll(pageNum, pageSize);
+        // 2. build & return
+        List<Vm> vmList = vmPage.getContent();
+        vmPage.setContent(vmProcess.buildVmList(vmList));
+        return vmPage;
+    }
+
+    public VmPageResponse fuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+        // 1. get from DB
+        VmPageResponse vmPage = tableStorage.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
+        // 2. build & return
+        List<Vm> vmList = vmPage.getContent();
+        vmPage.setContent(vmProcess.buildVmList(vmList));
+        return vmPage;
+    }
+
+    public VmPageResponse fuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+        // 1. get from DB
+        VmPageResponse vmPage = tableStorage.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));

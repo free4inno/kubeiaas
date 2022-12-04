@@ -3,6 +3,7 @@ package kubeiaas.iaascore.dao.feign;
 import kubeiaas.common.constants.ComponentConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,22 +28,21 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1
     );
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.FUZZY_QUERY_VM)
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.FUZZY_QUERY)
     @ResponseBody
-    String fuzzyQueryVm(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String param,
-            @RequestParam(value = RequestParamConstants.STATUS) String status,
-            @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
-            @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid
-    );
-
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.PAGE_FUZZY_QUERY_VM)
-    @ResponseBody
-    String pageFuzzyQueryVm(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String param,
+    String vmFuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
             @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM + "/" + RequestMappingConstants.FUZZY_QUERY_ATTACH)
+    @ResponseBody
+    String vmFuzzyQueryAttach(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
     );
@@ -154,16 +154,9 @@ public interface DbProxy {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.FUZZY_QUERY_DATA_VOLUME)
     @ResponseBody
-    String fuzzyQueryDataVolume(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String value1,
-            @RequestParam(value = RequestParamConstants.VALUE_2) String value2
-    );
-
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.PAGE_FUZZY_QUERY_DATA_VOLUME)
-    @ResponseBody
-    String pageFuzzyQueryDataVolume(
-            @RequestParam(value = RequestParamConstants.VALUE_1) String param,
-            @RequestParam(value = RequestParamConstants.VALUE_2) String value2,
+    String volumeFuzzyQueryDataVolume(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
+            @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize
     );
@@ -185,5 +178,13 @@ public interface DbProxy {
     @ResponseBody
     String volumeDeleteByUuid(
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid
+    );
+
+    // ========================= specConfig =========================
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SPEC_CONFIG + "/" + RequestMappingConstants.QUERY_ALL_BY_TYPE)
+    @ResponseBody
+    String specConfigQueryAllByType(
+            @RequestParam(value = RequestParamConstants.TYPE) SpecTypeEnum type
     );
 }

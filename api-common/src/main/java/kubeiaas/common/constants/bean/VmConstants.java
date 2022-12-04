@@ -2,7 +2,12 @@ package kubeiaas.common.constants.bean;
 
 public class VmConstants {
     /* DB key */
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+    public static final String STATUS = "status";
     public static final String UUID = "uuid";
+    public static final String HOST_UUID = "hostUuid";
+    public static final String IMAGE_UUID = "imageUuid";
 
     /* default value */
     public static final String DEFAULT_DESCRIPTION = "无";       // vm's default description

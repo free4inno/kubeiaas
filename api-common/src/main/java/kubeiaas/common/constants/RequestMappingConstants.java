@@ -11,6 +11,7 @@ public class RequestMappingConstants {
     public static final String VOLUME = "volume";
     public static final String IP_SEGMENT = "ip_segment";
     public static final String IP_USED = "ip_used";
+    public static final String SPEC_CONFIG = "spec_config";
 
     // -- agent component
     public static final String DHCP_C = "dhcp_c";
@@ -28,19 +29,6 @@ public class RequestMappingConstants {
     public static final String DETACH = "detach";
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
-    public static final String PAGE_QUERY_ALL = "page_query_all";
-    public static final String PAGE_QUERY_ALL_DATA_VOLUME = "page_query_all_data_volume";
-    public static final String PAGE_FUZZY_QUERY_DATA_VOLUME = "page_fuzzy_query_data_volume";
-    public static final String QUERY_ALL = "query_all";
-    public static final String FUZZY_QUERY = "fuzzy_query";
-    public static final String PAGE_FUZZY_QUERY = "page_fuzzy_query";
-    public static final String QUERY_BY_UUID = "query_by_uuid";
-    public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
-    public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
-    public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
-    public static final String FUZZY_QUERY_DATA_VOLUME = "fuzzy_query_data_volume";
-    public static final String FUZZY_QUERY_VM = "fuzzy_query_vm";
-    public static final String PAGE_FUZZY_QUERY_VM = "page_fuzzy_query_vm";
     public static final String SAVE = "save";
     public static final String UPDATE = "update";
     public static final String REDUCE = "reduce";
@@ -53,6 +41,21 @@ public class RequestMappingConstants {
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
+    // -- query all
+    public static final String QUERY_ALL = "query_all";
+    public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
+    public static final String QUERY_ALL_BY_TYPE = "query_all_by_type";
+    public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
+    public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
+    // -- fuzzy query
+    public static final String FUZZY_QUERY = "fuzzy_query";
+    public static final String FUZZY_QUERY_ATTACH = "fuzzy_query_attach";
+    public static final String FUZZY_QUERY_DATA_VOLUME = "fuzzy_query_data_volume";
+    // -- page query
+    public static final String PAGE_QUERY_ALL = "page_query_all";
+    public static final String PAGE_QUERY_ALL_DATA_VOLUME = "page_query_all_data_volume";
+    // -- query by
+    public static final String QUERY_BY_UUID = "query_by_uuid";
 
     // -- Resource Operator
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
