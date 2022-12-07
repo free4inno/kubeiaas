@@ -10,6 +10,7 @@ import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.service.HostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
+@Validated
 @Controller
 @RequestMapping(value = RequestMappingConstants.HOST)
 public class HostOpenAPI {

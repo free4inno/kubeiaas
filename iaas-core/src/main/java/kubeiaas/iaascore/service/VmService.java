@@ -10,7 +10,7 @@ import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.process.*;
-import kubeiaas.iaascore.response.VmPageResponse;
+import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -250,27 +250,27 @@ public class VmService {
         return vmProcess.buildVmList(vmList);
     }
 
-    public VmPageResponse pageQueryAll(Integer pageNum, Integer pageSize) {
+    public PageResponse<Vm> pageQueryAll(Integer pageNum, Integer pageSize) {
         // 1. get from DB
-        VmPageResponse vmPage = tableStorage.vmPageQueryAll(pageNum, pageSize);
+        PageResponse<Vm> vmPage = tableStorage.vmPageQueryAll(pageNum, pageSize);
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));
         return vmPage;
     }
 
-    public VmPageResponse fuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+    public PageResponse<Vm> fuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
         // 1. get from DB
-        VmPageResponse vmPage = tableStorage.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
+        PageResponse<Vm> vmPage = tableStorage.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));
         return vmPage;
     }
 
-    public VmPageResponse fuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+    public PageResponse<Vm> fuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
         // 1. get from DB
-        VmPageResponse vmPage = tableStorage.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
+        PageResponse<Vm> vmPage = tableStorage.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));

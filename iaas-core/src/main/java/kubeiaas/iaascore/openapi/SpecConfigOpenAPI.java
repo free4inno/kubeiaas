@@ -11,6 +11,7 @@ import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Slf4j
+@Validated
 @Controller
 @RequestMapping(value = RequestMappingConstants.SPEC_CONFIG)
 public class SpecConfigOpenAPI {

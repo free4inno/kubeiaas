@@ -1,6 +1,5 @@
-package kubeiaas.iaascore.response;
+package kubeiaas.imageoperator.response;
 
-import kubeiaas.common.bean.Vm;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,8 +7,8 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class VmPageResponse {
-    List<Vm> content;
+public class PageResponse<T> {
+    List<T> content;
     int totalPages;
     long totalElements;
 }

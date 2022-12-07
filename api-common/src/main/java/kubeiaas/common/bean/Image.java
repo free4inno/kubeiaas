@@ -42,6 +42,12 @@ public class Image {
         this.osType = osType;
     }
 
+    public Image(String uuid, String name, String description) {
+        this.uuid = uuid;
+        this.name = name;
+        this.description = description;
+    }
+
     public Image(String uuid, String directory) {
         this.uuid = uuid;
         this.directory = directory;

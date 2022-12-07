@@ -21,4 +21,10 @@ public interface ImageOperator {
     @ResponseBody
     String imageQueryAll();
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_ALL)
+    @ResponseBody
+    String imagePageQueryAll(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize);
+
 }

@@ -1,14 +1,13 @@
 package kubeiaas.iaascore.service;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
-import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.process.ResourceProcess;
 import kubeiaas.iaascore.process.VolumeProcess;
-import kubeiaas.iaascore.response.VolumePageResponse;
+import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -134,18 +133,18 @@ public class VolumeService {
         return volumeProcess.buildVolumeList(volumeList);
     }
 
-    public VolumePageResponse pageQueryAllDataVolume(Integer pageNum, Integer pageSize) {
+    public PageResponse<Volume> pageQueryAllDataVolume(Integer pageNum, Integer pageSize) {
         // 1. get list from DB
-        VolumePageResponse volumePage = tableStorage.volumePageQueryAll(pageNum, pageSize);
+        PageResponse<Volume> volumePage = tableStorage.volumePageQueryAll(pageNum, pageSize);
         // 2. build & return
         List<Volume> volumeList = volumePage.getContent();
         volumePage.setContent(volumeProcess.buildVolumeList(volumeList));
         return volumePage;
     }
 
-    public VolumePageResponse fuzzyQueryDataVolume(String keywords, String status, Integer pageNum, Integer pageSize) {
+    public PageResponse<Volume> fuzzyQueryDataVolume(String keywords, String status, Integer pageNum, Integer pageSize) {
         // 1. get list from DB
-        VolumePageResponse volumePage = tableStorage.volumeFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
+        PageResponse<Volume> volumePage = tableStorage.volumeFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
         // 2. build & return
         List<Volume> volumeList = volumePage.getContent();
         volumePage.setContent(volumeProcess.buildVolumeList(volumeList));
