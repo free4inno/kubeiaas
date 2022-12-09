@@ -1,11 +1,10 @@
 package kubeiaas.imageoperator.controller;
 
 import com.alibaba.fastjson.JSON;
-import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
-import kubeiaas.imageoperator.ImageOperatorApplication;
+import kubeiaas.imageoperator.response.PageResponse;
 import kubeiaas.imageoperator.service.ImageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -41,6 +40,17 @@ public class ImageController {
         List<Image> imageList = imageService.queryAll();
         log.info("imageQueryAll ==== end ====");
         return JSON.toJSONString(imageList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String imagePageQueryAll(
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
+        log.info("imagePageQueryAll ==== start ====");
+        PageResponse<Image> res = imageService.pageQueryAll(pageNum, pageSize);
+        log.info("imagePageQueryAll ==== end ====");
+        return JSON.toJSONString(res);
     }
 
 }

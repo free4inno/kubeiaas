@@ -1,13 +1,13 @@
 package kubeiaas.iaascore.dao;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
-import kubeiaas.iaascore.response.VmPageResponse;
-import kubeiaas.iaascore.response.VolumePageResponse;
+import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +31,14 @@ public class TableStorage {
         return JSON.parseArray(jsonString, Vm.class);
     }
 
-    public VmPageResponse vmFuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+    public PageResponse<Vm> vmFuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
         String jsonString = dbProxy.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
-        return JSON.parseObject(jsonString, VmPageResponse.class);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Vm>>(){});
     }
 
-    public VmPageResponse vmFuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+    public PageResponse<Vm> vmFuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
         String jsonString = dbProxy.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
-        return JSON.parseObject(jsonString, VmPageResponse.class);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Vm>>(){});
     }
 
     public Vm vmQueryByUuid(String uuid) {
@@ -51,9 +51,9 @@ public class TableStorage {
         }
     }
 
-    public VmPageResponse vmPageQueryAll(Integer pageNum, Integer pageSize) {
+    public PageResponse<Vm> vmPageQueryAll(Integer pageNum, Integer pageSize) {
         String jsonString = dbProxy.vmPageQueryAll(pageNum, pageSize);
-        return JSON.parseObject(jsonString, VmPageResponse.class);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Vm>>(){});
     }
 
     public Vm vmSave(Vm vm) {
@@ -87,6 +87,11 @@ public class TableStorage {
     public List<Image> imageQueryAll() {
         String jsonString = imageOperator.imageQueryAll();
         return JSON.parseArray(jsonString, Image.class);
+    }
+
+    public PageResponse<Image> imagePageQueryAll(Integer pageNum, Integer pageSize) {
+        String jsonString = imageOperator.imagePageQueryAll(pageNum, pageSize);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Image>>(){});
     }
 
     public Image imageQueryByUuid(String uuid) {
@@ -219,14 +224,14 @@ public class TableStorage {
         return JSON.parseArray(jsonString, Volume.class);
     }
 
-    public VolumePageResponse volumeFuzzyQueryDataVolume(String keywords, String status ,Integer pageNum, Integer pageSize) {
+    public PageResponse<Volume> volumeFuzzyQueryDataVolume(String keywords, String status ,Integer pageNum, Integer pageSize) {
         String jsonString = dbProxy.volumeFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
-        return JSON.parseObject(jsonString, VolumePageResponse.class);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Volume>>(){});
     }
 
-    public VolumePageResponse volumePageQueryAll(Integer pageNum, Integer pageSize) {
+    public PageResponse<Volume> volumePageQueryAll(Integer pageNum, Integer pageSize) {
         String jsonString = dbProxy.volumePageQueryAllDataVolume(pageNum, pageSize);
-        return JSON.parseObject(jsonString, VolumePageResponse.class);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Volume>>(){});
     }
 
     public Volume volumeQueryByUuid(String uuid) {

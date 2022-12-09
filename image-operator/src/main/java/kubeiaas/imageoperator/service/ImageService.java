@@ -4,6 +4,7 @@ package kubeiaas.imageoperator.service;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Image;
 import kubeiaas.imageoperator.config.ImageConfig;
+import kubeiaas.imageoperator.response.PageResponse;
 import kubeiaas.imageoperator.utils.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,30 @@ public class ImageService {
         return imageList;
     }
 
+    public PageResponse<Image> pageQueryAll(Integer pageNum, Integer pageSize) {
+        // 1. get all yaml files under image storage path
+        List<String> yamlList = getYamlList();
+
+        // 2. calculate basic number
+        Integer totalElements = yamlList.size();
+        int totalPages = (totalElements % pageSize == 0) ? (totalElements / pageSize) : (totalElements / pageSize) + 1;
+
+        // 3. get content
+        List<Image> imageList = new ArrayList<>();
+        for (int id = 0; id < yamlList.size(); id++) {
+            if (id >= (pageNum - 1) * pageSize && id < pageNum * pageSize) {
+                Image image = ImageUtils.getImageFromYaml(yamlList.get(id), id);
+                if (image != null) {
+                    imageList.add(image);
+                } else {
+                    imageList.add(new Image(null, "UNKNOWN", "Error parsing yaml file: " + yamlList.get(id)));
+                }
+            }
+        }
+
+        return new PageResponse<>(imageList, totalPages, totalElements.longValue());
+    }
+
     private List<String> getYamlList() {
         List<String> yamlList = new ArrayList<>();
         /*
@@ -64,8 +89,7 @@ public class ImageService {
            filesWalkPath: ImageConfig.CONTAINER_STORAGE_PATH
          */
         try (Stream<Path> paths = Files.walk(Paths.get(ImageConfig.CONTAINER_STORAGE_PATH), 1)) {
-            paths.map(Path::toString).filter(f -> f.endsWith(".yaml"))
-                    .forEach(yamlList::add);
+            paths.map(Path::toString).filter(f -> f.endsWith(".yaml") || f.endsWith(".yml")).forEach(yamlList::add);
         } catch (Exception e) {
             e.printStackTrace();
         }

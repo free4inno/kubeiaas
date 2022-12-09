@@ -10,10 +10,7 @@ import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.request.vm.*;
-import kubeiaas.iaascore.response.BaseResponse;
-import kubeiaas.iaascore.response.ResponseEnum;
-import kubeiaas.iaascore.response.SingleMsgResponse;
-import kubeiaas.iaascore.response.VmPageResponse;
+import kubeiaas.iaascore.response.*;
 import kubeiaas.iaascore.service.VmService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -262,7 +259,7 @@ public class VmOpenAPI {
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("pageQueryAll ==== start ====");
-        VmPageResponse res = vmService.pageQueryAll(pageNum, pageSize);
+        PageResponse<Vm> res = vmService.pageQueryAll(pageNum, pageSize);
         log.info("pageQueryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }
@@ -281,7 +278,7 @@ public class VmOpenAPI {
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("fuzzyQuery ==== start ====");
-        VmPageResponse res = vmService.fuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
+        PageResponse<Vm> res = vmService.fuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
         log.info("fuzzyQuery ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }
@@ -297,7 +294,7 @@ public class VmOpenAPI {
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("fuzzyQueryAttach ==== start ====");
-        VmPageResponse res = vmService.fuzzyQueryAttach(keywords, pageNum, pageSize);
+        PageResponse<Vm> res = vmService.fuzzyQueryAttach(keywords, pageNum, pageSize);
         log.info("fuzzyQueryAttach ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }

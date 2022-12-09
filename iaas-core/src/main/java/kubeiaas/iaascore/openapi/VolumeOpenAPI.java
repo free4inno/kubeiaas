@@ -10,10 +10,7 @@ import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.request.volume.AttachVolumeForm;
 import kubeiaas.iaascore.request.volume.CreateVolumeForm;
 import kubeiaas.iaascore.request.volume.DeleteVolumeForm;
-import kubeiaas.iaascore.response.BaseResponse;
-import kubeiaas.iaascore.response.ResponseEnum;
-import kubeiaas.iaascore.response.SingleMsgResponse;
-import kubeiaas.iaascore.response.VolumePageResponse;
+import kubeiaas.iaascore.response.*;
 import kubeiaas.iaascore.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -149,7 +146,7 @@ public class VolumeOpenAPI {
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("pageQueryAll ==== start ====");
-        VolumePageResponse res = volumeService.pageQueryAllDataVolume(pageNum, pageSize);
+        PageResponse<Volume> res = volumeService.pageQueryAllDataVolume(pageNum, pageSize);
         log.info("pageQueryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }
@@ -165,7 +162,7 @@ public class VolumeOpenAPI {
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("fuzzyQuery ==== start ====");
-        VolumePageResponse res = volumeService.fuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
+        PageResponse<Volume> res = volumeService.fuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
         log.info("fuzzyQuery ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }

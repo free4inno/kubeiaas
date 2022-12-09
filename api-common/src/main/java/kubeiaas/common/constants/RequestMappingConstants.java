@@ -57,21 +57,21 @@ public class RequestMappingConstants {
     // -- query by
     public static final String QUERY_BY_UUID = "query_by_uuid";
 
-    // -- Resource Operator
+    // >>> Resource Operator <<<
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
     public static final String SELECT_HOST_BY_HOST_UUID = "select_host_by_host_uuid";
     public static final String SELECT_HOST_BY_OPERATOR = "select_host_by_operator";
     public static final String SELECT_HOST_BY_HOST_OPERATOR = "select_host_by_host_operator";
 
-    // -- Image Operator
+    // >>> Image Operator <<<
     public static final String QUERY_IMAGE_BY_UUID = "query_image_by_uuid";
     public static final String QUERY_IMAGE_ALL = "query_image_all";
 
-    // -- DHCP Controller
+    // >>> DHCP Controller <<<
     public static final String BIND_MAC_IP = "bind_mac_ip";
     public static final String UNBIND_MAC_IP = "unbind_mac_ip";
 
-    // -- Volume Controller
+    // >>> Volume Controller <<<
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
     public static final String CREATE_DATA_VOLUME = "create_data_volume";
     public static final String DELETE_SYSTEM_VOLUME = "delete_system_volume";
@@ -79,7 +79,7 @@ public class RequestMappingConstants {
     public static final String ATTACH_DATA_VOLUME = "attach_data_volume";
     public static final String DETACH_DATA_VOLUME = "detach_data_volume";
 
-    // -- Vm Controller
+    // >>> Vm Controller <<<
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";
     public static final String DELETE_VM_INSTANCE = "delete_vm_instance";
     public static final String STOP_VM_INSTANCE = "stop_vm_instance";
@@ -89,12 +89,12 @@ public class RequestMappingConstants {
     public static final String RESUME_VM_INSTANCE = "resume_vm_instance";
     public static final String MODIFY_VM_INSTANCE = "modify_vm_instance";
 
-    // -- Vnc Controller
+    // >>> Vnc Controller <<<
     public static final String ADD_VNC_TOKEN = "add_vnc_token";
     public static final String FLUSH_VNC_TOKEN = "flush_vnc_token";
     public static final String DELETE_VNC_TOKEN = "delete_vnc_token";
 
-    // -- host Controller
+    // >>> host Controller <<<
     public static final String CHECK_ENV = "check_env";
     public static final String CONFIG_ENV = "config_env";
 
