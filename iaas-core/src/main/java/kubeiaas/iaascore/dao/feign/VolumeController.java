@@ -59,4 +59,13 @@ public interface VolumeController {
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr);
+
+    @RequestMapping(method = RequestMethod.GET,value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.VOLUME_PUBLISH_IMAGE)
+    @ResponseBody
+    String volumePublishImage(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr
+    );
 }

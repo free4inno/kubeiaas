@@ -216,7 +216,7 @@ public class VmOpenAPI {
     /**
      * 模糊搜索获取 vm
      */
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+/*    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String fuzzyQuery(
             @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
@@ -227,13 +227,13 @@ public class VmOpenAPI {
         List<Vm> vmList = vmService.fuzzyQueryVm(keywords,status,hostUuid,imageUuid);
         log.info("fuzzyQuery ==== end ====");
         return JSON.toJSONString(BaseResponse.success(vmList));
-    }
+    }*/
 
     /**
      * 分页获取 vm 列表
      * @return pageTotal, vmTotal, vmList
      */
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+/*    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String pageFuzzyQuery(
             @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
@@ -246,7 +246,7 @@ public class VmOpenAPI {
         VmPageResponse res = vmService.pageFuzzyQueryVm(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
         log.info("pageFuzzyQuery ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
-    }
+    }*/
 
 
     /**
@@ -335,6 +335,23 @@ public class VmOpenAPI {
         Vm vm = vmService.editVm(f.getVmUuid(), f.getName(), f.getDescription());
         log.info("edit ==== end ====");
         return JSON.toJSONString(BaseResponse.success(vm));
+    }
+
+    /**
+     * 镜像发布：将系统盘发布，名称、描述
+     */
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.PUBLISH_IMAGE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String publishImage(@Valid @RequestBody VolumePubilshImageForm f) throws BaseException {
+        log.info("publishImage ==== start ====");
+        if (vmService.publishImage(f.getVmUuid(), f.getName(), f.getDescription())
+                .equals(ResponseMsgConstants.SUCCESS)) {
+            log.info("publishImage ==== end ====");
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.info("publishImage ==== error ====");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.PUBLISH_IMAGE_ERROR));
+        }
     }
 
 }

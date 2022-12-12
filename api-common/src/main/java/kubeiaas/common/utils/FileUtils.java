@@ -3,6 +3,7 @@ package kubeiaas.common.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.Properties;
 
 @Slf4j
@@ -168,6 +169,16 @@ public class FileUtils {
             return false;
         }
         return true;
+    }
+
+    public static Float getFileSize(String filePath) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new IOException("file not exists");
+        }
+        long fileSize = file.length();
+        Float fileSizeGB = new BigDecimal(fileSize/1024/1024/1024).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue(); //转换单位为GB
+        return fileSizeGB;
     }
 
     public static Properties readFile(String filePath) {

@@ -5,6 +5,8 @@ import com.alibaba.fastjson.TypeReference;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
+import kubeiaas.common.enums.volume.VolumeFormatEnum;
+import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.response.PageResponse;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -240,6 +243,17 @@ public class TableStorage {
         if (volumeList != null && !volumeList.isEmpty()) {
             return volumeList.get(0);
         } else {
+            return null;
+        }
+    }
+
+    public Volume systemVolumeQueryByUuid(String uuid) {
+        String jsonString = dbProxy.volumeQueryAllBySingleKey(VolumeConstants.INSTANCE_UUID, uuid);
+        List<Volume> volumeList = JSON.parseArray(jsonString, Volume.class);
+        if (volumeList != null && !volumeList.isEmpty()) {
+            volumeList = volumeList.stream().filter(volume1 -> volume1.getUsageType().equals(VolumeUsageEnum.SYSTEM)).collect(Collectors.toList());
+            return volumeList.get(0);
+        }else {
             return null;
         }
     }

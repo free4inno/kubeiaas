@@ -53,6 +53,7 @@ public class RequestMappingConstants {
     public static final String FUZZY_QUERY_DATA_VOLUME = "fuzzy_query_data_volume";
     // -- page query
     public static final String PAGE_QUERY_ALL = "page_query_all";
+    public static final String PAGE_FUZZY_QUERY = "page_fuzzy_query";
     public static final String PAGE_QUERY_ALL_DATA_VOLUME = "page_query_all_data_volume";
     // -- query by
     public static final String QUERY_BY_UUID = "query_by_uuid";
@@ -66,6 +67,8 @@ public class RequestMappingConstants {
     // >>> Image Operator <<<
     public static final String QUERY_IMAGE_BY_UUID = "query_image_by_uuid";
     public static final String QUERY_IMAGE_ALL = "query_image_all";
+    public static final String PUBLISH_IMAGE = "publish_image";
+    public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
 
     // >>> DHCP Controller <<<
     public static final String BIND_MAC_IP = "bind_mac_ip";

@@ -1,11 +1,15 @@
 package kubeiaas.iaascore.scheduler;
 
+import com.alibaba.fastjson.JSON;
+import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.dao.feign.VmController;
+import kubeiaas.iaascore.dao.feign.VolumeController;
 import kubeiaas.iaascore.process.MountProcess;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +28,9 @@ public class VmScheduler {
 
     @Resource
     private VmController vmController;
+
+    @Resource
+    private VolumeController volumeController;
 
     @Resource
     private MountProcess mountProcess;
@@ -108,6 +115,17 @@ public class VmScheduler {
     public boolean modifyVmInstance(String vmUuid, Integer cpus, Integer memory) {
         try {
             return vmController.modifyVmInstance(getSelectedUri(vmUuid), vmUuid, cpus, memory)
+                    .equals(ResponseMsgConstants.SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean volumeToImage(String vmUuid, String imagePath, String volumePath ,Image image) {
+        String imageObjectStr = JSON.toJSONString(image);
+        try {
+            return volumeController.volumePublishImage(getSelectedUri(vmUuid), imagePath, volumePath, imageObjectStr)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();

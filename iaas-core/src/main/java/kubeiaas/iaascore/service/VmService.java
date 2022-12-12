@@ -343,4 +343,20 @@ public class VmService {
         return vm;
     }
 
+    public String publishImage(String vmUuid, String name, String description) throws BaseException {
+//        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+
+       /* ----- choose host ----
+        Select the host where the VM to be deleted resides
+       */
+        resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* ----- publish Image ----
+        publish system volume to image
+       */
+        vmProcess.publishImage(vmUuid, name, description);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
 }

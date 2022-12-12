@@ -1,7 +1,10 @@
 package kubeiaas.iaascore.process;
 
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.image.ImageFormatEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
@@ -269,6 +272,41 @@ public class VmProcess {
     }
 
     /**
+     * Publish Volume to Image(Select host by vmUuid)
+     */
+    public void publishImage(String vmUuid, String name , String description) throws BaseException {
+
+        // 1. find systemVolume
+        Volume volume = tableStorage.systemVolumeQueryByUuid(vmUuid);
+        if (volume == null){
+            throw new BaseException("ERROR: volume is not found!");
+        }
+
+        // 2.get parentImage
+        Image parentImage = tableStorage.imageQueryByUuid(volume.getImageUuid());
+        if (parentImage == null){
+            throw new BaseException("ERROR: image is not found!");
+        }
+
+        //3.create new image
+        Image newImage = volumeToImage(parentImage, volume, name, description);
+
+        //4.get new imagePath
+        String suffix = getImageSuffix(newImage.getFormat());
+        if (suffix == null){
+            throw new BaseException("ERROR: can't get imageSuffix!");
+        }
+        String imagePath = ImageConstants.IMAGE_PATH + newImage.getUuid() + suffix;
+
+        //5. publish volume to image
+        vmScheduler.volumeToImage(vmUuid, imagePath, volume.getProviderLocation(), newImage);
+
+        // 6. clear select cache
+        AgentConfig.clearSelectedHost(vmUuid);
+
+    }
+
+    /**
      * Set VM Status in DB
      */
     public void setVmStatus(String VmUuid, VmStatusEnum status) {
@@ -321,5 +359,26 @@ public class VmProcess {
             vm.setVncPort(null);
         }
         return vmList;
+    }
+
+    private Image volumeToImage(Image image, Volume volume,String name, String description){
+        String imageUuid =  UuidUtils.getRandomUuid();
+        //在这里无法完成数据盘大小测算
+        image.setUuid(imageUuid);
+        image.setName(name);
+        image.setDescription(description);
+        image.setMinDisk(volume.getSize());
+        return image;
+    }
+
+    private String getImageSuffix(ImageFormatEnum formatEnum){
+        switch (formatEnum){
+            case IMAGE:
+                return VolumeConstants.IMG_VOLUME_SUFFIX;
+            case QCOW2:
+                return VolumeConstants.WIN_VOLUME_SUFFIX;
+            default:
+                return null;
+        }
     }
 }

@@ -3,6 +3,7 @@ package kubeiaas.iaasagent.controller;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
@@ -122,6 +123,24 @@ public class VolumeController {
             return ResponseMsgConstants.SUCCESS;
         }else {
             log.info("detachVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_PUBLISH_IMAGE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String volumePublishImage(
+            @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr
+    ) {
+        log.info("publishImage ==== start ====");
+        Image image = JSON.parseObject(imageObjectStr, Image.class);
+        if (volumeService.volumeToImage(image, volumePath, imagePath)) {
+            log.info("publishImage -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("publishImage -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }

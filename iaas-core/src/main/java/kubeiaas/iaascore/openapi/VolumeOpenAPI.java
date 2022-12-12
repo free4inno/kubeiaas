@@ -111,31 +111,31 @@ public class VolumeOpenAPI {
     /**
      * 模糊查询获取 “云硬盘” 列表
      */
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
-    @ResponseBody
-    public String fuzzyQuery(@RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
-                             @RequestParam(value = RequestParamConstants.STATUS) String status) {
-        log.info("fuzzyQuery ==== start ====");
-        List<Volume> dataVolumeList = volumeService.FuzzyQueryDataVolume(keywords, status);
-        log.info("fuzzyQuery ==== end ====");
-        return JSON.toJSONString(BaseResponse.success(dataVolumeList));
-    }
+//    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+//    @ResponseBody
+//    public String fuzzyQuery(@RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+//                             @RequestParam(value = RequestParamConstants.STATUS) String status) {
+//        log.info("fuzzyQuery ==== start ====");
+//        List<Volume> dataVolumeList = volumeService.FuzzyQueryDataVolume(keywords, status);
+//        log.info("fuzzyQuery ==== end ====");
+//        return JSON.toJSONString(BaseResponse.success(dataVolumeList));
+//    }
 
     /**
      * 分页模糊搜索获取 “云硬盘” 列表
      */
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
-    @ResponseBody
-    public String pageFuzzyQuery(
-            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
-            @RequestParam(value = RequestParamConstants.STATUS) String status,
-            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
-            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("pageFuzzyQuery ==== start ====");
-        VolumePageResponse res = volumeService.pageFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
-        log.info("pageFuzzyQuery ==== end ====");
-        return JSON.toJSONString(BaseResponse.success(res));
-    }
+//    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+//    @ResponseBody
+//    public String pageFuzzyQuery(
+//            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+//            @RequestParam(value = RequestParamConstants.STATUS) String status,
+//            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+//            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+//        log.info("pageFuzzyQuery ==== start ====");
+//        VolumePageResponse res = volumeService.pageFuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
+//        log.info("pageFuzzyQuery ==== end ====");
+//        return JSON.toJSONString(BaseResponse.success(res));
+//    }
 
     /**
      * 分页获取 “云硬盘” 列表
