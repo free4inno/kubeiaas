@@ -1,22 +1,16 @@
 package kubeiaas.iaasagent.service;
 
-import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
-import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.utils.*;
-import kubeiaas.iaasagent.config.DhcpConfig;
 import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.VolumeConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
-import kubeiaas.iaasagent.utils.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
@@ -24,11 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -232,11 +222,13 @@ public class VolumeService {
         return true;
     }
 
-    public boolean volumeToImage(Image image, String volumePath, String imagePath) {
+    public boolean volumeToImage(String volumePath, String imagePath) {
         log.info("volumeToImage ==== start ====  volumePath: " + volumePath + " imagePath: " + imagePath);
+
         // 1. ------------ getFullPath ------------
         String volumeImageFullPath = PathUtils.genFullPath(volumePath);
         String imageImageFullPath = PathUtils.genFullPath(imagePath);
+
         // 2. ------------ copy file ------------
         if (!FileUtils.createDirIfNotExist(imageImageFullPath)) {
             log.error("Create new image file path Error!!!");
@@ -250,14 +242,7 @@ public class VolumeService {
                 e.printStackTrace();
             }
         }).start();
-        try {
-            Float size = FileUtils.getFileSize(imageImageFullPath);
-            image.setSize(size);
-            volumeUtils.createImageYaml(image);
-        }catch (IOException e){
-            log.error("create imageYaml Error!!!");
-            e.printStackTrace();
-        }
+
         return true;
     }
 

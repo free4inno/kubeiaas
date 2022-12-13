@@ -3,14 +3,14 @@ package kubeiaas.iaascore.process;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.common.constants.bean.VmConstants;
-import kubeiaas.common.constants.bean.VolumeConstants;
-import kubeiaas.common.enums.image.ImageFormatEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.scheduler.ImageScheduler;
 import kubeiaas.iaascore.scheduler.VmScheduler;
+import kubeiaas.iaascore.utils.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +29,9 @@ public class VmProcess {
 
     @Resource
     private VmScheduler vmScheduler;
+
+    @Resource
+    private ImageScheduler imageScheduler;
 
 
     /**
@@ -274,7 +277,7 @@ public class VmProcess {
     /**
      * Publish Volume to Image(Select host by vmUuid)
      */
-    public void publishImage(String vmUuid, String name , String description) throws BaseException {
+    public void publishImage(String vmUuid, String name, String description) throws BaseException {
 
         // 1. find systemVolume
         Volume volume = tableStorage.systemVolumeQueryByUuid(vmUuid);
@@ -282,26 +285,45 @@ public class VmProcess {
             throw new BaseException("ERROR: volume is not found!");
         }
 
-        // 2.get parentImage
+        // 2. get parentImage
         Image parentImage = tableStorage.imageQueryByUuid(volume.getImageUuid());
         if (parentImage == null){
             throw new BaseException("ERROR: image is not found!");
         }
 
-        //3.create new image
-        Image newImage = volumeToImage(parentImage, volume, name, description);
+        // 3. create new image
+        Image newImage = new Image();
+        newImage.setUuid(UuidUtils.getRandomUuid());
 
-        //4.get new imagePath
-        String suffix = getImageSuffix(newImage.getFormat());
-        if (suffix == null){
+        newImage.setName(name);
+        newImage.setDescription(description);
+
+        newImage.setMinMem(parentImage.getMinMem());
+        newImage.setMinDisk(volume.getSize());
+
+        newImage.setFormat(parentImage.getFormat());
+        newImage.setSize(0f);   // 在这里无法完成镜像实际大小测算
+
+        newImage.setOsArch(parentImage.getOsArch());
+        newImage.setOsType(parentImage.getOsType());
+        newImage.setOsMode(parentImage.getOsMode());
+
+        // 4. get new imagePath
+        String suffix = ImageUtils.getImageSuffix(newImage.getFormat());
+        if (suffix == null) {
             throw new BaseException("ERROR: can't get imageSuffix!");
         }
         String imagePath = ImageConstants.IMAGE_PATH + newImage.getUuid() + suffix;
 
-        //5. publish volume to image
-        vmScheduler.volumeToImage(vmUuid, imagePath, volume.getProviderLocation(), newImage);
+        // 5. copy volume file
+        vmScheduler.volumePublishImage(vmUuid, imagePath, volume.getProviderLocation(), newImage);
 
-        // 6. clear select cache
+        // 6. build volume yaml
+        if (!imageScheduler.imageCreateYaml(newImage)) {
+            throw new BaseException("ERROR: build volume yaml failed!");
+        }
+
+        // 7. clear select cache
         AgentConfig.clearSelectedHost(vmUuid);
 
     }
@@ -359,26 +381,5 @@ public class VmProcess {
             vm.setVncPort(null);
         }
         return vmList;
-    }
-
-    private Image volumeToImage(Image image, Volume volume,String name, String description){
-        String imageUuid =  UuidUtils.getRandomUuid();
-        //在这里无法完成数据盘大小测算
-        image.setUuid(imageUuid);
-        image.setName(name);
-        image.setDescription(description);
-        image.setMinDisk(volume.getSize());
-        return image;
-    }
-
-    private String getImageSuffix(ImageFormatEnum formatEnum){
-        switch (formatEnum){
-            case IMAGE:
-                return VolumeConstants.IMG_VOLUME_SUFFIX;
-            case QCOW2:
-                return VolumeConstants.WIN_VOLUME_SUFFIX;
-            default:
-                return null;
-        }
     }
 }

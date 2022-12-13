@@ -122,7 +122,7 @@ public class VmScheduler {
         }
     }
 
-    public boolean volumeToImage(String vmUuid, String imagePath, String volumePath ,Image image) {
+    public boolean volumePublishImage(String vmUuid, String imagePath, String volumePath, Image image) {
         String imageObjectStr = JSON.toJSONString(image);
         try {
             return volumeController.volumePublishImage(getSelectedUri(vmUuid), imagePath, volumePath, imageObjectStr)

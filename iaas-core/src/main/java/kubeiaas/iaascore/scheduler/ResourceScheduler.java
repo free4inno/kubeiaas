@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 @Slf4j
 @Configuration
 public class ResourceScheduler {
+
     @Resource
     private ResourceOperator resourceOperator;
 

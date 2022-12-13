@@ -69,6 +69,7 @@ public class RequestMappingConstants {
     public static final String QUERY_IMAGE_ALL = "query_image_all";
     public static final String PUBLISH_IMAGE = "publish_image";
     public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
+    public static final String IMAGE_CREATE_YAML = "image_create_yaml";
 
     // >>> DHCP Controller <<<
     public static final String BIND_MAC_IP = "bind_mac_ip";

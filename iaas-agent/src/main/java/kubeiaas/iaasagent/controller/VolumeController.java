@@ -1,15 +1,11 @@
 package kubeiaas.iaasagent.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
-import kubeiaas.iaasagent.service.DhcpService;
 import kubeiaas.iaasagent.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -19,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Controller
@@ -130,13 +124,10 @@ public class VolumeController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_PUBLISH_IMAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String volumePublishImage(
-            @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
-            @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr
-    ) {
+            @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath) {
         log.info("publishImage ==== start ====");
-        Image image = JSON.parseObject(imageObjectStr, Image.class);
-        if (volumeService.volumeToImage(image, volumePath, imagePath)) {
+        if (volumeService.volumeToImage(volumePath, imagePath)) {
             log.info("publishImage -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {

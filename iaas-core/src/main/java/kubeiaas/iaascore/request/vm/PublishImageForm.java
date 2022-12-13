@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Data
-public class VolumePubilshImageForm {
+public class PublishImageForm {
     @NotNull
     @NotEmpty
     private String vmUuid;

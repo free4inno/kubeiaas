@@ -9,6 +9,7 @@ import kubeiaas.imageoperator.utils.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -76,6 +77,18 @@ public class ImageService {
         }
 
         return new PageResponse<>(imageList, totalPages, totalElements.longValue());
+    }
+
+    public boolean imageCreateYaml(Image image) {
+        try {
+            image.setSize(0f);
+            ImageUtils.createImageYaml(image);
+            return true;
+        } catch (IOException e) {
+            log.error("imageCreateYaml -- create imageYaml Error!");
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private List<String> getYamlList() {

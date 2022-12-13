@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.imageoperator.response.PageResponse;
 import kubeiaas.imageoperator.service.ImageService;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,22 @@ public class ImageController {
         PageResponse<Image> res = imageService.pageQueryAll(pageNum, pageSize);
         log.info("imagePageQueryAll ==== end ====");
         return JSON.toJSONString(res);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE_CREATE_YAML, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String imageCreateYaml(
+            @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr) {
+        log.info("imageCreateYaml ==== start ====");
+        Image image = JSON.parseObject(imageObjectStr, Image.class);
+        boolean res = imageService.imageCreateYaml(image);
+        if (res) {
+            log.info("imageCreateYaml ==== success ====");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.info("imageCreateYaml ==== failed ====");
+            return ResponseMsgConstants.FAILED;
+        }
     }
 
 }

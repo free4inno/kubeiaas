@@ -2,14 +2,18 @@ package kubeiaas.imageoperator.utils;
 
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Image;
+import kubeiaas.common.constants.bean.ImageConstants;
+import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.image.*;
+import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.imageoperator.config.ImageConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,10 +37,10 @@ public class ImageUtils {
             Map<String, Object> spec = (Map<String, Object>) imageMap.get("spec");
             Float size = ((Double) spec.get("size")).floatValue();
 
-            ImageFormatEnum format = getEnumFromString(ImageFormatEnum.class, (String) spec.get("format"));
-            ImageOSTypeEnum osType = getEnumFromString(ImageOSTypeEnum.class, (String) spec.get("os_type"));
-            ImageOSModeEnum osMode = getEnumFromString(ImageOSModeEnum.class, (String) spec.get("os_mode"));
-            ImageOSArchEnum osArch = getEnumFromString(ImageOSArchEnum.class, (String) spec.get("os_arch"));
+            ImageFormatEnum format = EnumUtils.getEnumFromString(ImageFormatEnum.class, (String) spec.get("format"));
+            ImageOSTypeEnum osType = EnumUtils.getEnumFromString(ImageOSTypeEnum.class, (String) spec.get("os_type"));
+            ImageOSModeEnum osMode = EnumUtils.getEnumFromString(ImageOSModeEnum.class, (String) spec.get("os_mode"));
+            ImageOSArchEnum osArch = EnumUtils.getEnumFromString(ImageOSArchEnum.class, (String) spec.get("os_arch"));
 
             Map<String, Object> config = (Map<String, Object>) imageMap.get("config");
             Integer minDisk = (Integer) config.get("min_disk");
@@ -64,20 +68,72 @@ public class ImageUtils {
         }
     }
 
-    /**
-     * A common method for all enums since they can't have another base class
-     * @param <T> Enum type
-     * @param c enum type. All enums must be all caps.
-     * @param string case insensitive
-     * @return corresponding enum, or null
-     */
-    public static <T extends Enum<T>> T getEnumFromString(Class<T> c, String string) {
-        if( c != null && string != null ) {
-            try {
-                return Enum.valueOf(c, string.trim().toUpperCase());
-            } catch (IllegalArgumentException ignored) {
-            }
+    public static void createImageYaml(Image image) throws IOException {
+        //设置yml格式
+        DumperOptions dumperOptions = new DumperOptions();
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+        //创建FileWriter
+        String uuid = image.getUuid();
+        String filepath = ImageConfig.CONTAINER_STORAGE_PATH + uuid + ImageConstants.IMAGE_YAML_SUFFIX;
+        log.info("createImageYaml -- filePath: " + filepath);
+//        // create file
+//        File file = new File(filepath);
+//        if (file.createNewFile()) {
+//            log.info("createImageYaml -- create new file: " + filepath);
+//        } else {
+//            log.info("createImageYaml -- file existed: " + filepath);
+//        }
+        // new file writer
+        FileWriter fileWriter = new FileWriter(filepath);
+        Yaml yaml = new Yaml(dumperOptions);
+
+        //构建spec部分yaml文件
+        Map<String, Object> specData = new HashMap<String, Object>();
+        Float size = image.getSize();
+        String format = image.getFormat().toString().toUpperCase();
+        String os_arch = image.getOsArch().toString().toUpperCase();
+        String os_mode = image.getOsMode().toString().toUpperCase();
+        String os_type = image.getOsType().toString().toUpperCase();
+        specData.put("size", size);
+        specData.put("format", format);
+        specData.put("os_arch", os_arch);
+        specData.put("os_mode", os_mode);
+        specData.put("os_type", os_type);
+
+        //构建config部分yaml文件
+        Map<String, Object> configData = new HashMap<String, Object>();
+        Integer min_disk = image.getMinDisk();
+        configData.put("min_disk", min_disk);
+        Integer min_mem = image.getMinMem();
+        configData.put("min_mem", min_mem);
+
+        //构建image部分yaml文件
+        Map<String, Object> imageData = new HashMap<String, Object>();
+        String name = image.getName();
+        String filename = getImageFileName(uuid, image.getFormat());
+        String description = image.getDescription();
+        imageData.put("name", name);
+        imageData.put("uuid", uuid);
+        imageData.put("filename", filename);
+        imageData.put("description", description);
+        imageData.put("spec", specData);
+        imageData.put("config", configData);
+
+        //构建最顶层yaml
+        Map<String, Object> dataMap = new HashMap<String, Object>();
+        dataMap.put("image", imageData);
+        yaml.dump(dataMap, fileWriter);
+    }
+
+    private static String getImageFileName(String imageUuid, ImageFormatEnum formatEnum){
+        switch (formatEnum){
+            case IMAGE:
+                return imageUuid + VolumeConstants.IMG_VOLUME_SUFFIX;
+            case QCOW2:
+                return imageUuid + VolumeConstants.WIN_VOLUME_SUFFIX;
+            default:
+                return null;
         }
-        return null;
     }
 }
