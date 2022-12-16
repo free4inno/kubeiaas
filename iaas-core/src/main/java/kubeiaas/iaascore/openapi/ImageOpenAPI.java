@@ -50,4 +50,16 @@ public class ImageOpenAPI {
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String fuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+        log.info("image fuzzyQuery ==== start ====");
+        PageResponse<Image> res = tableStorage.imageFuzzyQuery(keywords, pageNum, pageSize);
+        log.info("image fuzzyQuery ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(res));
+    }
+
 }

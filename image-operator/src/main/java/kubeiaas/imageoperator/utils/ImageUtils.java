@@ -20,6 +20,25 @@ import java.util.Map;
 @Slf4j
 public class ImageUtils {
 
+    public static String getRawFromYaml(String filePath) {
+        StringBuilder content = new StringBuilder();
+        try {
+            FileReader fileReader = new FileReader(filePath);
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            while (bufferedReader.ready()) {
+                content.append(bufferedReader.readLine());
+            }
+            fileReader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            log.error("getRawFromYaml -- file not exist!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("getRawFromYaml -- read file failed!");
+        }
+        return content.toString();
+    }
+
     public static Image getImageFromYaml(String filePath, Integer id) {
         Map<String, Object> objectMap;
         try {

@@ -54,6 +54,18 @@ public class ImageController {
         return JSON.toJSONString(res);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String imageFuzzyQuery(
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
+        log.info("imageFuzzyQuery ==== start ====");
+        PageResponse<Image> res = imageService.fuzzyQuery(keywords, pageNum, pageSize);
+        log.info("imageFuzzyQuery ==== end ====");
+        return JSON.toJSONString(res);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMAGE_CREATE_YAML, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String imageCreateYaml(

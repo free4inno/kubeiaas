@@ -106,6 +106,11 @@ public class TableStorage {
         }
     }
 
+    public PageResponse<Image> imageFuzzyQuery(String keywords, Integer pageNum, Integer pageSize) {
+        String jsonString = imageOperator.imageFuzzyQuery(keywords, pageNum, pageSize);
+        return JSON.parseObject(jsonString, new TypeReference<PageResponse<Image>>(){});
+    }
+
     /*
     public Image imageQueryByUuid(String uuid) {
         String jsonString = dbProxy.imageQueryAllBySingleKey(ImageConstants.UUID, uuid);

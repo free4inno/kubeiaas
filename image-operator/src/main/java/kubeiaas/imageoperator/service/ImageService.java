@@ -59,24 +59,25 @@ public class ImageService {
         // 1. get all yaml files under image storage path
         List<String> yamlList = getYamlList();
 
-        // 2. calculate basic number
-        Integer totalElements = yamlList.size();
-        int totalPages = (totalElements % pageSize == 0) ? (totalElements / pageSize) : (totalElements / pageSize) + 1;
+        // 2. parse page response & return
+        return parseImagePage(yamlList, pageNum, pageSize);
+    }
 
-        // 3. get content
-        List<Image> imageList = new ArrayList<>();
-        for (int id = 0; id < yamlList.size(); id++) {
-            if (id >= (pageNum - 1) * pageSize && id < pageNum * pageSize) {
-                Image image = ImageUtils.getImageFromYaml(yamlList.get(id), id);
-                if (image != null) {
-                    imageList.add(image);
-                } else {
-                    imageList.add(new Image(null, "UNKNOWN", "Error parsing yaml file: " + yamlList.get(id)));
-                }
+    public PageResponse<Image> fuzzyQuery(String keywords, Integer pageNum, Integer pageSize) {
+        // 1. get all yaml files under image storage path
+        List<String> yamlList = getYamlList();
+
+        // 2. fuzzy check raw content
+        List<String> fuzzyList = new ArrayList<>();
+        for (String yamlPath : yamlList) {
+            String raw = ImageUtils.getRawFromYaml(yamlPath);
+            if (raw.contains(keywords)) {
+                fuzzyList.add(yamlPath);
             }
         }
 
-        return new PageResponse<>(imageList, totalPages, totalElements.longValue());
+        // 3. parse page response & return
+        return parseImagePage(fuzzyList, pageNum, pageSize);
     }
 
     public boolean imageCreateYaml(Image image) {
@@ -88,6 +89,30 @@ public class ImageService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private PageResponse<Image> parseImagePage(List<String> fileList, Integer pageNum, Integer pageSize) {
+        // 1. calculate basic number
+        Integer totalElements = fileList.size();
+        int totalPages = (totalElements % pageSize == 0) ? (totalElements / pageSize) : (totalElements / pageSize) + 1;
+
+        // 2. get content
+        List<Image> imageList = new ArrayList<>();
+        for (int id = 0; id < fileList.size(); id++) {
+            if (id >= (pageNum - 1) * pageSize && id < pageNum * pageSize) {
+                Image image = ImageUtils.getImageFromYaml(fileList.get(id), id);
+                if (image != null) {
+                    imageList.add(image);
+                } else {
+                    imageList.add(new Image(null, "UNKNOWN", "Error parsing yaml file: " + fileList.get(id)));
+                }
+            }
+        }
+
+        // 3. return
+        return new PageResponse<>(imageList, totalPages, totalElements.longValue());
     }
 
     private List<String> getYamlList() {

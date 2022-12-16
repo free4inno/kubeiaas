@@ -235,7 +235,7 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String fuzzyQuery(
-            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid,
             @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
@@ -254,7 +254,7 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FUZZY_QUERY_ATTACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String fuzzyQueryAttach(
-            @RequestParam(value = RequestParamConstants.KEYWORDS)  String keywords,
+            @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("fuzzyQueryAttach ==== start ====");
