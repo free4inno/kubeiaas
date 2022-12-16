@@ -346,7 +346,7 @@ public class VmService {
     /**
      * 发布镜像
      */
-    public String publishImage(String vmUuid, String name, String description) throws BaseException {
+    public String publishImage(String vmUuid, String name, String description, Integer vdSize) throws BaseException {
 
         // 1. ----- choose host ----
         // Select the host where the VM to be deleted resides
@@ -354,7 +354,7 @@ public class VmService {
 
         // 2. ----- publish Image ----
         // Publish system volume to image
-        vmProcess.publishImage(vmUuid, name, description);
+        vmProcess.publishImage(vmUuid, name, description, vdSize);
 
         return ResponseMsgConstants.SUCCESS;
     }

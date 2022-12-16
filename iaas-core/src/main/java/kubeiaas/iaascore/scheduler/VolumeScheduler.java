@@ -101,8 +101,8 @@ public class VolumeScheduler {
         // 计算系统盘镜像额外存储空间
         // （经过先前创建过程处理，vm 中的 size 一定满足创建条件，但是需要计算和 image 原大小之间的 extraSize，调整增大）
         int extraSize = 0;
-        if (newVolume.getSize() > image.getMinDisk()) {
-            extraSize = newVolume.getSize() - image.getMinDisk();
+        if (newVolume.getSize() > image.getVdSize()) {
+            extraSize = newVolume.getSize() - image.getVdSize();
         }
 
         // save into DB

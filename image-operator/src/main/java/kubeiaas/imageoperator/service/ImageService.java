@@ -81,7 +81,6 @@ public class ImageService {
 
     public boolean imageCreateYaml(Image image) {
         try {
-            image.setSize(0f);
             ImageUtils.createImageYaml(image);
             return true;
         } catch (IOException e) {

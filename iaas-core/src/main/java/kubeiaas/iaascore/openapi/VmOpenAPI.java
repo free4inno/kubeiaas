@@ -308,7 +308,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String publishImage(@Valid @RequestBody PublishImageForm f) throws BaseException {
         log.info("publishImage ==== start ====");
-        if (vmService.publishImage(f.getVmUuid(), f.getName(), f.getDescription())
+        if (vmService.publishImage(f.getVmUuid(), f.getName(), f.getDescription(), f.getVdSize())
                 .equals(ResponseMsgConstants.SUCCESS)) {
             log.info("publishImage ==== end ====");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));

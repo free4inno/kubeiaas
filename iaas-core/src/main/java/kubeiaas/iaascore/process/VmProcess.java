@@ -277,7 +277,7 @@ public class VmProcess {
     /**
      * Publish Volume to Image(Select host by vmUuid)
      */
-    public void publishImage(String vmUuid, String name, String description) throws BaseException {
+    public void publishImage(String vmUuid, String name, String description, Integer vdSize) throws BaseException {
 
         // 1. find systemVolume
         Volume volume = tableStorage.systemVolumeQueryByUuid(vmUuid);
@@ -298,12 +298,8 @@ public class VmProcess {
         newImage.setName(name);
         newImage.setDescription(description);
 
-        newImage.setMinMem(parentImage.getMinMem());
-        newImage.setMinDisk(volume.getSize());
-
+        newImage.setVdSize(vdSize);
         newImage.setFormat(parentImage.getFormat());
-        newImage.setSize(0f);   // 在这里无法完成镜像实际大小测算
-
         newImage.setOsArch(parentImage.getOsArch());
         newImage.setOsType(parentImage.getOsType());
         newImage.setOsMode(parentImage.getOsMode());

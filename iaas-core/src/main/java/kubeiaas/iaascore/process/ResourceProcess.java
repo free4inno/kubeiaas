@@ -42,11 +42,13 @@ public class ResourceProcess {
             throw new VmException(newVm,"ERROR: image not available!");
         }
         // mem
+        /*
         if (newVm.getMemory() < image.getMinMem()) {
             throw new VmException(newVm,"ERROR: memory too low for image!");
         }
+         */
         // size
-        int imageMinDisk = image.getMinDisk();
+        int imageMinDisk = image.getVdSize();
         int newVmDiskSize = newVm.getDiskSize();
         if (newVmDiskSize < imageMinDisk) {
             // 强制修改 diskSize，不终止
