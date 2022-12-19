@@ -3,12 +3,13 @@ package kubeiaas.iaascore.dao;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
-import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
+import kubeiaas.iaascore.request.image.SaveImageForm;
 import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,19 @@ public class TableStorage {
     public PageResponse<Image> imageFuzzyQuery(String keywords, Integer pageNum, Integer pageSize) {
         String jsonString = imageOperator.imageFuzzyQuery(keywords, pageNum, pageSize);
         return JSON.parseObject(jsonString, new TypeReference<PageResponse<Image>>(){});
+    }
+
+    public String imageGetRaw(String uuid) {
+        return imageOperator.imageQueryRawByUuid(uuid);
+    }
+
+    public boolean imageSave(String uuid, String content) {
+        SaveImageForm f = new SaveImageForm(uuid, content);
+        return imageOperator.imageSaveYaml(f).equals(ResponseMsgConstants.SUCCESS);
+    }
+
+    public boolean imageDelete(String uuid) {
+        return imageOperator.imageDelete(uuid).equals(ResponseMsgConstants.SUCCESS);
     }
 
     /*

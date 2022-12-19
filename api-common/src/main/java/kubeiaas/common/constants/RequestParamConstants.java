@@ -36,6 +36,7 @@ public class RequestParamConstants {
 
     /* ===== IMAGE ===== */
     public static final String IMAGE_OBJECT = "image_object";
+    public static final String CONTENT = "content";
 
     /* ===== IP ===== */
     public static final String IP_SEGMENT_ID = "ip_segment_id";

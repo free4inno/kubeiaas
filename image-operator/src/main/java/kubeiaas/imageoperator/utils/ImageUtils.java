@@ -27,6 +27,7 @@ public class ImageUtils {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             while (bufferedReader.ready()) {
                 content.append(bufferedReader.readLine());
+                content.append("\n");
             }
             fileReader.close();
         } catch (FileNotFoundException e) {
@@ -42,14 +43,18 @@ public class ImageUtils {
     public static Image getImageFromYaml(String filePath, Integer id) {
         Map<String, Object> objectMap;
         try {
-            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            FileReader fr = new FileReader(filePath);
+            BufferedReader br = new BufferedReader(fr);
             Yaml yaml = new Yaml();
             objectMap = yaml.load(br);
             log.info("yamlContent: " + JSON.toJSONString(objectMap));
 
             Map<String, Object> imageMap = (Map<String, Object>) objectMap.get("image");
             String name = (String) imageMap.get("name");
-            String uuid = (String) imageMap.get("uuid");
+            // - Version 1: use uuid as an attr in yaml (不能控制去重，并且不利于索引) =====
+            // String uuid = (String) imageMap.get("uuid");
+            // - Version 2: use yamlName as uuid ======================================
+            String uuid = getFileNameFromPath(filePath, true);
             String description = (String) imageMap.get("description");
             String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + imageMap.get("filename");
 
@@ -78,6 +83,9 @@ public class ImageUtils {
                     childImageList.add(new Image(childUuid, ImageConfig.HOST_STORAGE_IMAGE_PATH + childFilename));
                 }
             }
+
+            br.close();
+            fr.close();
 
             Image image = new Image(id + 1, uuid, name, description, directory, format, null, vdSize,
                     ImageStatusEnum.AVAILABLE, null, null, osType, osArch, osMode, null, childImageList);
@@ -144,6 +152,25 @@ public class ImageUtils {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("image", imageData);
         yaml.dump(dataMap, fileWriter);
+
+        fileWriter.close();
+    }
+
+    public static void saveImageYaml(String filePath, String content) throws IOException {
+        // use fileWriter rewrite yaml
+        FileWriter fileWriter = new FileWriter(filePath);
+        fileWriter.write(content);
+        fileWriter.close();
+    }
+
+    public static boolean deleteFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            return file.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private static String getImageFileName(String imageUuid, ImageFormatEnum formatEnum){
@@ -154,6 +181,14 @@ public class ImageUtils {
                 return imageUuid + VolumeConstants.WIN_VOLUME_SUFFIX;
             default:
                 return null;
+        }
+    }
+
+    public static String getFileNameFromPath(String filePath, boolean isUnix) {
+        if (isUnix) {
+            return filePath.substring(filePath.lastIndexOf("/") + 1);
+        } else {
+            return filePath.substring(filePath.lastIndexOf("\\") + 1);
         }
     }
 }

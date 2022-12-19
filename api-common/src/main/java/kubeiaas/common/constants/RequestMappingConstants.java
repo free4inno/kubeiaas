@@ -66,10 +66,12 @@ public class RequestMappingConstants {
 
     // >>> Image Operator <<<
     public static final String QUERY_IMAGE_BY_UUID = "query_image_by_uuid";
+    public static final String QUERY_IMAGE_RAW_BY_UUID = "query_image_raw_by_uuid";
     public static final String QUERY_IMAGE_ALL = "query_image_all";
     public static final String PUBLISH_IMAGE = "publish_image";
     public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
     public static final String IMAGE_CREATE_YAML = "image_create_yaml";
+    public static final String IMAGE_SAVE_YAML = "image_save_yaml";
 
     // >>> DHCP Controller <<<
     public static final String BIND_MAC_IP = "bind_mac_ip";
