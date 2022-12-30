@@ -10,6 +10,7 @@ import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.request.volume.AttachVolumeForm;
 import kubeiaas.iaascore.request.volume.CreateVolumeForm;
 import kubeiaas.iaascore.request.volume.DeleteVolumeForm;
+import kubeiaas.iaascore.request.volume.EditVolumeForm;
 import kubeiaas.iaascore.response.*;
 import kubeiaas.iaascore.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
@@ -136,5 +137,17 @@ public class VolumeOpenAPI {
         PageResponse<Volume> res = volumeService.fuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
         log.info("fuzzyQuery ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
+    }
+
+    /**
+     * 修改：名称、描述
+     */
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String edit(@Valid @RequestBody EditVolumeForm f) throws BaseException {
+        log.info("edit ==== start ====");
+        Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription());
+        log.info("edit ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(volume));
     }
 }

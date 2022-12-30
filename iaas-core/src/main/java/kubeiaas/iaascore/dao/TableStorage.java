@@ -287,6 +287,12 @@ public class TableStorage {
         dbProxy.volumeDeleteByUuid(volumeUuid);
     }
 
+    public Volume volumeUpdate(Volume volume){
+        String volumeObjectStr = JSON.toJSONString(volume);
+        volumeObjectStr = dbProxy.volumeSave(volumeObjectStr);
+        return JSON.parseObject(volumeObjectStr, Volume.class);
+    }
+
     // ========================= specConfig =========================
 
     public List<SpecConfig> specConfigQueryAllByType(SpecTypeEnum type) {

@@ -1,4 +1,5 @@
 package kubeiaas.iaascore.service;
+
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
@@ -117,6 +118,36 @@ public class VolumeService {
         volumeProcess.detachDataVolume(vmUuid, volumeUuid);
 
         return ResponseMsgConstants.SUCCESS;
+    }
+
+    /**
+     * 编辑基本信息
+     * 支持字段：名称、描述
+     */
+    public Volume editVolume(String volumeUuid, String name, String description) throws BaseException {
+        // 1. find Volume
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        if (volume == null) {
+            throw new BaseException("ERROR: volume is not found!");
+        }
+
+        // 2. check is edit changed
+        boolean editFlag = false;
+        if (name != null && !name.isEmpty() && !name.equals(volume.getName())) {
+            volume.setName(name);
+            editFlag = true;
+        }
+        if (description != null && !description.isEmpty() && !description.equals(volume.getDescription())) {
+            volume.setDescription(description);
+            editFlag = true;
+        }
+
+        // 3. save into DB
+        if (editFlag) {
+            volume = tableStorage.volumeUpdate(volume);
+        }
+
+        return volume;
     }
 
     /**

@@ -1,4 +1,4 @@
-package kubeiaas.iaascore.request.vm;
+package kubeiaas.iaascore.request.volume;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -8,10 +8,10 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Data
-public class EditVmForm {
+public class EditVolumeForm {
     @NotNull
     @NotEmpty
-    private String vmUuid;
+    private String volumeUuid;
 
     private String name;
     private String description;
