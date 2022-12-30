@@ -76,7 +76,7 @@
                 <!-- global -->
                 <configuration>
                     <!-- =============== docker control =============== -->
-                    <dockerHost>tcp://192.168.122.11:2375</dockerHost>
+                    <dockerHost>${docker.host}</dockerHost>
 
                     <!-- =============== registry control =============== -->
                     <authConfig>
