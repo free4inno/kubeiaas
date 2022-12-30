@@ -177,7 +177,7 @@ public class VolumeService {
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             try {
                 domain.attachDeviceFlags(volumeXml, 3);
-            }catch (Exception e){
+            } catch (Exception e) {
                 volume.setInstanceUuid("");
                 volume.setMountPoint("");
                 volume.setBus("");
@@ -207,7 +207,7 @@ public class VolumeService {
             Domain domain = virtCon.domainLookupByUUIDString(instanceUuid);
             try {
                 domain.detachDeviceFlags(volumeXml, 3);
-            }catch (Exception e){
+            } catch (Exception e) {
                 setVolumeStatus(volumeUuid, VolumeStatusEnum.ATTACHED);
                 e.printStackTrace();
                 return false;

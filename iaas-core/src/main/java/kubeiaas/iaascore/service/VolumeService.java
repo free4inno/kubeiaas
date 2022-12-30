@@ -80,11 +80,16 @@ public class VolumeService {
         */
         resourceProcess.selectHostByVmUuid(vmUuid);
 
-        /* -----2. save volume info ----
+        /* -----2. save volume info (CHECK STATUS) ----
         Save instanceUuid into DB
         */
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        if (!volume.getStatus().equals(VolumeStatusEnum.AVAILABLE)) {
+            log.error("ERR: DataVolume not AVAILABLE! (uuid: " + vmUuid + ")");
+            return ResponseMsgConstants.FAILED;
+        }
         volume.setInstanceUuid(vmUuid);
+        volume.setStatus(VolumeStatusEnum.USED);
         tableStorage.volumeSave(volume);
 
         /* -----3. attach data Volume ----
@@ -99,6 +104,13 @@ public class VolumeService {
         Select the host where the VM to be detached
         */
         resourceProcess.selectHostByVmUuid(vmUuid);
+
+        /* -----2. CHECK STATUS ---- */
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        if (!volume.getStatus().equals(VolumeStatusEnum.ATTACHED)) {
+            log.error("ERR: DataVolume not ATTACHED! (uuid: " + vmUuid + ")");
+            return ResponseMsgConstants.FAILED;
+        }
 
         /* -----2. detach data Volume ----
          */
