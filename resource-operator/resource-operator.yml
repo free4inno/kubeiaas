@@ -14,6 +14,7 @@ spec:
       labels:
         app: resource-operator
     spec:
+      nodeName: hf-node-01
       containers:
         - name: resource-operator
           command: ["sh"]
@@ -26,6 +27,11 @@ spec:
           ports:
             - containerPort: 9092
               protocol: TCP
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
 ---
 apiVersion: v1
 kind: Service

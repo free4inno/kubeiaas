@@ -12,6 +12,7 @@ public class RequestMappingConstants {
     public static final String IP_SEGMENT = "ip_segment";
     public static final String IP_USED = "ip_used";
     public static final String SPEC_CONFIG = "spec_config";
+    public static final String SERVICE = "service";
 
     // -- agent component
     public static final String DHCP_C = "dhcp_c";
@@ -103,6 +104,11 @@ public class RequestMappingConstants {
     // >>> host Controller <<<
     public static final String CHECK_ENV = "check_env";
     public static final String CONFIG_ENV = "config_env";
+
+    // >>> service Controller <<<
+    public static final String REGISTER = "register";
+    public static final String QUERY_SERVICE = "query_service";
+    public static final String QUERY_STORAGE = "query_storage";
 
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";

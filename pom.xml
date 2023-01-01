@@ -31,7 +31,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.version>0.0.1-SNAPSHOT</project.version>
         <!-- docker host -->
-        <docker.host>tcp://172.23.115.217:2375</docker.host>
+        <docker.host>tcp://172.28.202.68:2375</docker.host>
     </properties>
 
     <dependencies>

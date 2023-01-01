@@ -28,11 +28,31 @@ spec:
             - containerPort: 9080
               hostPort: 9080
               protocol: TCP
-#          env:
-#            - name: DHCP_HOST_IP
-#              value: "192.168.33.6"
-#            - name: VNC_HOST_IP
-#              value: "192.168.33.6"
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: IAAS_CORE_NODE_NAME
+              value: "hf-node-01"
+            - name: DB_PROXY_NODE_NAME
+              value: "hf-master-01"
+            - name: RS_OPT_NODE_NAME
+              value: "hf-node-01"
+            - name: IMG_OPT_NODE_NAME
+              value: "hf-node-02"
+            - name: AGENT_NODE_NAME_LIST
+              value: "hf-node-01,hf-node-02"
+            - name: DHCP_NODE_NAME
+              value: "hf-node-01"
+            - name: VNC_NODE_NAME
+              value: "hf-node-01"
+            - name: NFS_IP
+              value: "192.168.33.7"
 ---
 apiVersion: v1
 kind: Service

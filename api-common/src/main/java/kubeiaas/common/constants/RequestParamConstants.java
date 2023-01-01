@@ -56,4 +56,8 @@ public class RequestParamConstants {
     /* ===== HOST ===== */
     public static final String HOST_OBJECT = "host_object";
 
+    /* ===== SERVICE =====*/
+    public static final String SERVICE_NAME = "service_name";
+    public static final String NODE_NAME = "node_name";
+    public static final String TIMESTAMP = "timestamp";
 }

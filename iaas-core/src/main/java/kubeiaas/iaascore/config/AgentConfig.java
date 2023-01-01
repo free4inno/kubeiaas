@@ -28,11 +28,10 @@ public class AgentConfig {
     /* select agent's host ip */
     // < vmUuid     : hostIp >
     // < volumeUuid : hostIp >
-    private static Map<String, String> selected_host_ip = new HashMap<>();
+    private static final Map<String, String> selected_host_ip = new HashMap<>();
 
     /**
      * 设置 target host
-     * @param vmUuid
      * @param host 目标 agent 所在 host
      */
     public static void setSelectedHost(String vmUuid, Host host) {
@@ -41,7 +40,6 @@ public class AgentConfig {
 
     /**
      * 清除 target host
-     * @param vmUuid
      */
     public static void clearSelectedHost(String vmUuid) {
         selected_host_ip.remove(vmUuid);
@@ -49,7 +47,6 @@ public class AgentConfig {
 
     /**
      * 设置 target host
-     * @param volumeUuid
      * @param host 目标 agent 所在 host
      */
     public static void setVolumeSelectedHost(String volumeUuid, Host host) {
@@ -58,7 +55,6 @@ public class AgentConfig {
 
     /**
      * 清除 target host
-     * @param volumeUuid
      */
     public static void clearVolumeSelectedHost(String volumeUuid) {
         selected_host_ip.remove(volumeUuid);

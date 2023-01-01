@@ -14,8 +14,7 @@ spec:
       labels:
         app: image-operator
     spec:
-      nodeSelector:
-        kubeiaas/node: "true"   # 指定节点标签
+      nodeName: hf-node-02
       containers:
         - name: image-operator
           command: ["sh"]
