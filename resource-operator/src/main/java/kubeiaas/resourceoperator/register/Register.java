@@ -1,4 +1,4 @@
-package kubeiaas.resourceoperator.dao.feign;
+package kubeiaas.resourceoperator.register;
 
 import kubeiaas.common.constants.ComponentConstants;
 import kubeiaas.common.constants.RequestMappingConstants;

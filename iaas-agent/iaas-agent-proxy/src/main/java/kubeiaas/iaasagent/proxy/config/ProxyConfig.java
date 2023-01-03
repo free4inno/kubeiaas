@@ -19,6 +19,7 @@ public class ProxyConfig implements ServletContextInitializer {
             this.sc = servletContext;
             this.registerDBProxy();
             this.registerImageOperator();
+            this.registerIaasCore();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -40,5 +41,14 @@ public class ProxyConfig implements ServletContextInitializer {
         initParameters.put(ProxyServletExtend.P_TARGET_URI, "http://image-operator:9093");
         registrationBean.setInitParameters(initParameters);
         registrationBean.addMapping("/image_operator/*");
+    }
+
+    protected void registerIaasCore() {
+        ServletRegistration registrationBean = this.sc.addServlet("iaas-core", ProxyServletExtend.class);
+        Map<String, String> initParameters = new LinkedHashMap<>();
+        initParameters.put(ProxyServletExtend.P_LOG, "true");
+        initParameters.put(ProxyServletExtend.P_TARGET_URI, "http://iaas-core:9080");
+        registrationBean.setInitParameters(initParameters);
+        registrationBean.addMapping("/iaas_core/*");
     }
 }

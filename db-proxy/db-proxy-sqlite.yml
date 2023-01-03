@@ -27,6 +27,11 @@ spec:
           ports:
             - containerPort: 9091
               protocol: TCP
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           volumeMounts:
             - name: sqlite-data
               mountPath: /db

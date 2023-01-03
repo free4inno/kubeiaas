@@ -111,7 +111,7 @@ public class ServiceConfig {
                     }
                 } else {
                     if (isInActiveList(svc, node)) {
-                        rowMap.put(svc, ServiceStatusEnum.ACTIVE);
+                        rowMap.put(svc, ServiceStatusEnum.NON);
                     } else {
                         rowMap.put(svc, ServiceStatusEnum.NON);
                     }
