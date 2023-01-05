@@ -45,7 +45,9 @@ public class RequestMappingConstants {
     // -- query all
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
+    public static final String QUERY_ALL_BY_DOUBLE_KEY = "query_all_by_double_key";
     public static final String QUERY_ALL_BY_TYPE = "query_all_by_type";
+    public static final String QUERY_ALL_BY_HOST_AND_TYPE = "query_all_by_host_and_type";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
     // -- fuzzy query

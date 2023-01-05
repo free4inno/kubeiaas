@@ -1,6 +1,5 @@
 package kubeiaas.common.bean;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import kubeiaas.common.enums.network.IpTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,4 +20,7 @@ public class IpSegment {
 
     private String ipRangeStart;    // 网段起始地址
     private String ipRangeEnd;      // 网段结束地址
+
+    private String hostUuid;        // 所属节点
+    private String bridge;          // 所用网桥
 }

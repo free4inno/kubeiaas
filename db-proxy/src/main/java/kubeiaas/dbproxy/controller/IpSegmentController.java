@@ -3,6 +3,9 @@ package kubeiaas.dbproxy.controller;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.constants.bean.IpSegmentConstants;
+import kubeiaas.common.enums.network.IpTypeEnum;
+import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.dbproxy.dao.IpSegmentDao;
 import kubeiaas.dbproxy.table.IpSegmentTable;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,28 @@ public class IpSegmentController {
                 cb.and(cb.equal(root.get(key1), value1));
         List<IpSegmentTable> ipSegmentTableList = ipSegmentDao.findAll(specification);
         log.info("queryAllBySingleKey ==== end ====");
+        return JSON.toJSONString(ipSegmentTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_DOUBLE_KEY, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAllByDoubleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1,
+            @RequestParam(value = RequestParamConstants.KEY_2) String key2,
+            @RequestParam(value = RequestParamConstants.VALUE_2) String value2) {
+        log.info("queryAllByDoubleKey ==== start ====");
+        Specification<IpSegmentTable> specification;
+        if (key2.equals(IpSegmentConstants.TYPE)) {
+            IpTypeEnum type = EnumUtils.getEnumFromString(IpTypeEnum.class, value2);
+            specification = (root, cq, cb) ->
+                    cb.and(cb.equal(root.get(key1), value1), cb.equal(root.get(key2), type));
+        } else {
+            specification = (root, cq, cb) ->
+                    cb.and(cb.equal(root.get(key1), value1), cb.equal(root.get(key2), value2));
+        }
+        List<IpSegmentTable> ipSegmentTableList = ipSegmentDao.findAll(specification);
+        log.info("queryAllByDoubleKey ==== end ====");
         return JSON.toJSONString(ipSegmentTableList);
     }
 }

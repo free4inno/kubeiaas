@@ -77,4 +77,22 @@ public class IpSegmentTable extends IpSegment {
     public void setIpRangeEnd(String endIp) {
         super.setIpRangeEnd(endIp);
     }
+
+    @Column(name = "host_uuid")
+    public String getHostUuid() {
+        return super.getHostUuid();
+    }
+
+    public void setHostUuid(String hostUuid) {
+        super.setHostUuid(hostUuid);
+    }
+
+    @Column(name = "bridge")
+    public String getBridge() {
+        return super.getBridge();
+    }
+
+    public void setBridge(String bridge) {
+        super.setBridge(bridge);
+    }
 }

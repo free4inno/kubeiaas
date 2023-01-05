@@ -53,6 +53,15 @@ public class IpUsedTable extends IpUsed {
         super.setIpSegmentId(ipSegmentId);
     }
 
+    @Column(name = "bridge")
+    public String getBridge() {
+        return super.getBridge();
+    }
+
+    public void setBridge(String bridge) {
+        super.setBridge(bridge);
+    }
+
     @Column(name = "instance_uuid")
     public String getInstanceUuid() {
         return super.getInstanceUuid();

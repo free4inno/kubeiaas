@@ -177,6 +177,12 @@ public class TableStorage {
 
     // ========================= ip segment =========================
 
+    public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
+        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
+                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
+        return JSON.parseArray(jsonString, IpSegment.class);
+    }
+
     public IpSegment ipSegmentQueryById(int id) {
         String jsonString = dbProxy.ipSegmentQueryAllBySingleKey(IpSegmentConstants.ID, Integer.toString(id));
         List<IpSegment> ipSegmentList = JSON.parseArray(jsonString, IpSegment.class);

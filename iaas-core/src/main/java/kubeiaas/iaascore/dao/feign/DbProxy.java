@@ -108,6 +108,15 @@ public interface DbProxy {
 
     // ========================= ip segment =========================
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.QUERY_ALL_BY_DOUBLE_KEY)
+    @ResponseBody
+    String ipSegmentQueryAllByDoubleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1,
+            @RequestParam(value = RequestParamConstants.KEY_2) String key2,
+            @RequestParam(value = RequestParamConstants.VALUE_2) String value2
+    );
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
     @ResponseBody
     String ipSegmentQueryAllBySingleKey(

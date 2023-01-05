@@ -1,6 +1,5 @@
 package kubeiaas.common.bean;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
 import lombok.AllArgsConstructor;
@@ -22,6 +21,7 @@ public class IpUsed {
 
     /* related */
     private Integer ipSegmentId;
+    private String bridge;          // 所用网桥
 
     /* for attach */
     private String instanceUuid;    // attach of: IP & VM
