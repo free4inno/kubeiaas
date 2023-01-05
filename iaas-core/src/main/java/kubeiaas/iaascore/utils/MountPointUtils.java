@@ -13,30 +13,28 @@ import java.util.Map;
  */
 @Component
 public class MountPointUtils {
-    private final char limitMountPoint = 'z';
-    private char maxUsedMountPoint = 'a';
-    private Map<Character, Integer> usedPointList;  //当value为0时，表示未使用
+    private static final char limitMountPoint = 'z';
+    private static final char startMountPoint = 'a';
+    private final Map<Character, Integer> usedPointMap;  //当value为0时，表示未使用
 
     public MountPointUtils() {
-        usedPointList = new HashMap<>();
+        usedPointMap = new HashMap<>();
         for (char a = 'a'; a <= 'z'; a++) {
-            usedPointList.put(a, 0);
+            usedPointMap.put(a, 0);
         }
     }
 
     public String getMountPoint(List<Volume> volumes) {
         refreshUsedList();
-        maxUsedMountPoint = 'a';        //每次使用进行初始化
         for (Volume volume : volumes) {
             if (volume.getMountPoint() != null) {
                 setUsedDevPoint(volume.getMountPoint());
             }
         }
-        String newMountPoint = null;
-        for (maxUsedMountPoint++; maxUsedMountPoint <= limitMountPoint; maxUsedMountPoint++) {
-            if (usedPointList.get(maxUsedMountPoint) == 0) {
-                newMountPoint = maxUsedMountPoint + "";
-                return newMountPoint;
+        char newMountPoint;
+        for (newMountPoint = startMountPoint; newMountPoint <= limitMountPoint; newMountPoint++) {
+            if (usedPointMap.get(newMountPoint) == 0) {
+                return String.valueOf(newMountPoint);
             }
         }
         return "";
@@ -44,7 +42,7 @@ public class MountPointUtils {
 
     private void refreshUsedList() {
         for (char a = 'a'; a <= 'z'; a++) {
-            usedPointList.put(a, 0);
+            usedPointMap.put(a, 0);
         }
     }
 
@@ -54,10 +52,7 @@ public class MountPointUtils {
             return;
         }
         char mount = mountPoint.charAt(2);
-        usedPointList.put(mount, 1);
-        if (maxUsedMountPoint < mount) {
-            maxUsedMountPoint = mount;
-        }
+        usedPointMap.put(mount, 1);
     }
 
 }

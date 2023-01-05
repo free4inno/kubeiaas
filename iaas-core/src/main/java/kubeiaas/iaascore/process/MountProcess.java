@@ -54,28 +54,29 @@ public class MountProcess {
     private void allocDevMountPoint(List<Volume> volumeList, Vm vm) {
         Image systemImage = tableStorage.imageQueryByUuid(vm.getImageUuid());
         for (Volume volume : volumeList) {
-            // 逐个分配挂载点
-            String mountPoint = null;
-            if (volume.getUsageType().equals(VolumeUsageEnum.SYSTEM)) {
-                // 1. 挂载系统盘
-                if (systemImage.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
-                    mountPoint = VolumeConstants.WIN_PREFIX + "a";
+            if (volume.getMountPoint() == null || volume.getMountPoint().isEmpty()) {
+                // 逐个分配挂载点
+                String mountPoint;
+                if (volume.getUsageType().equals(VolumeUsageEnum.SYSTEM)) {
+                    // 1. 挂载系统盘
+                    if (systemImage.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
+                        mountPoint = VolumeConstants.WIN_PREFIX + "a";
+                    } else {
+                        mountPoint = VolumeConstants.DEV_PREFIX + "a";
+                    }
                 } else {
-                    mountPoint = VolumeConstants.DEV_PREFIX + "a";
+                    // 2. 挂载数据盘
+                    mountPoint = mountPointUtils.getMountPoint(volumeList);
+                    // （在 attachVolumes 中处理返回 empty）
+                    if (systemImage.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
+                        mountPoint = VolumeConstants.WIN_PREFIX + mountPoint;
+                    } else {
+                        mountPoint = VolumeConstants.DEV_PREFIX + mountPoint;
+                    }
                 }
-            } else {
-                // 2. 挂载数据盘
-                mountPoint = mountPointUtils.getMountPoint(volumeList);
-                // （在 attachVolumes 中处理返回 empty）
-                if (systemImage.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
-                    mountPoint = VolumeConstants.WIN_PREFIX + mountPoint;
-                } else {
-                    mountPoint = VolumeConstants.DEV_PREFIX + mountPoint;
-                }
+                volume.setMountPoint(mountPoint);
             }
-            volume.setMountPoint(mountPoint);
             log.info("volume: " + volume.getUuid() + "'s mount point: " + volume.getMountPoint());
         }
-
     }
 }
