@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Validated
@@ -48,5 +49,17 @@ public class HostOpenAPI {
         List<Host> hostList = tableStorage.hostQueryAll();
         log.info("queryAll ==== end ====");
         return JSON.toJSONString(BaseResponse.success(hostList));
+    }
+
+    /**
+     * 统计信息
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statistics() {
+        log.info("statistics ==== start ====");
+        Map<String, Integer> resMap = hostService.getStatistics();
+        log.info("statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
     }
 }

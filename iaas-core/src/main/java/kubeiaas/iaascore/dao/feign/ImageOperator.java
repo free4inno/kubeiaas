@@ -50,4 +50,8 @@ public interface ImageOperator {
     @ResponseBody
     String imageDelete(
             @RequestParam(value = RequestParamConstants.UUID) String uuid);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS)
+    @ResponseBody
+    Integer statistics();
 }

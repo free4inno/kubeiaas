@@ -5,6 +5,7 @@ import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.request.image.DeleteImageForm;
 import kubeiaas.iaascore.request.image.SaveImageForm;
@@ -19,7 +20,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Validated
@@ -97,6 +100,17 @@ public class ImageOpenAPI {
             log.info("image delete ==== error ====");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.IMAGE_DELETE_ERROR));
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statistics() {
+        log.info("statistics ==== start ====");
+        Map<String, Integer> resMap = new HashMap<>();
+        Integer totalNum = tableStorage.imageTotalNum();
+        resMap.put(ImageConstants.TOTAL, totalNum);
+        log.info("statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
 }

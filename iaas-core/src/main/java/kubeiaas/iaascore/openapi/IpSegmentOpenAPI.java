@@ -5,6 +5,7 @@ import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.process.NetworkProcess;
 import kubeiaas.iaascore.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Validated
@@ -27,6 +29,9 @@ public class IpSegmentOpenAPI {
 
     @Resource
     private TableStorage tableStorage;
+
+    @Resource
+    private NetworkProcess networkProcess;
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
@@ -46,5 +51,14 @@ public class IpSegmentOpenAPI {
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAllByHostAndType(hostUuid, type);
         log.info("ip_segment queryAllByHostAndType ==== end ====");
         return JSON.toJSONString(BaseResponse.success(ipSegmentList));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statistics() {
+        log.info("ip_segment statistics ==== start ====");
+        Map<String, Integer> resMap = networkProcess.getIpCount();
+        log.info("ip_segment statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
     }
 }

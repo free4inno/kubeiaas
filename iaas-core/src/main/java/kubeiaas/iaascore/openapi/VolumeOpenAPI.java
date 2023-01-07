@@ -5,6 +5,7 @@ import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.request.volume.AttachVolumeForm;
@@ -22,7 +23,9 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -149,5 +152,17 @@ public class VolumeOpenAPI {
         Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription());
         log.info("edit ==== end ====");
         return JSON.toJSONString(BaseResponse.success(volume));
+    }
+
+    /**
+     * 统计信息
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statistics() {
+        log.info("statistics ==== start ====");
+        Map<String, Integer> resMap = volumeService.getStatistics();
+        log.info("statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
     }
 }

@@ -9,6 +9,9 @@ public class VmConstants {
     public static final String HOST_UUID = "hostUuid";
     public static final String IMAGE_UUID = "imageUuid";
 
+    /* statistics */
+    public static final String TOTAL = "total";
+
     /* default value */
     public static final String DEFAULT_DESCRIPTION = "无";       // vm's default description
     public static final String DEFAULT_PASSWORD = "abc123";     // vm's default password

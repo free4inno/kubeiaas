@@ -2,6 +2,7 @@ package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
@@ -13,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -148,6 +151,25 @@ public class VolumeService {
         }
 
         return volume;
+    }
+
+    /**
+     * 获取统计表
+     */
+    public Map<String, Integer> getStatistics() {
+        Map<String, Integer> resMap = new HashMap<>();
+        List<Volume> dataVolumes = tableStorage.volumeQueryAllDataVolume();
+
+        // 1. total
+        resMap.put(VolumeConstants.TOTAL, dataVolumes.size());
+
+        // 2. used
+        long usedNum = dataVolumes.stream()
+                .filter((Volume v) -> v.getStatus().equals(VolumeStatusEnum.ATTACHED))
+                .count();
+        resMap.put(VolumeConstants.USED, (int) usedNum);
+
+        return resMap;
     }
 
     /**

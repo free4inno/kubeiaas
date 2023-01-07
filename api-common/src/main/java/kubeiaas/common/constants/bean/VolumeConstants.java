@@ -9,6 +9,10 @@ public class VolumeConstants {
     public static final String INSTANCE_UUID = "instanceUuid";
     public static final String USAGE_TYPE = "usageType";
 
+    /* statistics */
+    public static final String TOTAL = "total";
+    public static final String USED = "used";
+
     /* config */
     public static final String SPILT = "/";
     public static final String DEFAULT_DISK_TYPE = "qcow2";

@@ -318,4 +318,16 @@ public class VmOpenAPI {
         }
     }
 
+    /**
+     * 统计信息
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statistics() {
+        log.info("statistics ==== start ====");
+        Map<String, Integer> resMap = vmService.getStatistics();
+        log.info("statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
+    }
+
 }

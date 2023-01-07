@@ -119,4 +119,13 @@ public class ImageController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public Integer statistics() {
+        log.info("statistics totalNum ==== start ====");
+        Integer res = imageService.getTotalNum();
+        log.info("statistics totalNum ==== end ====");
+        return res;
+    }
+
 }

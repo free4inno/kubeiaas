@@ -15,8 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -359,4 +358,29 @@ public class VmService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    /**
+     * 获取统计表
+     */
+    public Map<String, Integer> getStatistics() {
+        Map<String, Integer> resMap = new HashMap<>();
+        List<Vm> vmList = tableStorage.vmQueryAll();
+
+        // 1. total
+        resMap.put(VmConstants.TOTAL, vmList.size());
+
+        // 2. status
+        Set<VmStatusEnum> statusEnumSet = new HashSet<>();
+        statusEnumSet.add(VmStatusEnum.BUILDING);
+        statusEnumSet.add(VmStatusEnum.ACTIVE);
+        statusEnumSet.add(VmStatusEnum.STOPPED);
+        statusEnumSet.add(VmStatusEnum.SUSPENDED);
+        statusEnumSet.add(VmStatusEnum.ERROR);
+
+        for (VmStatusEnum status : statusEnumSet) {
+            resMap.put(status.toString(), (int) vmList.stream()
+                    .filter((Vm vm) -> vm.getStatus().equals(status)).count());
+        }
+
+        return resMap;
+    }
 }

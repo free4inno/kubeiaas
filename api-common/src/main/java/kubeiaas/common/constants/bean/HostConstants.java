@@ -6,6 +6,10 @@ public class HostConstants {
     public static final String IP = "ip";
     public static final String ROLE = "role";
 
+    /* statistics */
+    public static final String TOTAL = "total";
+    public static final String ACTIVE = "active";
+
     // roles
     public static final String ROLE_DHCP = "dhcp";
     public static final String ROLE_VNC = "vnc";

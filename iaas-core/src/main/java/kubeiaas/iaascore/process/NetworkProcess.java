@@ -3,6 +3,7 @@ package kubeiaas.iaascore.process;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.constants.bean.IpSegmentConstants;
 import kubeiaas.common.constants.bean.IpUsedConstants;
 import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
@@ -69,7 +70,74 @@ public class NetworkProcess {
         return newIpUsed;
     }
 
+    /**
+     * Delete IP
+     */
+    public void deleteIps(String vmUuid) throws BaseException {
+        log.info("deleteIps ==== start ====  vmUuid: " + vmUuid);
 
+        // DHCP中解绑
+        if (!dhcpScheduler.unbindMacAndIp(vmUuid)){
+            throw new BaseException("ERROR: dhcp unbind failed!");
+        }
+
+        // 数据库中删除
+        tableStorage.ipUsedDeleteByVmUuid(vmUuid);
+        log.info("deleteIps ==== end ====");
+    }
+
+    /**
+     * statistics
+     */
+    public Map<String, Integer> getIpCount() {
+        Map<String, Integer> resMap = new HashMap<>();
+        // 1. 私网IP - 总量
+        Integer privateIpTotal = this.getAllTotalNum(IpTypeEnum.PRIVATE);
+        resMap.put(IpSegmentConstants.PRIVATE_TOTAL, privateIpTotal);
+        // 2. 私网IP - 用量
+        Integer privateIpUsed = this.getAllUsedNum(IpTypeEnum.PRIVATE);
+        resMap.put(IpSegmentConstants.PRIVATE_USED, privateIpUsed);
+        // 3. 公网IP - 总量
+        Integer publicIpTotal = this.getAllTotalNum(IpTypeEnum.PUBLIC);
+        resMap.put(IpSegmentConstants.PUBLIC_TOTAL, publicIpTotal);
+        // 4. 公网IP - 用量
+        Integer publicIpUsed = this.getAllUsedNum(IpTypeEnum.PUBLIC);
+        resMap.put(IpSegmentConstants.PUBLIC_USED, publicIpUsed);
+
+        return resMap;
+    }
+
+    // =================================================================================================================
+
+    /**
+     * 获取 Total IP Seg 总量
+     */
+    public Integer getAllTotalNum(IpTypeEnum type) {
+        int count = 0;
+        List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
+        for (IpSegment ipSegment : ipSegmentList) {
+            if (ipSegment.getType().equals(type)) {
+                count += IpUtils.getTotalIpNum(ipSegment);
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 获取 Total IP Seg 用量
+     */
+    public Integer getAllUsedNum(IpTypeEnum type) {
+        int count = 0;
+        List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
+        for (IpSegment ipSegment : ipSegmentList) {
+            if (ipSegment.getType().equals(type)) {
+                count += getAllUsedIp(ipSegment.getId()).size();
+            }
+        }
+        return count;
+    }
+
+    // 获取分配 MAC 地址
     public String getNewMac(IpSegment ipSegment) {
         if (ipSegment == null) {
             return IpUsedConstants.DEFAULT_MAC;
@@ -78,14 +146,13 @@ public class NetworkProcess {
         return MacUtils.getMACAddress(macPre);
     }
 
-
+    // 获取分配 IP 地址
     public IpUsed getNewIp(IpSegment ipSegment) {
         if (ipSegment == null) {
             return null;
         }
         return IpUtils.getIpAddress(getAllUsedIp(ipSegment.getId()), ipSegment);
     }
-
 
     // 已经使用的ip地址，通过Map方式存放，key是Ip
     public Map<String, IpUsed> getAllUsedIp(int ipSegmentId) {
@@ -97,16 +164,4 @@ public class NetworkProcess {
         return allUsedIp;
     }
 
-    public void deleteIps(String vmUuid) throws BaseException {
-        log.info("deleteIps ==== start ====  vmUuid: " + vmUuid);
-
-        //DHCP中解绑
-        if (!dhcpScheduler.unbindMacAndIp(vmUuid)){
-            throw new BaseException("ERROR: dhcp unbind failed!");
-        }
-
-        //数据库中删除
-        tableStorage.ipUsedDeleteByVmUuid(vmUuid);
-        log.info("deleteIps ==== end ====");
-    }
 }

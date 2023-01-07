@@ -154,6 +154,10 @@ public class ImageService {
         return true;
     }
 
+    public Integer getTotalNum() {
+        return getYamlList().size();
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
 
     private PageResponse<Image> parseImagePage(List<String> fileList, Integer pageNum, Integer pageSize) {

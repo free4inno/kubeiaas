@@ -122,6 +122,26 @@ public class ServiceConfig {
         return resMap;
     }
 
+    public Map<String, Integer> getSvcCount() {
+        int activeNum = 0;
+        int deadNum = 0;
+        Map<String, Integer> resMap = new HashMap<>();
+        for (String node : nodeSet) {
+            for (String svc : serviceSet) {
+                if (isInNeedMap(svc, node)) {
+                    if (isInActiveList(svc, node)) {
+                        activeNum += 1;
+                    } else {
+                        deadNum += 1;
+                    }
+                }
+            }
+        }
+        resMap.put("total", activeNum + deadNum);
+        resMap.put("active", activeNum);
+        return resMap;
+    }
+
     public Map<String, String> getNfs() {
         Map<String, String> resMap = new HashMap<>();
 

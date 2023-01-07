@@ -17,6 +17,35 @@ public class IpUtils {
     private static int remainIpNum = 5;
 
     /**
+     * Total
+     * 获取 IP 段内 IP 总数
+     */
+    public static Integer getTotalIpNum(IpSegment ipSegment) {
+        int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
+        int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
+        return (ipEnd - ipBegin + 1);
+    }
+
+    /**
+     * Available
+     * 获取 IP 段内可用 IP 数
+     */
+    public static Integer getAvailableIpNum(Map<String, IpUsed> usedIps, IpSegment ipSegment) {
+        int remainIp = 0;
+
+        int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
+        int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
+        remainIp = remainIp + (ipEnd - ipBegin + 1);
+
+        remainIp = remainIp - usedIps.size();
+        if (remainIp < remainIpNum) {
+            log.info("-- the " + ipSegment.getId() + " only " + remainIp + " ip left");
+            remainIpNum = remainIp;
+        }
+        return remainIp;
+    }
+
+    /**
      * 为了保证获取的Ip地址唯一，应该保证在方法执行期间只能有一个进程调用.
      *
      * @param usedIps   已经使用的ip地址，通过Map方式存放，key是Ip
@@ -33,17 +62,8 @@ public class IpUtils {
             gatewayIps.add(IpUtils.stringToInt(ipSegment.getDns()));
         }
 
-        int remainIp = 0;
-
         int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
         int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
-        remainIp = remainIp + (ipEnd - ipBegin + 1);
-
-        remainIp = remainIp - usedIps.size();
-        if (remainIp < remainIpNum) {
-            log.info("the " + ipSegment.getId() + " only " + remainIp + " ip left");
-            remainIpNum = remainIp;
-        }
 
         for (int ip = ipBegin; ip <= ipEnd; ip++) {
             if (gatewayIps.contains(ip)) {

@@ -60,4 +60,12 @@ public class ServiceOpenAPI {
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statistics() {
+        log.info("statistics ==== start ====");
+        Map<String, Integer> resMap = serviceConfig.getSvcCount();
+        log.info("statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
+    }
 }

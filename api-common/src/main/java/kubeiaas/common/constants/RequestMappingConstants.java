@@ -42,6 +42,7 @@ public class RequestMappingConstants {
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
+    public static final String STATISTICS = "statistics";
     // -- query all
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";

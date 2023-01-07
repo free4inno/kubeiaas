@@ -125,6 +125,10 @@ public class TableStorage {
         return imageOperator.imageDelete(uuid).equals(ResponseMsgConstants.SUCCESS);
     }
 
+    public Integer imageTotalNum() {
+        return imageOperator.statistics();
+    }
+
     /*
     public Image imageQueryByUuid(String uuid) {
         String jsonString = dbProxy.imageQueryAllBySingleKey(ImageConstants.UUID, uuid);
