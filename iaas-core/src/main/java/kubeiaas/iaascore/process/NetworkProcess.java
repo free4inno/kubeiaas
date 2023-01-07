@@ -39,17 +39,21 @@ public class NetworkProcess {
     public synchronized IpUsed createVmNetwork(Vm newVm, int ipSegmentId) throws VmException {
         log.info("createVm -- 3. Network");
 
-        String newMac = getNewMac(ipSegmentId);
-        IpUsed newIpUsed = getNewIp(ipSegmentId);
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+
+        String newMac = getNewMac(ipSegment);
+        IpUsed newIpUsed = getNewIp(ipSegment);
         if (newIpUsed == null) {
-            throw new VmException(newVm,"ERROR: ip allocated failed!");
+            throw new VmException(newVm, "ERROR: ip allocated failed!");
         }
+
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
         newIpUsed.setInstanceUuid(newVm.getUuid());
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
         newIpUsed.setType(IpTypeEnum.PRIVATE);
+        newIpUsed.setBridge(ipSegment.getBridge());
 
         log.info("new mac: " + newIpUsed.getMac());
         log.info("new ip: " + newIpUsed.getIp());
@@ -59,35 +63,27 @@ public class NetworkProcess {
 
         // bind in DHCP-Controller
         if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
-            throw new VmException(newVm,"ERROR: dhcp bind mac & ip failed!");
+            throw new VmException(newVm, "ERROR: dhcp bind mac & ip failed!");
         }
         log.info("createVm -- 3. network success!");
         return newIpUsed;
     }
 
 
-    public String getNewMac(int ipSegmentId) {
-        if (ipSegmentId <= 0 || ipSegmentId >= 4096) {
-            // when id <= 0, illegal;
-            // when id >= 4096, up to top.
+    public String getNewMac(IpSegment ipSegment) {
+        if (ipSegment == null) {
             return IpUsedConstants.DEFAULT_MAC;
-        } else {
-            IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-            if (ipSegment == null) {
-                return IpUsedConstants.DEFAULT_MAC;
-            }
-            String macPre = MacUtils.getMacPre(ipSegmentId, ipSegment.getType());
-            return MacUtils.getMACAddress(macPre);
         }
+        String macPre = MacUtils.getMacPre(ipSegment.getId(), ipSegment.getType());
+        return MacUtils.getMACAddress(macPre);
     }
 
 
-    public IpUsed getNewIp(int ipSegmentId) {
-        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+    public IpUsed getNewIp(IpSegment ipSegment) {
         if (ipSegment == null) {
             return null;
         }
-        return IpUtils.getIpAddress(getAllUsedIp(ipSegmentId), ipSegment);
+        return IpUtils.getIpAddress(getAllUsedIp(ipSegment.getId()), ipSegment);
     }
 
 

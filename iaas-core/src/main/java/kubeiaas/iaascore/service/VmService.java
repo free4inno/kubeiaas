@@ -63,7 +63,7 @@ public class VmService {
         Use Resource Operator to allocate Host and check available
         （资源调度：分配宿主机，检查资源合法性）
          */
-        newVm = resourceProcess.createVmOperate(newVm);
+        newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, false, -1);
 
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller

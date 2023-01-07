@@ -1,11 +1,9 @@
 package kubeiaas.iaascore.process;
 
-import kubeiaas.common.bean.Host;
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
 import kubeiaas.common.enums.image.ImageStatusEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
@@ -16,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -31,8 +30,14 @@ public class ResourceProcess {
     /**
      * Create VM.
      * 2. Resource Operator
+     * @param newVm 经过 preCreate 的 newVm
+     * @param privateIpSegId 私网网段id（-1代表未指定）
+     * @param needPublicIp 是否需要公网IP
+     * @param publicIpSegId 公网网段id（-1代表未指定）
+     * @return Vm
+     * @throws VmException VmException
      */
-    public Vm createVmOperate(Vm newVm) throws VmException {
+    public Vm createVmOperate(Vm newVm, int privateIpSegId, boolean needPublicIp, int publicIpSegId) throws VmException {
         log.info("createVm -- 2. Resource Operator");
 
         // 2.1. check image
@@ -67,9 +72,43 @@ public class ResourceProcess {
             selectedHost = resourceScheduler.vmSelectHostByOperator(newVm.getUuid(), HostSelectStrategyConstants.ROUND_ROBIN);
         }
         if (selectedHost == null) {
-            throw new VmException(newVm,"ERROR: no available host.");
+            throw new VmException(newVm, "ERROR: no available host.");
         }
         log.info("selected host: " + selectedHost.getName());
+
+        // 2.3. check IP segment
+        IpSegment privateIpSeg;
+        if (privateIpSegId == -1) {
+            // no select private ip
+            // TODO: call resourceScheduler to alloc
+            throw new VmException(newVm, "ERROR: no available privateIpSeg.");
+        } else {
+            // check private host
+            privateIpSeg = tableStorage.ipSegmentQueryById(privateIpSegId);
+            if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
+                    || !privateIpSeg.getType().equals(IpTypeEnum.PRIVATE)) {
+                throw new VmException(newVm, "ERROR: not available privateIpSeg.");
+            }
+        }
+
+        IpSegment publicIpSeg;
+        if (publicIpSegId == -1) {
+            if (needPublicIp) {
+                // no select public ip
+                // TODO: call resourceScheduler to alloc
+                throw new VmException(newVm, "ERROR: no available publicIpSeg.");
+            } else {
+                log.info("-- no need public ip");
+            }
+        } else {
+            // check public host
+            publicIpSeg = tableStorage.ipSegmentQueryById(publicIpSegId);
+            if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
+                    || !publicIpSeg.getType().equals(IpTypeEnum.PUBLIC)) {
+                throw new VmException(newVm, "ERROR: not available publicIpSeg.");
+            }
+        }
+
         // set scheduler of iaas-agent
         AgentConfig.setSelectedHost(newVm.getUuid(), selectedHost);
         // save into DB

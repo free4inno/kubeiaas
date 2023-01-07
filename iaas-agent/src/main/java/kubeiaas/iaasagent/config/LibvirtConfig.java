@@ -192,14 +192,21 @@ public class LibvirtConfig {
             //设置基本网卡信息
             netInterface.addElement("mac")
                     .addAttribute("address", ip.getMac());
+            //设置所用网桥
+            netInterface.addElement("source")
+                    .addAttribute("bridge", ip.getBridge());
 
+            /*
             if (ip.getType().equals(IpTypeEnum.PRIVATE)) {
+                // old: 通过conf类加载，默认私网为br0，可以在properties中更改
                 netInterface.addElement("source")
-                        .addAttribute("bridge", privateNetwork);             //通过conf类加载，默认私网为br0，可以在properties中更改
+                        .addAttribute("bridge", privateNetwork);
             } else {
+                // old: 通过conf类加载，默认公网为br1，可以在properties中更改
                 netInterface.addElement("source")
-                        .addAttribute("bridge", publicNetwork);             //通过conf类加载，默认公网为br1，可以在properties中更改
+                        .addAttribute("bridge", publicNetwork);
             }
+             */
 
             //设置网卡接口名称
             log.info("tap=" + getTap(ip.getMac()));
@@ -208,7 +215,6 @@ public class LibvirtConfig {
             //设置网卡型号为Virtio
             netInterface.addElement("model").
                     addAttribute("type", "virtio");
-
         }
         log.info("ipToNetworkXml ---- end ----");
     }
