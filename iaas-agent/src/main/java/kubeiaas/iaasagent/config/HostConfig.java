@@ -29,13 +29,17 @@ public class HostConfig {
     @Resource
     private VncService vncService;
 
-    private String hostIp = "";
-    private String hostName = "";
+    private final String hostIp = System.getenv("HOST_IP");
+    private final String hostName = System.getenv("HOST_NAME");
 
     private final String network_subnet = System.getenv("NETWORK_SUBNET");
     private final String network_netmask = System.getenv("NETWORK_NETMASK");
     private final String network_subnet_with_mask = System.getenv("NETWORK_SUBNET_WITH_MASK");
     private final String network_gateway = System.getenv("NETWORK_GATEWAY");
+
+    private final String vCPU = System.getenv(hostName.toUpperCase().replace("-", "_") + "_VCPU");
+    private final String MEM = System.getenv(hostName.toUpperCase().replace("-", "_") + "_MEM");
+    private final String STORAGE = System.getenv(hostName.toUpperCase().replace("-", "_") + "_STORAGE");
 
     public static String CMD_CPU_CORE = "cat /proc/cpuinfo| grep \"processor\" | wc -l";
     public static String CMD_CPU_MHZ = "cat /proc/cpuinfo | grep MHz|head -1|awk '{print $4}'";
@@ -49,10 +53,9 @@ public class HostConfig {
     public static String RESULT_CHECKER = "/usr/local/kubeiaas/workdir/log/checkResult-%s.log";
 
     public void hostInitialize() {
-        // get localhost hostIp & hostName
-        hostIp = System.getenv("HOST_IP");
-        hostName = System.getenv("HOST_NAME");
-        log.info("hostIp:" + hostIp + " hostName:" + hostName);
+        // get host resource config
+        log.info("hostIp:" + hostIp + ", hostName:" + hostName);
+        log.info("vCPU:" + vCPU + ", MEM:" + MEM + ", STORAGE:" + STORAGE);
 
         // check is this host registered in DB
         Host host = tableStorage.hostQueryByIp(hostIp);
@@ -83,6 +86,11 @@ public class HostConfig {
             String os = ShellUtils.getCmd(CMD_VERSION);
             host.setConfig(String.format("系统版本：%s；处理器：%s核心，%sMHz；内存：%sGB；磁盘：%sGB", os, cpuCore, cpuMhz, memSize, diskSize));
 
+            // - set resource config
+            host.setVCPU(Integer.parseInt(vCPU));
+            host.setMemory(Integer.parseInt(MEM));
+            host.setStorage(Integer.parseInt(STORAGE));
+
             // - generate uuid
             host.setUuid(UuidUtils.getRandomUuid());
 
@@ -112,6 +120,11 @@ public class HostConfig {
 
         } else {
             log.info("this host is registered.");
+            // - set resource config
+            host.setVCPU(Integer.parseInt(vCPU));
+            host.setMemory(Integer.parseInt(MEM));
+            host.setStorage(Integer.parseInt(STORAGE));
+
             // check only
             boolean totalSuccessFlag;
             ShellUtils.getCmd(CMD_REFRESH_LOG);

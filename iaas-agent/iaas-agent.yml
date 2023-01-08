@@ -13,27 +13,9 @@ spec:
       labels:
         app: iaas-agent
     spec:
+      # 打标签：kubectl label node hf-node-01 kubeiaas=node
       nodeSelector:
         kubeiaas/node: "true"   # 指定节点标签
-        # 打标签：kubectl label node hf-node-01 kubeiaas=node
-#      initContainers:
-#        - name: init-nfs
-#          image: registry.cn-beijing.aliyuncs.com/kubeiaas/init-nfs:0.1
-#          imagePullPolicy: Always
-#          securityContext:
-#            privileged: true
-#          env:
-#            - name: HOST_NAME
-#              valueFrom:
-#                fieldRef:
-#                  fieldPath: spec.nodeName
-#            - name: MNT_HOST_NAME
-#              value: "hf-node-02"
-#          volumeMounts:
-#            - name: host-proc
-#              mountPath: /host/proc
-#            - name: checker
-#              mountPath: /checker
       containers:
         - name: iaas-agent
           command: ["sh"]
@@ -53,6 +35,7 @@ spec:
               hostPort: 9089
               protocol: TCP
           env:
+            # -------- BASIC ENV --------
             - name: HOST_IP
               valueFrom:
                 fieldRef:
@@ -61,6 +44,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            # -------- NETWORK CONFIG --------
             - name: NETWORK_SUBNET
               value: "192.168.32.0"
             - name: NETWORK_NETMASK
@@ -69,6 +53,20 @@ spec:
               value: "192.168.32.0/19"
             - name: NETWORK_GATEWAY
               value: "192.168.32.1"
+            # -------- RESOURCE CONFIG --------
+            - name: HF_NODE_01_VCPU
+              value: "40"
+            - name: HF_NODE_01_MEM
+              value: "64"
+            - name: HF_NODE_01_STORAGE
+              value: "4096"
+            - name: HF_NODE_02_VCPU
+              value: "40"
+            - name: HF_NODE_02_MEM
+              value: "64"
+            - name: HF_NODE_02_STORAGE
+              value: "4096"
+            # ----------------------------------
           volumeMounts:
             - name: host-proc
               mountPath: /host/proc

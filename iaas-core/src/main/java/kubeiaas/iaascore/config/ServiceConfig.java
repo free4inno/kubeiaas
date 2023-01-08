@@ -142,6 +142,10 @@ public class ServiceConfig {
         return resMap;
     }
 
+    public boolean getAgent(String nodeName) {
+        return isInActiveList(ComponentConstants.IAAS_AGENT, nodeName);
+    }
+
     public Map<String, String> getNfs() {
         Map<String, String> resMap = new HashMap<>();
 

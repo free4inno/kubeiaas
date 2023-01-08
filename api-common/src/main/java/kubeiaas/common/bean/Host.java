@@ -18,6 +18,9 @@ public class Host {
     private HostStatusEnum status;  // 节点状态
     private String role;            // 节点角色，例如：["dhcp","vnc","mnt"]
 
+    private Integer vCPU;            // 节点配置：虚拟CPU
+    private Integer memory;          // 节点配置：虚拟内存
+    private Integer storage;         // 节点配置：存储空间
 
     public Host(String name, String ip) {
         this.name = name;

@@ -29,6 +29,7 @@ spec:
               hostPort: 9080
               protocol: TCP
           env:
+            # -------- BASIC ENV --------
             - name: HOST_IP
               valueFrom:
                 fieldRef:
@@ -37,6 +38,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            # -------- SERVICE CONFIG --------
             - name: IAAS_CORE_NODE_NAME
               value: "hf-node-01"
             - name: DB_PROXY_NODE_NAME
@@ -53,6 +55,7 @@ spec:
               value: "hf-node-01"
             - name: NFS_IP
               value: "192.168.33.7"
+            # ----------------------------------
 ---
 apiVersion: v1
 kind: Service

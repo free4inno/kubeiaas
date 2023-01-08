@@ -79,4 +79,30 @@ public class HostTable extends Host {
         super.setRole(role);
     }
 
+    @Column(name = "vcpu")
+    public Integer getVCPU() {
+        return super.getVCPU();
+    }
+
+    public void setVCPU(Integer vCPU) {
+        super.setVCPU(vCPU);
+    }
+
+    @Column(name = "memory")
+    public Integer getMemory() {
+        return super.getMemory();
+    }
+
+    public void setMemory(Integer memory) {
+        super.setMemory(memory);
+    }
+
+    @Column(name = "storage")
+    public Integer getStorage() {
+        return super.getStorage();
+    }
+
+    public void setStorage(Integer storage) {
+        super.setStorage(storage);
+    }
 }

@@ -10,6 +10,13 @@ public class HostConstants {
     public static final String TOTAL = "total";
     public static final String ACTIVE = "active";
 
+    public static final String TOTAL_vCPU = "total_vcpu";
+    public static final String USED_vCPU = "used_vcpu";
+    public static final String TOTAL_MEM = "total_mem";
+    public static final String USED_MEM = "used_mem";
+    public static final String TOTAL_STORAGE = "total_storage";
+    public static final String USED_STORAGE = "used_storage";
+
     // roles
     public static final String ROLE_DHCP = "dhcp";
     public static final String ROLE_VNC = "vnc";
