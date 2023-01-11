@@ -1,10 +1,12 @@
 package kubeiaas.iaascore.scheduler;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
 import kubeiaas.common.enums.image.ImageStatusEnum;
@@ -25,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Configuration
@@ -230,6 +233,24 @@ public class VolumeScheduler {
             return false;
         }
     }
+
+    /**
+     * 获取云硬盘存储统计数据
+     */
+    public Map<String, String> getDataVolStorageInfo() {
+        String jsonObjectStr = volumeController.getDataVolStorage(getSelectedUri(RequestMappingConstants.GET_DATA_VOLUME_STORAGE));
+        return JSON.parseObject(jsonObjectStr, new TypeReference<Map<String, String>>(){});
+    }
+
+    /**
+     * 获取云镜像存储统计数据
+     */
+    public Map<String, String> getImgVolStorageInfo() {
+        String jsonObjectStr = volumeController.getImgVolStorage(getSelectedUri(RequestMappingConstants.GET_IMG_VOLUME_STORAGE));
+        return JSON.parseObject(jsonObjectStr, new TypeReference<Map<String, String>>(){});
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
 
     private URI getSelectedUri(String vmUuid) {
         try {

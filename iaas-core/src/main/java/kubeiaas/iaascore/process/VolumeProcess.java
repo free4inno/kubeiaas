@@ -110,7 +110,7 @@ public class VolumeProcess {
         if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, diskSize)){
             throw new VolumeException(newVolume, "ERROR create Data volume:"+newVolume.getUuid()+" failed!");
         }
-        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+        AgentConfig.clearSelectedHost(volumeUuid);
     }
 
     public void deleteSystemVolume(String vmUuid) throws BaseException {
@@ -147,7 +147,7 @@ public class VolumeProcess {
             throw new BaseException("ERROR: delete data volume:" + volume.getUuid() + " failed!");
         }
         log.info("deleteDataVolume ==== end ==== volumeUuid:" + volumeUuid);
-        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+        AgentConfig.clearSelectedHost(volumeUuid);
     }
 
     public void attachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
@@ -156,7 +156,7 @@ public class VolumeProcess {
             throw new BaseException("ERROR: attach data volume:" + volumeUuid + " failed!");
         }
         log.info("attachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
-        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+        AgentConfig.clearSelectedHost(volumeUuid);
     }
 
     public void detachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
@@ -170,7 +170,7 @@ public class VolumeProcess {
         volume.setBus("");
         tableStorage.volumeSave(volume);
         log.info("detachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
-        AgentConfig.clearVolumeSelectedHost(volumeUuid);
+        AgentConfig.clearSelectedHost(volumeUuid);
     }
 
     /**

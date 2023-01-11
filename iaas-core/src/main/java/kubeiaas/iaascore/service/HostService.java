@@ -4,19 +4,23 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.bean.HostConstants;
+import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.host.HostStatusEnum;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.config.ServiceConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.scheduler.HostScheduler;
+import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +31,9 @@ public class HostService {
 
     @Resource
     private HostScheduler hostScheduler;
+
+    @Resource
+    private VolumeScheduler volumeScheduler;
 
     @Resource
     private ServiceConfig serviceConfig;
@@ -71,17 +78,17 @@ public class HostService {
     }
 
     /**
-     * 获取统计表
+     * 获取统计数据
      */
     public Map<String, Integer> getStatistics() {
         Map<String, Integer> resMap = new HashMap<>();
         List<Host> hostList = tableStorage.hostQueryAll();
 
         // 1. total
-        resMap.put(HostConstants.TOTAL, hostList.size());
+        resMap.put(HostConstants.TOTAL_NODE, hostList.size());
 
         // 2. status
-        resMap.put(HostConstants.ACTIVE, (int) hostList.stream()
+        resMap.put(HostConstants.ACTIVE_NODE, (int) hostList.stream()
                 .filter((Host h) -> h.getStatus().equals(HostStatusEnum.READY)).count());
 
         // 3. resource
@@ -95,8 +102,10 @@ public class HostService {
         // -- 3.3. STORAGE -----------
         Integer totalSysStorage = 0;
         Integer usedSysStorage = 0;
-        Integer totalDataStorage = 0;
-        Integer usedDataStorage = 0;
+        int totalDataStorage = 0;
+        int usedDataStorage = 0;
+        int totalImgStorage = 0;
+        int usedImgStorage = 0;
 
         // calculate used
         List<Vm> vmList = tableStorage.vmQueryAll();
@@ -104,11 +113,6 @@ public class HostService {
             usedVCPU += vm.getCpus();
             usedMEM += vm.getMemory();
             usedSysStorage += vm.getDiskSize();
-        }
-
-        List<Volume> dataVolumeList = tableStorage.volumeQueryAllDataVolume();
-        for (Volume volume : dataVolumeList) {
-            usedDataStorage += volume.getSize();
         }
 
         // calculate total
@@ -122,8 +126,34 @@ public class HostService {
         resMap.put(HostConstants.USED_vCPU, usedVCPU);
         resMap.put(HostConstants.TOTAL_MEM, totalMEM);
         resMap.put(HostConstants.USED_MEM, usedMEM);
-        resMap.put(HostConstants.TOTAL_STORAGE, totalSysStorage);
-        resMap.put(HostConstants.USED_STORAGE, usedSysStorage);
+        resMap.put(HostConstants.TOTAL_SYS_STORAGE, totalSysStorage);
+        resMap.put(HostConstants.USED_SYS_STORAGE, usedSysStorage);
+
+        // get nfs info
+        List<Host> readyHosts = hostList.stream()
+                .filter(h -> (h.getStatus().equals(HostStatusEnum.READY)))
+                .collect(Collectors.toList());
+
+        if (!readyHosts.isEmpty()) {
+            Host node = hostList.get(0);
+
+            AgentConfig.setSelectedHost(RequestMappingConstants.GET_DATA_VOLUME_STORAGE, node);
+            Map<String, String> dataVolStorageMap = volumeScheduler.getDataVolStorageInfo();
+            totalDataStorage = Integer.parseInt(dataVolStorageMap.get(VolumeConstants.TOTAL));
+            usedDataStorage = Integer.parseInt(dataVolStorageMap.get(VolumeConstants.USED));
+            AgentConfig.clearSelectedHost(RequestMappingConstants.GET_DATA_VOLUME_STORAGE);
+
+            AgentConfig.setSelectedHost(RequestMappingConstants.GET_IMG_VOLUME_STORAGE, node);
+            Map<String, String> imgVolStorageMap = volumeScheduler.getImgVolStorageInfo();
+            totalImgStorage = Integer.parseInt(imgVolStorageMap.get(VolumeConstants.TOTAL));
+            usedImgStorage = Integer.parseInt(imgVolStorageMap.get(VolumeConstants.USED));
+            AgentConfig.clearSelectedHost(RequestMappingConstants.GET_IMG_VOLUME_STORAGE);
+        }
+
+        resMap.put(HostConstants.TOTAL_DATA_STORAGE, totalDataStorage);
+        resMap.put(HostConstants.USED_DATA_STORAGE, usedDataStorage);
+        resMap.put(HostConstants.TOTAL_IMG_STORAGE, totalImgStorage);
+        resMap.put(HostConstants.USED_IMG_STORAGE, usedImgStorage);
 
         return resMap;
     }

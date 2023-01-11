@@ -73,7 +73,6 @@ public class RequestMappingConstants {
     public static final String QUERY_IMAGE_RAW_BY_UUID = "query_image_raw_by_uuid";
     public static final String QUERY_IMAGE_ALL = "query_image_all";
     public static final String PUBLISH_IMAGE = "publish_image";
-    public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
     public static final String IMAGE_CREATE_YAML = "image_create_yaml";
     public static final String IMAGE_SAVE_YAML = "image_save_yaml";
 
@@ -88,6 +87,9 @@ public class RequestMappingConstants {
     public static final String DELETE_DATA_VOLUME = "delete_data_volume";
     public static final String ATTACH_DATA_VOLUME = "attach_data_volume";
     public static final String DETACH_DATA_VOLUME = "detach_data_volume";
+    public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
+    public static final String GET_DATA_VOLUME_STORAGE = "get_data_vol_sto";
+    public static final String GET_IMG_VOLUME_STORAGE = "get_img_vol_sto";
 
     // >>> Vm Controller <<<
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";

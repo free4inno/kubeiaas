@@ -12,6 +12,8 @@ public class VolumeConstants {
     /* statistics */
     public static final String TOTAL = "total";
     public static final String USED = "used";
+    public static final String MNT_DIR = "mount_dir";
+    public static final String MNT_FS = "mount_fs";
 
     /* config */
     public static final String SPILT = "/";

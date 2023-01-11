@@ -25,7 +25,11 @@ public class IaasAgentRegister {
 
     public void agentRegister() {
         log.info("== AGENT REGISTER");
-        register.register(svcName, nodeName, System.currentTimeMillis());
+        try {
+            register.register(svcName, nodeName, System.currentTimeMillis());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Scheduled(cron = "0 0/1 * * * ?")

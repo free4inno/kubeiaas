@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -245,6 +247,27 @@ public class VolumeService {
 
         return true;
     }
+
+    public Map<String, String> getVolStorage(String directory) {
+        String command;
+        Map<String, String> resMap = new HashMap<>();
+
+        command = String.format(VolumeConfig.QUERY_NFS_MOUNT_FS, directory);
+        String mountFS = ShellUtils.getCmd(command);
+        command = String.format(VolumeConfig.QUERY_VOLUME_TOTAL, directory);
+        String total = ShellUtils.getCmd(command);
+        command = String.format(VolumeConfig.QUERY_VOLUME_USED, directory);
+        String used = ShellUtils.getCmd(command);
+
+        resMap.put(VolumeConstants.MNT_DIR, directory);
+        resMap.put(VolumeConstants.MNT_FS, mountFS);
+        resMap.put(VolumeConstants.TOTAL, total);
+        resMap.put(VolumeConstants.USED, used);
+
+        return resMap;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     private void setVolumeStatus(String volumeUuid, VolumeStatusEnum status){
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);

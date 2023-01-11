@@ -34,30 +34,15 @@ public class AgentConfig {
      * 设置 target host
      * @param host 目标 agent 所在 host
      */
-    public static void setSelectedHost(String vmUuid, Host host) {
-        selected_host_ip.put(vmUuid, host.getIp());
+    public static void setSelectedHost(String uuid, Host host) {
+        selected_host_ip.put(uuid, host.getIp());
     }
 
     /**
      * 清除 target host
      */
-    public static void clearSelectedHost(String vmUuid) {
-        selected_host_ip.remove(vmUuid);
-    }
-
-    /**
-     * 设置 target host
-     * @param host 目标 agent 所在 host
-     */
-    public static void setVolumeSelectedHost(String volumeUuid, Host host) {
-        selected_host_ip.put(volumeUuid, host.getIp());
-    }
-
-    /**
-     * 清除 target host
-     */
-    public static void clearVolumeSelectedHost(String volumeUuid) {
-        selected_host_ip.remove(volumeUuid);
+    public static void clearSelectedHost(String uuid) {
+        selected_host_ip.remove(uuid);
     }
 
     /**

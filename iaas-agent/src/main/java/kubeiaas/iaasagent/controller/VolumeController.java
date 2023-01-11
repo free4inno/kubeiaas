@@ -6,6 +6,7 @@ import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.iaasagent.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -134,5 +136,25 @@ public class VolumeController {
             log.error("publishImage -- failed");
             return ResponseMsgConstants.FAILED;
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_DATA_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String getDataVolStorage() {
+        log.info("getDataVolStorage ==== start ====");
+        String dataDir = VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.DATA_VOLUME_PATH;
+        Map<String, String> resMap = volumeService.getVolStorage(dataDir);
+        log.info("getDataVolStorage ==== end ====");
+        return JSON.toJSONString(resMap);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_IMG_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String getImgVolStorage() {
+        log.info("getImgVolStorage ==== start ====");
+        String imageDir = VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.IMAGE_PATH;
+        Map<String, String> resMap = volumeService.getVolStorage(imageDir);
+        log.info("getImgVolStorage ==== end ====");
+        return JSON.toJSONString(resMap);
     }
 }

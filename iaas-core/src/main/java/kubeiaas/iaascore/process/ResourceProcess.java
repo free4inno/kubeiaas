@@ -135,7 +135,7 @@ public class ResourceProcess {
         }
         log.info("selected host: " + selectedHost.getName());
         // set scheduler of iaas-agent
-        AgentConfig.setVolumeSelectedHost(newVolume.getUuid(), selectedHost);
+        AgentConfig.setSelectedHost(newVolume.getUuid(), selectedHost);
         // save into DB
         newVolume.setHostUuid(selectedHost.getUuid());
         newVolume = tableStorage.volumeSave(newVolume);
@@ -193,7 +193,7 @@ public class ResourceProcess {
         }
 
         log.info("selected host: " + selectedHost.getName());
-        AgentConfig.setVolumeSelectedHost(volume.getUuid(), selectedHost);
+        AgentConfig.setSelectedHost(volume.getUuid(), selectedHost);
     }
 
 }
