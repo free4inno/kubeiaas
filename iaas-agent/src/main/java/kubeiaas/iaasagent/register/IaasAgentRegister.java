@@ -1,7 +1,9 @@
 package kubeiaas.iaasagent.register;
 
 import kubeiaas.common.constants.ComponentConstants;
+import kubeiaas.common.enums.host.HostStatusEnum;
 import kubeiaas.common.utils.ShellUtils;
+import kubeiaas.iaasagent.service.HostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,23 +17,51 @@ public class IaasAgentRegister {
     @Resource
     private Register register;
 
+    @Resource
+    private HostService hostService;
+
     private static final String svcName = ComponentConstants.IAAS_AGENT;
     private static final String nodeName = System.getenv("HOST_NAME");
+
+    public void agentRegister() {
+        log.info("== AGENT REGISTER");
+        register.register(svcName, nodeName, System.currentTimeMillis());
+    }
 
     @Scheduled(cron = "0 0/1 * * * ?")
     private void register() {
         log.info("== REGISTER");
+        boolean errorFlag = false;
+
+        // == 1. Agent =====
         register.register(svcName, nodeName, System.currentTimeMillis());
+
+        // == 2. Libvirt =====
         if (checkLibvirt()) {
             register.register(ComponentConstants.LIBVIRT, nodeName, System.currentTimeMillis());
+        } else {
+            errorFlag = true;
         }
+
+        // == 3. DHCP =====
         if (checkDHCP()) {
             register.register(ComponentConstants.DHCP, nodeName, System.currentTimeMillis());
         }
+
+        // == 4. VNC ======
         if (checkVNC()) {
             register.register(ComponentConstants.VNC, nodeName, System.currentTimeMillis());
         }
+
+        // update hostNode status
+        if (errorFlag) {
+            hostService.setHostStatus(HostStatusEnum.ERROR);
+        } else {
+            hostService.setHostStatus(HostStatusEnum.READY);
+        }
     }
+
+    // ----------------------------------------------------------------------------------------------------------------
 
     private final String CHECK_SUCCESS = "1";
 

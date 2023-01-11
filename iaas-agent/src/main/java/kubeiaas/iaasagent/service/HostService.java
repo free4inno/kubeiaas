@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -180,10 +179,12 @@ public class HostService {
     /**
      * 设置当前节点 host 状态
      */
-    public Host setHostStatus(HostStatusEnum hostStatus) {
+    public void setHostStatus(HostStatusEnum hostStatus) {
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
-        host.setStatus(hostStatus);
-        return tableStorage.hostSave(host);
+        if (!host.getStatus().equals(hostStatus)) {
+            host.setStatus(hostStatus);
+        }
+        tableStorage.hostSave(host);
     }
 
 }
