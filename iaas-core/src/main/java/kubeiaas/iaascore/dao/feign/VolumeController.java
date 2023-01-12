@@ -69,13 +69,13 @@ public interface VolumeController {
             @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr
     );
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.GET_DATA_VOLUME_STORAGE)
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DATA_VOLUME_STORAGE)
     @ResponseBody
     String getDataVolStorage(
             URI uri
     );
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.GET_IMG_VOLUME_STORAGE)
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.IMG_VOLUME_STORAGE)
     @ResponseBody
     String getImgVolStorage(
             URI uri

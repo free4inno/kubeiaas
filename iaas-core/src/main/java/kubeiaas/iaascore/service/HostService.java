@@ -137,23 +137,127 @@ public class HostService {
         if (!readyHosts.isEmpty()) {
             Host node = hostList.get(0);
 
-            AgentConfig.setSelectedHost(RequestMappingConstants.GET_DATA_VOLUME_STORAGE, node);
+            AgentConfig.setSelectedHost(RequestMappingConstants.DATA_VOLUME_STORAGE, node);
             Map<String, String> dataVolStorageMap = volumeScheduler.getDataVolStorageInfo();
             totalDataStorage = Integer.parseInt(dataVolStorageMap.get(VolumeConstants.TOTAL));
             usedDataStorage = Integer.parseInt(dataVolStorageMap.get(VolumeConstants.USED));
-            AgentConfig.clearSelectedHost(RequestMappingConstants.GET_DATA_VOLUME_STORAGE);
+            AgentConfig.clearSelectedHost(RequestMappingConstants.DATA_VOLUME_STORAGE);
 
-            AgentConfig.setSelectedHost(RequestMappingConstants.GET_IMG_VOLUME_STORAGE, node);
+            AgentConfig.setSelectedHost(RequestMappingConstants.IMG_VOLUME_STORAGE, node);
             Map<String, String> imgVolStorageMap = volumeScheduler.getImgVolStorageInfo();
             totalImgStorage = Integer.parseInt(imgVolStorageMap.get(VolumeConstants.TOTAL));
             usedImgStorage = Integer.parseInt(imgVolStorageMap.get(VolumeConstants.USED));
-            AgentConfig.clearSelectedHost(RequestMappingConstants.GET_IMG_VOLUME_STORAGE);
+            AgentConfig.clearSelectedHost(RequestMappingConstants.IMG_VOLUME_STORAGE);
         }
 
         resMap.put(HostConstants.TOTAL_DATA_STORAGE, totalDataStorage);
         resMap.put(HostConstants.USED_DATA_STORAGE, usedDataStorage);
         resMap.put(HostConstants.TOTAL_IMG_STORAGE, totalImgStorage);
         resMap.put(HostConstants.USED_IMG_STORAGE, usedImgStorage);
+
+        return resMap;
+    }
+
+    /**
+     * 获取节点资源详细信息
+     */
+    public Map<String, Object> getNodeResource() {
+        Map<String, Object> resMap = new HashMap<>();
+        List<Host> hostList = tableStorage.hostQueryAll();
+        // 1. total num
+        resMap.put(HostConstants.TOTAL_NODE, hostList.size());
+        // 2. build node map
+        List<Vm> vmList = tableStorage.vmQueryAll();
+        for (Host host : hostList) {
+            Map<String, Object> nodeMap = new HashMap<>();
+
+            nodeMap.put(HostConstants.TOTAL_vCPU, host.getVCPU());
+            nodeMap.put(HostConstants.TOTAL_MEM, host.getMemory());
+            nodeMap.put(HostConstants.TOTAL_SYS_STORAGE, host.getStorage());
+
+            int usedVCPU = 0;
+            int usedMEM = 0;
+            int usedSTO = 0;
+            for (Vm vm : vmList) {
+                if (vm.getHostUuid().equals(host.getUuid())) {
+                    usedVCPU += vm.getCpus();
+                    usedMEM += vm.getMemory();
+                    usedSTO += vm.getDiskSize();
+                }
+            }
+            nodeMap.put(HostConstants.USED_vCPU, usedVCPU);
+            nodeMap.put(HostConstants.USED_MEM, usedMEM);
+            nodeMap.put(HostConstants.USED_SYS_STORAGE, usedSTO);
+
+            nodeMap.put(HostConstants.STO_DIR, VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.VOLUME_PATH);
+            resMap.put(host.getName(), nodeMap);
+        }
+        return resMap;
+    }
+
+    /**
+     * 获取网络存储资源详细信息
+     */
+    public Map<String, Object> getNetStoResource() {
+        Map<String, Object> resMap = new HashMap<>();
+        List<Host> hostList = tableStorage.hostQueryAll();
+
+        List<String> queryTypes = new ArrayList<>();
+        queryTypes.add(RequestMappingConstants.DATA_VOLUME_STORAGE);
+        queryTypes.add(RequestMappingConstants.IMG_VOLUME_STORAGE);
+
+        // get nfs info
+        boolean outerNfs = true;
+        String nfsIp = "";
+        for (Host host : hostList) {
+            if (host.getRole().contains(HostConstants.ROLE_MNT)) {
+                nfsIp = host.getIp();
+                outerNfs = false;
+            }
+        }
+
+        List<Host> readyHosts = hostList.stream()
+                .filter(h -> (h.getStatus().equals(HostStatusEnum.READY)))
+                .collect(Collectors.toList());
+
+        for (String queryType : queryTypes) {
+            int totalStorage = 0;
+            int usedStorage = 0;
+            String stoDir = "";
+
+            if (!readyHosts.isEmpty()) {
+                Host node = hostList.get(0);
+                AgentConfig.setSelectedHost(queryType, node);
+
+                Map<String, String> volStorageMap = new HashMap<>();
+                switch (queryType) {
+                    case RequestMappingConstants.DATA_VOLUME_STORAGE:
+                        volStorageMap = volumeScheduler.getDataVolStorageInfo();
+                        break;
+                    case RequestMappingConstants.IMG_VOLUME_STORAGE:
+                        volStorageMap = volumeScheduler.getImgVolStorageInfo();
+                        break;
+                }
+                if (!volStorageMap.isEmpty()) {
+                    totalStorage = Integer.parseInt(volStorageMap.get(VolumeConstants.TOTAL));
+                    usedStorage = Integer.parseInt(volStorageMap.get(VolumeConstants.USED));
+                    if (outerNfs) {
+                        nfsIp = volStorageMap.get(VolumeConstants.MNT_FS).split(":")[0];
+                    }
+                    stoDir = volStorageMap.get(VolumeConstants.MNT_DIR);
+                }
+
+                AgentConfig.clearSelectedHost(queryType);
+            }
+
+            Map<String, Object> netStoMap = new HashMap<>();
+            netStoMap.put(HostConstants.TOTAL_STORAGE, totalStorage);
+            netStoMap.put(HostConstants.USED_STORAGE, usedStorage);
+            netStoMap.put(HostConstants.NFS_IP, nfsIp);
+            netStoMap.put(HostConstants.STO_DIR, stoDir);
+
+            resMap.put(queryType, netStoMap);
+        }
 
         return resMap;
     }

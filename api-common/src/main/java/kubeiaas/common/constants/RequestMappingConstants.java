@@ -43,6 +43,8 @@ public class RequestMappingConstants {
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
     public static final String STATISTICS = "statistics";
+    public static final String NODE_RESOURCE = "node_resource";
+    public static final String NET_STO_RESOURCE = "net_sto_resource";
     // -- query all
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
@@ -88,8 +90,8 @@ public class RequestMappingConstants {
     public static final String ATTACH_DATA_VOLUME = "attach_data_volume";
     public static final String DETACH_DATA_VOLUME = "detach_data_volume";
     public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
-    public static final String GET_DATA_VOLUME_STORAGE = "get_data_vol_sto";
-    public static final String GET_IMG_VOLUME_STORAGE = "get_img_vol_sto";
+    public static final String DATA_VOLUME_STORAGE = "data_vol_sto";
+    public static final String IMG_VOLUME_STORAGE = "img_vol_sto";
 
     // >>> Vm Controller <<<
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";

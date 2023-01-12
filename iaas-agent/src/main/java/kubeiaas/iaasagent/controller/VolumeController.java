@@ -138,7 +138,7 @@ public class VolumeController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_DATA_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DATA_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String getDataVolStorage() {
         log.info("getDataVolStorage ==== start ====");
@@ -148,7 +148,7 @@ public class VolumeController {
         return JSON.toJSONString(resMap);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_IMG_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMG_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String getImgVolStorage() {
         log.info("getImgVolStorage ==== start ====");

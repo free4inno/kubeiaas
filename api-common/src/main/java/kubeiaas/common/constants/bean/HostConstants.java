@@ -21,6 +21,11 @@ public class HostConstants {
     public static final String TOTAL_IMG_STORAGE = "total_img_storage";
     public static final String USED_IMG_STORAGE = "used_img_storage";
 
+    public static final String TOTAL_STORAGE = "total_storage";
+    public static final String USED_STORAGE = "used_storage";
+    public static final String NFS_IP = "nfs_ip";
+    public static final String STO_DIR = "storage_dir";
+
     // roles
     public static final String ROLE_DHCP = "dhcp";
     public static final String ROLE_VNC = "vnc";

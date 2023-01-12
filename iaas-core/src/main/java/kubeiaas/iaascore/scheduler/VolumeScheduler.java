@@ -238,7 +238,7 @@ public class VolumeScheduler {
      * 获取云硬盘存储统计数据
      */
     public Map<String, String> getDataVolStorageInfo() {
-        String jsonObjectStr = volumeController.getDataVolStorage(getSelectedUri(RequestMappingConstants.GET_DATA_VOLUME_STORAGE));
+        String jsonObjectStr = volumeController.getDataVolStorage(getSelectedUri(RequestMappingConstants.DATA_VOLUME_STORAGE));
         return JSON.parseObject(jsonObjectStr, new TypeReference<Map<String, String>>(){});
     }
 
@@ -246,7 +246,7 @@ public class VolumeScheduler {
      * 获取云镜像存储统计数据
      */
     public Map<String, String> getImgVolStorageInfo() {
-        String jsonObjectStr = volumeController.getImgVolStorage(getSelectedUri(RequestMappingConstants.GET_IMG_VOLUME_STORAGE));
+        String jsonObjectStr = volumeController.getImgVolStorage(getSelectedUri(RequestMappingConstants.IMG_VOLUME_STORAGE));
         return JSON.parseObject(jsonObjectStr, new TypeReference<Map<String, String>>(){});
     }
 

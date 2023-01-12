@@ -62,4 +62,22 @@ public class HostOpenAPI {
         log.info("statistics ==== end ====");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.NODE_RESOURCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String nodeResource() {
+        log.info("nodeResource ==== start ====");
+        Map<String, Object> resMap = hostService.getNodeResource();
+        log.info("nodeResource ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.NET_STO_RESOURCE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String netStoResource() {
+        log.info("netStorageResource ==== start ====");
+        Map<String, Object> resMap = hostService.getNetStoResource();
+        log.info("netStorageResource ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
+    }
 }
