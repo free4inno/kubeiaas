@@ -86,27 +86,6 @@ public class NetworkProcess {
         log.info("deleteIps ==== end ====");
     }
 
-    /**
-     * statistics
-     */
-    public Map<String, Integer> getIpCount() {
-        Map<String, Integer> resMap = new HashMap<>();
-        // 1. 私网IP - 总量
-        Integer privateIpTotal = this.getAllTotalNum(IpTypeEnum.PRIVATE);
-        resMap.put(IpSegmentConstants.PRIVATE_TOTAL, privateIpTotal);
-        // 2. 私网IP - 用量
-        Integer privateIpUsed = this.getAllUsedNum(IpTypeEnum.PRIVATE);
-        resMap.put(IpSegmentConstants.PRIVATE_USED, privateIpUsed);
-        // 3. 公网IP - 总量
-        Integer publicIpTotal = this.getAllTotalNum(IpTypeEnum.PUBLIC);
-        resMap.put(IpSegmentConstants.PUBLIC_TOTAL, publicIpTotal);
-        // 4. 公网IP - 用量
-        Integer publicIpUsed = this.getAllUsedNum(IpTypeEnum.PUBLIC);
-        resMap.put(IpSegmentConstants.PUBLIC_USED, publicIpUsed);
-
-        return resMap;
-    }
-
     // =================================================================================================================
 
     /**

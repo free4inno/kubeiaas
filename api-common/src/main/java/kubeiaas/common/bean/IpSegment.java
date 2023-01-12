@@ -23,4 +23,7 @@ public class IpSegment {
 
     private String hostUuid;        // 所属节点
     private String bridge;          // 所用网桥
+
+    /* !NOT_IN_DB */
+    private String hostName;
 }
