@@ -1,7 +1,7 @@
 package kubeiaas.common.enums.config;
 
 public enum SpecTypeEnum {
-    VM_COMPUTE, SYS_VOLUME, DATA_VOLUME, VM_STATUS, VOLUME_STATUS;
+    VM_COMPUTE, SYS_VOLUME, DATA_VOLUME, VM_STATUS, VOLUME_STATUS, NETWORK_TYPE;
 
     public String toString() {
         switch (this) {
@@ -15,6 +15,8 @@ public enum SpecTypeEnum {
                 return "vm_status";
             case VOLUME_STATUS:
                 return "volume_status";
+            case NETWORK_TYPE:
+                return "network_type";
         }
         return super.toString();
     }

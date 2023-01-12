@@ -55,7 +55,7 @@ public class VmOpenAPI {
     @ResponseBody
     public String create(@Valid @RequestBody CreateVmForm f) throws VmException {
         log.info("create ==== start ====");
-        Vm newVm = vmService.createVm(f.getName(), f.getCpus(), f.getMemory(), f.getImageUuid(), f.getIpSegmentId(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
+        Vm newVm = vmService.createVm(f.getName(), f.getCpus(), f.getMemory(), f.getImageUuid(), f.getIpSegmentId(), f.getPublicIpSegId(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
         log.info("create ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newVm));
     }

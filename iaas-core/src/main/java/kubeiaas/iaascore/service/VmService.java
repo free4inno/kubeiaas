@@ -48,6 +48,7 @@ public class VmService {
             int memory,
             String imageUuid,
             int ipSegmentId,
+            Integer publicIpSegId,
             Integer diskSize,
             String description,
             String hostUUid) throws VmException {
@@ -59,19 +60,28 @@ public class VmService {
         Vm newVm = vmProcess.preCreateVm(name, cpus, memory, imageUuid, diskSize, description, hostUUid);
 
         /* ---- 2. Resource Operator ----
-        Use Resource Operator to allocate Host and check available
+        Use Resource Operator to allocate Host and check Resource available
         （资源调度：分配宿主机，检查资源合法性）
          */
-        newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, false, -1);
+        if (publicIpSegId == null || publicIpSegId <= 0) {
+            newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, false, -1);
+        } else {
+            newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, true, publicIpSegId);
+        }
 
         /* ---- 3. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
-        IpUsed newIpUsed = networkProcess.createVmNetwork(newVm, ipSegmentId);
-        // set into newVm
         List<IpUsed> newIpUsedList = new ArrayList<>();
-        newIpUsedList.add(newIpUsed);
+        // -- 3.1. PRIVATE --------
+        IpUsed newPrivateIpUsed = networkProcess.createVmNetwork(newVm, ipSegmentId);
+        newIpUsedList.add(newPrivateIpUsed);
+        // -- 3.2. PUBLIC ---------
+        if (!(publicIpSegId == null || publicIpSegId <= 0)) {
+            IpUsed newPublicIpUsed = networkProcess.createVmNetwork(newVm, publicIpSegId);
+            newIpUsedList.add(newPublicIpUsed);
+        }
         newVm.setIps(newIpUsedList);
 
         /* ---- 4. Volume ----

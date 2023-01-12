@@ -53,7 +53,7 @@ public class NetworkProcess {
         newIpUsed.setInstanceUuid(newVm.getUuid());
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
-        newIpUsed.setType(IpTypeEnum.PRIVATE);
+        newIpUsed.setType(ipSegment.getType());
         newIpUsed.setBridge(ipSegment.getBridge());
 
         log.info("new mac: " + newIpUsed.getMac());

@@ -21,8 +21,11 @@ public class CreateVmForm {
     @NotNull @Min(1)
     private int ipSegmentId;
 
+    private Integer publicIpSegId;
+
     @Min(1)
     private Integer diskSize;
+
     private String description;
     private String hostUuid;
 }
