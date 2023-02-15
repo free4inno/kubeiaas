@@ -1,0 +1,185 @@
+#!/bin/bash
+
+# ============================
+#   KubeIaaS - Env Processor
+#   @ dhcp-processor
+# ============================
+# Author:   free4inno
+# Date:     2022-09-20
+#
+# dhcp-processor is used to check dhcpd env and setup config.
+#
+# Params:
+#
+#   -n : private subnet
+#   -m : private netmask
+#   -p : public subnet
+#   -q : public netmask
+#
+# Example:
+#
+#   /bin/bash dhcp-processor.sh -n 192.168.255.0 -m 255.255.255.0 -p 129.168.31.0 -q 255.255.255.0
+#
+
+# ----------------------- Function -----------------------
+
+# Check system service's installation.
+# param：
+#   - service_name
+# return：
+#   - is_install (0-n, 1-y)
+function is_service_install(){
+    result=$(systemctl status $1 2>&1)
+    if [[ $result =~ "could not be found" || $result =~ "Loaded: not-found" ]]; then
+        echo "0"
+    else
+        echo "1"
+    fi
+}
+
+
+# Check system service's status.
+# param：
+#   - service_name
+# return：
+#   - is_active (0-n, 1-y)
+function is_service_active(){
+    result=$(systemctl status $1)
+    if [[ $result =~ (dead) || $result =~ "Active: inactive" ]]; then
+        echo "0"
+    elif [[ $result =~ "Active: active" ]]; then
+        echo "1"
+    else
+        echo "0"
+    fi
+}
+
+# ----------------------- Main -----------------------
+
+function main(){
+
+    SERVICE_DHCPD=dhcpd
+
+    # 1. check dhcpd install =============
+    echo "[1] check dhcpd installation"
+    res=$(is_service_install $SERVICE_DHCPD)
+    if [ $res == "1" ]; then
+        # --- dhcpd founded ---
+        echo "[-] dhcpd is founded."
+    else
+        # --- dhcpd not found ---
+        echo "[-] dhcpd could not be found!"
+        echo "[+] start to install dhcpd..."
+
+        # check Yum repo
+        res=$(ls /etc/yum.repos.d | grep ali)
+        if [ -z $res ]; then
+            # no ali repo
+            echo "[yum] adding ali repo..."
+            sudo curl -o /etc/yum.repos.d/CentOS-ali.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+            echo "[yum] make cache..."
+            yum makecache
+        else
+            echo "[yum] yum repo exist. OK"
+        fi
+
+        # yum install
+        yum install dhcp -y
+
+        # write dhcpd.conf
+        cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak
+        echo "[-] dhcpd.conf backup to '/etc/dhcp/dhcpd.conf.bak'"
+        
+        echo "[+] begin to write dhcpd.conf..."
+        echo -e "
+deny unknown-clients;
+shared-network private {
+    subnet $PRIVATE_SUBNET netmask $PRIVATE_NETMASK {
+
+    }
+}\n" | tee -a /etc/dhcp/dhcpd.conf
+
+        echo -e "
+shared-network public {
+    subnet $PUBLIC_SUBNET netmask $PUBLIC_NETMASK {
+
+    }
+}\n" | tee -a /etc/dhcp/dhcpd.conf
+
+    fi
+
+    # 2. check dhcpd active =============
+    echo "[2] check dhcpd status"
+    res=$(is_service_active $SERVICE_DHCPD)
+    if [ $res == "1" ]; then
+        echo "[-] dhcpd is active."
+    else
+        echo "[-] dhcpd have not started!"
+        echo "[+] try to start dhcpd..."
+
+        service dhcpd start
+    fi
+
+    res=$(is_service_active $SERVICE_DHCPD)
+    if [ $res == "1" ]; then
+        echo "[-] dhcpd is active."
+        echo ">>> success"
+    else
+        echo "[-] dhcpd have not started!"
+        echo "[+] please check manually..."
+        echo ">>> failed"
+    fi
+}
+
+# --------------------------------------------------
+
+echo ""
+echo "# ========================== #"
+echo "#  KubeIaaS - Env Processor  #"
+echo "#  @ dhcp-processor          #"
+echo "# ========================== #"
+echo "$(date +%Y-%m-%d\ %H:%M:%S)"
+echo ""
+
+PRIVATE_SUBNET=""
+PRIVATE_NETMASK=""
+PUBLIC_SUBNET=""
+PUBLIC_NETMASK=""
+
+while getopts ":n:m:p:q:" opt
+do
+    case $opt in
+        n)
+            echo "PRIVATE_SUBNET: $OPTARG"
+            PRIVATE_SUBNET=$OPTARG
+        ;;
+        m)
+            echo "PRIVATE_NETMASK: $OPTARG"
+            PRIVATE_NETMASK=$OPTARG
+        ;;
+        p)
+            echo "PUBLIC_SUBNET: $OPTARG"
+            PUBLIC_SUBNET=$OPTARG
+        ;;
+        q)
+            echo "PUBLIC_NETMASK: $OPTARG"
+            PUBLIC_NETMASK=$OPTARG
+        ;;
+        *)
+            echo "unknown param: $opt"
+            echo ">>> failed"
+            echo ""
+            exit
+        ;;
+        ?)
+            echo "unknown param: $opt"
+            echo ">>> failed"
+            echo ""
+            exit
+        ;;
+    esac
+done
+
+echo ""
+main
+echo ""
