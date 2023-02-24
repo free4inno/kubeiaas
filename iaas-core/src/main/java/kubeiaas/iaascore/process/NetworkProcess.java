@@ -7,6 +7,7 @@ import kubeiaas.common.constants.bean.IpSegmentConstants;
 import kubeiaas.common.constants.bean.IpUsedConstants;
 import kubeiaas.common.enums.network.IpAttachEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
+import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.common.utils.IpUtils;
 import kubeiaas.common.utils.MacUtils;
 import kubeiaas.iaascore.dao.TableStorage;
@@ -68,6 +69,65 @@ public class NetworkProcess {
         }
         log.info("createVm -- 3. network success!");
         return newIpUsed;
+    }
+
+    /**
+     * crate IpSegment
+     */
+    public IpSegment createIpSegment(
+            String name,
+            String hostUuid,
+            String type,
+            String bridge,
+            String ipRangeStart,
+            String ipRangeEnd,
+            String gateway,
+            String netmask
+    ){
+        IpSegment newIpSegment = new IpSegment();
+        newIpSegment.setName(name);
+        newIpSegment.setHostUuid(hostUuid);
+        newIpSegment.setBridge(bridge);
+        newIpSegment.setDns("8.8.8.8");
+        newIpSegment.setIpRangeStart(ipRangeStart);
+        newIpSegment.setIpRangeEnd(ipRangeEnd);
+        newIpSegment.setGateway(gateway);
+        newIpSegment.setNetmask(netmask);
+/*        switch (type){
+            case "PRIVATE":
+                newIpSegment.setType(IpTypeEnum.PRIVATE);
+                break;
+            case "PUBLIC":
+                newIpSegment.setType(IpTypeEnum.PUBLIC);
+                break;
+        }*/
+        newIpSegment.setType(EnumUtils.getEnumFromString(IpTypeEnum.class, type));
+        newIpSegment = tableStorage.ipSegmentSave(newIpSegment);
+        return newIpSegment;
+    }
+
+    public IpSegment editIpSegment(
+            IpSegment ipSegment,
+            String name,
+            String hostUuid,
+            String type,
+            String bridge,
+            String ipRangeStart,
+            String ipRangeEnd,
+            String gateway,
+            String netmask
+    ){
+        ipSegment.setName(name);
+        ipSegment.setHostUuid(hostUuid);
+        ipSegment.setBridge(bridge);
+        ipSegment.setDns("8.8.8.8");
+        ipSegment.setIpRangeStart(ipRangeStart);
+        ipSegment.setIpRangeEnd(ipRangeEnd);
+        ipSegment.setGateway(gateway);
+        ipSegment.setNetmask(netmask);
+        ipSegment.setType(EnumUtils.getEnumFromString(IpTypeEnum.class, type));
+        ipSegment = tableStorage.ipSegmentSave(ipSegment);
+        return ipSegment;
     }
 
     /**

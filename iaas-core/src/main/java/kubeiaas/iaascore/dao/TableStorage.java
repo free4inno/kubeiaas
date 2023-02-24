@@ -202,6 +202,18 @@ public class TableStorage {
         return JSON.parseArray(jsonString, IpSegment.class);
     }
 
+    public IpSegment ipSegmentSave(IpSegment ipSegment) {
+        String ipSegmentObjectStr = JSON.toJSONString(ipSegment);
+        ipSegmentObjectStr = dbProxy.ipSegmentSave(ipSegmentObjectStr);
+        return JSON.parseObject(ipSegmentObjectStr, IpSegment.class);
+    }
+
+    public void ipSegmentDelete(Integer ipSegmentId){
+        dbProxy.ipSegmentDeleteById(ipSegmentId);
+    }
+
+
+
     // ========================= ip used =========================
 
     public List<IpUsed> ipUsedQueryAllByInstanceUuid(String instanceUuid) {

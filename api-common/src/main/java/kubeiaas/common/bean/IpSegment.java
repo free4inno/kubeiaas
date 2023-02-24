@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,6 +14,7 @@ public class IpSegment {
     private Integer id;
 
     /* basic info */
+    private String name;
     private String netmask;         // 掩码
     private String gateway;         // 网关
     private String dns;             // dns
@@ -26,4 +29,5 @@ public class IpSegment {
 
     /* !NOT_IN_DB */
     private String hostName;
+    private List<IpUsed> ips;
 }

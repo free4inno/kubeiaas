@@ -7,6 +7,7 @@ public class RequestParamConstants {
     public static final String NAME = "name";
     public static final String UUID = "uuid";
     public static final String DESCRIPTION = "description";
+    public static final String ID = "id";
 
     public static final String IMAGE_UUID = "image_uuid";
     public static final String HOST_UUID = "host_uuid";
@@ -42,6 +43,7 @@ public class RequestParamConstants {
     public static final String IP_SEGMENT_ID = "ip_segment_id";
     public static final String PRIVATE_IP_SEGMENT_ID = "private_ip_segment_id";
     public static final String PUBLIC_IP_SEGMENT_ID = "public_ip_segment_id";
+    public static final String IP_SEGMENT_OBJECT = "ip_segment_object";
     public static final String IP_USED_OBJECT = "ip_used_object";
     public static final String MAC = "mac";
     public static final String IP = "ip";

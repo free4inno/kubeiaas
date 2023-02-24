@@ -128,6 +128,19 @@ public interface DbProxy {
     @ResponseBody
     String ipSegmentQueryAll();
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String ipSegmentSave(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_OBJECT) String ipSegmentObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_SEGMENT + "/" + RequestMappingConstants.DELETE_BY_ID)
+    @ResponseBody
+    String ipSegmentDeleteById(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId
+    );
+
+
     // ========================= ip used =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)

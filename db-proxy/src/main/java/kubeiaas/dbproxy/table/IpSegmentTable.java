@@ -23,6 +23,15 @@ public class IpSegmentTable extends IpSegment {
         super.setId(id);
     }
 
+    @Column(name = "name")
+    public String getName() {
+        return super.getName();
+    }
+
+    public void setName(String name) {
+        super.setName(name);
+    }
+
     @Column(name = "netmask")
     public String getNetmask() {
         return super.getNetmask();

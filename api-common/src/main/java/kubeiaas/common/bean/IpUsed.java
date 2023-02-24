@@ -29,4 +29,7 @@ public class IpUsed {
 
     /* timestamp */
     private Timestamp createTime;
+
+    /* !NOT_IN_DB */
+    private String instanceName;
 }

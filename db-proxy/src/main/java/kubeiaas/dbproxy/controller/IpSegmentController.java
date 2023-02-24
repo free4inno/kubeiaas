@@ -8,6 +8,7 @@ import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.dbproxy.dao.IpSegmentDao;
 import kubeiaas.dbproxy.table.IpSegmentTable;
+import kubeiaas.dbproxy.table.IpUsedTable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
@@ -68,5 +69,25 @@ public class IpSegmentController {
         List<IpSegmentTable> ipSegmentTableList = ipSegmentDao.findAll(specification);
         log.info("queryAllByDoubleKey ==== end ====");
         return JSON.toJSONString(ipSegmentTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String save(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_OBJECT) String ipSegmentObjectStr) {
+        log.info("save ==== start ====");
+        IpSegmentTable ipSegmentTable = JSON.parseObject(ipSegmentObjectStr, IpSegmentTable.class);
+        ipSegmentDao.saveAndFlush(ipSegmentTable);
+        log.info("save ==== end ====");
+        return JSON.toJSONString(ipSegmentTable);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteById(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId) {
+        log.info("deleteById ==== start ==== id:" + ipSegmentId);
+        ipSegmentDao.deleteById(ipSegmentId);
+        log.info("deleteById ==== end ====");
     }
 }

@@ -28,6 +28,7 @@ public class RequestMappingConstants {
     public static final String DELETE = "delete";
     public static final String ATTACH = "attach";
     public static final String DETACH = "detach";
+    public static final String DELETE_BY_ID = "delete_by_id";
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
     public static final String SAVE = "save";
@@ -59,9 +60,11 @@ public class RequestMappingConstants {
     public static final String FUZZY_QUERY_DATA_VOLUME = "fuzzy_query_data_volume";
     // -- page query
     public static final String PAGE_QUERY_ALL = "page_query_all";
+    public static final String PAGE_QUERY_BY_ID = "page_query_by_id";
     public static final String PAGE_FUZZY_QUERY = "page_fuzzy_query";
     public static final String PAGE_QUERY_ALL_DATA_VOLUME = "page_query_all_data_volume";
     // -- query by
+    public static final String QUERY_BY_ID = "query_by_id";
     public static final String QUERY_BY_UUID = "query_by_uuid";
 
     // >>> Resource Operator <<<
@@ -116,6 +119,11 @@ public class RequestMappingConstants {
     public static final String REGISTER = "register";
     public static final String QUERY_SERVICE = "query_service";
     public static final String QUERY_STORAGE = "query_storage";
+
+    // >>> ipSegment Controller <<<
+    public static final String CREATE_IP_SEGMENT = "create_ip_segment";
+    public static final String DELETE_IP_SEGMENT = "delete_ip_segment";
+    public static final String EDIT_IP_SEGMENT = "edit_ip_segment";
 
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";
