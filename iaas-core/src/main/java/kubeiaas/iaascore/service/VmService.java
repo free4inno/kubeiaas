@@ -2,7 +2,9 @@ package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
@@ -314,12 +316,16 @@ public class VmService {
      * 2. 根据配置中获取 Domain 域名模板
      */
     public String getVncUrl(String vmUuid) {
-        // 1. Analyze `vnc` host from DB hostRoles.
-        // Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
-        // return String.format(VmConstants.VNC_URL_TEMPLATE, host.getIp(), vmUuid);
-
-        // 2. Analyze `vnc` host from Domain Name.
-        return String.format(VmConstants.VNC_URL_TEMPLATE, vmUuid);
+        List<SpecConfig> vncConfigs = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VNC_DOMAIN);
+        if (vncConfigs == null || vncConfigs.isEmpty()) {
+            // 1. Analyze `vnc` host from DB hostRoles.
+            Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
+            return String.format(VmConstants.VNC_URL_IP_TEMPLATE, host.getIp(), vmUuid);
+        } else {
+            // 2. Analyze `vnc` host from Domain Name.
+            String domainUrl = vncConfigs.get(0).getValue();
+            return String.format(VmConstants.VNC_URL_DOMAIN_TEMPLATE, domainUrl, vmUuid);
+        }
     }
 
     /**
