@@ -14,7 +14,8 @@ spec:
       labels:
         app: db-proxy
     spec:
-      nodeName: hf-master-01
+      nodeSelector:
+        kubeiaas/ctl: "true"
       containers:
         - name: db-proxy
           command: ["sh"]

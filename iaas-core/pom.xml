@@ -71,8 +71,8 @@
                     <!-- 认证配置,用于私有registry认证,如果忘记了可以去对应的registry查看-->
                     <authConfig>
                         <push>
-                            <username>USERNAME</username>
-                            <password>PASSWORD</password>
+                            <username>${docker.repo.username}</username>
+                            <password>${docker.repo.password}</password>
                         </push>
                     </authConfig>
 

@@ -57,6 +57,7 @@ function main(){
     else
         echo "[-] cpu unsupport kvm!"
         echo ">>> failed"
+        echo -e "kvm=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
         echo ""
         exit
     fi
@@ -69,11 +70,13 @@ function main(){
     else
         echo "[-] cpu unsupport kvm!"
         echo ">>> failed"
+        echo -e "kvm=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
         echo ""
         exit
     fi
 
     echo ">>> success"
+    echo -e "kvm=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
 }
 
 # --------------------------------------------------

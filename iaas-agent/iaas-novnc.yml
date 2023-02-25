@@ -14,7 +14,8 @@ spec:
       labels:
         app: iaas-novnc
     spec:
-      nodeName: hf-node-01   # appointed node
+      nodeSelector:
+        kubeiaas/vnc: "true"   # appointed node
       containers:
         - name: iaas-novnc
           command: [ "sh" ]

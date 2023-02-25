@@ -31,7 +31,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.version>0.0.1-SNAPSHOT</project.version>
         <!-- docker host -->
-        <docker.host>tcp://172.28.202.68:2375</docker.host>
+        <docker.host>tcp://192.168.31.40:2375</docker.host>
+        <docker.repo.username>USERNAME</docker.repo.username>
+        <docker.repo.password>PASSWORD</docker.repo.password>
     </properties>
 
     <dependencies>

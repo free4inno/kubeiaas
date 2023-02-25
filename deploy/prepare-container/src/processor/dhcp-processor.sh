@@ -69,42 +69,10 @@ function main(){
     else
         # --- dhcpd not found ---
         echo "[-] dhcpd could not be found!"
-        echo "[+] start to install dhcpd..."
+        echo "[+] please check manually..."
+        echo ">>> failed"
 
-        # check Yum repo
-        res=$(ls /etc/yum.repos.d | grep ali)
-        if [ -z $res ]; then
-            # no ali repo
-            echo "[yum] adding ali repo..."
-            sudo curl -o /etc/yum.repos.d/CentOS-ali.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-            echo "[yum] make cache..."
-            yum makecache
-        else
-            echo "[yum] yum repo exist. OK"
-        fi
-
-        # yum install
-        yum install dhcp -y
-
-        # write dhcpd.conf
-        cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak
-        echo "[-] dhcpd.conf backup to '/etc/dhcp/dhcpd.conf.bak'"
-        
-        echo "[+] begin to write dhcpd.conf..."
-        echo -e "
-deny unknown-clients;
-shared-network private {
-    subnet $PRIVATE_SUBNET netmask $PRIVATE_NETMASK {
-
-    }
-}\n" | tee -a /etc/dhcp/dhcpd.conf
-
-        echo -e "
-shared-network public {
-    subnet $PUBLIC_SUBNET netmask $PUBLIC_NETMASK {
-
-    }
-}\n" | tee -a /etc/dhcp/dhcpd.conf
+        echo -e "dhcp=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
 
     fi
 
@@ -124,10 +92,14 @@ shared-network public {
     if [ $res == "1" ]; then
         echo "[-] dhcpd is active."
         echo ">>> success"
+
+        echo -e "dhcp=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
     else
         echo "[-] dhcpd have not started!"
         echo "[+] please check manually..."
         echo ">>> failed"
+
+        echo -e "dhcp=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
     fi
 }
 
@@ -141,44 +113,44 @@ echo "# ========================== #"
 echo "$(date +%Y-%m-%d\ %H:%M:%S)"
 echo ""
 
-PRIVATE_SUBNET=""
-PRIVATE_NETMASK=""
-PUBLIC_SUBNET=""
-PUBLIC_NETMASK=""
+#PRIVATE_SUBNET=""
+#PRIVATE_NETMASK=""
+#PUBLIC_SUBNET=""
+#PUBLIC_NETMASK=""
 
-while getopts ":n:m:p:q:" opt
-do
-    case $opt in
-        n)
-            echo "PRIVATE_SUBNET: $OPTARG"
-            PRIVATE_SUBNET=$OPTARG
-        ;;
-        m)
-            echo "PRIVATE_NETMASK: $OPTARG"
-            PRIVATE_NETMASK=$OPTARG
-        ;;
-        p)
-            echo "PUBLIC_SUBNET: $OPTARG"
-            PUBLIC_SUBNET=$OPTARG
-        ;;
-        q)
-            echo "PUBLIC_NETMASK: $OPTARG"
-            PUBLIC_NETMASK=$OPTARG
-        ;;
-        *)
-            echo "unknown param: $opt"
-            echo ">>> failed"
-            echo ""
-            exit
-        ;;
-        ?)
-            echo "unknown param: $opt"
-            echo ">>> failed"
-            echo ""
-            exit
-        ;;
-    esac
-done
+#while getopts ":n:m:p:q:" opt
+#do
+#    case $opt in
+#        n)
+#            echo "PRIVATE_SUBNET: $OPTARG"
+#            PRIVATE_SUBNET=$OPTARG
+#        ;;
+#        m)
+#            echo "PRIVATE_NETMASK: $OPTARG"
+#            PRIVATE_NETMASK=$OPTARG
+#        ;;
+#        p)
+#            echo "PUBLIC_SUBNET: $OPTARG"
+#            PUBLIC_SUBNET=$OPTARG
+#        ;;
+#        q)
+#            echo "PUBLIC_NETMASK: $OPTARG"
+#            PUBLIC_NETMASK=$OPTARG
+#        ;;
+#        *)
+#            echo "unknown param: $opt"
+#            echo ">>> failed"
+#            echo ""
+#            exit
+#        ;;
+#        ?)
+#            echo "unknown param: $opt"
+#            echo ">>> failed"
+#            echo ""
+#            exit
+#        ;;
+#    esac
+#done
 
 echo ""
 main

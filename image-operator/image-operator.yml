@@ -14,7 +14,8 @@ spec:
       labels:
         app: image-operator
     spec:
-      nodeName: hf-node-02
+      nodeSelector:
+        kubeiaas/img: "true"
       containers:
         - name: image-operator
           command: ["sh"]

@@ -12,90 +12,14 @@ function host_sh(){
   echo "$res"
 }
 
-# 0. Check host Java8 env ---------------------
-echo "[0] Check host Java8 env "
-
-echo " - Java8 check result: "
-result=$(host_sh "java -version 2>&1 >/dev/null | grep 'version'")
-echo "---"
-echo $result
-echo "---"
-
-if [[ $result =~ 1.8 ]]; then
-  echo " - Java8 is already installed. OK"
-else
-  echo " - Java8 is not found."
-  echo "KubeIaaS need Java8 on your host machine. Please restart iaas-agent after installed Java8!"
-  echo ">>> failed"
-  echo ""
-  exit
-fi
-
-# 1. Check and make basic dir -----------------
-echo "[1] Check and make basic dir "
-echo "
-/usr/local/kubeiaas
-  - /workdir
-    - /checker
-    - /src
-    - /log
-  - /data
-    - /images
-    - /sys-volumes
-    - /data-volumes
-  - /libvirt
-  - /vnc
-    - /token
-  - /mysql
-    - /data
-    - /cnf
-  - /sqlite
-"
-
-function check_and_make_dir(){
-  res=$(host_sh "if [[ -e /usr/local/kubeiaas/$1 || -d /usr/local/kubeiaas/$1 || \$(df -h) =~ /usr/local/kubeiaas/$1 ]]; then echo '1'; else echo '0'; fi;")
-  if [ $res == "0" ]; then
-    host_sh "mkdir -p /usr/local/kubeiaas/$1"
-    echo " + mkdir -p /usr/local/kubeiaas/$1"
-  else
-    echo " - /usr/local/kubeiaas/$1 already exist."
-  fi
-}
-
-check_and_make_dir workdir/src
-check_and_make_dir workdir/checker
-check_and_make_dir workdir/log
-
-check_and_make_dir data/images
-check_and_make_dir data/sys-volumes
-check_and_make_dir data/data-volumes
-
-check_and_make_dir libvirt
-
-check_and_make_dir vnc/token
-
-check_and_make_dir mysql/data
-check_and_make_dir mysql/cnf
-
-check_and_make_dir sqlite
-
-echo ""
-
-# 2. prepare files to workdir ---------------------
-echo "[2] prepare files to /workdir "
+# 1. prepare files to workdir ---------------------
+echo "[1/4] prepare files to /workdir "
 
 echo " - cp iaas-agent jar"
 cp /kubeiaas/iaas-agent.jar /workdir/src/
 
-echo " - cp src/*"
-cp -r /kubeiaas/src/* /workdir/src/
-
-echo " - cp checker/*"
-cp -r /kubeiaas/checker/* /workdir/checker/
-chmod 755 /workdir/checker/*
-
-# 3. wait for DB-proxy ---------------------
-echo "[3] loop wait for DB-proxy "
+# 2. wait for DB-proxy ---------------------
+echo "[2/4] loop wait for DB-proxy "
 count=0
 while [[ ! $(curl http://db-proxy:9091/heartbeat) =~ heartbeat ]]
 do
@@ -109,22 +33,11 @@ do
 done
 echo " - db-proxy is ready."
 
-# 4. check noVNC port `8787` -----------------
-echo "[4] check noVNC status "
-res=$(host_sh "ps -ef | grep noVNC")
-if [[ $res =~ "websockify" ]]; then
-  echo " - noVNC is on this host! "
-  echo -e "result=success" | tee /workdir/log/checkResult-novnc.log
-else
-  echo " - noVNC is not on this host... "
-  echo -e "result=failed" | tee /workdir/log/checkResult-novnc.log
-fi
-
-# 5. RUN agent-proxy in container -----------------
-echo "[5] RUN agent-proxy in container "
+# 3. RUN agent-proxy in container -----------------
+echo "[3/4] RUN agent-proxy in container "
 nohup java -jar /kubeiaas/iaas-agent-proxy.jar > /workdir/log/iaas-agent-proxy.log 2>&1 &
 
-# 6. RUN agent on host ----------------------------
-echo "[6] RUN agent on host "
+# 4. RUN agent on host ----------------------------
+echo "[4/4] RUN agent on host "
 host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
 tail -f /workdir/log/iaas-agent.log

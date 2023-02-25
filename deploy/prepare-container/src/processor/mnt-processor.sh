@@ -1,21 +1,22 @@
 #!/bin/bash
 
 # ============================
-#   KubeIaaS - Env Checker
-#   @ mnt-checker
+#   KubeIaaS - Env Processor
+#   @ mnt-processor
 # ============================
 # Author:   free4inno
 # Date:     2022-09-22
 #
-# mnt-checker is used to mount `images` and `data-volumes`
+# mnt-processor is used to mount `images` and `data-volumes`
 #
 # Params:
 #
-#   -m : the IP which your volume is mount to
+#   -i : the address which your image storage mount to
+#   -d : the address which your data-volume storage mount to
 #
 # Example:
 #
-#   sh mnt-checker.sh -m 192.168.33.6
+#   sh mnt-processor.sh -i 192.168.33.7:/image/path -d 192.168.33.7:/datavol/path/
 #
 
 # ----------------------- Function -----------------------
@@ -66,36 +67,11 @@ function main(){
     else
         # --- nfs not found ---
         echo "[-] nfs could not be found!"
-        echo "[+] start to install nfs..."
 
-        # check Yum repo
-        res=$(ls /etc/yum.repos.d | grep ali)
-        if [ -z $res ]; then
-            # no ali repo
-            echo "[yum] adding ali repo..."
-            sudo curl -o /etc/yum.repos.d/CentOS-ali.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-            echo "[yum] make cache..."
-            yum makecache
-        else
-            echo "[yum] yum repo exist. OK"
-        fi
-
-        # yum install
-        yum -y install nfs-utils rpcbind
-
-        # recheck
-        res=$(is_service_install $SERVICE_NFS)
-        if [ $res == "1" ]; then
-            # --- nfs founded ---
-            echo "[-] nfs is installed successfully."
-        else
-            # --- nfs not found ---
-            echo "[-] nfs could not be installed!"
-            echo ">>> failed"
-            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
-            echo ""
-            exit
-        fi
+        echo ">>> failed"
+        echo -e "mnt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        echo ""
+        exit
     fi
 
     # 2. check NFS active ============
@@ -118,7 +94,7 @@ function main(){
             echo "[-] nfs still have not started!"
             echo "[+] please check manually..."
             echo ">>> failed"
-            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
+            echo -e "mnt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
             echo ""
             exit
         fi
@@ -127,7 +103,7 @@ function main(){
     # 3. check `/etc/fstab` ==================
     echo "[3] check '/etc/fstab' config"
     res=$(cat /etc/fstab)
-    if [[ $res =~ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES ]]; then
+    if [[ $res =~ $KUBEIAAS_MNT_IMG && $res =~ $KUBEIAAS_MNT_DATAVOL ]]; then
         echo "[-] fstab config is OK."
     else 
         echo "[-] fstab config have not writen!"
@@ -138,8 +114,8 @@ function main(){
         echo "[-] fstab backup to '/etc/fstab.bak'"
         
         echo -e "
-$KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_IMAGES $KUBEIAAS_PATH_IMAGES  nfs    rw,soft,timeo=30,retry=3 0 0
-$KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry=3 0 0
+$KUBEIAAS_MNT_IMG $KUBEIAAS_PATH_IMAGES  nfs    rw,soft,timeo=30,retry=3 0 0
+$KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry=3 0 0
 " | tee -a /etc/fstab
 
         echo "[+] wrote fstab"
@@ -152,7 +128,7 @@ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nf
     if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
         echo "[-] mount is OK."
         echo ">>> success"
-        echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
+        echo -e "mnt=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
         echo ""
         exit
     else
@@ -160,8 +136,8 @@ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nf
         echo "[-] start to mount..."
         
         # write fstab
-        mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_IMAGES $KUBEIAAS_PATH_IMAGES 
-        mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES
+        mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_IMG $KUBEIAAS_PATH_IMAGES
+        mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES
         
         # recheck
         echo "[+] recheck mount status"
@@ -169,13 +145,13 @@ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nf
         if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
             echo "[-] mount success."
             echo ">>> success"
-            echo -e "result=success" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
+            echo -e "mnt=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
             echo ""
             exit
         else
             echo "[-] mount failed!"
             echo ">>> failed"
-            echo -e "result=failed" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
+            echo -e "mnt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
             echo ""
             exit
         fi
@@ -186,25 +162,28 @@ $KUBEIAAS_MNT_TARGET:$KUBEIAAS_PATH_DATA_VOLUMES $KUBEIAAS_PATH_DATA_VOLUMES  nf
 
 echo ""
 echo "# ========================== #"
-echo "#   KubeIaaS - Env Checker   #"
-echo "#   @ mnt-checker            #"
+echo "#  KubeIaaS - Env Processor  #"
+echo "#  @ mnt-processor           #"
 echo "# ========================== #"
-echo $(date +%Y-%m-%d\ %H:%M:%S)
+echo "$(date +%Y-%m-%d\ %H:%M:%S)"
 echo ""
-
-echo -e "result=unknown" | tee /usr/local/kubeiaas/workdir/log/checkResult-mnt.log
 
 KUBEIAAS_PATH_IMAGES=/usr/local/kubeiaas/data/images
 KUBEIAAS_PATH_DATA_VOLUMES=/usr/local/kubeiaas/data/data-volumes
 
-KUBEIAAS_MNT_TARGET=""
+KUBEIAAS_MNT_IMG=""
+KUBEIAAS_MNT_DATAVOL=""
 
-while getopts ":m:" opt
+while getopts ":i:d:" opt
 do
     case $opt in
-        m)
-            echo "KUBEIAAS_MNT_TARGET: $OPTARG"
-            KUBEIAAS_MNT_TARGET=$OPTARG
+        i)
+            echo "KUBEIAAS_MNT_IMG: $OPTARG"
+            KUBEIAAS_MNT_IMG=$OPTARG
+        ;;
+        d)
+            echo "KUBEIAAS_MNT_DATAVOL: $OPTARG"
+            KUBEIAAS_MNT_DATAVOL=$OPTARG
         ;;
         *)
             echo "unknown param: $opt"

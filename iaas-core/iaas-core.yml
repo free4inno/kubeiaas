@@ -14,7 +14,8 @@ spec:
       labels:
         app: iaas-core
     spec:
-      nodeName: hf-node-01
+      nodeSelector:
+        kubeiaas/ctl: "true"
       containers:
         - name: iaas-core
           command: ["sh"]
@@ -40,21 +41,45 @@ spec:
                   fieldPath: spec.nodeName
             # -------- SERVICE CONFIG --------
             - name: IAAS_CORE_NODE_NAME
-              value: "hf-node-01"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.control
             - name: DB_PROXY_NODE_NAME
-              value: "hf-master-01"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.control
             - name: RS_OPT_NODE_NAME
-              value: "hf-node-01"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.control
             - name: IMG_OPT_NODE_NAME
-              value: "hf-node-02"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.image
             - name: AGENT_NODE_NAME_LIST
-              value: "hf-node-01,hf-node-02"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.work.list
             - name: DHCP_NODE_NAME
-              value: "hf-node-01"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
             - name: VNC_NODE_NAME
-              value: "hf-node-01"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.vnc
             - name: NFS_IP
-              value: "192.168.33.7"
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
             # ----------------------------------
 ---
 apiVersion: v1

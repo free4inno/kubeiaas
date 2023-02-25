@@ -1,13 +1,9 @@
 package kubeiaas.iaasagent.service;
 
-import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.utils.ShellUtils;
-import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.config.VncConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 @Slf4j
 @Service
@@ -36,25 +32,5 @@ public class VncService {
         addVncToken(uuid, address);
         log.debug("flushVncToken -- Vnc Token for " + uuid + " has been flushed.");
         log.info("flushVncToken ---- end ----");
-    }
-
-    @Resource
-    private HostService hostService;
-
-    public void checkVncStatus() {
-        boolean res = hostService.checkEnvRes("novnc");
-        if (res) {
-            log.info("checkVncStatus -- vnc is on this host!");
-            if (!hostService.hasHostRole(HostConstants.ROLE_VNC)) {
-                // if not set role, then set
-                hostService.setHostRole(HostConstants.ROLE_VNC);
-            }
-        } else {
-            log.info("checkVncStatus -- vnc is not on this host.");
-            if (hostService.hasHostRole(HostConstants.ROLE_VNC)) {
-                // if already set role, then delete
-                hostService.delHostRole(HostConstants.ROLE_VNC);
-            }
-        }
     }
 }

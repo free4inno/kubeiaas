@@ -14,7 +14,8 @@ spec:
       labels:
         app: resource-operator
     spec:
-      nodeName: hf-node-01
+      nodeSelector:
+        kubeiaas/ctl: "true"
       containers:
         - name: resource-operator
           command: ["sh"]

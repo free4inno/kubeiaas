@@ -13,7 +13,7 @@ spec:
       labels:
         app: iaas-agent
     spec:
-      # 打标签：kubectl label node hf-node-01 kubeiaas=node
+      # 打标签：kubectl label node hf-node-01 kubeiaas/node=true
       nodeSelector:
         kubeiaas/node: "true"   # 指定节点标签
       containers:
@@ -44,28 +44,43 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            # -------- NETWORK CONFIG --------
-            - name: NETWORK_SUBNET
-              value: "192.168.32.0"
-            - name: NETWORK_NETMASK
-              value: "255.255.224.0"
-            - name: NETWORK_SUBNET_WITH_MASK
-              value: "192.168.32.0/19"
-            - name: NETWORK_GATEWAY
-              value: "192.168.32.1"
             # -------- RESOURCE CONFIG --------
-            - name: HF_NODE_01_VCPU
-              value: "40"
-            - name: HF_NODE_01_MEM
-              value: "64"
-            - name: HF_NODE_01_STORAGE
-              value: "4096"
-            - name: HF_NODE_02_VCPU
-              value: "40"
-            - name: HF_NODE_02_MEM
-              value: "64"
-            - name: HF_NODE_02_STORAGE
-              value: "4096"
+            - name: AGENT_NODE_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.work.list
+            - name: AGENT_VCPUS_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.work.vcpus
+            - name: AGENT_MEM_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.work.mem
+            - name: AGENT_STORAGE_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.work.storage
+            # -------- SERVICE CONFIG --------
+            - name: DHCP_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
+            - name: VNC_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.vnc
+            - name: NFS_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
             # ----------------------------------
           volumeMounts:
             - name: host-proc
@@ -79,9 +94,6 @@ spec:
         - name: workdir
           hostPath:
             path: /usr/local/kubeiaas/workdir
-        - name: checker
-          hostPath:
-            path: /usr/local/kubeiaas/workdir/checker
 ---
 apiVersion: v1
 kind: Service

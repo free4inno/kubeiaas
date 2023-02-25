@@ -29,15 +29,14 @@ public class HostConstants {
     // roles
     public static final String ROLE_DHCP = "dhcp";
     public static final String ROLE_VNC = "vnc";
-    public static final String ROLE_MNT = "mnt";
+    public static final String ROLE_NFS = "nfs";
 
     // checker
     public static final String CHECKER_DIR = "dir";
+    public static final String CHECKER_JAVA = "java";
     public static final String CHECKER_KVM = "kvm";
     public static final String CHECKER_MNT = "mnt";
-    public static final String CHECKER_MNT_EXPORT = "mnt-export";
     public static final String CHECKER_LIBVIRT = "libvirt";
     public static final String CHECKER_DHCP = "dhcp";
-    public static final String CHECKER_VNC = "vnc";
 
 }

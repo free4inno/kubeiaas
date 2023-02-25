@@ -70,8 +70,8 @@
                     <!-- =============== registry control =============== -->
                     <authConfig>
                         <push>
-                            <username>USERNAME</username>
-                            <password>PASSWORD</password>
+                            <username>${docker.repo.username}</username>
+                            <password>${docker.repo.password}</password>
                         </push>
                     </authConfig>
 
