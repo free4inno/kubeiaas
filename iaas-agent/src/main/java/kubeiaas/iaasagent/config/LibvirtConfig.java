@@ -30,7 +30,7 @@ public class LibvirtConfig {
     private static final String MAX_MEMORY = "16";
     private static final String MAX_CPU = "16";
 
-    public static String emulatorName = "/usr/libexec/qemu-kvm";    //the location of kvm simulation
+    public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     public static String virConStr = "qemu:///system";
 
     public static String privateNetwork = "br0";
@@ -41,35 +41,39 @@ public class LibvirtConfig {
     /**
      * old：使用构造函数在启动时调用
      * now：在kvm操作前主动调用
-     * （为了启动时不依赖宿主机的libvirt安装，暂时不考虑额外造成的开销）
+     * （为了启动时不依赖宿主机的 libvirt 安装，暂时不考虑额外造成的开销）
      */
     public void initEmulator() {
-        emulatorName = getQemuKvmLocation();
+        emulatorName = getEmulatorLocation();
     }
 
     /**
-     * 此方法是获取xml中 emulator 的位置，目前CentOS6和CentOS7都是 /usr/libexec/qemu-kvm.
-     * 为了防止之后emulator路径会改变，或者运维时设置错误，目前使用三种方式可以更改
-     * 1、先读取vmcontroller.properties中的 emulatorName 的值，如果不为空，则就使用这个值，如果CentOS7之后kvm路径更改，可以优先更改这个；如果为空，则执行2
-     * 2、使用 whereis qemu-kvm 命令，查找全部kvm的路径，找到中间含有 libexec 的路径，然后返回这个值；如果找不到，则返回指定序号的字段，如果序号不合法，最后执行3
-     * 3、加载 String emulatorName 的默认值。
-     * 三个方法有先后顺序，一个生效之后，则不执行剩下的步骤，所以更改时，一定注意先后顺序。
+     * 获取 xml 中 emulator 的位置，目前 CentOS 是 /usr/local/bin/qemu-system-x86_64, Ubuntu 是 /usr/bin/qemu-system-x86_64
+     * 为了防止之后 emulator 路径会改变，或者运维时设置错误，目前使用三种方式可以更改：
      *
-     * @return xml中 emulator 的全路径.
+     * 1、使用 whereis 命令，查找全部 emulator 的路径，找到中间含有 usr & bin 的路径，然后返回这个值;
+     * 2、默认使用查找到的首个位置
+     * 3、加载 static 中的 emulatorName 的默认值。
+     *
+     * 三个方法有先后顺序，一个生效之后，则不执行剩下的步骤，所以更改时，一定注意先后顺序。
      */
-    private static String getQemuKvmLocation() {
-        log.info("execute \"whereis qemu-kvm\" cmd ");
-        String tempLocation = ShellUtils.getCmd("whereis qemu-kvm");
-        // qemu-kvm: /bin/qemu-kvm /usr/bin/qemu-kvm
-        String[] kvms = tempLocation.split(" ");
-        for (String kvm : kvms) {
-            if (kvm.contains("libexec")) {
-                return kvm;
+    private static String getEmulatorLocation() {
+        log.info("execute \"whereis qemu-system-x86_64\" cmd ");
+        String tempLocation = ShellUtils.getCmd("whereis qemu-system-x86_64");
+        /* CentOS:
+         *      qemu-system-x86_64: /usr/local/bin/qemu-system-x86_64
+         * Ubuntu:
+         *      qemu-system-x86_64: /usr/bin/qemu-system-x86_64
+         */
+        String[] emulators = tempLocation.split(" ");
+        for (String emulator : emulators) {
+            if (emulator.contains("usr") && emulator.contains("bin")) {
+                return emulator;
             }
         }
         int num = 2;
-        if (num < kvms.length) {
-            return kvms[num];
+        if (num < emulators.length) {
+            return emulators[num];
         }
         return emulatorName;
     }
