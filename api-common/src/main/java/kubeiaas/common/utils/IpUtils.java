@@ -117,6 +117,9 @@ public class IpUtils {
      * @return.
      */
     public static int stringToInt(String ipStr) {
+        if (ipStr == null || ipStr.isEmpty()) {
+            return -1;
+        }
         int ip = 0;
         String[] strs = ipStr.split("\\.");
         for (int i = 0; i < 4; i++) {
