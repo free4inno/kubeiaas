@@ -125,6 +125,72 @@ public class IpUtils {
         return ip;
     }
 
+    /**
+     * 根据 Ip + Netmask 获取 subnet
+     */
+    public static String getSubnet(String symbolicIP, String netmask) throws NumberFormatException {
+        int baseIPNumeric;
+        int netmaskNumeric;
+
+        /* IP */
+        String[] st = symbolicIP.split("\\.");
+
+        if (st.length != 4) throw new NumberFormatException("Invalid IP address: " + symbolicIP);
+
+        int i = 24;
+        baseIPNumeric = 0;
+
+        for (String item : st) {
+            int value = Integer.parseInt(item);
+            if (value != (value & 0xff)) {
+                throw new NumberFormatException("Invalid IP address: " + symbolicIP);
+            }
+            baseIPNumeric += value << i;
+            i -= 8;
+        }
+
+        /* Netmask */
+        st = netmask.split("\\.");
+
+        if (st.length != 4) throw new NumberFormatException("Invalid netmask address: " + netmask);
+
+        i = 24;
+        netmaskNumeric = 0;
+
+//        if (Integer.parseInt(st[0]) < 255) {
+//            throw new NumberFormatException("The first byte of netmask can not be less than 255");
+//        }
+
+        for (String s : st) {
+            int value = Integer.parseInt(s);
+            if (value != (value & 0xff)) {
+                throw new NumberFormatException("Invalid netmask address: " + netmask);
+            }
+            netmaskNumeric += value << i;
+            i -= 8;
+        }
+
+        /*
+         * see if there are zeroes inside netmask, like: 1111111101111 This is
+         * illegal, throw exception if encountered. Netmask should always have
+         * only ones, then only zeroes, like: 11111111110000
+         */
+        boolean encounteredOne = false;
+        int ourMaskBitPattern = 1;
+
+        for (i = 0; i < 32; i++) {
+            if ((netmaskNumeric & ourMaskBitPattern) != 0) {
+                encounteredOne = true; // the bit is 1
+            } else { // the bit is 0
+                if (encounteredOne)
+                    throw new NumberFormatException("Invalid netmask: " + netmask + " (bit " + (i + 1) + ")");
+            }
+            ourMaskBitPattern = ourMaskBitPattern << 1;
+        }
+
+        return intToString(baseIPNumeric & netmaskNumeric);
+    }
+
     public static int getNetmaskInt(String netmask) {
         int netmaskInt = stringToInt(netmask);
         String str = Integer.toBinaryString(netmaskInt);

@@ -49,4 +49,15 @@ public class DhcpController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.UPDATE_IP_SEG, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String updateIpSeg(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull @NotEmpty String ipSegId) {
+        log.info("updateIpSeg ==== " + "ipSegId: " + ipSegId);
+        if (dhcpService.updateIpSeg(Integer.parseInt(ipSegId))) {
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            return ResponseMsgConstants.FAILED;
+        }
+    }
 }

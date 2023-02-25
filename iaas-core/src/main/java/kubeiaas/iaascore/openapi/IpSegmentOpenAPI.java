@@ -73,7 +73,8 @@ public class IpSegmentOpenAPI {
     @ResponseBody
     public String createIpSegment(@Valid @RequestBody CreateIpSegmentForm f) throws BaseException {
         log.info("ip_segment crate ==== start ====");
-        IpSegment newIpSegment = networkService.createIpSegment(f.getName(),f.getHostName(),f.getType(),f.getBridge(),f.getIpRangeStart(),f.getIpRangeEnd(),f.getGateway(),f.getNetmask());
+        IpSegment newIpSegment = networkService.updateIpSegment(0,
+                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
         log.info("ip_segment crate ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
@@ -114,8 +115,7 @@ public class IpSegmentOpenAPI {
     public String pageQueryById(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
-            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize
-            ) {
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("pageQueryById ==== start ====");
         IpSegment ipSegment = networkService.pageQueryById(ipSegmentId,pageNum,pageSize);
         log.info("pageQueryById ==== end ====");
@@ -124,9 +124,10 @@ public class IpSegmentOpenAPI {
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String EditIpSegment(@Valid @RequestBody EditIpSegmentForm f) throws BaseException {
+    public String editIpSegment(@Valid @RequestBody EditIpSegmentForm f) throws BaseException {
         log.info("ip_segment edit ==== start ====");
-        IpSegment newIpSegment = networkService.editIpSegment(f.getIpSegmentId(),f.getName(),f.getHostName(),f.getType(),f.getBridge(),f.getIpRangeStart(),f.getIpRangeEnd(),f.getGateway(),f.getNetmask());
+        IpSegment newIpSegment = networkService.updateIpSegment(f.getIpSegmentId(),
+                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
         log.info("ip_segment edit ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }

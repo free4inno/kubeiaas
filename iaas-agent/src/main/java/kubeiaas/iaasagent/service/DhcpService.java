@@ -1,28 +1,74 @@
 package kubeiaas.iaasagent.service;
 
+import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.utils.FileUtils;
+import kubeiaas.common.utils.IpUtils;
 import kubeiaas.common.utils.MacUtils;
 import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.iaasagent.config.DhcpConfig;
+import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedWriter;
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Service
 public class DhcpService {
+
+    @Resource
+    private TableStorage tableStorage;
+
+    /**
+     * 根据网段更新 DHCP 监听配置
+     */
+    public boolean updateIpSeg(int ipSegId) {
+        // -------- 1. 获取 ipSegId 信息 --------
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegId);
+
+        // -------- 2. 构造配置串 --------
+        String segName = "IP_SEG_" + ipSegment.getBridge();
+        String subnetIP = IpUtils.getSubnet(ipSegment.getIpRangeStart(), ipSegment.getNetmask());
+        String confLine = String.format(DhcpConfig.BIND_IP_SEG_TEMPLATE,
+                segName, ipSegment.getBridge(), subnetIP, ipSegment.getNetmask(), ipSegment.getGateway());
+
+        // -------- 3. 更新 dhcp conf --------
+        try {
+            // 先拷贝旧文件
+            FileUtils.copy(DhcpConfig.DHCP_CONF_FILE_PATH, DhcpConfig.DHCP_CONF_FILE_TEMP_PATH);
+
+            // 删除旧有（sed帮助判定）
+            String cmdDefault = "sed -i '/" + "default" + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
+            ShellUtils.getCmd(cmdDefault);
+
+            String cmd = "sed -i '/" + segName + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
+            ShellUtils.getCmd(cmd);
+
+            // 再追加新内容
+            FileWriter writer = new FileWriter(DhcpConfig.DHCP_CONF_FILE_PATH, true);
+            writer.write(DhcpConfig.ESCAPE_NEWLINE + confLine);
+            writer.close();
+
+        } catch (Exception e) {
+            log.error("bindMacAndIp -- IO dhcp config files failed!");
+            e.printStackTrace();
+            return false;
+        }
+
+        // -------- 4. 重启 dhcp server --------
+        if (!restartDHCP()) {
+            log.error("updateIpSeg -- restart dhcp server error!");
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 绑定 dhcp 配置中的 mac 与 ip
@@ -65,7 +111,7 @@ public class DhcpService {
 
             // 再追加新内容
             FileWriter writer = new FileWriter(DhcpConfig.DHCP_CONF_FILE_PATH, true);
-            writer.write(DhcpConfig.ESCAPE_NEWLINE + newBindContent + DhcpConfig.ESCAPE_NEWLINE);
+            writer.write(DhcpConfig.ESCAPE_NEWLINE + newBindContent);
             writer.close();
         } catch (Exception e) {
             log.error("bindMacAndIp -- IO dhcp config files failed!");
@@ -79,19 +125,6 @@ public class DhcpService {
             return false;
         }
         return true;
-    }
-
-    /**
-     * 重启本机上的 dhcp 服务
-     * @return 重启结果
-     */
-    private boolean restartDHCP() {
-        if (!ShellUtils.run(DhcpConfig.DHCP_RESTART_CMD)) {
-            log.error("restartDHCP -- restart dhcp server error! please check it.");
-            return false;
-        } else {
-            return true;
-        }
     }
 
     /**
@@ -111,5 +144,20 @@ public class DhcpService {
         }
         log.info("unbindMacAndIp ---- end ----");
         return true;
+    }
+
+    // ================================================================================================================
+
+    /**
+     * 重启本机上的 dhcp 服务
+     * @return 重启结果
+     */
+    private boolean restartDHCP() {
+        if (!ShellUtils.run(DhcpConfig.DHCP_RESTART_CMD)) {
+            log.error("restartDHCP -- restart dhcp server error! please check it.");
+            return false;
+        } else {
+            return true;
+        }
     }
 }

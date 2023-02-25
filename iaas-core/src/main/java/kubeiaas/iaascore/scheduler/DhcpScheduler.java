@@ -52,6 +52,16 @@ public class DhcpScheduler {
         }
     }
 
+    public Boolean updateIpSeg(String ipSegId){
+        try {
+            return dhcpController.updateIpSeg(getDhcpUri(), ipSegId)
+                    .equals(ResponseMsgConstants.SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private URI getDhcpUri() {
         try {
             return new URI(agentConfig.getDhcpUri());

@@ -67,36 +67,46 @@ public class NetworkService {
         return resMap;
     }
 
-    public IpSegment createIpSegment(
+    /**
+     * 新建 & 编辑
+     */
+    public IpSegment updateIpSegment(
+            Integer ipSegmentId,
             String name,
-            String hostName,
+            String hostUuid,
             String type,
             String bridge,
             String ipRangeStart,
             String ipRangeEnd,
             String gateway,
-            String netmask) throws BaseException {
-        // 建立 name -> uuid 的索引
-        Map<String, String> hostNameUuidMap = new HashMap<>();
-        List<Host> hostList = tableStorage.hostQueryAll();
-        for (Host host : hostList) {
-            hostNameUuidMap.put(host.getName(), host.getUuid());
-        }
+            String netmask,
+            boolean isNew) throws BaseException {
 
-        String hostUuid = hostNameUuidMap.get(hostName);
-        if (hostUuid == null){
+        if (tableStorage.hostQueryByUuid(hostUuid) == null) {
             throw new BaseException("can't find host");
         }
 
-        IpSegment newIpSegment = networkProcess.createIpSegment(name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
-        return newIpSegment;
+        IpSegment ipSegment;
+        if (isNew) {
+            ipSegment = new IpSegment();
+        } else {
+            ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        }
+
+        return networkProcess.saveIpSegment(ipSegment, name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
     }
 
+    /**
+     * 删除
+     */
     public String deleteIpSegment(Integer ipSegmentId){
         tableStorage.ipSegmentDelete(ipSegmentId);
         return ResponseMsgConstants.SUCCESS;
     }
 
+    /**
+     * 全量详情
+     */
     public IpSegment queryById(Integer ipSegmentId) {
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
 
@@ -106,30 +116,30 @@ public class NetworkService {
         int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
         Map<String,IpUsed> ips = new HashMap<>();
         List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
-        ipUsedList.forEach(t->{
-            ips.put(t.getIp(),t);
-            });
+        ipUsedList.forEach(t -> ips.put(t.getIp(), t));
 
         for (int ip = ipBegin; ip <= ipEnd; ip++) {
             String ipStr = IpUtils.intToString(ip);
-            if (ips.containsKey(ipStr)){
-                IpUsed tempIpUsed = new IpUsed();
+            IpUsed tempIpUsed;
+            if (ips.containsKey(ipStr)) {
                 tempIpUsed = ips.get(ipStr);
                 String tempInstanceUuid = tempIpUsed.getInstanceUuid();
                 tempIpUsed.setInstanceName(tableStorage.vmQueryByUuid(tempInstanceUuid).getName());
-                ipList.add(tempIpUsed);
-            }else {
-                IpUsed tempIpUsed = new IpUsed();
+            } else {
+                tempIpUsed = new IpUsed();
                 tempIpUsed.setIp(ipStr);
-                ipList.add(tempIpUsed);
             }
-            }
+            ipList.add(tempIpUsed);
+        }
 
         ipSegment.setIps(ipList);
 
         return ipSegment;
     }
 
+    /**
+     * 分页详情
+     */
     public IpSegment pageQueryById(Integer ipSegmentId, Integer pageNum, Integer pageSize) {
 
         //get ipSegment by ipSegment
@@ -141,61 +151,30 @@ public class NetworkService {
         int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
         Map<String,IpUsed> ips = new HashMap<>();
         List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
-        ipUsedList.forEach(t->{
-            ips.put(t.getIp(),t);
-            });
+        ipUsedList.forEach(t -> ips.put(t.getIp(), t));
+
         for (int ip = ipBegin; ip <= ipEnd; ip++) {
             String ipStr = IpUtils.intToString(ip);
-            if (ips.containsKey(ipStr)){
-                IpUsed tempIpUsed = new IpUsed();
+            IpUsed tempIpUsed;
+            if (ips.containsKey(ipStr)) {
                 tempIpUsed = ips.get(ipStr);
                 String tempInstanceUuid = tempIpUsed.getInstanceUuid();
                 tempIpUsed.setInstanceName(tableStorage.vmQueryByUuid(tempInstanceUuid).getName());
-                ipList.add(tempIpUsed);
-            }else {
-                IpUsed tempIpUsed = new IpUsed();
+            } else {
+                tempIpUsed = new IpUsed();
                 tempIpUsed.setIp(ipStr);
-                ipList.add(tempIpUsed);
             }
-            }
-        //page ipList
+            ipList.add(tempIpUsed);
+        }
+        // page ipList
         List<IpUsed> listSort = new ArrayList<>();
         int size = ipList.size();
-        int pageStart=pageNum==1?0:(pageNum-1)*pageSize;
-        int pageEnd=size<pageNum*pageSize?size:pageNum*pageSize;;
-        if(size>pageStart){
+        int pageStart = pageNum == 1 ? 0 : (pageNum - 1) * pageSize;
+        int pageEnd = Math.min(size, pageNum * pageSize);
+        if (size > pageStart) {
             listSort =ipList.subList(pageStart, pageEnd);
         }
         ipSegment.setIps(listSort);
         return ipSegment;
     }
-
-    public IpSegment editIpSegment(
-            Integer ipSegmentId,
-            String name,
-            String hostName,
-            String type,
-            String bridge,
-            String ipRangeStart,
-            String ipRangeEnd,
-            String gateway,
-            String netmask) throws BaseException {
-
-        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-        // 建立 name -> uuid 的索引
-        Map<String, String> hostNameUuidMap = new HashMap<>();
-        List<Host> hostList = tableStorage.hostQueryAll();
-        for (Host host : hostList) {
-            hostNameUuidMap.put(host.getName(), host.getUuid());
-        }
-
-        String hostUuid = hostNameUuidMap.get(hostName);
-        if (hostUuid == null){
-            throw new BaseException("can't find host");
-        }
-
-        IpSegment newIpSegment = networkProcess.editIpSegment(ipSegment,name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
-        return newIpSegment;
-    }
-
 }

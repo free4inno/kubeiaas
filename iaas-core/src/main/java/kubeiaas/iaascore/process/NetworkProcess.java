@@ -72,41 +72,9 @@ public class NetworkProcess {
     }
 
     /**
-     * crate IpSegment
+     * save IpSegment
      */
-    public IpSegment createIpSegment(
-            String name,
-            String hostUuid,
-            String type,
-            String bridge,
-            String ipRangeStart,
-            String ipRangeEnd,
-            String gateway,
-            String netmask
-    ){
-        IpSegment newIpSegment = new IpSegment();
-        newIpSegment.setName(name);
-        newIpSegment.setHostUuid(hostUuid);
-        newIpSegment.setBridge(bridge);
-        newIpSegment.setDns("8.8.8.8");
-        newIpSegment.setIpRangeStart(ipRangeStart);
-        newIpSegment.setIpRangeEnd(ipRangeEnd);
-        newIpSegment.setGateway(gateway);
-        newIpSegment.setNetmask(netmask);
-/*        switch (type){
-            case "PRIVATE":
-                newIpSegment.setType(IpTypeEnum.PRIVATE);
-                break;
-            case "PUBLIC":
-                newIpSegment.setType(IpTypeEnum.PUBLIC);
-                break;
-        }*/
-        newIpSegment.setType(EnumUtils.getEnumFromString(IpTypeEnum.class, type));
-        newIpSegment = tableStorage.ipSegmentSave(newIpSegment);
-        return newIpSegment;
-    }
-
-    public IpSegment editIpSegment(
+    public IpSegment saveIpSegment(
             IpSegment ipSegment,
             String name,
             String hostUuid,
@@ -115,18 +83,22 @@ public class NetworkProcess {
             String ipRangeStart,
             String ipRangeEnd,
             String gateway,
-            String netmask
-    ){
+            String netmask) {
+        // 1. update DB
         ipSegment.setName(name);
         ipSegment.setHostUuid(hostUuid);
         ipSegment.setBridge(bridge);
-        ipSegment.setDns("8.8.8.8");
+        ipSegment.setDns("");
         ipSegment.setIpRangeStart(ipRangeStart);
         ipSegment.setIpRangeEnd(ipRangeEnd);
         ipSegment.setGateway(gateway);
         ipSegment.setNetmask(netmask);
         ipSegment.setType(EnumUtils.getEnumFromString(IpTypeEnum.class, type));
         ipSegment = tableStorage.ipSegmentSave(ipSegment);
+
+        // 2. update DHCP config
+        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
+
         return ipSegment;
     }
 

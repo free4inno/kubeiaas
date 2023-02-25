@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 
 //@FeignClient(name = ComponentConstants.DHCP_CONTROLLER, url = "http://192.168.31.238:9090")
@@ -28,5 +30,11 @@ public interface DhcpController {
     String unbindMacAndIp(
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DHCP_C + "/" + RequestMappingConstants.UPDATE_IP_SEG)
+    @ResponseBody
+    String updateIpSeg(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) String ipSegId);
 
 }

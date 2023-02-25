@@ -84,6 +84,7 @@ public class RequestMappingConstants {
     // >>> DHCP Controller <<<
     public static final String BIND_MAC_IP = "bind_mac_ip";
     public static final String UNBIND_MAC_IP = "unbind_mac_ip";
+    public static final String UPDATE_IP_SEG = "update_ip_seg";
 
     // >>> Volume Controller <<<
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";

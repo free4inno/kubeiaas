@@ -1,6 +1,5 @@
 package kubeiaas.iaascore.request.IpSegment;
 
-
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +13,7 @@ public class CreateIpSegmentForm {
     private String name;
 
     @NotNull @NotEmpty
-    private String hostName;
+    private String hostUuid;
 
     @NotNull @NotEmpty
     private String type;

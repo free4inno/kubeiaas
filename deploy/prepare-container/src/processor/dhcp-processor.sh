@@ -85,6 +85,12 @@ function main(){
         echo "[-] dhcpd have not started!"
         echo "[+] try to start dhcpd..."
 
+        # write default conf
+        echo -e "
+deny unknown-clients;
+shared-network default {subnet 0.0.0.0 netmask 0.0.0.0 {}}
+" | tee /etc/dhcp/dhcpd.conf
+
         service dhcpd start
     fi
 

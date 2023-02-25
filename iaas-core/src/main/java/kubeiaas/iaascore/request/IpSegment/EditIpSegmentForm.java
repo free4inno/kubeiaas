@@ -17,7 +17,7 @@ public class EditIpSegmentForm {
     private String name;
 
     @NotNull @NotEmpty
-    private String hostName;
+    private String hostUuid;
 
     @NotNull @NotEmpty
     private String type;

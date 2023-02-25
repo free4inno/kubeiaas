@@ -55,11 +55,23 @@ public class ShellUtils {
             is = proc.getInputStream();
             br = new BufferedReader(new InputStreamReader(is));
             // fill msg
-            msg.append(br.readLine());
-            while (br.ready()) {
-                msg.append("\n");
-                msg.append(br.readLine());
+
+            // Method 1: updated by zht
+            String lineStr;
+            if ((lineStr = br.readLine()) != null) {
+                msg.append(lineStr);
             }
+            while ((lineStr = br.readLine()) != null) {
+                msg.append("\n").append(lineStr);
+            }
+
+            // Method 2: old way (may cause bug, only get first line)
+//            msg.append(br.readLine());
+//            while (br.ready()) {
+//                msg.append("\n");
+//                msg.append(br.readLine());
+//            }
+
             proc.destroy();     // destroy 此进程，可以回收相关资源，特别是“文件句柄”
         } catch (Exception ex) {
             ex.printStackTrace();
