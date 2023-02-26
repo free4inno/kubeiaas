@@ -2,6 +2,7 @@ package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.IpSegment;
+import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
@@ -12,6 +13,7 @@ import kubeiaas.iaascore.request.IpSegment.CreateIpSegmentForm;
 import kubeiaas.iaascore.request.IpSegment.EditIpSegmentForm;
 import kubeiaas.iaascore.request.vm.CreateVmForm;
 import kubeiaas.iaascore.response.BaseResponse;
+import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.response.SingleMsgResponse;
 import kubeiaas.iaascore.service.NetworkService;
@@ -110,7 +112,8 @@ public class IpSegmentOpenAPI {
     /**
      * 分页获取 ipSegment详情
      */
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
+/*
+ @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String pageQueryById(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId,
@@ -120,7 +123,7 @@ public class IpSegmentOpenAPI {
         IpSegment ipSegment = networkService.pageQueryById(ipSegmentId,pageNum,pageSize);
         log.info("pageQueryById ==== end ====");
         return JSON.toJSONString(BaseResponse.success(ipSegment));
-    }
+    }*/
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
@@ -130,6 +133,21 @@ public class IpSegmentOpenAPI {
                 f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
         log.info("ip_segment edit ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
+    }
+
+    /**
+     * 分页获取 ipSegment详情ips信息
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String pageQueryIpsById(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId,
+            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
+            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
+        log.info("pageQueryIpsById ==== start ====");
+        PageResponse<IpUsed> res = networkService.pageQueryById(ipSegmentId,pageNum,pageSize);
+        log.info("pageQueryById ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(res));
     }
 
 }

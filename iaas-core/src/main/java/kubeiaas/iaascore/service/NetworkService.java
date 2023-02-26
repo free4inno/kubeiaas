@@ -8,6 +8,7 @@ import kubeiaas.common.utils.IpUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.process.NetworkProcess;
+import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -111,6 +112,7 @@ public class NetworkService {
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
 
         //set ips
+        /*
         List<IpUsed> ipList = new ArrayList<>();
         int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
         int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
@@ -131,8 +133,7 @@ public class NetworkService {
             }
             ipList.add(tempIpUsed);
         }
-
-        ipSegment.setIps(ipList);
+        ipSegment.setIps(ipList);*/
 
         return ipSegment;
     }
@@ -140,6 +141,7 @@ public class NetworkService {
     /**
      * 分页详情
      */
+/*
     public IpSegment pageQueryById(Integer ipSegmentId, Integer pageNum, Integer pageSize) {
 
         //get ipSegment by ipSegment
@@ -176,5 +178,46 @@ public class NetworkService {
         }
         ipSegment.setIps(listSort);
         return ipSegment;
+    }*/
+
+    /**
+     * 分页详情
+     */
+    public PageResponse<IpUsed> pageQueryById(Integer ipSegmentId, Integer pageNum, Integer pageSize) {
+
+        //get ipSegment by ipSegment
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+
+        //set ips
+        List<IpUsed> ipList = new ArrayList<>();
+        int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
+        int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
+        Map<String,IpUsed> ips = new HashMap<>();
+        List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
+        ipUsedList.forEach(t -> ips.put(t.getIp(), t));
+
+        for (int ip = ipBegin; ip <= ipEnd; ip++) {
+            String ipStr = IpUtils.intToString(ip);
+            IpUsed tempIpUsed;
+            if (ips.containsKey(ipStr)) {
+                tempIpUsed = ips.get(ipStr);
+                String tempInstanceUuid = tempIpUsed.getInstanceUuid();
+                tempIpUsed.setInstanceName(tableStorage.vmQueryByUuid(tempInstanceUuid).getName());
+            } else {
+                tempIpUsed = new IpUsed();
+                tempIpUsed.setIp(ipStr);
+            }
+            ipList.add(tempIpUsed);
+        }
+        // page ipList
+        List<IpUsed> listSort = new ArrayList<>();
+        Integer totalElements = ipList.size();
+        int totalPages = (totalElements % pageSize == 0) ? (totalElements / pageSize) : (totalElements / pageSize) + 1;
+        int pageStart = pageNum == 1 ? 0 : (pageNum - 1) * pageSize;
+        int pageEnd = Math.min(totalElements, pageNum * pageSize);
+        if (totalElements > pageStart) {
+            listSort =ipList.subList(pageStart, pageEnd);
+        }
+        return new PageResponse<>(listSort, totalPages, totalElements.longValue());
     }
 }
