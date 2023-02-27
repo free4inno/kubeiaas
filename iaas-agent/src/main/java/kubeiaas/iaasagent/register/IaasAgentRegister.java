@@ -67,23 +67,21 @@ public class IaasAgentRegister {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    private final String CHECK_SUCCESS = "1";
-
-    private static final String CMD_CHECK_LIBVIRT = "if [[ $(virsh version) =~ \"QEMU\" ]]; then echo \"1\"; else echo \"0\"; fi";
+    private static final String CMD_CHECK_LIBVIRT = "systemctl status libvirtd";
     private boolean checkLibvirt() {
         String res = ShellUtils.getCmd(CMD_CHECK_LIBVIRT);
-        return res.contains(CHECK_SUCCESS);
+        return res.contains("active");
     }
 
-    private static final String CMD_CHECK_DHCP = "if [[ $(service dhcpd status) =~ \"active\" ]]; then echo \"1\"; else echo \"0\"; fi";
+    private static final String CMD_CHECK_DHCP = "service dhcpd status";
     private boolean checkDHCP() {
         String res = ShellUtils.getCmd(CMD_CHECK_DHCP);
-        return res.contains(CHECK_SUCCESS);
+        return res.contains("active");
     }
 
-    private static final String CMD_CHECK_VNC = "if [[ $(ps -ef | grep noVNC) =~ \"websockify\" ]]; then echo \"1\"; else echo \"0\"; fi";
+    private static final String CMD_CHECK_VNC = "ps -ef | grep noVNC";
     private boolean checkVNC() {
         String res = ShellUtils.getCmd(CMD_CHECK_VNC);
-        return res.contains(CHECK_SUCCESS);
+        return res.contains("websockify");
     }
 }

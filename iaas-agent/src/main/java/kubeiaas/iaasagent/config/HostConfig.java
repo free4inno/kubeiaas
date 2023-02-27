@@ -126,10 +126,10 @@ public class HostConfig {
         totalSuccessFlag = hostService.getEnvPrepareRes(roleList);
         if (totalSuccessFlag) {
             host.setStatus(HostStatusEnum.READY);
-            log.info(" == host check done, total success. == ");
+            log.info("== host check done, total success. == ");
         } else {
             host.setStatus(HostStatusEnum.ERROR);
-            log.error(" == host check done, total failed! == ");
+            log.error("== host check done, total failed! == ");
         }
         tableStorage.hostSave(host);
     }

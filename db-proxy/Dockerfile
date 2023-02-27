@@ -1,4 +1,4 @@
-FROM openjdk:8
+FROM free4inno/iaas-sqlite:1.0
 
 # sqlite
 RUN mkdir /db
