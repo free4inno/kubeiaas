@@ -45,6 +45,13 @@ function is_lsmod_loaded(){
     fi
 }
 
+# Output prepare log
+function log(){
+  cmd="sed -i '/""$1""/d' /usr/local/kubeiaas/workdir/log/prepare_result.log"
+  eval "$cmd"
+  echo -e "$1=$2" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+}
+
 # ----------------------- Main -----------------------
 
 function main(){
@@ -57,7 +64,7 @@ function main(){
     else
         echo "[-] cpu unsupport kvm!"
         echo ">>> failed"
-        echo -e "kvm=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log kvm failed
         echo ""
         exit
     fi
@@ -70,13 +77,13 @@ function main(){
     else
         echo "[-] cpu unsupport kvm!"
         echo ">>> failed"
-        echo -e "kvm=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log kvm failed
         echo ""
         exit
     fi
 
     echo ">>> success"
-    echo -e "kvm=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+    log kvm success
 }
 
 # --------------------------------------------------

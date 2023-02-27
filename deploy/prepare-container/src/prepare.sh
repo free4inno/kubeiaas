@@ -14,13 +14,13 @@ echo " - Now let's begin to prepare basic environment for KubeIaaS host."
 echo ""
 
 # FUNCTION: use host sh to run command
-function host_sh(){
+host_sh(){
   res=$(nsenter --mount=/host/proc/1/ns/mnt sh -c "$1")
   echo "$res"
 }
 
 # FUNCTION: get from env
-function get_env(){
+get_env(){
   env_name=$1
   eval value='$'$env_name
   echo "${value}"
@@ -81,24 +81,24 @@ echo "[2] RUN init shell script"
 
 echo "(1/6) prepare dir"
 echo " - this node is work node -> PREPARE"
-host_sh "./usr/local/kubeiaas/workdir/checker/dir-processor.sh"
+host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/dir-processor.sh"
 
 echo "(2/6) prepare java"
 echo " - this node is work node -> PREPARE"
-host_sh "./usr/local/kubeiaas/workdir/checker/java-processor.sh"
+host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/java-processor.sh"
 
 echo "(3/6) prepare kvm"
 echo " - this node is work node -> PREPARE"
-host_sh "./usr/local/kubeiaas/workdir/checker/kvm-processor.sh"
+host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/kvm-processor.sh"
 
 echo "(4/6) prepare libvirt"
 echo " - this node is work node -> PREPARE"
-host_sh "./usr/local/kubeiaas/workdir/checker/libvirt-processor.sh"
+host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/libvirt-processor.sh"
 
 echo "(5/6) prepare dhcp"
 if [[ "$dhcp_node" == "$host_name" || "$dhcp_node" == "$host_ip" ]]; then
   echo " - this node is dhcp node -> PREPARE"
-  host_sh "./usr/local/kubeiaas/workdir/checker/dhcp-processor.sh"
+  host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/dhcp-processor.sh"
 else
   echo " - this node is not dhcp node -> NO NEED TO RUN."
 fi
@@ -108,7 +108,7 @@ if [[ "$nfs_node" == "$host_name" || "$nfs_node" == "$host_ip" ]]; then
   echo " - this node is nfs node -> NO NEED TO RUN."
 else
   echo " - this node is work node -> PREPARE"
-  host_sh "./usr/local/kubeiaas/workdir/checker/mnt-processor.sh -i $mnt_node:$nfs_dir_img -d $mnt_node:$nfs_dir_dv"
+  host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/mnt-processor.sh -i $nfs_node:$nfs_dir_img -d $nfs_node:$nfs_dir_dv"
 fi
 
 tail -f /dev/null

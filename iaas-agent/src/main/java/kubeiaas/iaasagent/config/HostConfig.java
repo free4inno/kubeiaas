@@ -52,7 +52,7 @@ public class HostConfig {
     public static String CMD_CPU_MHZ = "cat /proc/cpuinfo | grep MHz|head -1|awk '{print $4}'";
     public static String CMD_MEM_GB = "cat /proc/meminfo | grep MemTotal | awk '{print $2/1024/1024}'";
     public static String CMD_DISK_GB = "df | grep '/$' | awk '{print int($2*1/1024/1024)}'";
-    public static String CMD_VERSION = "cat /etc/redhat-release";
+    public static String CMD_VERSION = "cat /proc/version";
 
     public static String RESULT_PREPARE = "/usr/local/kubeiaas/workdir/log/prepare_result.log";
 

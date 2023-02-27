@@ -42,7 +42,7 @@ function is_service_install(){
 # return：
 #   - is_active (0-n, 1-y)
 function is_service_active(){
-    res=$(systemctl status $1)
+    res=$(systemctl status $1 2>&1)
     if [[ $res =~ (dead) || $res =~ "Active: inactive" ]]; then
         echo "0"
     elif [[ $res =~ "Active: active" ]]; then
@@ -50,6 +50,13 @@ function is_service_active(){
     else
         echo "0"
     fi
+}
+
+# Output prepare log
+function log(){
+  cmd="sed -i '/""$1""/d' /usr/local/kubeiaas/workdir/log/prepare_result.log"
+  eval "$cmd"
+  echo -e "$1=$2" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
 }
 
 # ----------------------- Main -----------------------
@@ -69,7 +76,7 @@ function main(){
         echo "[-] nfs could not be found!"
 
         echo ">>> failed"
-        echo -e "mnt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log mnt failed
         echo ""
         exit
     fi
@@ -94,7 +101,7 @@ function main(){
             echo "[-] nfs still have not started!"
             echo "[+] please check manually..."
             echo ">>> failed"
-            echo -e "mnt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+            log mnt failed
             echo ""
             exit
         fi
@@ -128,7 +135,7 @@ $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry
     if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
         echo "[-] mount is OK."
         echo ">>> success"
-        echo -e "mnt=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log mnt success
         echo ""
         exit
     else
@@ -145,13 +152,13 @@ $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry
         if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
             echo "[-] mount success."
             echo ">>> success"
-            echo -e "mnt=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+            log mnt success
             echo ""
             exit
         else
             echo "[-] mount failed!"
             echo ">>> failed"
-            echo -e "mnt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+            log mnt failed
             echo ""
             exit
         fi

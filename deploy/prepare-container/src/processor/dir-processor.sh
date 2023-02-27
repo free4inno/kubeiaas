@@ -25,12 +25,19 @@ function check_and_make_dir(){
     fi
 }
 
+# Output prepare log
+function log(){
+  cmd="sed -i '/""$1""/d' /usr/local/kubeiaas/workdir/log/prepare_result.log"
+  eval "$cmd"
+  echo -e "$1=$2" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+}
+
 # ----------------------- Main -----------------------
 
 function main(){
     # 0. Get host basic info ---------------------
     info_name=$(hostname)
-    info_version=$(cat /etc/redhat-release)
+    info_version=$(cat /proc/version)
     info_cpu_core=$(cat /proc/cpuinfo| grep "processor" | wc -l)
     info_cpu_mhz=$(cat /proc/cpuinfo | grep MHz|head -1|awk '{print $4}')
     info_mem_size=$(cat /proc/meminfo | grep MemTotal | awk '{print $2/1024/1024}')
@@ -83,7 +90,7 @@ function main(){
     check_and_make_dir sqlite
 
     echo ">>> success"
-    echo -e "dir=success" | tee /usr/local/kubeiaas/workdir/log/prepare_result.log
+    log dir success
 }
 
 # --------------------------------------------------

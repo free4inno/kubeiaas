@@ -16,6 +16,8 @@ spec:
       restartPolicy: Always
       nodeSelector:
         kubeiaas/node: "true"
+      hostPID: true
+      hostIPC: true
       containers:
         - name: iaas-prepare
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:0.1

@@ -94,10 +94,7 @@
                             <!-- ######## MySQL ######## -->
 <!--                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>-->
                             <build>
-                                <!-- ######## SQLITE ######## -->
-                                <dockerFile>${project.basedir}/Dockerfile-sqlite</dockerFile>
-                                <!-- ######## MySQL ######## -->
-<!--                                <dockerFile>${project.basedir}/Dockerfile</dockerFile>-->
+                                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
                             </build>
                             <run>
                             </run>

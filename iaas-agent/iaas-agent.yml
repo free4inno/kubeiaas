@@ -16,6 +16,8 @@ spec:
       # 打标签：kubectl label node hf-node-01 kubeiaas/node=true
       nodeSelector:
         kubeiaas/node: "true"   # 指定节点标签
+      hostPID: true
+      hostIPC: true
       containers:
         - name: iaas-agent
           command: ["sh"]

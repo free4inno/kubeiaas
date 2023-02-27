@@ -44,7 +44,7 @@ function is_service_install(){
 # return：
 #   - is_active (0-n, 1-y)
 function is_service_active(){
-    result=$(systemctl status $1)
+    result=$(systemctl status $1 2>&1)
     if [[ $result =~ (dead) || $result =~ "Active: inactive" ]]; then
         echo "0"
     elif [[ $result =~ "Active: active" ]]; then
@@ -52,6 +52,13 @@ function is_service_active(){
     else
         echo "0"
     fi
+}
+
+# Output prepare log
+function log(){
+  cmd="sed -i '/""$1""/d' /usr/local/kubeiaas/workdir/log/prepare_result.log"
+  eval "$cmd"
+  echo -e "$1=$2" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
 }
 
 # ----------------------- Main -----------------------
@@ -72,7 +79,7 @@ function main(){
         echo "[+] please check manually..."
         echo ">>> failed"
 
-        echo -e "dhcp=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log dhcp failed
 
     fi
 
@@ -99,13 +106,13 @@ shared-network default {subnet 0.0.0.0 netmask 0.0.0.0 {}}
         echo "[-] dhcpd is active."
         echo ">>> success"
 
-        echo -e "dhcp=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log dhcp success
     else
         echo "[-] dhcpd have not started!"
         echo "[+] please check manually..."
         echo ">>> failed"
 
-        echo -e "dhcp=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log dhcp failed
     fi
 }
 

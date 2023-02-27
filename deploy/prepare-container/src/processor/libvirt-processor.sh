@@ -18,7 +18,7 @@
 # retrun：
 #   - is_active (0-n, 1-y)
 function is_service_active(){
-    result=$(systemctl status $1)
+    result=$(systemctl status $1 2>&1)
     if [[ $result =~ (dead) || $result =~ "Active: inactive" ]]; then
         echo "0"
     elif [[ $result =~ "Active: active" ]]; then
@@ -26,6 +26,13 @@ function is_service_active(){
     else
         echo "0"
     fi
+}
+
+# Output prepare log
+function log(){
+  cmd="sed -i '/""$1""/d' /usr/local/kubeiaas/workdir/log/prepare_result.log"
+  eval "$cmd"
+  echo -e "$1=$2" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
 }
 
 # ----------------------- Main -----------------------
@@ -45,7 +52,7 @@ function main(){
 
         echo " - Please install libvirt manually..."
         echo ">>> failed"
-        echo -e "libvirt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log libvirt failed
         echo ""
         exit
     fi
@@ -70,7 +77,7 @@ function main(){
         else
             echo " - libvirtd is failed to start! Please start libvirtd manually..."
             echo ">>> failed"
-            echo -e "libvirt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+            log libvirt failed
             echo ""
             exit
         fi
@@ -84,13 +91,13 @@ function main(){
     if [[ $res =~ "QEMU" ]]; then
         echo " - libvirtd support qemu."
         echo ">>> success"
-        echo -e "libvirt=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log libvirt success
         echo ""
         exit
     else
         echo " - libvirtd API error! No QEMU found or libvirt connection error, please Check it manually..."
         echo ">>> failed"
-        echo -e "libvirt=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+        log libvirt failed
         echo ""
         exit
     fi

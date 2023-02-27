@@ -16,6 +16,13 @@
 #   sh java-processor.sh
 #
 
+# Output prepare log
+function log(){
+  cmd="sed -i '/""$1""/d' /usr/local/kubeiaas/workdir/log/prepare_result.log"
+  eval "$cmd"
+  echo -e "$1=$2" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+}
+
 # ----------------------- Main -----------------------
 
 function main(){
@@ -30,14 +37,14 @@ function main(){
     if [[ $result =~ 1.8 ]]; then
       echo " - Java8 is already installed. OK"
       echo ">>> success"
-      echo -e "java=success" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+      log java success
       echo ""
       exit
     else
       echo " - Java8 is not found."
       echo "KubeIaaS need Java8 on your host machine. Please restart iaas-agent after installed Java8!"
       echo ">>> failed"
-      echo -e "java=failed" | tee -a /usr/local/kubeiaas/workdir/log/prepare_result.log
+      log java failed
       echo ""
       exit
     fi

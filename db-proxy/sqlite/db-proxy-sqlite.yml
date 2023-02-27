@@ -18,11 +18,6 @@ spec:
         kubeiaas/ctl: "true"
       containers:
         - name: db-proxy
-          command: ["sh"]
-          args:
-            - "-c"
-            - |
-              java -jar /root/db-proxy.jar
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.1-sqlite
           imagePullPolicy: Always
           ports:
