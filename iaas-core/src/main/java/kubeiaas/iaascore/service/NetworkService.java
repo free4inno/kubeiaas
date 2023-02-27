@@ -106,89 +106,20 @@ public class NetworkService {
     }
 
     /**
-     * 全量详情
+     * 网段基本详情
      */
     public IpSegment queryById(Integer ipSegmentId) {
-        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-
-        //set ips
-        /*
-        List<IpUsed> ipList = new ArrayList<>();
-        int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
-        int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
-        Map<String,IpUsed> ips = new HashMap<>();
-        List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
-        ipUsedList.forEach(t -> ips.put(t.getIp(), t));
-
-        for (int ip = ipBegin; ip <= ipEnd; ip++) {
-            String ipStr = IpUtils.intToString(ip);
-            IpUsed tempIpUsed;
-            if (ips.containsKey(ipStr)) {
-                tempIpUsed = ips.get(ipStr);
-                String tempInstanceUuid = tempIpUsed.getInstanceUuid();
-                tempIpUsed.setInstanceName(tableStorage.vmQueryByUuid(tempInstanceUuid).getName());
-            } else {
-                tempIpUsed = new IpUsed();
-                tempIpUsed.setIp(ipStr);
-            }
-            ipList.add(tempIpUsed);
-        }
-        ipSegment.setIps(ipList);*/
-
-        return ipSegment;
+        return tableStorage.ipSegmentQueryById(ipSegmentId);
     }
 
     /**
-     * 分页详情
-     */
-/*
-    public IpSegment pageQueryById(Integer ipSegmentId, Integer pageNum, Integer pageSize) {
-
-        //get ipSegment by ipSegment
-        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-
-        //set ips
-        List<IpUsed> ipList = new ArrayList<>();
-        int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
-        int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
-        Map<String,IpUsed> ips = new HashMap<>();
-        List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
-        ipUsedList.forEach(t -> ips.put(t.getIp(), t));
-
-        for (int ip = ipBegin; ip <= ipEnd; ip++) {
-            String ipStr = IpUtils.intToString(ip);
-            IpUsed tempIpUsed;
-            if (ips.containsKey(ipStr)) {
-                tempIpUsed = ips.get(ipStr);
-                String tempInstanceUuid = tempIpUsed.getInstanceUuid();
-                tempIpUsed.setInstanceName(tableStorage.vmQueryByUuid(tempInstanceUuid).getName());
-            } else {
-                tempIpUsed = new IpUsed();
-                tempIpUsed.setIp(ipStr);
-            }
-            ipList.add(tempIpUsed);
-        }
-        // page ipList
-        List<IpUsed> listSort = new ArrayList<>();
-        int size = ipList.size();
-        int pageStart = pageNum == 1 ? 0 : (pageNum - 1) * pageSize;
-        int pageEnd = Math.min(size, pageNum * pageSize);
-        if (size > pageStart) {
-            listSort =ipList.subList(pageStart, pageEnd);
-        }
-        ipSegment.setIps(listSort);
-        return ipSegment;
-    }*/
-
-    /**
-     * 分页详情
+     * 段内IP分页详情
      */
     public PageResponse<IpUsed> pageQueryById(Integer ipSegmentId, Integer pageNum, Integer pageSize) {
-
-        //get ipSegment by ipSegment
+        // get ipSegment by ipSegment
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
 
-        //set ips
+        // set ips
         List<IpUsed> ipList = new ArrayList<>();
         int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
         int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
@@ -209,6 +140,7 @@ public class NetworkService {
             }
             ipList.add(tempIpUsed);
         }
+
         // page ipList
         List<IpUsed> listSort = new ArrayList<>();
         Integer totalElements = ipList.size();
@@ -218,6 +150,7 @@ public class NetworkService {
         if (totalElements > pageStart) {
             listSort =ipList.subList(pageStart, pageEnd);
         }
+
         return new PageResponse<>(listSort, totalPages, totalElements.longValue());
     }
 }

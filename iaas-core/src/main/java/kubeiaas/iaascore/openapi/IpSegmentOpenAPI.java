@@ -71,6 +71,9 @@ public class IpSegmentOpenAPI {
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
+    /**
+     * 新建网段
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createIpSegment(@Valid @RequestBody CreateIpSegmentForm f) throws BaseException {
@@ -81,6 +84,9 @@ public class IpSegmentOpenAPI {
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
 
+    /**
+     * 删除网段
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteIpSegment(
@@ -97,7 +103,20 @@ public class IpSegmentOpenAPI {
     }
 
     /**
-     * 获取 ipSegment详情
+     * 编辑网段
+     */
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String editIpSegment(@Valid @RequestBody EditIpSegmentForm f) throws BaseException {
+        log.info("ip_segment edit ==== start ====");
+        IpSegment newIpSegment = networkService.updateIpSegment(f.getIpSegmentId(),
+                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
+        log.info("ip_segment edit ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(newIpSegment));
+    }
+
+    /**
+     * 获取 ipSegment 详情
      */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
@@ -110,33 +129,7 @@ public class IpSegmentOpenAPI {
     }
 
     /**
-     * 分页获取 ipSegment详情
-     */
-/*
- @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
-    @ResponseBody
-    public String pageQueryById(
-            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId,
-            @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
-            @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("pageQueryById ==== start ====");
-        IpSegment ipSegment = networkService.pageQueryById(ipSegmentId,pageNum,pageSize);
-        log.info("pageQueryById ==== end ====");
-        return JSON.toJSONString(BaseResponse.success(ipSegment));
-    }*/
-
-    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
-    @ResponseBody
-    public String editIpSegment(@Valid @RequestBody EditIpSegmentForm f) throws BaseException {
-        log.info("ip_segment edit ==== start ====");
-        IpSegment newIpSegment = networkService.updateIpSegment(f.getIpSegmentId(),
-                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
-        log.info("ip_segment edit ==== end ====");
-        return JSON.toJSONString(BaseResponse.success(newIpSegment));
-    }
-
-    /**
-     * 分页获取 ipSegment详情ips信息
+     * 获取 ipSegment 段内 IP 分页详情
      */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.PAGE_QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
@@ -145,7 +138,7 @@ public class IpSegmentOpenAPI {
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
         log.info("pageQueryIpsById ==== start ====");
-        PageResponse<IpUsed> res = networkService.pageQueryById(ipSegmentId,pageNum,pageSize);
+        PageResponse<IpUsed> res = networkService.pageQueryById(ipSegmentId, pageNum, pageSize);
         log.info("pageQueryById ==== end ====");
         return JSON.toJSONString(BaseResponse.success(res));
     }
