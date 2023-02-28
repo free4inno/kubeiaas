@@ -28,3 +28,7 @@ data:
 
   nfs.dir.img: "/usr/local/kubeiaas/data/images"
   nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
+
+  # -------- 网络配置 --------
+  # Linux / OVS
+  network.bridge.type: "Linux"

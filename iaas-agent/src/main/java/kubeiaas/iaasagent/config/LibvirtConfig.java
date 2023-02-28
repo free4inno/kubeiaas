@@ -33,9 +33,11 @@ public class LibvirtConfig {
     public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     public static String virConStr = "qemu:///system";
 
-    public static String privateNetwork = "br0";
-    public static String publicNetwork = "br1";
-    public static String defaultNetwork = "bridge"; //net type
+    public static String defaultNetwork = "bridge";
+    public static String networkBridgeType = System.getenv("NETWORK_BRIDGE_TYPE");
+    public static final String BR_TYPE_LINUX = "Linux";
+    public static final String BR_TYPE_OVS = "OVS";
+
     public static String getVncPort = "virsh vncdisplay ";
 
     /**
@@ -212,11 +214,23 @@ public class LibvirtConfig {
             }
              */
 
-            //设置网卡接口名称
-            log.info("tap=" + getTap(ip.getMac()));
-            netInterface.addElement("target").
-                    addAttribute("dev", getTap(ip.getMac()));
-            //设置网卡型号为Virtio
+            // 网卡接入配置
+            switch (networkBridgeType) {
+                case BR_TYPE_LINUX:
+                    // Linux: target & device
+                    log.info("---- BR_TYPE: Linux (tap={})", getTap(ip.getMac()));
+                    netInterface.addElement("target").
+                            addAttribute("dev", getTap(ip.getMac()));
+                    break;
+                case BR_TYPE_OVS:
+                    // OVS: virtualPort & type(OpenVSwitch)
+                    log.info("---- BR_TYPE: OVS");
+                    netInterface.addElement("virtualport").
+                            addAttribute("type", "openvswitch");
+                    break;
+            }
+
+            // 设置网卡模式类型为 Virtio
             netInterface.addElement("model").
                     addAttribute("type", "virtio");
         }

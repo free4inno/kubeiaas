@@ -9,7 +9,6 @@ import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaasagent.dao.TableStorage;
 import kubeiaas.iaasagent.service.HostService;
-import kubeiaas.iaasagent.service.VncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,9 +24,6 @@ public class HostConfig {
 
     @Resource
     private HostService hostService;
-
-    @Resource
-    private VncService vncService;
 
     private final String hostIp = System.getenv("HOST_IP");
     private final String hostName = System.getenv("HOST_NAME");

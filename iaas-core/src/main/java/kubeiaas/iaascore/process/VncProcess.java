@@ -28,6 +28,10 @@ public class VncProcess {
 
         // 2. GET VNC PORT
         String vncPort = vm.getVncPort();
+        if (vncPort == null || vncPort.isEmpty()) {
+            log.info("createVm -- no port available, setting VNC end");
+            return;
+        }
 
         // 3. GET HOST IP
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
@@ -36,7 +40,7 @@ public class VncProcess {
         // 4. BUILD ADDRESS AND ADD
         String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
         vncScheduler.addVncToken(vmUuid, address);
-        log.info("createVm -- setting VNC end");
+        log.info("createVm -- success, setting VNC end");
     }
 
     public void deleteVncToken(String vmUuid){

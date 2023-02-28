@@ -83,6 +83,12 @@ spec:
                 configMapKeyRef:
                   name: iaas-config
                   key: nodes.nfs
+            # -------- NETWORK CONFIG --------
+            - name: NETWORK_BRIDGE_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: network.bridge.type
             # ----------------------------------
           volumeMounts:
             - name: host-proc
