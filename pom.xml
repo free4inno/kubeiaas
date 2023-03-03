@@ -29,11 +29,15 @@
         <java.version>1.8</java.version>
         <spring.boot.version>2.2.2.RELEASE</spring.boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.version>0.0.1-SNAPSHOT</project.version>
-        <!-- docker host -->
-        <docker.host>tcp://192.168.31.40:2375</docker.host>
-        <docker.repo.username>USERNAME</docker.repo.username>
-        <docker.repo.password>PASSWORD</docker.repo.password>
+
+        <!-- ====== KubeIaaS ====== -->
+        <!-- mvn versions:set -DnewVersion=1.0.0-SNAPSHOT -DgenerateBackupPoms=false -->
+
+        <!-- ====== DockerHost ====== -->
+        <docker.host>${env.KUBEIAAS_DOCKER_HOST}</docker.host>
+        <docker.repo.username>${env.KUBEIAAS_DOCKER_REPO_USERNAME}</docker.repo.username>
+        <docker.repo.password>${env.KUBEIAAS_DOCKER_REPO_PASSWORD}</docker.repo.password>
+        <docker.repo.address>${env.KUBEIAAS_DOCKER_REPO_ADDRESS}</docker.repo.address>
     </properties>
 
     <dependencies>

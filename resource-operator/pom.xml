@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.free4inno.kubeiaas</groupId>
             <artifactId>api-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -66,7 +66,7 @@
 
                     <!-- =============== registry control =============== -->
                     <!-- registry地址,用于推送,拉取镜像,例如阿里的registry -->
-<!--                    <registry>registry.cn-beijing.aliyuncs.com</registry>-->
+                    <!--<registry></registry>-->
                     <!-- 不填写即是官方 docker-hub -->
 
                     <!-- 认证配置,用于私有registry认证,如果忘记了可以去对应的registry查看-->
@@ -83,7 +83,7 @@
                         <!-- 单个镜像配置 -->
                         <image>
                             <!--镜像名(含版本号)-->
-                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>
+                            <name>${docker.repo.address}/${project.name}:${project.version}</name>
                             <!--镜像build相关配置-->
                             <build>
                                 <!--使用dockerFile文件-->
@@ -107,34 +107,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <!-- jib -->
-<!--            <plugin>-->
-<!--                <groupId>com.google.cloud.tools</groupId>-->
-<!--                <artifactId>jib-maven-plugin</artifactId>-->
-<!--                <version>2.4.0</version>-->
-<!--                <configuration>-->
-<!--                    &lt;!&ndash; 相当于 Dockerfile 中的 FROM &ndash;&gt;-->
-<!--                    <from>-->
-<!--                        <image>openjdk:8-jre-alpine</image>-->
-<!--                    </from>-->
-<!--                    <to>-->
-<!--                        &lt;!&ndash;构建镜像名称，这里我使用maven中定义的项目名称&ndash;&gt;-->
-<!--                        <image>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}</image>-->
-<!--                        &lt;!&ndash;私有仓库的账号密码&ndash;&gt;-->
-<!--                        <auth>-->
-<!--                            <username>USERNAME</username>-->
-<!--                            <password>PASSWORD</password>-->
-<!--                        </auth>-->
-<!--                        &lt;!&ndash;Docker 镜像的 tag 这里使用maven定义的版本号&ndash;&gt;-->
-<!--                        <tags>-->
-<!--                            <tag>-->
-<!--                                ${project.version}-->
-<!--                            </tag>-->
-<!--                        </tags>-->
-<!--                    </to>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
         </plugins>
     </build>
 

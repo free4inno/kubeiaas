@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.free4inno.kubeiaas</groupId>
             <artifactId>api-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
         <!-- yaml -->
         <dependency>
@@ -78,7 +78,7 @@
                     <!-- =============== image control =============== -->
                     <images>
                         <image>
-                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>
+                            <name>${docker.repo.address}/${project.name}:${project.version}</name>
                             <build>
                                 <dockerFile>${project.basedir}/Dockerfile</dockerFile>
                             </build>

@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.free4inno.kubeiaas</groupId>
             <artifactId>api-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -82,7 +82,7 @@
                         <!-- 单个镜像配置 -->
                         <image>
                             <!--镜像名(含版本号)-->
-                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>
+                            <name>${docker.repo.address}/${project.name}:${project.version}</name>
                             <!--镜像build相关配置-->
                             <build>
                                 <!--使用dockerFile文件-->

@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.free4inno.kubeiaas</groupId>
             <artifactId>api-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
         <!-- spring jpa -->
         <dependency>
@@ -90,7 +90,7 @@
                     <images>
                         <image>
                             <!-- ######## SQLITE ######## -->
-                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:0.1.1-sqlite</name>
+                            <name>${docker.repo.address}/${project.name}:0.1.1-sqlite</name>
                             <!-- ######## MySQL ######## -->
 <!--                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>-->
                             <build>
