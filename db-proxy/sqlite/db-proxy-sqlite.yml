@@ -18,7 +18,7 @@ spec:
         kubeiaas/ctl: "true"
       containers:
         - name: db-proxy
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.1-sqlite
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.1-SNAPSHOT-sqlite
           imagePullPolicy: Always
           ports:
             - containerPort: 9091

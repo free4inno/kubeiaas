@@ -90,9 +90,9 @@
                     <images>
                         <image>
                             <!-- ######## SQLITE ######## -->
-                            <name>${docker.repo.address}/${project.name}:0.1.1-sqlite</name>
+                            <name>${docker.repo.address}/${project.name}:${project.version}-sqlite</name>
                             <!-- ######## MySQL ######## -->
-<!--                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}</name>-->
+<!--                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}-mysql</name>-->
                             <build>
                                 <dockerFile>${project.basedir}/Dockerfile</dockerFile>
                             </build>
