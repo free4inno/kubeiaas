@@ -35,7 +35,7 @@ KubeIaaS将对虚拟机的管控能力封装为Kubernetes上的应用组件，�
 ## 📦 功能概述
 KubeIaaS在当前版本（v1.0）中主要实现了如下相关功能，
 
-【图】
+![func-total](https://foruda.gitee.com/images/1678002489358765039/3c6a565f_8142739.png)
 
 > 说明：灰色部分为当前版本尚未完成，但计划在未来版本中加入的功能
 
@@ -67,7 +67,7 @@ KubeIaaS能够与“虎符”集成，组建“Hybrid cloUd FUsion platform”�
 
 ## 🚀 安装部署
 
-- 启动文档：https://gitee.com/free4inno-team/kubeiaas/wikis/%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C/%E5%90%AF%E5%8A%A8%E6%96%87%E6%A1%A3%20v1.0
+- 启动文档：[gitee-wiki-kubeiaas-startup](https://gitee.com/free4inno-team/kubeiaas/wikis/pages/preview?sort_id=7851184&doc_id=3598576)
 
 ## 📖 技术架构
 
@@ -105,7 +105,7 @@ KubeIaaS 中定义了两种节点角色类型：
 ├─ image-operator     # 镜像管理模块
 ├─ resource-operator  # 资源调度模块
 ```
-更多详细内容请见：https://gitee.com/free4inno-team/kubeiaas/wikis/pages/preview?sort_id=7851227&doc_id=3598576
+更多详细内容请见：[gitee-wiki-kubeiaas-tech](https://gitee.com/free4inno-team/kubeiaas/wikis/pages/preview?sort_id=7851227&doc_id=3598576)
 
 ## 🎓 贡献说明
 本项目由[自邮之翼](http://www.free4inno.com)团队研发，指导老师为北京邮电大学[徐鹏](https://teacher.bupt.edu.cn/xupeng/zh_CN/index.htm)老师，贡献人员名单如下：
