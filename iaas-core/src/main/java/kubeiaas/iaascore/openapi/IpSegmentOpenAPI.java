@@ -62,11 +62,38 @@ public class IpSegmentOpenAPI {
         return JSON.toJSONString(BaseResponse.success(ipSegmentList));
     }
 
+    /**
+     * 统计信息
+     * @return 四字段公私分类Map
+     */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
         log.info("ip_segment statistics ==== start ====");
+        log.info("ip_segment -- getTotal");
         Map<String, Integer> resMap = networkService.getIpCount();
+        log.info("ip_segment statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
+    }
+
+    /**
+     * ip用量统计
+     * @param ipSegmentId id
+     * @return 两字段用量统计Map
+     * @throws BaseException id异常
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statisticsById(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId) throws BaseException {
+        log.info("ip_segment statistics ==== start ====");
+        Map<String, Integer> resMap;
+        if (ipSegmentId == null) {
+            throw new BaseException("err: ipSegmentId illegal");
+        } else {
+            log.info("ip_segment -- getSegId: " + ipSegmentId);
+            resMap = networkService.getIpCount(ipSegmentId);
+        }
         log.info("ip_segment statistics ==== end ====");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }

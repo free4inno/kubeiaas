@@ -44,6 +44,7 @@ public class RequestMappingConstants {
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
     public static final String STATISTICS = "statistics";
+    public static final String STATISTICS_BY_ID = "statistics_by_id";
     public static final String NODE_RESOURCE = "node_resource";
     public static final String NET_STO_RESOURCE = "net_sto_resource";
     // -- query all

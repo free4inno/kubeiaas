@@ -148,6 +148,28 @@ public class NetworkProcess {
         return count;
     }
 
+    /**
+     * 获取 SegId IP Seg 总量
+     */
+    public Integer getAllNumBySegId(Integer id) throws BaseException {
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(id);
+        if (ipSegment == null) {
+            throw new BaseException("err: ipSegmentId illegal");
+        }
+        return IpUtils.getTotalIpNum(ipSegment);
+    }
+
+    /**
+     * 获取 SegId IP Seg 用量
+     */
+    public Integer getAllUsedNumBySegId(Integer id) throws BaseException {
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(id);
+        if (ipSegment == null) {
+            throw new BaseException("err: ipSegmentId illegal");
+        }
+        return getAllUsedIp(ipSegment.getId()).size();
+    }
+
     // 获取分配 MAC 地址
     public String getNewMac(IpSegment ipSegment) {
         if (ipSegment == null) {

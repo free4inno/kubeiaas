@@ -8,9 +8,7 @@ public class IpSegmentConstants {
     public static final String TYPE = "type";
 
     /* statistics */
-    public static final String PRIVATE_TOTAL = "private_total";
-    public static final String PRIVATE_USED = "private_used";
-    public static final String PUBLIC_TOTAL = "public_total";
-    public static final String PUBLIC_USED = "public_used";
+    public static final String TOTAL = "total";
+    public static final String USED = "used";
 
 }
