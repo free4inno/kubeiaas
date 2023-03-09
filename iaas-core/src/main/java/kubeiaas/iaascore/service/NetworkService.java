@@ -123,7 +123,11 @@ public class NetworkService {
      * 网段基本详情
      */
     public IpSegment queryById(Integer ipSegmentId) {
-        return tableStorage.ipSegmentQueryById(ipSegmentId);
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        String hostUuid = ipSegment.getHostUuid();
+        String hostName = tableStorage.hostQueryByUuid(hostUuid).getName();
+        ipSegment.setHostName(hostName);
+        return ipSegment;
     }
 
     /**
