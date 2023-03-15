@@ -10,6 +10,7 @@ import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.request.IpSegment.CreateIpSegmentForm;
+import kubeiaas.iaascore.request.IpSegment.DeleteIpSegmentForm;
 import kubeiaas.iaascore.request.IpSegment.EditIpSegmentForm;
 import kubeiaas.iaascore.request.vm.CreateVmForm;
 import kubeiaas.iaascore.response.BaseResponse;
@@ -116,10 +117,9 @@ public class IpSegmentOpenAPI {
      */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String deleteIpSegment(
-            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId) {
+    public String deleteIpSegment(@Valid @RequestBody DeleteIpSegmentForm f) {
         log.info("ip_segment delete ==== start ====");
-        String result  = networkService.deleteIpSegment(ipSegmentId);
+        String result  = networkService.deleteIpSegment(f.getIpSegmentId());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("delete ==== end ====");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
