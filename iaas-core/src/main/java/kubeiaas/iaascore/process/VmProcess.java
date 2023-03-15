@@ -19,6 +19,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -360,11 +361,13 @@ public class VmProcess {
 
             // set image
             // (use new Variable to avoid Pointer)
-            Image image = imageMap.get(vm.getImageUuid());
+            Optional<Image> imageOpt = Optional.ofNullable(imageMap.get(vm.getImageUuid()));
+            Image image = imageOpt.orElse(new Image(vm.getImageUuid(), "NA", "NA"));
             vm.setImage(new Image(image.getUuid(), image.getName(), image.getOsType()));
 
             // set host
-            Host host = hostMap.get(vm.getHostUuid());
+            Optional<Host> hostOpt = Optional.ofNullable(hostMap.get(vm.getHostUuid()));
+            Host host = hostOpt.orElse(new Host("NA", "NA"));
             vm.setHost(new Host(host.getName(), host.getIp()));
 
             // set volume
