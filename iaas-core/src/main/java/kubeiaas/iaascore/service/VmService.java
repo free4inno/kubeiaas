@@ -15,6 +15,8 @@ import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -316,14 +318,19 @@ public class VmService {
      * 2. 根据配置中获取 Domain 域名模板
      */
     public String getVncUrl(String vmUuid) {
+        String domainUrl = "";
+        // 1. get config from DB
         List<SpecConfig> vncConfigs = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VNC_DOMAIN);
-        if (vncConfigs == null || vncConfigs.isEmpty()) {
-            // 1. Analyze `vnc` host from DB hostRoles.
+        if (!CollectionUtils.isEmpty(vncConfigs)) {
+            domainUrl = vncConfigs.get(0).getValue();
+        }
+        // 2. build and return
+        if (StringUtils.isEmpty(domainUrl)) {
+            // - Analyze `vnc` host from DB hostRoles.
             Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
             return String.format(VmConstants.VNC_URL_IP_TEMPLATE, host.getIp(), vmUuid);
         } else {
-            // 2. Analyze `vnc` host from Domain Name.
-            String domainUrl = vncConfigs.get(0).getValue();
+            // - Analyze `vnc` host from Domain Name.
             return String.format(VmConstants.VNC_URL_DOMAIN_TEMPLATE, domainUrl, vmUuid);
         }
     }
