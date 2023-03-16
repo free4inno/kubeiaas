@@ -33,10 +33,10 @@ public class LibvirtConfig {
     public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     public static String virConStr = "qemu:///system";
 
-    public static String defaultNetwork = "bridge";
-    public static String networkBridgeType = System.getenv("NETWORK_BRIDGE_TYPE");
-    public static final String BR_TYPE_LINUX = "Linux";
-    public static final String BR_TYPE_OVS = "OVS";
+    public static String networkType = System.getenv("NETWORK_BRIDGE_TYPE");
+    public static final String NETWORK_TYPE_LINUX = "Linux";
+    public static final String NETWORK_TYPE_OVS = "OVS";
+    public static final String NETWORK_TYPE_MACV = "MACVLAN";
 
     public static String getVncPort = "virsh vncdisplay ";
 
@@ -191,49 +191,63 @@ public class LibvirtConfig {
 
     private void ipToNetworkXml(IpUsed ip, Element devices) {
         log.info("ipToNetworkXml ---- start ----");
-        Element netInterface = devices.addElement("interface")
-                .addAttribute("type", defaultNetwork);     //通过conf类加载，默认为 bridge，可以在properties中更改
-        // 采用桥接网络,如下配置:
-        if (defaultNetwork.equals("bridge")) {
-            //设置基本网卡信息
-            netInterface.addElement("mac")
-                    .addAttribute("address", ip.getMac());
-            //设置所用网桥
-            netInterface.addElement("source")
-                    .addAttribute("bridge", ip.getBridge());
+        Element netInterface = devices.addElement("interface");
 
-            /*
-            if (ip.getType().equals(IpTypeEnum.PRIVATE)) {
-                // old: 通过conf类加载，默认私网为br0，可以在properties中更改
+        switch (networkType) {
+            case NETWORK_TYPE_LINUX:
+                // == Linux: target & device
+                log.info("---- NETWORK_TYPE: Linux (tap={})", getTap(ip.getMac()));
+
+                netInterface.addAttribute("type", "bridge");
+                // 设置基本网卡信息
+                netInterface.addElement("mac")
+                        .addAttribute("address", ip.getMac());
+                // 设置所用网桥
                 netInterface.addElement("source")
-                        .addAttribute("bridge", privateNetwork);
-            } else {
-                // old: 通过conf类加载，默认公网为br1，可以在properties中更改
+                        .addAttribute("bridge", ip.getBridge());
+                // set target
+                netInterface.addElement("target").
+                        addAttribute("dev", getTap(ip.getMac()));
+                break;
+
+            case NETWORK_TYPE_OVS:
+                // == OVS: virtualPort & type(OpenVSwitch)
+                log.info("---- NETWORK_TYPE: OVS");
+
+                netInterface.addAttribute("type", "bridge");
+                // 设置基本网卡信息
+                netInterface.addElement("mac")
+                        .addAttribute("address", ip.getMac());
+                // 设置所用网桥
                 netInterface.addElement("source")
-                        .addAttribute("bridge", publicNetwork);
-            }
-             */
+                        .addAttribute("bridge", ip.getBridge());
+                // set virtualport
+                netInterface.addElement("virtualport").
+                        addAttribute("type", "openvswitch");
+                break;
 
-            // 网卡接入配置
-            switch (networkBridgeType) {
-                case BR_TYPE_LINUX:
-                    // Linux: target & device
-                    log.info("---- BR_TYPE: Linux (tap={})", getTap(ip.getMac()));
-                    netInterface.addElement("target").
-                            addAttribute("dev", getTap(ip.getMac()));
-                    break;
-                case BR_TYPE_OVS:
-                    // OVS: virtualPort & type(OpenVSwitch)
-                    log.info("---- BR_TYPE: OVS");
-                    netInterface.addElement("virtualport").
-                            addAttribute("type", "openvswitch");
-                    break;
-            }
+            case NETWORK_TYPE_MACV:
+            default:
+                // == MACV: macvlan & macvtap
+                log.info("---- NETWORK_TYPE: MACV");
 
-            // 设置网卡模式类型为 Virtio
-            netInterface.addElement("model").
-                    addAttribute("type", "virtio");
+                netInterface.addAttribute("type", "direct");
+                // 设置基本网卡信息
+                netInterface.addElement("mac")
+                        .addAttribute("address", ip.getMac());
+                // 设置直连设备
+                netInterface.addElement("source")
+                        .addAttribute("dev", ip.getBridge()).addAttribute("mode", "bridge");
+                // set target
+                netInterface.addElement("target").
+                        addAttribute("dev", getTap(ip.getMac()));
+                break;
         }
+
+        // 设置网卡模式类型为 Virtio
+        netInterface.addElement("model").
+                addAttribute("type", "virtio");
+
         log.info("ipToNetworkXml ---- end ----");
     }
 
