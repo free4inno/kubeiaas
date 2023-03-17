@@ -209,4 +209,23 @@ public interface DbProxy {
     String specConfigQueryAllByType(
             @RequestParam(value = RequestParamConstants.TYPE) SpecTypeEnum type
     );
+
+    // ========================= host =========================
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DEVICE + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String deviceQueryAll();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DEVICE + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
+    @ResponseBody
+    String deviceQueryAllBySingleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DEVICE + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String deviceSave(
+            @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr
+    );
 }

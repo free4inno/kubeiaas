@@ -331,4 +331,22 @@ public class TableStorage {
         String jsonString = dbProxy.specConfigQueryAllByType(type);
         return JSON.parseArray(jsonString, SpecConfig.class);
     }
+
+    // ======================== device ==============================
+
+    public List<Device> deviceQueryAllByHostUuid(String uuid) {
+        String jsonString = dbProxy.deviceQueryAllBySingleKey(DeviceConstants.HOST_UUID, uuid);
+        return JSON.parseArray(jsonString, Device.class);
+    }
+
+    public List<Device> deviceQueryByVmUuid(String uuid) {
+        String jsonString = dbProxy.deviceQueryAllBySingleKey(DeviceConstants.INSTANCE_UUID, uuid);
+        return JSON.parseArray(jsonString, Device.class);
+    }
+
+    public Device deviceSave(Device device) {
+        String deviceObjectStr = JSON.toJSONString(device);
+        deviceObjectStr = dbProxy.deviceSave(deviceObjectStr);
+        return JSON.parseObject(deviceObjectStr, Device.class);
+    }
 }

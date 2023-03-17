@@ -63,4 +63,7 @@ public class RequestParamConstants {
     public static final String SERVICE_NAME = "service_name";
     public static final String NODE_NAME = "node_name";
     public static final String TIMESTAMP = "timestamp";
+
+    /* ==== DEVICE ===== */
+    public static final String DEVICE_OBJECT = "device_object";
 }

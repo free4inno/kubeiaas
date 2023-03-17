@@ -1,5 +1,6 @@
 package kubeiaas.iaasagent.config;
 
+import kubeiaas.common.bean.Device;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
@@ -7,7 +8,6 @@ import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.VmCUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -46,6 +46,13 @@ public class XmlConfig {
     public String getVolumeDevice(Volume volume) {
         log.info("getVolumeDevice ---- start ----");
         String res = libvirtConfig.volumeToDisk(volume);
+        log.info("getVolumeDevice ---- end ----");
+        return res;
+    }
+
+    public String getUsbDevice(Device device) {
+        log.info("getVolumeDevice ---- start ----");
+        String res = libvirtConfig.usbToDevice(device);
         log.info("getVolumeDevice ---- end ----");
         return res;
     }

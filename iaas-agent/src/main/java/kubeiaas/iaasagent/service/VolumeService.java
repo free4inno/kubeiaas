@@ -6,12 +6,10 @@ import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.utils.*;
-import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.VolumeConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
-import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
@@ -22,29 +20,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static kubeiaas.iaasagent.config.LibvirtConfig.virtCon;
+
 @Slf4j
 @Service
 public class VolumeService {
-
-    private static Connect virtCon;
 
     @Resource
     private TableStorage tableStorage;
 
     @Resource
     private XmlConfig xmlConfig;
-
-    public VolumeService() {
-        if (virtCon == null) {
-            String conStr = LibvirtConfig.virConStr;
-            try {
-                virtCon = new Connect(conStr);
-            } catch (LibvirtException e) {
-                log.error("get virt connection error", e);
-                log.error(e.getMessage());
-            }
-        }
-    }
 
     public boolean createSystemVolume(String imagePath, String volumePath, String volumeUuid, int extraSize) {
 

@@ -10,7 +10,6 @@ import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
-import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
@@ -19,35 +18,20 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static kubeiaas.iaasagent.config.LibvirtConfig.virtCon;
+
 @Slf4j
 @Service
 public class VmService {
 
-    private static Connect virtCon;
-
     @Resource
     private TableStorage tableStorage;
-
-    @Resource
-    private VncService vncService;
 
     @Resource
     private LibvirtConfig libvirtConfig;
 
     @Resource
     private XmlConfig xmlConfig;
-
-    public VmService() {
-        if (virtCon == null) {
-            String conStr = LibvirtConfig.virConStr;
-            try {
-                virtCon = new Connect(conStr);
-            } catch (LibvirtException e) {
-                log.error("get virt connection error", e);
-                log.error(e.getMessage());
-            }
-        }
-    }
 
     public boolean createVm(String vmUuid) {
         log.info("createVm ---- start ---- instanceUuid: " + vmUuid);

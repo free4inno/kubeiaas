@@ -14,7 +14,7 @@ public class Device {
     private DeviceTypeEnum type;
 
     private String bus;
-    private String device;
+    private String dev;
     private String vendor;
     private String product;
 
@@ -28,16 +28,18 @@ public class Device {
         this.setType(type);
     }
 
-    public boolean equals(Device dev) {
-        if (null == dev)
+    public boolean equals(Device device) {
+        if (null == device)
             return false;
-        if (null == bus || null == dev.getBus() || !bus.equals(dev.getBus()))
+        if (null == type || null == device.getType() || !type.equals(device.getType()))
             return false;
-        if (null == device || null == dev.getDevice() || !device.equals(dev.getDevice()))
+        if (null == bus || null == device.getBus() || !bus.equals(device.getBus()))
             return false;
-        if (null == vendor || null == dev.getVendor() || !vendor.equals(getVendor()))
+        if (null == dev || null == device.getDev() || !dev.equals(device.getDev()))
             return false;
-        if (null == product || null == dev.getProduct() || !product.equals(getProduct()))
+        if (null == vendor || null == device.getVendor() || !vendor.equals(device.getVendor()))
+            return false;
+        if (null == product || null == device.getProduct() || !product.equals(device.getProduct()))
             return false;
         return true;
     }

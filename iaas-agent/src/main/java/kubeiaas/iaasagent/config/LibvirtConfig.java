@@ -1,12 +1,8 @@
 package kubeiaas.iaasagent.config;
 
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
-import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.VmCUtils;
@@ -14,8 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.libvirt.Connect;
+import org.libvirt.LibvirtException;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -32,6 +29,7 @@ public class LibvirtConfig {
 
     public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     public static String virConStr = "qemu:///system";
+    public static Connect virtCon;
 
     public static String networkType = System.getenv("NETWORK_BRIDGE_TYPE");
     public static final String NETWORK_TYPE_LINUX = "Linux";
@@ -39,6 +37,18 @@ public class LibvirtConfig {
     public static final String NETWORK_TYPE_MACV = "MACVLAN";
 
     public static String getVncPort = "virsh vncdisplay ";
+
+    public LibvirtConfig() {
+        if (virtCon == null) {
+            String conStr = LibvirtConfig.virConStr;
+            try {
+                virtCon = new Connect(conStr);
+            } catch (LibvirtException e) {
+                log.error("get virt connection error", e);
+                log.error(e.getMessage());
+            }
+        }
+    }
 
     /**
      * old：使用构造函数在启动时调用
@@ -102,39 +112,39 @@ public class LibvirtConfig {
         domain.addElement("uuid")
                 .setText(instance.getUuid());
         domain.addElement("memory")
-                .setText(String.valueOf(VmCUtils.memUnitConvert(Integer.valueOf(MAX_MEMORY))));
+                .setText(String.valueOf(VmCUtils.memUnitConvert(memory)));
         domain.addElement("currentMemory")
                 .setText(String.valueOf(VmCUtils.memUnitConvert(memory)));
         domain.addElement("vcpu")
                 .addAttribute("placement", "static")
                 .addAttribute("current", String.valueOf(cpu))
-                .setText(MAX_CPU);
+                .setText(String.valueOf(cpu));
         domain.addElement("cpu")
                 .addElement("topology")
                 .addAttribute("sockets", "1")
-                .addAttribute("cores", MAX_CPU)
+                .addAttribute("cores", String.valueOf(cpu))
                 .addAttribute("threads", "1");
 
         Element os = domain.addElement("os");
         os.addElement("type").setText(image.getOsMode().toString()); //需验证参数是否为空
         os.addElement("bootmenu").addAttribute("enable", "yes");        //为了兼容windows，不能指定boot dev
 
-        //一些确定值
+        // static value
         Element features = domain.addElement("features");
         features.addElement("acpi");
         features.addElement("apic");
-        if(image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+        if (image.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
             Element hyperv = features.addElement("hyperv");
             hyperv.addElement("relaxed").addAttribute("state", "on");
             hyperv.addElement("vapic").addAttribute("state", "on");
             hyperv.addElement("spinlocks").addAttribute("state", "on").addAttribute("retries", "8191");
-        }else{
+        } else {
             features.addElement("pae");
         }
         Element clock = domain.addElement("clock").addAttribute("offset", "localtime");
         clock.addElement("timer").addAttribute("name", "pit").addAttribute("tickpolicy", "delay");
         clock.addElement("timer").addAttribute("name", "rtc").addAttribute("tickpolicy", "catchup");
-        if(image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+        if (image.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
             clock.addElement("timer").addAttribute("name", "hpet").addAttribute("present", "no");
             clock.addElement("timer").addAttribute("name", "hypervclock").addAttribute("present", "yes");
         }
@@ -142,7 +152,7 @@ public class LibvirtConfig {
         domain.addElement("on_reboot").setText("restart");
         domain.addElement("on_crash").setText("restart");
 
-        //volume设置
+        // volume设置
         Element devices = domain.addElement("devices");
         initEmulator();  // get emulator path
         if (emulatorName != null) {
@@ -150,19 +160,23 @@ public class LibvirtConfig {
         }
 
         for (Volume volume : volumes) {
-            volumeToDiskXml(volume, devices);
+            this.volumeToDiskXml(volume, devices);
         }
 
-        //网络设置
+        // 控制器设置
+        devices.addElement("controller")
+                .addAttribute("type", "usb").addAttribute("model", "nec-xhci");
+
+        // 网络设置
         for (IpUsed ip : ips) {
-            ipToNetworkXml(ip, devices);
+            this.ipToNetworkXml(ip, devices);
         }
 
-        //Tab设置
+        // Tablet设置
         devices.addElement("input").addAttribute("type", "tablet")
                 .addAttribute("bus", "usb");
 
-        //VNC设置
+        // VNC设置
         Element graphicsVNC = devices.addElement("graphics")
                 .addAttribute("type", "vnc")
                 .addAttribute("port", "-1")
@@ -177,6 +191,11 @@ public class LibvirtConfig {
         return document.asXML();
     }
 
+    // ===== NETWORK ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
     public String ipToNetwork(IpUsed ip) {
         log.info("ipToNetwork ---- start ----");
         Document root = DocumentHelper.createDocument();
@@ -189,6 +208,9 @@ public class LibvirtConfig {
         return res.trim();
     }
 
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
     private void ipToNetworkXml(IpUsed ip, Element devices) {
         log.info("ipToNetworkXml ---- start ----");
         Element netInterface = devices.addElement("interface");
@@ -251,7 +273,16 @@ public class LibvirtConfig {
         log.info("ipToNetworkXml ---- end ----");
     }
 
-    //目前dom4j没有办法获取部分xml内容，只能使用这种笨方法
+    private String getTap(String str) {
+        str = str.replaceAll(":", "");
+        return VolumeConstants.TAP_PREFIX + str;
+    }
+
+    // ===== VOLUME ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
     public String volumeToDisk(Volume volume) {
         log.info("volumeToDisk ---- start ----");
         Document root = DocumentHelper.createDocument();
@@ -264,6 +295,9 @@ public class LibvirtConfig {
         return res.trim();
     }
 
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
     private void volumeToDiskXml(Volume volume, Element devices) {
         log.info("volumeToDiskXml ---- start ----");
         String volumeType = getVolumeDiskDevice(volume.getFormatType());
@@ -297,9 +331,42 @@ public class LibvirtConfig {
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 
-    private String getTap(String str) {
-        str = str.replaceAll(":", "");
-        return VolumeConstants.TAP_PREFIX + str;
+    // ===== DEVICE ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
+    public String usbToDevice(Device device) {
+        log.info("usbToDevice ---- start ----");
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        usbToDeviceXml(device, devices);
+        String res = devices.asXML();
+        res = res.replaceAll("<root>", "");
+        res = res.replaceAll("</root>", "");
+        log.info("usbToDevice ---- end ---- res: " + res.trim());
+        return res.trim();
     }
 
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
+    private void usbToDeviceXml(Device device, Element devices) {
+        log.info("usbToDeviceXml ---- start ----");
+
+        Element hostdev = devices.addElement("hostdev")
+                .addAttribute("mode", "subsystem")
+                .addAttribute("type", "usb");
+
+        Element source = hostdev.addElement("source");
+        source.addElement("vendor")
+                .addAttribute("id", device.getVendor());
+        source.addElement("product")
+                .addAttribute("id", device.getProduct());
+        source.addElement("address")
+                .addAttribute("bus", device.getBus())
+                .addAttribute("device", device.getDev());
+
+        log.info("usbToDeviceXml ---- end ----");
+    }
 }

@@ -29,13 +29,13 @@ public class UsbUtils {
                 String[] devInfo = lineStr.split(" ");
 
                 usbDevice.setBus(devInfo[1]);
-                usbDevice.setDevice(devInfo[3].split(":")[0]);
+                usbDevice.setDev(devInfo[3].split(":")[0]);
                 usbDevice.setVendor("0x" + devInfo[5].split(":")[0]);
                 usbDevice.setProduct("0x" + devInfo[5].split(":")[1]);
 
                 StringBuilder sb = new StringBuilder();
                 for (int i = 6; i < devInfo.length; i++) {
-                    sb.append(devInfo[i]);
+                    sb.append(devInfo[i]).append(" ");
                 }
                 usbDevice.setName(sb.toString());
 
