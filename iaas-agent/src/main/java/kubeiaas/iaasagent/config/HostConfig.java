@@ -25,6 +25,8 @@ public class HostConfig {
     @Resource
     private HostService hostService;
 
+    public static Host thisHost;
+
     private final String hostIp = System.getenv("HOST_IP");
     private final String hostName = System.getenv("HOST_NAME");
 
@@ -127,7 +129,10 @@ public class HostConfig {
             host.setStatus(HostStatusEnum.ERROR);
             log.error("== host check done, total failed! == ");
         }
+
+        // - save
         tableStorage.hostSave(host);
+        thisHost = host;
     }
 
     private List<String> splitByComma(String str) {

@@ -5,6 +5,7 @@ public class HostConstants {
     public static final String UUID = "uuid";
     public static final String IP = "ip";
     public static final String ROLE = "role";
+    public static final String NAME = "name";
 
     /* statistics */
     public static final String TOTAL_NODE = "total_node";

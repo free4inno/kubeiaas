@@ -11,6 +11,7 @@ public class RequestParamConstants {
 
     public static final String IMAGE_UUID = "image_uuid";
     public static final String HOST_UUID = "host_uuid";
+    public static final String HOST_NAME = "host_name";
     public static final String VM_UUID = "vm_uuid";
     public static final String VOLUME_UUID = "volume_uuid";
 

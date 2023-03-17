@@ -22,51 +22,38 @@ public class AgentConfig {
     private static final String HTTP_URI = "http://";
     private static final String AGENT_PORT = ":9090";
 
-    private static final String DHCP_HOST_IP = "DHCP_HOST_IP";
-    private static final String VNC_HOST_IP = "VNC_HOST_IP";
-
-    /* select agent's host ip */
-    // < vmUuid     : hostIp >
-    // < volumeUuid : hostIp >
+    /**
+     *  select agent's host ip
+     *
+     *  < vmUuid     : hostIp >
+     *  < volumeUuid : hostIp >
+     *
+     *  缓存当前访问 uuid 与 host 关联关系
+     */
     private static final Map<String, String> selected_host_ip = new HashMap<>();
 
-    /**
-     * 设置 target host
-     * @param host 目标 agent 所在 host
-     */
     public static void setSelectedHost(String uuid, Host host) {
         selected_host_ip.put(uuid, host.getIp());
     }
 
-    /**
-     * 清除 target host
-     */
     public static void clearSelectedHost(String uuid) {
         selected_host_ip.remove(uuid);
     }
 
-    /**
-     * 获取 agent uri - 主动选择
-     * @return uri
-     */
-    public static String getSelectedUri(String vmUuid) {
-        String selectedIp = selected_host_ip.get(vmUuid);
+    public static String getSelectedUri(String uuid) {
+        String selectedIp = selected_host_ip.get(uuid);
         if (selectedIp == null || selectedIp.isEmpty()) {
-            log.error("getSelectedUri -- no selected ip for " + vmUuid);
+            log.error("getSelectedUri -- no selected ip for " + uuid);
             return "";
         }
         return HTTP_URI + selectedIp + AGENT_PORT;
     }
 
     /**
-     * 获取 agent uri - dhcp
-     * @return uri
+     * ===== 根据节点角色获取 URI =====
      */
     public String getDhcpUri() throws BaseException {
-        // [old] direct from ENV variable.
-        //String dhcpHostIp = System.getenv(DHCP_HOST_IP);
-
-        // [new] analyze from DB hostRoles.
+        // analyze from DB hostRoles.
         Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_DHCP);
         if (host == null) {
             throw new BaseException("getDhcpUri -- dhcp host not found!");
@@ -75,15 +62,8 @@ public class AgentConfig {
         return HTTP_URI + host.getIp() + AGENT_PORT;
     }
 
-    /**
-     * 获取 agent uri - vnc
-     * @return uri
-     */
     public String getVncUri() throws BaseException {
-        // [old] direct from ENV variable.
-        //String dhcpHostIp = System.getenv(VNC_HOST_IP);
-
-        // [new] analyze from DB hostRoles.
+        // analyze from DB hostRoles.
         Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
         if (host == null) {
             throw new BaseException("getVncUri -- vnc host not found!");
@@ -93,10 +73,9 @@ public class AgentConfig {
     }
 
     /**
-     * 获取 agent uri - host
-     * @return uri
+     * ===== 通过 Host 直接获取 URI =====
      */
-    public static String getHostUri(String hostIp) {
-        return HTTP_URI + hostIp + AGENT_PORT;
+    public static String getHostUri(Host host) {
+        return HTTP_URI + host.getIp() + AGENT_PORT;
     }
 }

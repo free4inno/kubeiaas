@@ -13,6 +13,7 @@ public class RequestMappingConstants {
     public static final String IP_USED = "ip_used";
     public static final String SPEC_CONFIG = "spec_config";
     public static final String SERVICE = "service";
+    public static final String DEVICE = "device";
 
     // -- agent component
     public static final String DHCP_C = "dhcp_c";
@@ -20,6 +21,7 @@ public class RequestMappingConstants {
     public static final String IMAGE_C = "image_c";
     public static final String VM_C = "vm_c";
     public static final String VOLUME_C = "volume_c";
+    public static final String DEVICE_C = "device_c";
     public static final String HOST_C = "host_c";
 
     /* =============== action =============== */
@@ -55,6 +57,8 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_BY_HOST_AND_TYPE = "query_all_by_host_and_type";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
+    public static final String QUERY_ALL_BY_HOST_NAME = "query_all_by_host_name";
+    public static final String QUERY_ALL_BY_HOST_UUID = "query_all_by_host_uuid";
     // -- fuzzy query
     public static final String FUZZY_QUERY = "fuzzy_query";
     public static final String FUZZY_QUERY_ATTACH = "fuzzy_query_attach";

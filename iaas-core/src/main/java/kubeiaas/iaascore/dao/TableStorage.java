@@ -163,6 +163,16 @@ public class TableStorage {
         }
     }
 
+    public Host hostQueryByName(String name) {
+        String jsonString = dbProxy.hostQueryAllBySingleKey(HostConstants.NAME, name);
+        List<Host> hostList = JSON.parseArray(jsonString, Host.class);
+        if (hostList != null && !hostList.isEmpty()) {
+            return hostList.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public Host hostQueryByRole(String role) {
         String jsonString = dbProxy.hostQueryAllLikeBySingleKey(HostConstants.ROLE, "\"" + role + "\"");
         List<Host> hostList = JSON.parseArray(jsonString, Host.class);
