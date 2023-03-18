@@ -1,7 +1,7 @@
 package kubeiaas.common.enums.device;
 
 public enum DeviceStatusEnum {
-    ATTACHED, AVAILABLE;
+    ATTACHED, AVAILABLE, UNREACHABLE;
 
     public String toString() {
         switch (this) {
@@ -9,6 +9,8 @@ public enum DeviceStatusEnum {
                 return "attached";
             case AVAILABLE:
                 return "available";
+            case UNREACHABLE:
+                return "unreachable";
         }
         return super.toString();
     }

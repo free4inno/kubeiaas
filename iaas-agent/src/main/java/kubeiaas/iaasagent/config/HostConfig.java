@@ -30,6 +30,13 @@ public class HostConfig {
     private final String hostIp = System.getenv("HOST_IP");
     private final String hostName = System.getenv("HOST_NAME");
 
+    public String getHostIp() {
+        return hostIp;
+    }
+    public String getHostName() {
+        return hostName;
+    }
+
     private final Map<String ,String> roleNodes = new HashMap<>();
     HostConfig() {
         roleNodes.put(HostConstants.ROLE_DHCP, System.getenv("DHCP_NODE"));
@@ -139,11 +146,4 @@ public class HostConfig {
         return Arrays.asList(str.split(","));
     }
 
-    public String getHostIp() {
-        return hostIp;
-    }
-
-    public String getHostName() {
-        return hostName;
-    }
 }

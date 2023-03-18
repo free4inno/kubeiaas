@@ -269,7 +269,7 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_UUID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryByUuid(
-            @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) {
+            @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) throws BaseException {
         log.info("queryByUuid ==== start ====");
         Vm vm = vmService.queryByUuid(uuid);
         log.info("queryByUuid ==== end ====");

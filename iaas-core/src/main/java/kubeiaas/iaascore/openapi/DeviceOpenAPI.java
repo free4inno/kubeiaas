@@ -75,19 +75,16 @@ public class DeviceOpenAPI {
             @Valid @RequestBody AttachDeviceForm f) throws BaseException {
         log.info("attach ==== start ====");
 
-        // 1. get host and check
-        Host host = tableStorage.hostQueryByUuid(f.getHostUuid());
-        if (null == host) {
-            log.info("queryAll ==== error: host_uuid {} unknown.", f.getHostUuid());
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
-        }
-        // 2. get vm and check
+        // 1.1. get vm and check
         Vm vm = tableStorage.vmQueryByUuid(f.getVmUuid());
         if (null == vm) {
             log.info("queryAll ==== error: vm_uuid {} unknown.", f.getVmUuid());
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
         }
-        // 3. get device and check
+        // 1.2. get host
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+
+        // 2. get device and check
         DeviceTypeEnum deviceTypeEnum = EnumUtils.getEnumFromString(DeviceTypeEnum.class, f.getType());
         if (null == deviceTypeEnum) {
             log.info("queryAll ==== error: type {} unknown.", f.getType());
@@ -95,9 +92,7 @@ public class DeviceOpenAPI {
         }
 
         // 3. build a temp device for compare with list
-        Device tempDevice = new Device(null, deviceTypeEnum,
-                f.getBus(), f.getDev(), f.getVendor(), f.getProduct(),
-                null, null, null, null);
+        Device tempDevice = new Device(deviceTypeEnum, f.getBus(), f.getDev(), f.getVendor(), f.getProduct());
         boolean result = deviceScheduler.attachDevice(tempDevice, host, vm);
 
         // 4. response

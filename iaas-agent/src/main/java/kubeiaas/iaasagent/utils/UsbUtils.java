@@ -39,7 +39,10 @@ public class UsbUtils {
                 }
                 usbDevice.setName(sb.toString());
 
-                deviceList.add(usbDevice);
+                // exclude root hub
+                if (Integer.parseInt(usbDevice.getDev()) != 1) {
+                    deviceList.add(usbDevice);
+                }
             }
             proc.destroy();
         } catch (Exception ex) {

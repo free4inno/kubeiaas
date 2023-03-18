@@ -2,18 +2,23 @@ package kubeiaas.iaasagent.config;
 
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.VmCUtils;
+import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.eclipse.aether.util.ConfigUtils;
 import org.libvirt.Connect;
 import org.libvirt.LibvirtException;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -24,8 +29,11 @@ import java.util.List;
 @Configuration
 public class LibvirtConfig {
 
-    private static final String MAX_MEMORY = "16";
-    private static final String MAX_CPU = "16";
+    @Resource
+    private TableStorage tableStorage;
+
+    private static Integer MAX_MEMORY = 16;
+    private static Integer MAX_CPU = 16;
 
     public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     public static String virConStr = "qemu:///system";
@@ -39,24 +47,16 @@ public class LibvirtConfig {
     public static String getVncPort = "virsh vncdisplay ";
 
     public LibvirtConfig() {
+        emulatorName = getEmulatorLocation();
         if (virtCon == null) {
             String conStr = LibvirtConfig.virConStr;
             try {
                 virtCon = new Connect(conStr);
             } catch (LibvirtException e) {
-                log.error("get virt connection error", e);
+                log.error("get virt connection error");
                 log.error(e.getMessage());
             }
         }
-    }
-
-    /**
-     * old：使用构造函数在启动时调用
-     * now：在kvm操作前主动调用
-     * （为了启动时不依赖宿主机的 libvirt 安装，暂时不考虑额外造成的开销）
-     */
-    public void initEmulator() {
-        emulatorName = getEmulatorLocation();
     }
 
     /**
@@ -91,6 +91,36 @@ public class LibvirtConfig {
     }
 
     /**
+     * 刷新用户计算资源上限配置
+     *
+     * 从配置表中读取配置，并按照配置设置最大值，期间需要防止用户的 空配置 / 错误配置
+     * 在每次生产新的 XML 前刷新
+     */
+    private void refreshMaxCompute() {
+        List<SpecConfig> confList = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VM_COMPUTE);
+        if (CollectionUtils.isEmpty(confList)) {
+            return;
+        }
+        int tempMaxMem = MAX_MEMORY;
+        int tempMaxCpu = MAX_CPU;
+        for (SpecConfig conf : confList) {
+            String[] cm = conf.getValue().split(",");
+            if (cm.length == 2) {
+                try {
+                    int nowCpu = Integer.parseInt(cm[0]);
+                    int nowMem = Integer.parseInt(cm[1]);
+                    tempMaxCpu = Math.max(nowCpu, tempMaxCpu);
+                    tempMaxMem = Math.max(nowMem, tempMaxMem);
+                } catch (Exception e) {
+                    log.warn("bad config value '{}'. {}", conf.getValue(), e.getMessage());
+                }
+            }
+        }
+        MAX_CPU = tempMaxCpu;
+        MAX_MEMORY = tempMaxMem;
+    }
+
+    /**
      * 生成xml描述文件.
      * 参数解析、流程控制.
      */
@@ -103,6 +133,9 @@ public class LibvirtConfig {
             int memory) {
         log.info("generateDesXML ---- start ----");
 
+        // refresh MAX setting
+        this.refreshMaxCompute();
+
         Document document = DocumentHelper.createDocument();
         Element domain = document.addElement("domain").addAttribute("type", "kvm")
                 .addNamespace("qemu", "http://libvirt.org/schemas/domain/qemu/1.0");
@@ -112,17 +145,17 @@ public class LibvirtConfig {
         domain.addElement("uuid")
                 .setText(instance.getUuid());
         domain.addElement("memory")
-                .setText(String.valueOf(VmCUtils.memUnitConvert(memory)));
+                .setText(String.valueOf(VmCUtils.memUnitConvert(MAX_MEMORY)));
         domain.addElement("currentMemory")
                 .setText(String.valueOf(VmCUtils.memUnitConvert(memory)));
         domain.addElement("vcpu")
                 .addAttribute("placement", "static")
                 .addAttribute("current", String.valueOf(cpu))
-                .setText(String.valueOf(cpu));
+                .setText(String.valueOf(MAX_CPU));
         domain.addElement("cpu")
                 .addElement("topology")
                 .addAttribute("sockets", "1")
-                .addAttribute("cores", String.valueOf(cpu))
+                .addAttribute("cores", String.valueOf(MAX_CPU))
                 .addAttribute("threads", "1");
 
         Element os = domain.addElement("os");
@@ -152,18 +185,18 @@ public class LibvirtConfig {
         domain.addElement("on_reboot").setText("restart");
         domain.addElement("on_crash").setText("restart");
 
-        // volume设置
-        Element devices = domain.addElement("devices");
-        initEmulator();  // get emulator path
-        if (emulatorName != null) {
-            devices.addElement("emulator").setText(emulatorName);          //通过conf类加载，默认为 kvm 在Linux中的位置，可以在properties中更改
-        }
 
+        Element devices = domain.addElement("devices");
+
+        // emulator
+        devices.addElement("emulator").setText(emulatorName);  // init 时加载
+
+        // volume设置
         for (Volume volume : volumes) {
             this.volumeToDiskXml(volume, devices);
         }
 
-        // 控制器设置
+        // USB控制器设置 (must support USB 3.0)
         devices.addElement("controller")
                 .addAttribute("type", "usb").addAttribute("model", "nec-xhci");
 

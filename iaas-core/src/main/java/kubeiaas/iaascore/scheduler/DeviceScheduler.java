@@ -12,6 +12,7 @@ import kubeiaas.iaascore.dao.feign.DeviceController;
 import kubeiaas.iaascore.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.net.URI;
@@ -29,7 +30,7 @@ public class DeviceScheduler {
 
     public List<Device> queryAll(Host host) throws BaseException {
         // 1. Devices from host RAW
-        List<Device> rawDevices = new ArrayList<>();
+        List<Device> rawDevices;
         try {
             String jsonObjectString = deviceController.queryAll(getUri(host));
             rawDevices = JSON.parseArray(jsonObjectString, Device.class);
@@ -48,11 +49,57 @@ public class DeviceScheduler {
             for (Device dbDev : dbDevices) {
                 if (rawDev.equals(dbDev)) {
                     deviceList.add(dbDev);
+                    dbDevices.remove(dbDev);
                     addFlag = true;
+                    break;
                 }
             }
             if (!addFlag) deviceList.add(rawDev);
         }
+
+        for (Device dbDev : dbDevices) {
+            dbDev.setStatus(DeviceStatusEnum.UNREACHABLE);
+        }
+        deviceList.addAll(dbDevices);
+
+        return deviceList;
+    }
+
+    public List<Device> queryByVm(Vm vm) throws BaseException {
+        // 1. Devices from DB
+        List<Device> dbDevices = tableStorage.deviceQueryByVmUuid(vm.getUuid());
+        if (CollectionUtils.isEmpty(dbDevices)) {
+            return new ArrayList<>();
+        }
+
+        // 2. Devices form host RAW
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        List<Device> rawDevices;
+        try {
+            String jsonObjectString = deviceController.queryAll(getUri(host));
+            rawDevices = JSON.parseArray(jsonObjectString, Device.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BaseException("err: device query all failed, host name is " + host.getName());
+        }
+
+        // 3. build total (device amount will not too large, this method O(n^2) is ok)
+        List<Device> deviceList = new ArrayList<>();
+        for (Device dbDev : dbDevices) {
+            boolean findFlag = false;
+            for (Device rawDev : rawDevices) {
+                if (rawDev.equals(dbDev)) {
+                    deviceList.add(dbDev);
+                    findFlag = true;
+                    break;
+                }
+            }
+            if (!findFlag) {
+                dbDev.setStatus(DeviceStatusEnum.UNREACHABLE);
+                deviceList.add(dbDev);
+            }
+        }
+
         return deviceList;
     }
 
@@ -69,6 +116,7 @@ public class DeviceScheduler {
                     return false;
                 }
                 device.setStatus(DeviceStatusEnum.ATTACHED);
+                device.setInstanceUuid(vm.getUuid());
                 tableStorage.deviceSave(device);
                 return true;
             }

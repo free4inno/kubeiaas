@@ -24,10 +24,23 @@ public class Device {
     private DeviceStatusEnum status;
     private String instanceUuid;
 
+    /**
+     * construct a Device with type
+     */
     public Device(DeviceTypeEnum type) {
         this.setType(type);
     }
 
+    /**
+     * construct temp Device for compare
+     */
+    public Device(DeviceTypeEnum type, String bus, String dev, String vendor, String product) {
+        this.setType(type);
+    }
+
+    /**
+     * equals for compare
+     */
     public boolean equals(Device device) {
         if (null == device)
             return false;

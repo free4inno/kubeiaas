@@ -54,7 +54,15 @@ public class DeviceService {
         try {
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             try {
-                domain.attachDeviceFlags(deviceXml, 3);
+                /**
+                 * Attach a virtual device to a domain, using the flags parameter to control how the device is attached.
+                 * - 0000: VIR_DOMAIN_AFFECT_CURRENT specifies that the device allocation is made based on current domain state.
+                 * - 0001: VIR_DOMAIN_AFFECT_LIVE specifies that the device shall be allocated to the active domain instance only and is not added to the persisted domain configuration.
+                 * - 0010: VIR_DOMAIN_AFFECT_CONFIG specifies that the device shall be allocated to the persisted domain configuration only. Note that the target hypervisor must return an error if unable to satisfy flags.
+                 * - 0100: FORCE
+                 * Use | to combine those configs, we got 3 as (VIR_DOMAIN_AFFECT_LIVE | VIR_DOMAIN_AFFECT_CONFIG)
+                 */
+                domain.attachDeviceFlags(deviceXml, (0b0001 | 0b0010));
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;

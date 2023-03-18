@@ -40,4 +40,5 @@ public class Vm {
     private Image image;
     private List<Volume> volumes;
     private Host host;
+    private List<Device> devices;
 }

@@ -3,6 +3,7 @@ package kubeiaas.iaasagent.dao;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.*;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.iaasagent.dao.feign.DbProxy;
 import kubeiaas.iaasagent.dao.feign.ImageOperator;
 import lombok.extern.slf4j.Slf4j;
@@ -205,4 +206,10 @@ public class TableStorage {
         return JSON.parseObject(volumeObjectStr, Volume.class);
     }
 
+    // ========================= specConfig =========================
+
+    public List<SpecConfig> specConfigQueryAllByType(SpecTypeEnum type) {
+        String jsonString = dbProxy.specConfigQueryAllByType(type);
+        return JSON.parseArray(jsonString, SpecConfig.class);
+    }
 }

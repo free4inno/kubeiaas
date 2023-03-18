@@ -8,8 +8,6 @@ import javax.validation.constraints.NotNull;
 @Data
 public class AttachDeviceForm {
     @NotNull @NotEmpty
-    String hostUuid;
-    @NotNull @NotEmpty
     String vmUuid;
 
     @NotNull @NotEmpty

@@ -13,6 +13,7 @@ import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
+import kubeiaas.iaascore.scheduler.DeviceScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -42,6 +43,9 @@ public class VmService {
 
     @Resource
     private VncProcess vncProcess;
+
+    @Resource
+    private DeviceScheduler deviceScheduler;
 
     /**
      * 创建虚拟机
@@ -290,7 +294,7 @@ public class VmService {
         return vmPage;
     }
 
-    public Vm queryByUuid(String uuid) {
+    public Vm queryByUuid(String uuid) throws BaseException {
         Vm vm = tableStorage.vmQueryByUuid(uuid);
 
         // get ips
@@ -308,6 +312,10 @@ public class VmService {
         // get hosts
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
         vm.setHost(host);
+
+        // get devices
+        List<Device> deviceList = deviceScheduler.queryByVm(vm);
+        vm.setDevices(deviceList);
 
         return vm;
     }
