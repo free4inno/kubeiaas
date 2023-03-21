@@ -12,6 +12,7 @@ import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.request.device.AttachDeviceForm;
+import kubeiaas.iaascore.request.device.DetachDeviceForm;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.response.SingleMsgResponse;
@@ -46,8 +47,8 @@ public class DeviceOpenAPI {
         log.info("queryAll ==== start ====");
         Host host = tableStorage.hostQueryByName(hostName);
         if (null == host) {
-            log.info("queryAll ==== error: host_name {} unknown.", hostName);
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
+            throw new BaseException(
+                    String.format("attach -- error: host_name %s unknown.", hostName), ResponseEnum.ARGS_ERROR);
         }
         List<Device> deviceList = deviceScheduler.queryAll(host);
         log.info("queryAll ==== end ====");
@@ -61,8 +62,8 @@ public class DeviceOpenAPI {
         log.info("queryAll ==== start ====");
         Host host = tableStorage.hostQueryByUuid(hostUuid);
         if (null == host) {
-            log.info("queryAll ==== error: host_uuid {} unknown.", hostUuid);
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
+            throw new BaseException(
+                    String.format("attach -- error: host_uuid %s unknown.", hostUuid), ResponseEnum.ARGS_ERROR);
         }
         List<Device> deviceList = deviceScheduler.queryAll(host);
         log.info("queryAll ==== end ====");
@@ -78,8 +79,8 @@ public class DeviceOpenAPI {
         // 1.1. get vm and check
         Vm vm = tableStorage.vmQueryByUuid(f.getVmUuid());
         if (null == vm) {
-            log.info("queryAll ==== error: vm_uuid {} unknown.", f.getVmUuid());
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
+            throw new BaseException(
+                    String.format("attach -- error: vm_uuid %s unknown.", f.getVmUuid()), ResponseEnum.ARGS_ERROR);
         }
         // 1.2. get host
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
@@ -87,21 +88,47 @@ public class DeviceOpenAPI {
         // 2. get device and check
         DeviceTypeEnum deviceTypeEnum = EnumUtils.getEnumFromString(DeviceTypeEnum.class, f.getType());
         if (null == deviceTypeEnum) {
-            log.info("queryAll ==== error: type {} unknown.", f.getType());
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
+            throw new BaseException(
+                    String.format("attach -- error: type %s unknown.", f.getType()), ResponseEnum.ARGS_ERROR);
         }
 
         // 3. build a temp device for compare with list
         Device tempDevice = new Device(deviceTypeEnum, f.getBus(), f.getDev(), f.getVendor(), f.getProduct());
-        boolean result = deviceScheduler.attachDevice(tempDevice, host, vm);
+        deviceScheduler.attachDevice(tempDevice, host, vm);
 
         // 4. response
-        if (result) {
-            log.info("attach ==== end ====");
-            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
-        } else {
-            log.info("attach ==== error ====");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.DEVICE_ATTACH_ERROR));
+        log.info("attach ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DETACH, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String detach(
+            @Valid @RequestBody DetachDeviceForm f) throws BaseException {
+        log.info("detach ==== start ====");
+
+        // 1.1. get vm and check
+        Vm vm = tableStorage.vmQueryByUuid(f.getVmUuid());
+        if (null == vm) {
+            throw new BaseException(
+                    String.format("detach -- error: vm_uuid %s unknown.", f.getVmUuid()), ResponseEnum.ARGS_ERROR);
         }
+        // 1.2. get host
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+
+        // 2. get device and check
+        DeviceTypeEnum deviceTypeEnum = EnumUtils.getEnumFromString(DeviceTypeEnum.class, f.getType());
+        if (null == deviceTypeEnum) {
+            throw new BaseException(
+                    String.format("detach -- error: type %s unknown.", f.getType()), ResponseEnum.ARGS_ERROR);
+        }
+
+        // 3. build a temp device for compare with list
+        Device tempDevice = new Device(deviceTypeEnum, f.getBus(), f.getDev(), f.getVendor(), f.getProduct());
+        deviceScheduler.detachDevice(tempDevice, host, vm);
+
+        // 4. return
+        log.info("detach ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 }

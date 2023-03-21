@@ -35,24 +35,27 @@ public class OpenAPIExceptionHandler {
     public BaseResponse handle(Exception e) {
         if (e instanceof BaseException) {
             // ----- base ------
-            log.error(((BaseException) e).getMsg());
-            return BaseResponse.error(ResponseEnum.WORK_ERROR);
+            BaseException baseE = (BaseException) e;
+            log.error(baseE.getMsg());
+            return BaseResponse.error(baseE.getResEnum(), baseE.getMsg());
 
         } else if (e instanceof VmException){
             // ----- vm error -----
-            Vm vm = ((VmException) e).getVm();
+            VmException vmE = (VmException) e;
+            Vm vm = (vmE.getVm());
             vm.setStatus(VmStatusEnum.ERROR);
             tableStorage.vmSave(vm);
-            log.error(((VmException) e).getMsg());
-            return BaseResponse.error(ResponseEnum.WORK_ERROR);
+            log.error(vmE.getMsg());
+            return BaseResponse.error(vmE.getResEnum(), vmE.getMsg());
 
         } else if (e instanceof VolumeException){
             // ----- volume error -----
-            Volume volume = ((VolumeException) e).getVolume();
+            VolumeException volE = (VolumeException) e;
+            Volume volume = volE.getVolume();
             volume.setStatus(VolumeStatusEnum.ERROR);
             tableStorage.volumeSave(volume);
-            log.error(((VolumeException) e).getMsg());
-            return BaseResponse.error(ResponseEnum.WORK_ERROR);
+            log.error(volE.getMsg());
+            return BaseResponse.error(volE.getResEnum(), volE.getMsg());
 
         } else if (e instanceof ConstraintViolationException ||
                 e instanceof MethodArgumentNotValidException ||
@@ -60,7 +63,7 @@ public class OpenAPIExceptionHandler {
             // ----- args error -----
             log.error(ResponseEnum.ARGS_ERROR.getMsg());
             e.printStackTrace();
-            return BaseResponse.error(ResponseEnum.ARGS_ERROR);
+            return BaseResponse.error(ResponseEnum.ARGS_ERROR, ResponseEnum.ARGS_ERROR.getMsg());
 
         } else {
             // ----- else -----

@@ -7,7 +7,6 @@ import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
-import kubeiaas.common.enums.volume.VolumeUsageEnum;
 import kubeiaas.common.utils.PathUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
@@ -130,7 +129,9 @@ public class VolumeProcess {
                     }
                     break;
                 case DATA:
-                    // todo: data volume delete
+                    if (!volumeScheduler.deleteDataVolume(volume.getUuid(), volume.getProviderLocation())) {
+                        throw new BaseException("ERROR: delete data volume:" + volume.getUuid() + " failed!");
+                    }
                     break;
                 default:
                     log.warn("unknown volume type");

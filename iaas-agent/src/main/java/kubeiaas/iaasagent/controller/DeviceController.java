@@ -50,4 +50,22 @@ public class DeviceController {
             return ResponseMsgConstants.FAILED;
         }
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DETACH, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String detach(
+            @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr,
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObject
+    ) {
+        log.info("detach ==== start");
+        Vm vm = JSON.parseObject(vmObject, Vm.class);
+        Device device = JSON.parseObject(deviceObjectStr, Device.class);
+        if (deviceService.detach(device, vm)) {
+            log.info("detach -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.info("detach -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
 }

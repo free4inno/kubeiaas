@@ -349,4 +349,13 @@ public class TableStorage {
         deviceObjectStr = dbProxy.deviceSave(deviceObjectStr);
         return JSON.parseObject(deviceObjectStr, Device.class);
     }
+
+    public boolean deviceDelete(Device device) {
+        Integer id = device.getId();
+        if (null == id) {
+            return false;
+        }
+        dbProxy.deviceDelete(id);
+        return true;
+    }
 }

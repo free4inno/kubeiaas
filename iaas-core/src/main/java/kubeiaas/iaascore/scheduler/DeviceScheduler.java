@@ -10,6 +10,7 @@ import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.DeviceController;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
@@ -103,26 +104,56 @@ public class DeviceScheduler {
         return deviceList;
     }
 
-    public boolean attachDevice(Device attachDevice, Host host, Vm vm) throws BaseException {
+    public void attachDevice(Device attachDevice, Host host, Vm vm) throws BaseException {
         List<Device> deviceList = this.queryAll(host);
         for (Device device : deviceList) {
             if (device.equals(attachDevice) && device.getStatus().equals(DeviceStatusEnum.AVAILABLE)) {
                 // attach device
-                if (deviceController.attach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
+                if (!deviceController.attach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
                         .equals(ResponseMsgConstants.SUCCESS)) {
-                    log.info("attachDevice == success");
-                } else {
-                    log.info("attachDevice == error");
-                    return false;
+                    throw new BaseException(
+                            "err: AGENT do attach failed!", ResponseEnum.DEVICE_ATTACH_ERROR);
                 }
                 device.setStatus(DeviceStatusEnum.ATTACHED);
                 device.setInstanceUuid(vm.getUuid());
                 tableStorage.deviceSave(device);
-                return true;
+                return;
             }
         }
-        log.info("attach ==== error: device not found");
-        return false;
+        throw new BaseException(
+                "err: device not found!", ResponseEnum.DEVICE_ATTACH_ERROR);
+    }
+
+    public void detachDevice(Device detachDevice, Host host, Vm vm) throws BaseException {
+        List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vm.getUuid());
+        for (Device device : deviceList) {
+            if (device.equals(detachDevice) && device.getStatus().equals(DeviceStatusEnum.ATTACHED)) {
+                // detach device
+                if (!deviceController.detach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
+                        .equals(ResponseMsgConstants.SUCCESS)) {
+                    throw new BaseException(
+                            "err: AGENT do detach failed!", ResponseEnum.DEVICE_DETACH_ERROR);
+                }
+                // delete in db
+                if (!tableStorage.deviceDelete(device)) {
+                    throw new BaseException(
+                            "err: DB do delete failed!", ResponseEnum.DEVICE_DETACH_ERROR);
+                }
+                return;
+            }
+        }
+        throw new BaseException(
+                "err: device not found!", ResponseEnum.DEVICE_DETACH_ERROR);
+    }
+
+    public void deleteDevice(String vmUuid) throws BaseException {
+        List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vmUuid);
+        for (Device device : deviceList) {
+            if (!tableStorage.deviceDelete(device)) {
+                throw new BaseException(
+                        "error: device delete failed! id: " + device.getId());
+            }
+        }
     }
 
     private URI getUri(Host host) {

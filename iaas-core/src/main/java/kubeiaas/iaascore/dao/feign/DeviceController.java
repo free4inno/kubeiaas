@@ -27,4 +27,12 @@ public interface DeviceController {
             URI uri
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DEVICE_C + "/" + RequestMappingConstants.DETACH)
+    @ResponseBody
+    String detach(
+            @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr,
+            @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObject,
+            URI uri
+    );
+
 }

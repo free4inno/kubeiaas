@@ -55,4 +55,13 @@ public class DeviceController {
         log.info("save ==== end ====");
         return JSON.toJSONString(deviceTable);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteById(
+            @RequestParam(value = RequestParamConstants.ID) Integer id) {
+        log.info("deleteById ==== start ==== id:" + id);
+        deviceDao.deleteById(id);
+        log.info("deleteById ==== end ====");
+    }
 }

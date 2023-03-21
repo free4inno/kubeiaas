@@ -13,6 +13,7 @@ import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
+import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.scheduler.DeviceScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -108,7 +109,7 @@ public class VmService {
         // ----- check if exist -----
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         if (vm == null) {
-            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")");
+            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")", ResponseEnum.VM_DELETE_ERROR);
         }
 
         /* ----- judge status ----
@@ -121,44 +122,35 @@ public class VmService {
         }
 
         try {
-            /* -----0. set status -----
-            Set deleting status
-             */
+            // -- 0. set status -- Set deleting status
             vmProcess.setVmStatus(vmUuid, VmStatusEnum.DELETING);
 
-            /* -----1. choose host ----
-            Select the host where the VM to be deleted resides
-            */
+            // -- 1. choose host -- Select the host where the VM to be deleted resides
             resourceProcess.selectHostByVmUuid(vmUuid);
 
-            /* -----2. delete VM ----
-            Delete the VM and then delete other information
-            */
+            // ┌- 2. delete VM -- Delete the VM and then delete other information -┐
             vmProcess.deleteVM(vmUuid);
 
-            /* -----3. Delete Volume ----
-            Delete disks, including Linux files and database information
-            */
+            // ├- 3. Delete Volume -- Delete disks, including Linux files and database information
             volumeProcess.deleteSystemVolume(vmUuid);
 
-            /* -----4. Delete Ip ----
-            Delete Ip information
-            */
+            // ├- 4. Delete Ip -- Delete Ip information
             networkProcess.deleteIps(vmUuid);
 
-            /* -----5. delete in database ----
-            Delete VM records from the database
-            */
-            vmProcess.deleteVmInDataBase(vmUuid);
+            // ├- 5. Delete Device -- Delete Device information (while Step.2 already detached)
+            deviceScheduler.deleteDevice(vmUuid);
 
-            /* -----6. delete vnc ----
-            delete vnc in token.config
-            */
+            vmProcess.deleteVmInDataBase(vmUuid);
+            // └- 6. delete in database -- Delete VM records from the database -┘
+
+            // -- 7. delete vnc -- delete vnc in token.config
             vncProcess.deleteVncToken(vmUuid);
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new VmException(vm, "ERR: error while delete! (uuid: " + vmUuid + ")");
+            String log = (e instanceof BaseException) ? ((BaseException) e).getMsg() : "";
+            throw new VmException(vm,
+                    String.format("err: delete failed (uuid: %s)! %s", vmUuid, log), ResponseEnum.VM_DELETE_ERROR);
         }
 
         return ResponseMsgConstants.SUCCESS;

@@ -210,7 +210,7 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.TYPE) SpecTypeEnum type
     );
 
-    // ========================= host =========================
+    // ========================= device =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DEVICE + "/" + RequestMappingConstants.QUERY_ALL)
     @ResponseBody
@@ -227,5 +227,11 @@ public interface DbProxy {
     @ResponseBody
     String deviceSave(
             @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DEVICE + "/" + RequestMappingConstants.DELETE_BY_ID)
+    @ResponseBody
+    String deviceDelete(
+            @RequestParam(value = RequestParamConstants.ID) Integer id
     );
 }

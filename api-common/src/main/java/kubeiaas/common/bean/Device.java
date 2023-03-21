@@ -36,6 +36,10 @@ public class Device {
      */
     public Device(DeviceTypeEnum type, String bus, String dev, String vendor, String product) {
         this.setType(type);
+        this.setBus(bus);
+        this.setDev(dev);
+        this.setVendor(vendor);
+        this.setProduct(product);
     }
 
     /**
