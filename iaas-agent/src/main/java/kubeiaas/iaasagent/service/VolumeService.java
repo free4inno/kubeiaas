@@ -4,6 +4,7 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.utils.*;
 import kubeiaas.iaasagent.config.VolumeConfig;
@@ -172,7 +173,8 @@ public class VolumeService {
                  * - 0100: FORCE
                  * Use | to combine those configs, we got 3 as (VIR_DOMAIN_AFFECT_LIVE | VIR_DOMAIN_AFFECT_CONFIG)
                  */
-                domain.attachDeviceFlags(volumeXml, (0b0001 | 0b0010));
+                int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);
+                domain.attachDeviceFlags(volumeXml, virtFlag);
             } catch (Exception e) {
                 volume.setInstanceUuid("");
                 volume.setMountPoint("");
@@ -202,7 +204,8 @@ public class VolumeService {
         try {
             Domain domain = virtCon.domainLookupByUUIDString(instanceUuid);
             try {
-                domain.detachDeviceFlags(volumeXml, 3);
+                int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);
+                domain.detachDeviceFlags(volumeXml, virtFlag);
             } catch (Exception e) {
                 setVolumeStatus(volumeUuid, VolumeStatusEnum.ATTACHED);
                 e.printStackTrace();

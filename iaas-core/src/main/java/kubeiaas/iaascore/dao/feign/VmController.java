@@ -65,4 +65,10 @@ public interface VmController {
             @RequestParam(value = RequestParamConstants.CPUS) Integer cpus,
             @RequestParam(value = RequestParamConstants.MEMORY) Integer memory);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.STATUS)
+    @ResponseBody
+    String status(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
 }

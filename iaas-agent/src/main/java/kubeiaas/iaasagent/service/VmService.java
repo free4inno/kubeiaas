@@ -11,6 +11,7 @@ import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Domain;
+import org.libvirt.DomainInfo;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
 
@@ -160,14 +161,14 @@ public class VmService {
 
     /**
      * 修改虚拟机cpu和memory
-     * @param VmUuid
+     * @param vmUuid
      */
-    public Boolean modifyVm(String VmUuid, int cpu, int memory) {
-        log.info("modifyVm ---- start ---- VmUuid: " + VmUuid );
-        Vm instance = tableStorage.vmQueryByUuid(VmUuid);
+    public Boolean modifyVm(String vmUuid, int cpu, int memory) {
+        log.info("modifyVm ---- start ---- vmUuid: " + vmUuid );
+        Vm instance = tableStorage.vmQueryByUuid(vmUuid);
         try {
             long memories = VmCUtils.memUnitConvert(memory);
-            Domain domain = virtCon.domainLookupByUUIDString(VmUuid);
+            Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             if (instance.getStatus().equals(VmStatusEnum.ACTIVE)) {
                 if (cpu != 0) {
                     domain.setVcpus(cpu);
@@ -192,12 +193,12 @@ public class VmService {
 
     /**
      * 停止虚拟机
-     * @param VmUuid
+     * @param vmUuid
      */
-    public boolean stopVm(String VmUuid) {
-        log.info("stopVm ---- start ---- VmUuid: " + VmUuid);
+    public boolean stopVm(String vmUuid) {
+        log.info("stopVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain d = getDomainByUuid(VmUuid);
+            Domain d = getDomainByUuid(vmUuid);
             log.info("shutdownDomain ---- start ----");
             try {
                 if (d.isActive() > 0) {
@@ -223,14 +224,14 @@ public class VmService {
                     }
                 }).start();
             } catch (Exception e) {
-                setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                setVmStatus(vmUuid, VmStatusEnum.ACTIVE);
                 e.printStackTrace();
                 return false;
             }
             log.info("shutdownDomain ---- end ----");
 
             // status
-            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+            Vm vm = tableStorage.vmQueryByUuid(vmUuid);
             vm.setStatus(VmStatusEnum.STOPPED);
 
             // save
@@ -239,7 +240,7 @@ public class VmService {
             log.info("stopVm ---- end ---- Shutdown Domain Successfully.");
         } catch (Exception e) {
             log.info("stopVm ---- end ---- Shutdown Domain Error!");
-            setVmStatus(VmUuid, VmStatusEnum.ERROR);
+            setVmStatus(vmUuid, VmStatusEnum.ERROR);
             e.printStackTrace();
             return false;
         }
@@ -249,12 +250,12 @@ public class VmService {
 
     /**
      * 启动虚拟机
-     * @param VmUuid
+     * @param vmUuid
      */
-    public Boolean startVm(String VmUuid) {
-        log.info("startVm ---- start ---- VmUuid: " + VmUuid);
+    public Boolean startVm(String vmUuid) {
+        log.info("startVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain d = getDomainByUuid(VmUuid);
+            Domain d = getDomainByUuid(vmUuid);
             log.info("startDomain ---- start ----");
             try {
                 if (d.isActive() == 0) {
@@ -277,7 +278,7 @@ public class VmService {
                     }
                 }).start();
             } catch (Exception e) {
-                setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+                setVmStatus(vmUuid, VmStatusEnum.STOPPED);
                 e.printStackTrace();
                 return false;
             }
@@ -289,7 +290,7 @@ public class VmService {
             }
 
             // status
-            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+            Vm vm = tableStorage.vmQueryByUuid(vmUuid);
             vm.setStatus(VmStatusEnum.ACTIVE);
 
             // new vnc port
@@ -299,7 +300,7 @@ public class VmService {
             // save
             tableStorage.vmSave(vm);
         } catch (Exception e) {
-            setVmStatus(VmUuid, VmStatusEnum.ERROR);
+            setVmStatus(vmUuid, VmStatusEnum.ERROR);
             e.printStackTrace();
             return false;
         }
@@ -310,24 +311,24 @@ public class VmService {
 
     /**
      * 重启虚拟机
-     * @param VmUuid
+     * @param vmUuid
      * @return
      */
-    public Boolean rebootVm(String VmUuid) {
-        log.info("rebootVm ---- start ---- VmUuid: " + VmUuid);
+    public Boolean rebootVm(String vmUuid) {
+        log.info("rebootVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain domain = getDomainByUuid(VmUuid);
+            Domain domain = getDomainByUuid(vmUuid);
             if (domain.isActive() == 0) {
                 try {
                     domain.create(0);
                     String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");      //获取新建虚拟机的VncPort
-                    Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+                    Vm vm = tableStorage.vmQueryByUuid(vmUuid);
                     vm.setVncPort(vncPort);
                     vm.setStatus(VmStatusEnum.ACTIVE);
                     tableStorage.vmSave(vm);
                 } catch (Exception e) {
                     log.error("rebootVm ---- end ---- Domain Starting failed!");
-                    setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+                    setVmStatus(vmUuid, VmStatusEnum.STOPPED);
                     e.printStackTrace();
                     return false;
                 }
@@ -335,13 +336,13 @@ public class VmService {
                 try {
                     domain.reboot(0);
                     String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");      //获取新建虚拟机的VncPort
-                    Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+                    Vm vm = tableStorage.vmQueryByUuid(vmUuid);
                     vm.setVncPort(vncPort);
                     vm.setStatus(VmStatusEnum.ACTIVE);
                     tableStorage.vmSave(vm);
                 } catch (Exception e) {
                     log.error("rebootVm ---- end ---- Domain Starting failed!");
-                    setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                    setVmStatus(vmUuid, VmStatusEnum.ACTIVE);
                     e.printStackTrace();
                     return false;
                 }
@@ -349,7 +350,7 @@ public class VmService {
             log.info("rebootVm ---- end ---- Domain is rebooting.");
         } catch (Exception e) {
             log.error("rebootVm ---- end ---- Domain Starting failed!");
-            setVmStatus(VmUuid, VmStatusEnum.ERROR);
+            setVmStatus(vmUuid, VmStatusEnum.ERROR);
             e.printStackTrace();
             return false;
         }
@@ -358,32 +359,32 @@ public class VmService {
 
     /**
      * 挂起虚拟机
-     * @param VmUuid
+     * @param vmUuid
      * @return
      */
-    public Boolean suspendVm(String VmUuid) {
-        log.info("suspendVm ---- start ---- VmUuid: " + VmUuid);
+    public Boolean suspendVm(String vmUuid) {
+        log.info("suspendVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain domain = getDomainByUuid(VmUuid);
+            Domain domain = getDomainByUuid(vmUuid);
             if (domain.isActive() > 0) {
                 try {
                     domain.managedSave();
-                    setVmStatus(VmUuid, VmStatusEnum.SUSPENDED);
+                    setVmStatus(vmUuid, VmStatusEnum.SUSPENDED);
                 } catch (Exception e) {
                     log.error("suspendVm ---- end ---- Domain suspend failed!");
-                    setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                    setVmStatus(vmUuid, VmStatusEnum.ACTIVE);
                     e.printStackTrace();
                     return false;
                 }
             } else {
                 log.error("suspendDomain -- The domain is already dead. suspend failed!");
-                setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+                setVmStatus(vmUuid, VmStatusEnum.STOPPED);
                 return false;
             }
             log.info("suspendVm ---- end ---- Domain is suspending.");
         } catch (Exception e) {
             log.error("suspendVm ---- end ---- Domain Starting failed!");
-            setVmStatus(VmUuid, VmStatusEnum.ERROR);
+            setVmStatus(vmUuid, VmStatusEnum.ERROR);
             e.printStackTrace();
             return false;
         }
@@ -392,20 +393,20 @@ public class VmService {
 
     /**
      * 恢复虚拟机
-     * @param VmUuid
+     * @param vmUuid
      * @return
      */
-    public Boolean resumeVm(String VmUuid) {
-        log.info("resumeVm ---- start ---- VmUuid: " + VmUuid);
+    public Boolean resumeVm(String vmUuid) {
+        log.info("resumeVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain domain = getDomainByUuid(VmUuid);
+            Domain domain = getDomainByUuid(vmUuid);
             if (domain.isActive() > 0){
                 log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is still active");
-                setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                setVmStatus(vmUuid, VmStatusEnum.ACTIVE);
                 return false;
             }
             domain.create(0);
-            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+            Vm vm = tableStorage.vmQueryByUuid(vmUuid);
             String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");      //获取新建虚拟机的VncPort
             vm.setStatus(VmStatusEnum.ACTIVE);
             vm.setVncPort(vncPort);
@@ -413,7 +414,7 @@ public class VmService {
             log.info("resumeVm ---- end ---- Domain is resuming.");
         } catch (Exception e) {
             log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is dead");
-            setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+            setVmStatus(vmUuid, VmStatusEnum.STOPPED);
             log.error("resumeVm ---- end ---- Domain resume failed!");
             e.printStackTrace();
             return false;
@@ -421,32 +422,64 @@ public class VmService {
         return true;
     }
 
+    /**
+     * 获取状态
+     */
+    public VmStatusEnum status(String vmUuid) {
+        log.info("status ---- start ---- vmUuid: " + vmUuid);
+        DomainInfo.DomainState domainState;
+        int hasManagedSaveImage;
+        try {
+            Domain domain = getDomainByUuid(vmUuid);
+            domainState = domain.getInfo().state;
+            hasManagedSaveImage = domain.hasManagedSaveImage();
+        } catch (Exception e) {
+            log.error("status ---- error ----");
+            return null;
+        }
+        log.info("status ---- end ---- status: " + domainState);
+        switch (domainState) {
+            case VIR_DOMAIN_RUNNING:
+                return VmStatusEnum.ACTIVE;
+            case VIR_DOMAIN_SHUTDOWN:
+            case VIR_DOMAIN_SHUTOFF:
+                return (1 == hasManagedSaveImage) ? VmStatusEnum.SUSPENDED : VmStatusEnum.STOPPED;
+            case VIR_DOMAIN_PAUSED:
+                return VmStatusEnum.PAUSED;
+            case VIR_DOMAIN_BLOCKED:
+            case VIR_DOMAIN_CRASHED:
+            case VIR_DOMAIN_NOSTATE:
+            default:
+                return VmStatusEnum.ERROR;
+        }
+    }
+
     // ===== 已废弃 =====
     // 暂停虚拟机（已废弃）
     /*
-    public Boolean suspendVm(String VmUuid) {
-        log.info("suspendVm ---- start ---- VmUuid: " + VmUuid);
+    public Boolean suspendVm(String vmUuid) {
+        log.info("suspendVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain domain = getDomainByUuid(VmUuid);
+            Domain domain = getDomainByUuid(vmUuid);
             if (domain.isActive() > 0) {
                 try {
                     domain.suspend();
-                    setVmStatus(VmUuid, VmStatusEnum.SUSPENDED);
+                    setVmStatus(vmUuid, VmStatusEnum.SUSPENDED);
                 } catch (Exception e) {
                     log.error("suspendVm ---- end ---- Domain suspend failed!");
-                    setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                    setVmStatus(vmUuid, VmStatusEnum.ACTIVE);
                     e.printStackTrace();
                     return false;
                 }
             } else {
                 log.error("suspendDomain -- The domain is already dead. suspend failed!");
-                setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+                setVmStatus(vmUuid, VmStatusEnum.STOPPED);
                 return false;
             }
             log.info("suspendVm ---- end ---- Domain is suspending.");
         } catch (Exception e) {
             log.error("suspendVm ---- end ---- Domain Starting failed!");
-            setVmStatus(VmUuid, VmStatusEnum.ERROR);
+            setVmStatus(vmUuid, VmStatusEnum.ERROR);
             e.printStackTrace();
             return false;
         }
@@ -457,17 +490,17 @@ public class VmService {
     // ===== 已废弃 =====
     // 恢复（暂停的虚拟机）
     /*
-    public Boolean resumeVm(String VmUuid) {
-        log.info("resumeVm ---- start ---- VmUuid: " + VmUuid);
+    public Boolean resumeVm(String vmUuid) {
+        log.info("resumeVm ---- start ---- vmUuid: " + vmUuid);
         try {
-            Domain domain = getDomainByUuid(VmUuid);
+            Domain domain = getDomainByUuid(vmUuid);
             if (domain.isActive() > 0){
                 log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is still active");
-                setVmStatus(VmUuid, VmStatusEnum.ACTIVE);
+                setVmStatus(vmUuid, VmStatusEnum.ACTIVE);
                 return false;
             }
             domain.resume();
-            Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+            Vm vm = tableStorage.vmQueryByUuid(vmUuid);
             String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");      //获取新建虚拟机的VncPort
             vm.setStatus(VmStatusEnum.ACTIVE);
             vm.setVncPort(vncPort);
@@ -475,7 +508,7 @@ public class VmService {
             log.info("resumeVm ---- end ---- Domain is resuming.");
         } catch (Exception e) {
             log.error("resumeVm ---- end ---- Domain resume failed! ---- domain is dead");
-            setVmStatus(VmUuid, VmStatusEnum.STOPPED);
+            setVmStatus(vmUuid, VmStatusEnum.STOPPED);
             log.error("resumeVm ---- end ---- Domain resume failed!");
             e.printStackTrace();
             return false;
@@ -529,9 +562,9 @@ public class VmService {
         return d;
     }
 
-    private void setVmStatus(String VmUuid, VmStatusEnum status){
+    private void setVmStatus(String vmUuid, VmStatusEnum status){
 
-        Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         vm.setStatus(status);
         tableStorage.vmSave(vm);
     }

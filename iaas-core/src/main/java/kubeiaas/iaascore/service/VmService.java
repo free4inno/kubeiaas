@@ -406,4 +406,26 @@ public class VmService {
 
         return resMap;
     }
+
+    /**
+     * 获取并刷新状态
+     */
+    public VmStatusEnum status(String uuid) throws BaseException {
+        // 1. get status now
+        Vm vm = tableStorage.vmQueryByUuid(uuid);
+        if (null == vm) {
+            throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
+        }
+        VmStatusEnum vmStatus = vmProcess.getStatus(vm);
+        log.info("status -- old status: {}, now status: {}.", vm.getStatus(), vmStatus);
+
+        // 2. update status if needed
+        if (!vm.getStatus().equals(vmStatus)) {
+            log.info("status -- update status of {}", uuid);
+            vm.setStatus(vmStatus);
+            tableStorage.vmSave(vm);
+        }
+
+        return vmStatus;
+    }
 }

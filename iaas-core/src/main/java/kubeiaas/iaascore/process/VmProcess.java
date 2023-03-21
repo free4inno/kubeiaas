@@ -381,4 +381,15 @@ public class VmProcess {
         }
         return vmList;
     }
+
+    /**
+     * 获取状态
+     */
+    public VmStatusEnum getStatus(Vm vm) throws BaseException {
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        AgentConfig.setSelectedHost(vm.getUuid(), host);
+        VmStatusEnum vmStatusEnum = vmScheduler.getStatus(vm);
+        AgentConfig.clearSelectedHost(vm.getUuid());
+        return vmStatusEnum;
+    }
 }

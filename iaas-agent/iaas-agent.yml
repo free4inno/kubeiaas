@@ -34,7 +34,7 @@ spec:
               hostPort: 9090
               protocol: TCP
             - containerPort: 9089
-              hostPort: 9089
+#              hostPort: 9089
               protocol: TCP
           env:
             # -------- BASIC ENV --------

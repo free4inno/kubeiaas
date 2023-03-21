@@ -7,6 +7,7 @@ import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.vm.VmOperateEnum;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.request.vm.*;
@@ -328,6 +329,19 @@ public class VmOpenAPI {
         Map<String, Integer> resMap = vmService.getStatistics();
         log.info("statistics ==== end ====");
         return JSON.toJSONString(BaseResponse.success(resMap));
+    }
+
+    /**
+     * 刷新状态
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATUS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String status(
+            @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) throws BaseException {
+        log.info("refresh ==== start ====");
+        VmStatusEnum vmStatusEnum = vmService.status(uuid);
+        log.info("refresh ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(vmStatusEnum.toString())));
     }
 
 }
