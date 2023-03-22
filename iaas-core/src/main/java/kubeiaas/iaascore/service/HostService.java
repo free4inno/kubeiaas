@@ -9,6 +9,8 @@ import kubeiaas.common.enums.host.HostStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.config.ServiceConfig;
 import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.scheduler.VolumeScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -214,6 +216,25 @@ public class HostService {
         }
 
         return resMap;
+    }
+
+    /**
+     * 配置节点资源限制
+     */
+    public Host setResource(String uuid, int vcpu, int mem, int storage) throws BaseException {
+        Host host = tableStorage.hostQueryByUuid(uuid);
+        if (null == host) {
+            throw new BaseException("err: invalid host_uuid " + uuid, ResponseEnum.ARGS_ERROR);
+        }
+        host.setVCPU(vcpu);
+        host.setMemory(mem);
+        host.setStorage(storage);
+        try {
+            return tableStorage.hostSave(host);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BaseException("err: host save failed. " + e.getMessage());
+        }
     }
 
     /**

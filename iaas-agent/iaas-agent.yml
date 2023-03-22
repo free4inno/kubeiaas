@@ -46,27 +46,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            # -------- RESOURCE CONFIG --------
-            - name: AGENT_NODE_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.work.list
-            - name: AGENT_VCPUS_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.work.vcpus
-            - name: AGENT_MEM_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.work.mem
-            - name: AGENT_STORAGE_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.work.storage
             # -------- SERVICE CONFIG --------
             - name: DHCP_NODE
               valueFrom:

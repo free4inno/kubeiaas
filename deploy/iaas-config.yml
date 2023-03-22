@@ -10,9 +10,6 @@ data:
   # -------- 工作节点 --------
   # kubectl label node <node_name> kubeiaas/node=true
   nodes.work.list: "hf-node-01,hf-node-02"
-  nodes.work.vcpus: "40,40"
-  nodes.work.mem: "64,64"
-  nodes.work.storage: "4096,4096"
 
   # -------- 管控组件 --------
   # kubectl label node <node_name> kubeiaas/ctl=true
