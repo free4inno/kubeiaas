@@ -38,4 +38,29 @@ public class SpecConfigController {
         return JSON.toJSONString(specConfigTableList);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAll() {
+        log.info("queryAll == ");
+        return JSON.toJSONString(specConfigDao.findAll());
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String save(
+            @RequestParam(value = RequestParamConstants.OBJECT) String objectStr) {
+        log.info("save == ");
+        SpecConfigTable table = JSON.parseObject(objectStr, SpecConfigTable.class);
+        specConfigDao.saveAndFlush(table);
+        return JSON.toJSONString(table);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void deleteById(
+            @RequestParam(value = RequestParamConstants.ID) Integer id) {
+        log.info("delete == id: " + id);
+        specConfigDao.deleteById(id);
+    }
+
 }

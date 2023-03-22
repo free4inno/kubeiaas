@@ -332,6 +332,21 @@ public class TableStorage {
         return JSON.parseArray(jsonString, SpecConfig.class);
     }
 
+    public List<SpecConfig> specConfigQueryAll() {
+        String jsonString = dbProxy.specConfigQueryAll();
+        return JSON.parseArray(jsonString, SpecConfig.class);
+    }
+
+    public SpecConfig specConfigSave(SpecConfig specConfig) {
+        String specConfigObjectStr = JSON.toJSONString(specConfig);
+        specConfigObjectStr = dbProxy.specConfigSave(specConfigObjectStr);
+        return JSON.parseObject(specConfigObjectStr, SpecConfig.class);
+    }
+
+    public void specConfigDelete(Integer specConfigId){
+        dbProxy.specConfigDeleteById(specConfigId);
+    }
+
     // ======================== device ==============================
 
     public List<Device> deviceQueryAllByHostUuid(String uuid) {

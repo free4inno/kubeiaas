@@ -1,5 +1,4 @@
-package kubeiaas.iaascore.request.IpSegment;
-
+package kubeiaas.iaascore.request.ipSegment;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Data
-public class EditIpSegmentForm {
-    @NotNull
-    private Integer ipSegmentId;
-
+public class CreateIpSegmentForm {
     @NotNull @NotEmpty
     private String name;
 

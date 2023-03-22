@@ -3,16 +3,14 @@ package kubeiaas.iaascore.openapi;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.request.IpSegment.CreateIpSegmentForm;
-import kubeiaas.iaascore.request.IpSegment.DeleteIpSegmentForm;
-import kubeiaas.iaascore.request.IpSegment.EditIpSegmentForm;
-import kubeiaas.iaascore.request.vm.CreateVmForm;
+import kubeiaas.iaascore.request.ipSegment.CreateIpSegmentForm;
+import kubeiaas.iaascore.request.ipSegment.DeleteIpSegmentForm;
+import kubeiaas.iaascore.request.ipSegment.EditIpSegmentForm;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
@@ -105,10 +103,10 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createIpSegment(@Valid @RequestBody CreateIpSegmentForm f) throws BaseException {
-        log.info("ip_segment crate ==== start ====");
+        log.info("ip_segment create ==== start ====");
         IpSegment newIpSegment = networkService.updateIpSegment(0,
                 f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
-        log.info("ip_segment crate ==== end ====");
+        log.info("ip_segment create ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
 

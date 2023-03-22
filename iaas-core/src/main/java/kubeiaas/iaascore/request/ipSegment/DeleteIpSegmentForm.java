@@ -1,4 +1,4 @@
-package kubeiaas.iaascore.request.IpSegment;
+package kubeiaas.iaascore.request.ipSegment;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
