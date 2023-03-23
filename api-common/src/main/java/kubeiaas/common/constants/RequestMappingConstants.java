@@ -48,6 +48,7 @@ public class RequestMappingConstants {
     public static final String STATISTICS = "statistics";
     public static final String REFRESH = "refresh";
     public static final String STATUS = "status";
+    public static final String TYPE = "type";
     public static final String STATISTICS_BY_ID = "statistics_by_id";
     public static final String NODE_RESOURCE = "node_resource";
     public static final String NET_STO_RESOURCE = "net_sto_resource";

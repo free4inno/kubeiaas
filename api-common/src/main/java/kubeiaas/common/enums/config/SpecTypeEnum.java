@@ -1,25 +1,43 @@
 package kubeiaas.common.enums.config;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 public enum SpecTypeEnum {
-    VM_COMPUTE, SYS_VOLUME, DATA_VOLUME, VM_STATUS, VOLUME_STATUS, NETWORK_TYPE, VNC_DOMAIN;
+    VM_COMPUTE("VM_COMPUTE"),
+    SYS_VOLUME("SYS_VOLUME"),
+    DATA_VOLUME("DATA_VOLUME"),
+    VM_STATUS("VM_STATUS"),
+    VOLUME_STATUS("VOLUME_STATUS"),
+    NETWORK_TYPE("NETWORK_TYPE"),
+    VNC_DOMAIN("VNC_DOMAIN");
+
+    SpecTypeEnum(String type) {
+        this.type = type;
+    }
+
+    private String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String toString() {
-        switch (this) {
-            case VM_COMPUTE:
-                return "vm_compute";
-            case SYS_VOLUME:
-                return "sys_volume";
-            case DATA_VOLUME:
-                return "data_volume";
-            case VM_STATUS:
-                return "vm_status";
-            case VOLUME_STATUS:
-                return "volume_status";
-            case NETWORK_TYPE:
-                return "network_type";
-            case VNC_DOMAIN:
-                return "vnc_domain";
-        }
-        return super.toString();
+        return this.type;
     }
+
+    public static JSONArray toJSONArray() {
+        JSONArray jsonArray = new JSONArray();
+        for (SpecTypeEnum e : SpecTypeEnum.values()) {
+            JSONObject object = new JSONObject();
+            object.put("type", e.getType());
+            jsonArray.add(object);
+        }
+        return jsonArray;
+    }
+
 }

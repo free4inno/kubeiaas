@@ -100,4 +100,15 @@ public class SpecConfigOpenAPI {
         log.info("edit ==== end ====");
         return JSON.toJSONString(BaseResponse.success(specConfig));
     }
+
+    /**
+     * 获取全部 TYPE
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.TYPE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String type() {
+        log.info("type == ");
+        return JSON.toJSONString(BaseResponse.success(SpecTypeEnum.toJSONArray()));
+    }
+
 }
