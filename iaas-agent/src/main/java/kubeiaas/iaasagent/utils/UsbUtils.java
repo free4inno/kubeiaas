@@ -28,12 +28,34 @@ public class UsbUtils {
                 // example: Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
                 String[] devInfo = lineStr.split(" ");
 
-                usbDevice.setBus(devInfo[1]);
-                usbDevice.setDev(devInfo[3].split(":")[0]);
+                StringBuilder sb = new StringBuilder();
+
+                // - BUS
+                boolean zeroFlag = true;
+                for (int i = 0; i < devInfo[1].length(); i++){
+                    char ch = devInfo[1].charAt(i);
+                    if (ch != '0' && zeroFlag) zeroFlag = false;
+                    if (!zeroFlag) sb.append(ch);
+                }
+                usbDevice.setBus(sb.toString());
+
+                // - DEV
+                sb.setLength(0);
+                zeroFlag = true;
+                for (int i = 0; i < devInfo[3].length() - 1; i++){
+                    char ch = devInfo[3].charAt(i);
+                    if (ch != '0' && zeroFlag) zeroFlag = false;
+                    if (!zeroFlag) sb.append(ch);
+                }
+                usbDevice.setDev(sb.toString());
+
+                // - Vendor
                 usbDevice.setVendor("0x" + devInfo[5].split(":")[0]);
+                // - Product
                 usbDevice.setProduct("0x" + devInfo[5].split(":")[1]);
 
-                StringBuilder sb = new StringBuilder();
+                // - Name
+                sb.setLength(0);
                 for (int i = 6; i < devInfo.length; i++) {
                     sb.append(devInfo[i]).append(" ");
                 }

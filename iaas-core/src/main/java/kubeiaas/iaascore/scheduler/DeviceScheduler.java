@@ -127,6 +127,7 @@ public class DeviceScheduler {
     public void detachDevice(Device detachDevice, Host host, Vm vm) throws BaseException {
         List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vm.getUuid());
         for (Device device : deviceList) {
+            // from DB only has ATTACHED, no UNREACHABLE
             if (device.equals(detachDevice) && device.getStatus().equals(DeviceStatusEnum.ATTACHED)) {
                 // detach device
                 if (!deviceController.detach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
