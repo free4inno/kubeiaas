@@ -422,6 +422,10 @@ public class VmService {
         // 2. update status if needed
         if (!vm.getStatus().equals(vmStatus)) {
             log.info("status -- update status of {}", uuid);
+            // 3. flush VNC if is ACTIVE
+            if (vmStatus.equals(VmStatusEnum.ACTIVE)) {
+                vm = vncProcess.flushVncToken(uuid);
+            }
             vm.setStatus(vmStatus);
             tableStorage.vmSave(vm);
         }

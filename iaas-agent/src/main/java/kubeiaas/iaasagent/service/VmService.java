@@ -29,6 +29,9 @@ public class VmService {
     private TableStorage tableStorage;
 
     @Resource
+    private VncService vncService;
+
+    @Resource
     private LibvirtConfig libvirtConfig;
 
     @Resource
@@ -440,6 +443,7 @@ public class VmService {
         log.info("status ---- end ---- status: " + domainState);
         switch (domainState) {
             case VIR_DOMAIN_RUNNING:
+                vncService.saveVncPort(vmUuid);
                 return VmStatusEnum.ACTIVE;
             case VIR_DOMAIN_SHUTDOWN:
             case VIR_DOMAIN_SHUTOFF:

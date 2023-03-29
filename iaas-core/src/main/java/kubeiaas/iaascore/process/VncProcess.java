@@ -49,7 +49,7 @@ public class VncProcess {
         log.info("deleteVm --  delete VNC end");
     }
 
-    public void flushVncToken(String vmUuid){
+    public Vm flushVncToken(String vmUuid){
         log.info("flush VNC start");
 
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
@@ -65,7 +65,9 @@ public class VncProcess {
         // 4. BUILD ADDRESS AND ADD
         String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
         vncScheduler.flushVncToken(vmUuid, address);
+
         log.info("flush VNC end");
+        return vm;
     }
 
 
