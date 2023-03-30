@@ -437,8 +437,8 @@ public class VmService {
             domainState = domain.getInfo().state;
             hasManagedSaveImage = domain.hasManagedSaveImage();
         } catch (Exception e) {
-            log.error("status ---- error ----");
-            return null;
+            log.error("status ---- unknown ----");
+            return VmStatusEnum.UNKNOWN;
         }
         log.info("status ---- end ---- status: " + domainState);
         switch (domainState) {

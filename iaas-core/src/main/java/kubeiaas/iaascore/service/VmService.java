@@ -419,8 +419,20 @@ public class VmService {
         VmStatusEnum vmStatus = vmProcess.getStatus(vm);
         log.info("status -- old status: {}, now status: {}.", vm.getStatus(), vmStatus);
 
-        // 2. update status if needed
-        if (!vm.getStatus().equals(vmStatus)) {
+        // 2.1. do UNKNOWN
+        if (vmStatus.equals(VmStatusEnum.UNKNOWN)) {
+            if (vm.getStatus().equals(VmStatusEnum.BUILDING)
+                    || vm.getStatus().equals(VmStatusEnum.ERROR)) {
+                log.info("status -- no need to update status of {}", uuid);
+            } else {
+                vm.setStatus(VmStatusEnum.ERROR);
+            }
+            tableStorage.vmSave(vm);
+            return vm.getStatus();
+        }
+
+        // 2.2. update status if needed
+        if (!vmStatus.equals(vm.getStatus())) {
             log.info("status -- update status of {}", uuid);
             // 3. flush VNC if is ACTIVE
             if (vmStatus.equals(VmStatusEnum.ACTIVE)) {
@@ -429,7 +441,6 @@ public class VmService {
             vm.setStatus(vmStatus);
             tableStorage.vmSave(vm);
         }
-
-        return vmStatus;
+        return vm.getStatus();
     }
 }
