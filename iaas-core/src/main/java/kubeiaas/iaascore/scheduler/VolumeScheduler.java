@@ -21,6 +21,7 @@ import kubeiaas.iaascore.dao.feign.VolumeController;
 import kubeiaas.iaascore.process.MountProcess;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.net.URI;
@@ -53,16 +54,12 @@ public class VolumeScheduler {
             return volumeUuid;
         }
 
-        // 特判 windows 镜像
-        if (image.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
-            log.info("createSystemVolume -- WINDOWS");
-            // -- 获取子镜像，并 newIsoVolume()
-            List<Image> childImages = image.getChildImages();
+        // -- 获取子镜像，并 newIsoVolume()
+        List<Image> childImages = image.getChildImages();
+        if (!CollectionUtils.isEmpty(childImages)) {
             for (Image child : childImages) {
-                newIsoVolume(child, vm);
+                this.newIsoVolume(child, vm);
             }
-        } else {
-            log.info("createSystemVolume -- not WINDOWS");
         }
 
         log.info("createSystemVolume -- done");
