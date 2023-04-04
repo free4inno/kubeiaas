@@ -10,6 +10,7 @@ import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
+import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
 import org.libvirt.LibvirtException;
@@ -18,8 +19,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static kubeiaas.iaasagent.config.LibvirtConfig.virtCon;
 
 @Slf4j
 @Service
@@ -64,6 +63,7 @@ public class VmService {
 
         // detach active
         try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
             domain = virtCon.domainLookupByUUIDString(instance.getUuid());
             if (domain.isActive() != 0) {
                 instance.setStatus(VmStatusEnum.ERROR);
@@ -78,6 +78,7 @@ public class VmService {
         try {
             // Step 1：创建+启动虚拟机 -----------------------------------------
             log.info("domain xml: " + xml);
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain d = virtCon.domainDefineXML(xml);    //define and start vm
             domain = virtCon.domainLookupByUUIDString(instance.getUuid());
             Thread.sleep(500);
@@ -171,6 +172,7 @@ public class VmService {
         Vm instance = tableStorage.vmQueryByUuid(vmUuid);
         try {
             long memories = VmCUtils.memUnitConvert(memory);
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             if (instance.getStatus().equals(VmStatusEnum.ACTIVE)) {
                 if (cpu != 0) {
@@ -557,6 +559,7 @@ public class VmService {
             throw new Exception("vm uuid is empty");
         }
 
+        Connect virtCon = LibvirtConfig.getVirtCon();
         Domain d = virtCon.domainLookupByUUIDString(vmUuid);
         if (d == null) {
             log.info("getDomainByUuid ---- throws ---- no domain with uuid: " + vmUuid);

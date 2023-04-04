@@ -5,9 +5,11 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.enums.device.DeviceStatusEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaasagent.config.HostConfig;
+import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.utils.UsbUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.List;
 
-import static kubeiaas.iaasagent.config.LibvirtConfig.virtCon;
 
 @Slf4j
 @Service
@@ -68,6 +69,7 @@ public class DeviceService {
 
         String vmUuid = vm.getUuid();
         try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             try {
                 /**

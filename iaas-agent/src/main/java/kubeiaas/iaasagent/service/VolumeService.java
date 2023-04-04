@@ -7,10 +7,12 @@ import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.utils.*;
+import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.VolumeConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
+import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static kubeiaas.iaasagent.config.LibvirtConfig.virtCon;
 
 @Slf4j
 @Service
@@ -163,6 +163,7 @@ public class VolumeService {
         String vmUuid = vm.getUuid();
         String volumeUuid = volume.getUuid();
         try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             try {
                 /**
@@ -202,6 +203,7 @@ public class VolumeService {
         String instanceUuid = vm.getUuid();
         String volumeUuid = volume.getUuid();
         try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(instanceUuid);
             try {
                 int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);

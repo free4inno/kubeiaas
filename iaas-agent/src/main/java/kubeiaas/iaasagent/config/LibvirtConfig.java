@@ -35,9 +35,8 @@ public class LibvirtConfig {
     private static Integer MAX_MEMORY = 16;
     private static Integer MAX_CPU = 16;
 
-    public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
-    public static String virConStr = "qemu:///system";
-    public static Connect virtCon;
+    private static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
+    private static final String virConStr = "qemu:///system";
 
     public static String networkType = System.getenv("NETWORK_BRIDGE_TYPE");
     public static final String NETWORK_TYPE_LINUX = "Linux";
@@ -48,15 +47,18 @@ public class LibvirtConfig {
 
     public LibvirtConfig() {
         emulatorName = getEmulatorLocation();
-        if (virtCon == null) {
-            String conStr = LibvirtConfig.virConStr;
-            try {
-                virtCon = new Connect(conStr);
-            } catch (LibvirtException e) {
-                log.error("get virt connection error");
-                log.error(e.getMessage());
-            }
+    }
+
+    public static Connect getVirtCon() {
+        String conStr = LibvirtConfig.virConStr;
+        Connect connect = null;
+        try {
+            connect = new Connect(conStr);
+        } catch (LibvirtException e) {
+            log.error("get virt connection error");
+            log.error(e.getMessage());
         }
+        return connect;
     }
 
     /**
