@@ -64,7 +64,9 @@ public class VmCUtils {
     }
 
     public static String getVNCPasswd(Integer id, String uuid) {
-        return id + uuid;
+        // 6.2.0 以上的 QEMU 要求 VNC 密码不超过 8 位
+        String passwd = id + uuid;
+        return passwd.substring(0, 8);
     }
 
 }

@@ -30,7 +30,7 @@ while read -r line; do
       label="kubeiaas/img"
       ;;
     "nodes.control")
-      label="kubeiaas/img"
+      label="kubeiaas/ctl"
       ;;
     "nodes.vnc")
       label="kubeiaas/vnc"
@@ -45,7 +45,7 @@ while read -r line; do
     IFS=','
     for node in $values; do
       node=$(echo "$node" | xargs) # 移除两边的空白字符
-      echo "kubectl label node $node $label"
+      echo "kubectl label node $node $label=true;"
     done
   fi
 done <<< "$input"
