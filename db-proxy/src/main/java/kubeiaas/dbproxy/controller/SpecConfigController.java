@@ -8,6 +8,7 @@ import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.dbproxy.dao.SpecConfigDao;
 import kubeiaas.dbproxy.table.SpecConfigTable;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +43,8 @@ public class SpecConfigController {
     @ResponseBody
     public String queryAll() {
         log.info("queryAll == ");
-        return JSON.toJSONString(specConfigDao.findAll());
+        Sort s = Sort.by(Sort.Direction.ASC, SpecConfigConstants.TYPE);
+        return JSON.toJSONString(specConfigDao.findAll(s));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
