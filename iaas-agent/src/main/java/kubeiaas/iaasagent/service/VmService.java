@@ -534,6 +534,11 @@ public class VmService {
         if (d.isActive() > 0) {
             d.destroy();
         }
+
+        if (1 == d.hasManagedSaveImage()) {
+            d.managedSaveRemove();
+        }
+
         new Thread(() -> {
             try {
                 int waitLoop = 3;
