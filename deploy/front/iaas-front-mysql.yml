@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-front-mysql
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iaas-front-mysql
+  template:
+    metadata:
+      labels:
+        app: iaas-front-mysql
+    spec:
+      nodeSelector:
+        kubeiaas/ctl: "true"
+      containers:
+        - name: iaas-front-mysql
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-front-mysql:1.0-SNAPSHOT
+          # -------- change to IfNotPresent when prod
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3306
+              hostPort: 33066
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: MYSQL@free
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: mysql-conf
+              mountPath: /var/lib/mysql-files
+      volumes:
+        - name: mysql-data
+          hostPath:
+            path: /usr/local/kubeiaas/mysql/data
+        - name: mysql-conf
+          hostPath:
+            path: /usr/local/kubeiaas/mysql/cnf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-front-mysql
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-front-mysql
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+---

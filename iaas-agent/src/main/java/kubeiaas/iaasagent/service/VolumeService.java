@@ -136,11 +136,10 @@ public class VolumeService {
                     || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)
                     || volume.getStatus().equals(VolumeStatusEnum.ERROR)) {
                 log.info("no file need to delete");
-                return true;
             } else {
-                log.error("Delete volume Error!!! " + volumePath + "is not exists");
-                return false;
+                log.error("file `" + volumePath + "` is not exists");
             }
+            return true;
         }
 
         // 3. delete

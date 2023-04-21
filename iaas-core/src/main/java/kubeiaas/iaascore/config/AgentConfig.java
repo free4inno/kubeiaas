@@ -22,7 +22,7 @@ public class AgentConfig {
 
     /* constants */
     private static final String HTTP_URI = "http://";
-    private static final String AGENT_PORT = ":9090";
+    private static final String AGENT_PORT = ":32301";
 
     @Data
     @AllArgsConstructor

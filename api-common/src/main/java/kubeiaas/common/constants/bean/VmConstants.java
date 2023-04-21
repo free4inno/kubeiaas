@@ -22,6 +22,6 @@ public class VmConstants {
     public static final String DELETE_NORMAL = "normal";
 
     /* vnc config */
-    public static final String VNC_URL_IP_TEMPLATE = "http://%s:8787/vnc.html?path=?token=%s";
+    public static final String VNC_URL_IP_TEMPLATE = "http://%s:32302/vnc.html?path=?token=%s";
     public static final String VNC_URL_DOMAIN_TEMPLATE = "http://%s/vnc.html?path=?token=%s";
 }
