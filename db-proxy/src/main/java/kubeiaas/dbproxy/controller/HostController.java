@@ -60,7 +60,7 @@ public class HostController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.HOST_OBJECT) String hostObjectStr) {
         log.info("save ==== start ====");
         HostTable hostTable = JSON.parseObject(hostObjectStr, HostTable.class);

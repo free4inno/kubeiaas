@@ -49,7 +49,7 @@ public class SpecConfigController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.OBJECT) String objectStr) {
         log.info("save == ");
         SpecConfigTable table = JSON.parseObject(objectStr, SpecConfigTable.class);
@@ -59,7 +59,7 @@ public class SpecConfigController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void deleteById(
+    public synchronized void deleteById(
             @RequestParam(value = RequestParamConstants.ID) Integer id) {
         log.info("delete == id: " + id);
         specConfigDao.deleteById(id);

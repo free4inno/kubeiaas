@@ -73,7 +73,7 @@ public class IpSegmentController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_OBJECT) String ipSegmentObjectStr) {
         log.info("save ==== start ====");
         IpSegmentTable ipSegmentTable = JSON.parseObject(ipSegmentObjectStr, IpSegmentTable.class);
@@ -84,7 +84,7 @@ public class IpSegmentController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void deleteById(
+    public synchronized void deleteById(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId) {
         log.info("deleteById ==== start ==== id:" + ipSegmentId);
         ipSegmentDao.deleteById(ipSegmentId);

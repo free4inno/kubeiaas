@@ -111,4 +111,4 @@ else
   host_sh "sudo /bin/bash /usr/local/kubeiaas/workdir/checker/mnt-processor.sh -i $nfs_node:$nfs_dir_img -d $nfs_node:$nfs_dir_dv"
 fi
 
-tail -f /dev/null
+# tail -f /dev/null

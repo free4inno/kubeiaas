@@ -47,7 +47,7 @@ public class ImageController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr) {
         log.info("save ==== start ====");
         ImageTable imageTable = JSON.parseObject(imageObjectStr, ImageTable.class);

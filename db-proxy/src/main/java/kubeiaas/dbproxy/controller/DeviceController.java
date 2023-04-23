@@ -47,7 +47,7 @@ public class DeviceController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr) {
         log.info("save ==== start ====");
         DeviceTable deviceTable = JSON.parseObject(deviceObjectStr, DeviceTable.class);
@@ -58,7 +58,7 @@ public class DeviceController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void deleteById(
+    public synchronized void deleteById(
             @RequestParam(value = RequestParamConstants.ID) Integer id) {
         log.info("deleteById ==== start ==== id:" + id);
         deviceDao.deleteById(id);

@@ -202,6 +202,49 @@ spec:
         kubeiaas/node: "true"
       hostPID: true
       hostIPC: true
+      initContainers:
+        - name: iaas-prepare
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:0.1
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          env:
+            # -------- BASIC ENV --------
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            # -------- SERVICE CONFIG --------
+            - name: DHCP_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
+            - name: NFS_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
+            - name: NFS_DIR_IMG
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nfs.dir.img
+            - name: NFS_DIR_DV
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nfs.dir.dv
+            # ----------------------------------
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: checker
+              mountPath: /checker
       containers:
         - name: iaas-agent
           command: ["sh"]
@@ -261,6 +304,9 @@ spec:
         - name: host-proc
           hostPath:
             path: /proc
+        - name: checker
+          hostPath:
+            path: /usr/local/kubeiaas/workdir/checker
         - name: workdir
           hostPath:
             path: /usr/local/kubeiaas/workdir
