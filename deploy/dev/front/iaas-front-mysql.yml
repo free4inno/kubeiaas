@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: iaas-front-mysql
+  name: front-mysql
   namespace: kubeiaas
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: iaas-front-mysql
+      app: front-mysql
   template:
     metadata:
       labels:
-        app: iaas-front-mysql
+        app: front-mysql
     spec:
       nodeSelector:
         kubeiaas/ctl: "true"
       containers:
-        - name: iaas-front-mysql
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-front-mysql:1.0-SNAPSHOT
+        - name: front-mysql
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-mysql:1.0-SNAPSHOT
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           ports:
@@ -43,11 +43,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: iaas-front-mysql
+  name: front-mysql
   namespace: kubeiaas
 spec:
   selector:
-    app: iaas-front-mysql
+    app: front-mysql
   type: ClusterIP
   ports:
     - port: 3306
