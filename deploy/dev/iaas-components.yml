@@ -259,6 +259,7 @@ spec:
             privileged: true
           ports:
             - containerPort: 9090
+              hostPort: 32201
               protocol: TCP
             - containerPort: 9089
               protocol: TCP
@@ -319,10 +320,9 @@ metadata:
 spec:
   selector:
     app: iaas-agent
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 9090
-      nodePort: 32301
       targetPort: 9090
       protocol: TCP
 ---
@@ -373,7 +373,7 @@ spec:
   type: NodePort
   ports:
     - port: 8787
-      nodePort: 32302
+      nodePort: 32202
       targetPort: 8787
       protocol: TCP
 ---

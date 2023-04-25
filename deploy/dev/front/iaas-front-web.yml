@@ -101,7 +101,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - nodePort: 32300
+    - nodePort: 32200
       port: 80
       targetPort: 80
       protocol: TCP
