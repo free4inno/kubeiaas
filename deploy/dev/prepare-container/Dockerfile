@@ -10,5 +10,5 @@ RUN chmod 755 /workdir/*
 
 ENTRYPOINT ["/bin/sh", "/workdir/prepare.sh"]
 
-# docker build -f ./Dockerfile -t registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:0.1 .
-# docker push registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:0.1
+# docker build -f ./Dockerfile -t registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.0-RELEASE .
+# docker push registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.0-RELEASE

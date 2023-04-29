@@ -11,6 +11,6 @@ RUN mkdir /db
 COPY ./sqlite/resource/kubeiaas-init.db /root/
 COPY ./sqlite/resource/RUN.sh /root/
 
-ADD ./target/db-proxy-0.1.1-SNAPSHOT.jar /root/db-proxy.jar
+ADD ./target/db-proxy-1.0-RELEASE.jar /root/db-proxy.jar
 
 ENTRYPOINT ["/bin/bash", "/root/RUN.sh"]

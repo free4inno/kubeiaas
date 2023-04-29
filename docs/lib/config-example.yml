@@ -1,0 +1,100 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iaas-config
+  namespace: kubeiaas
+data:
+
+  # ===
+  # 配置：工作节点
+  # 说明：在这部分声明所有的工作节点
+  # 内容：
+  #   - <node_name>,<node_name>,...
+  #     注意！节点名称需要与 K8S 集群中的 node_name 一致，以英文逗号分隔不要有空格
+  # 示例：
+  nodes.work.list: "node-01,node-02"
+  # ===
+
+  # ===
+  # 配置：管控节点
+  # 说明：系统管控系列组件将被部署在该节点（包括：数据库、调度服务...）
+  # 内容：
+  #  - <node_name>
+  #    注意！请填入属于 K8S 集群内的节点名称，需要与 K8S 集群中的 node_name 一致
+  nodes.control: "master-01"
+  # ===
+
+  # ===
+  # 配置：镜像服务节点
+  # 说明：镜像服务组件将被部署在该节点
+  # 内容：
+  #   - <node_name>
+  #     注意！请填入属于工作节点内的节点名称，需要与 K8S 集群中的 node_name 一致
+  # 示例：
+  nodes.image: "node-02"
+  # ===
+
+  # ===
+  # 配置：VNC服务节点
+  # 说明：noVNC Web 服务将会由该节点提供并暴露
+  # 内容：
+  #   - <node_name>
+  #     注意！请填入属于工作节点内的节点名称，需要与 K8S 集群中的 node_name 一致
+  # 示例：
+  nodes.vnc: "node-02"
+  # ===
+
+  # ===
+  # 配置：DHCP服务节点
+  # 说明：填入先前选定并配置“负责网络”的工作节点
+  # 内容：
+  #   - <node_name>
+  #     注意！请填入属于工作节点内的节点名称，需要与 K8S 集群中的 node_name 一致
+  # 示例：
+  nodes.dhcp: "node-02"
+  # ===
+
+  # ===
+  # 配置：NFS服务节点
+  # 说明：负责NFS存储的节点
+  # 内容：
+  #   - <node_name>
+  #     填入您先前选定并配置的 负责存储的工作节点
+  #     注意！请填入属于工作节点内的节点名称，需要与 K8S 集群中的 node_name 一致
+  #   - <ip_address>
+  #     自定义的工作节点以外的 NFS Server IP
+  # 示例：
+  nodes.nfs: "node-02"
+  # ===
+
+  # ===
+  # 配置：NFS服务目录
+  # 说明：在各个工作节点上共享的 NFS 云镜像与云硬盘存储目录
+  # 内容：
+  #   - /usr/local/kubeiaas/data/images
+  #     默认请填入此项
+  #   - </custom/dir/img>
+  #     自定义的工作节点以外的 NFS 挂载目录
+  # 示例：
+  nfs.dir.img: "/usr/local/kubeiaas/data/images"
+  # ---
+  # 内容：
+  #   - /usr/local/kubeiaas/data/data-volumes
+  #     默认请填入此项
+  #   - </custom/dir/data-volumes>
+  #     自定义的工作节点以外的 NFS 挂载目录
+  # 示例：
+  nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
+  # ===
+
+  # ===
+  # 配置：网络（桥接）模式
+  # 说明：用于标注工作节点的网络配置类型
+  # 内容：
+  #   - MACV    (使用 MACVTAP 的桥接模式，默认请填入此项）
+  #   - OVS     (节点网桥为 OVS 网桥）
+  #   - Linux   (节点网桥为 Linux 网桥）
+  # 示例：
+  network.bridge.type: "MACV"
+  # ===

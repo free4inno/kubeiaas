@@ -1,3 +1,3 @@
 FROM openjdk:8-jre-alpine
 
-ADD ./target/iaas-core-0.1.1-SNAPSHOT.jar /root/iaas-core.jar
+ADD ./target/iaas-core-1.0-RELEASE.jar /root/iaas-core.jar

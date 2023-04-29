@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.free4inno.kubeiaas</groupId>
         <artifactId>kubeiaas</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>1.0-RELEASE</version>
     </parent>
 
     <artifactId>iaas-agent</artifactId>
@@ -20,7 +20,7 @@
         <dependency>
             <groupId>com.free4inno.kubeiaas</groupId>
             <artifactId>api-common</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>1.0-RELEASE</version>
         </dependency>
         <!-- libvirt -->
         <dependency>
