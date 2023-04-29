@@ -24,6 +24,8 @@ public enum ResponseEnum {
     VOLUME_DETACH_ERROR(202.13f,"云硬盘卸载失败"),
     IMAGE_SAVE_ERROR(203.01f,"云镜像保存失败"),
     IMAGE_DELETE_ERROR(203.02f,"云镜像删除失败"),
+    DEVICE_ATTACH_ERROR(204.01f,"设备挂载失败"),
+    DEVICE_DETACH_ERROR(204.02f,"设备卸载失败"),
     ARGS_ERROR(402f, "验参失败"),
     INTERNAL_ERROR(500f, "内部错误");
 

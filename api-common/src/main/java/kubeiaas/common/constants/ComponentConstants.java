@@ -16,6 +16,7 @@ public class ComponentConstants {
     public static final String VOLUME_CONTROLLER = "volume-controller";
     public static final String VM_CONTROLLER = "vm-controller";
     public static final String HOST_CONTROLLER = "host-controller";
+    public static final String DEVICE_CONTROLLER = "device-controller";
     // ---
     public static final String DHCP = "DHCP";
     public static final String VNC = "noVNC";

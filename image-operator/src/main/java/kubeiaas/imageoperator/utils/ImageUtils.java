@@ -42,6 +42,9 @@ public class ImageUtils {
 
     public static Image getImageFromYaml(String filePath, Integer id) {
         Map<String, Object> objectMap;
+        // - Version 1: use uuid as an attr in yaml (不能控制去重，并且不利于索引) =====
+        // - Version 2: use yamlName as uuid ======================================
+        String uuid = getFileNameFromPath(filePath, true);
         try {
             FileReader fr = new FileReader(filePath);
             BufferedReader br = new BufferedReader(fr);
@@ -51,10 +54,6 @@ public class ImageUtils {
 
             Map<String, Object> imageMap = (Map<String, Object>) objectMap.get("image");
             String name = (String) imageMap.get("name");
-            // - Version 1: use uuid as an attr in yaml (不能控制去重，并且不利于索引) =====
-            // String uuid = (String) imageMap.get("uuid");
-            // - Version 2: use yamlName as uuid ======================================
-            String uuid = getFileNameFromPath(filePath, true);
             String description = (String) imageMap.get("description");
             String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + imageMap.get("filename");
 
@@ -94,7 +93,11 @@ public class ImageUtils {
             return image;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            Image image = new Image();
+            image.setUuid(uuid);
+            image.setName("NA");
+            image.setDescription("FILE PARSE ERROR!");
+            return image;
         }
     }
 

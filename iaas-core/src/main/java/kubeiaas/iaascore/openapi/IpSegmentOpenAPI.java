@@ -3,15 +3,14 @@ package kubeiaas.iaascore.openapi;
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
-import kubeiaas.iaascore.request.IpSegment.CreateIpSegmentForm;
-import kubeiaas.iaascore.request.IpSegment.EditIpSegmentForm;
-import kubeiaas.iaascore.request.vm.CreateVmForm;
+import kubeiaas.iaascore.request.ipSegment.CreateIpSegmentForm;
+import kubeiaas.iaascore.request.ipSegment.DeleteIpSegmentForm;
+import kubeiaas.iaascore.request.ipSegment.EditIpSegmentForm;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
@@ -62,11 +61,38 @@ public class IpSegmentOpenAPI {
         return JSON.toJSONString(BaseResponse.success(ipSegmentList));
     }
 
+    /**
+     * 统计信息
+     * @return 四字段公私分类Map
+     */
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
         log.info("ip_segment statistics ==== start ====");
+        log.info("ip_segment -- getTotal");
         Map<String, Integer> resMap = networkService.getIpCount();
+        log.info("ip_segment statistics ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(resMap));
+    }
+
+    /**
+     * ip用量统计
+     * @param ipSegmentId id
+     * @return 两字段用量统计Map
+     * @throws BaseException id异常
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String statisticsById(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId) throws BaseException {
+        log.info("ip_segment statistics ==== start ====");
+        Map<String, Integer> resMap;
+        if (ipSegmentId == null) {
+            throw new BaseException("err: ipSegmentId illegal");
+        } else {
+            log.info("ip_segment -- getSegId: " + ipSegmentId);
+            resMap = networkService.getIpCount(ipSegmentId);
+        }
         log.info("ip_segment statistics ==== end ====");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
@@ -77,10 +103,10 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createIpSegment(@Valid @RequestBody CreateIpSegmentForm f) throws BaseException {
-        log.info("ip_segment crate ==== start ====");
+        log.info("ip_segment create ==== start ====");
         IpSegment newIpSegment = networkService.updateIpSegment(0,
                 f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
-        log.info("ip_segment crate ==== end ====");
+        log.info("ip_segment create ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
 
@@ -89,10 +115,9 @@ public class IpSegmentOpenAPI {
      */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String deleteIpSegment(
-            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId) {
+    public String deleteIpSegment(@Valid @RequestBody DeleteIpSegmentForm f) {
         log.info("ip_segment delete ==== start ====");
-        String result  = networkService.deleteIpSegment(ipSegmentId);
+        String result  = networkService.deleteIpSegment(f.getIpSegmentId());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("delete ==== end ====");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));

@@ -4,6 +4,7 @@ import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.common.utils.*;
 import kubeiaas.iaasagent.config.LibvirtConfig;
@@ -26,25 +27,11 @@ import java.util.Map;
 @Service
 public class VolumeService {
 
-    private static Connect virtCon;
-
     @Resource
     private TableStorage tableStorage;
 
     @Resource
     private XmlConfig xmlConfig;
-
-    public VolumeService() {
-        if (virtCon == null) {
-            String conStr = LibvirtConfig.virConStr;
-            try {
-                virtCon = new Connect(conStr);
-            } catch (LibvirtException e) {
-                log.error("get virt connection error", e);
-                log.error(e.getMessage());
-            }
-        }
-    }
 
     public boolean createSystemVolume(String imagePath, String volumePath, String volumeUuid, int extraSize) {
 
@@ -149,11 +136,10 @@ public class VolumeService {
                     || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)
                     || volume.getStatus().equals(VolumeStatusEnum.ERROR)) {
                 log.info("no file need to delete");
-                return true;
             } else {
-                log.error("Delete volume Error!!! " + volumePath + "is not exists");
-                return false;
+                log.error("file `" + volumePath + "` is not exists");
             }
+            return true;
         }
 
         // 3. delete
@@ -176,9 +162,19 @@ public class VolumeService {
         String vmUuid = vm.getUuid();
         String volumeUuid = volume.getUuid();
         try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             try {
-                domain.attachDeviceFlags(volumeXml, 3);
+                /**
+                 * Attach a virtual device to a domain, using the flags parameter to control how the device is attached.
+                 * - 0000: VIR_DOMAIN_AFFECT_CURRENT specifies that the device allocation is made based on current domain state.
+                 * - 0001: VIR_DOMAIN_AFFECT_LIVE specifies that the device shall be allocated to the active domain instance only and is not added to the persisted domain configuration.
+                 * - 0010: VIR_DOMAIN_AFFECT_CONFIG specifies that the device shall be allocated to the persisted domain configuration only. Note that the target hypervisor must return an error if unable to satisfy flags.
+                 * - 0100: FORCE
+                 * Use | to combine those configs, we got 3 as (VIR_DOMAIN_AFFECT_LIVE | VIR_DOMAIN_AFFECT_CONFIG)
+                 */
+                int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);
+                domain.attachDeviceFlags(volumeXml, virtFlag);
             } catch (Exception e) {
                 volume.setInstanceUuid("");
                 volume.setMountPoint("");
@@ -206,9 +202,11 @@ public class VolumeService {
         String instanceUuid = vm.getUuid();
         String volumeUuid = volume.getUuid();
         try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(instanceUuid);
             try {
-                domain.detachDeviceFlags(volumeXml, 3);
+                int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);
+                domain.detachDeviceFlags(volumeXml, virtFlag);
             } catch (Exception e) {
                 setVolumeStatus(volumeUuid, VolumeStatusEnum.ATTACHED);
                 e.printStackTrace();

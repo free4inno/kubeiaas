@@ -115,7 +115,7 @@ public class VmController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr) {
         log.info("save ==== start ====");
         VmTable vmTable = JSON.parseObject(vmObjectStr, VmTable.class);
@@ -126,7 +126,7 @@ public class VmController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_UUID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void deleteByUuid(
+    public synchronized void deleteByUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("deleteInstanceByUuid ==== start ==== vmUuid:" + vmUuid);
         vmDao.deleteByUuid(vmUuid);

@@ -1,5 +1,6 @@
 package kubeiaas.iaasagent.config;
 
+import kubeiaas.common.bean.Device;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
@@ -7,7 +8,6 @@ import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.VmCUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -50,43 +50,19 @@ public class XmlConfig {
         return res;
     }
 
+    public String getUsbDevice(Device device) {
+        log.info("getVolumeDevice ---- start ----");
+        String res = libvirtConfig.usbToDevice(device);
+        log.info("getVolumeDevice ---- end ----");
+        return res;
+    }
+
     public String getIpDevice(IpUsed ip) {
         log.info("getIpDevice ---- start ----");
         String res = libvirtConfig.ipToNetwork(ip);
         log.info("getIpDevice ---- end ----");
         return res;
     }
-
-    /*
-
-    public String modifyXml(String originXML, int newCores, int newMemory) {
-        log.info("modifyXml ---- start ----");
-        //1、判断newCores是否为空，不为空再进行修改之后返回String类型的修改结果
-        String resultXml = null;
-        Document document = stringToDocument(originXML);
-        if (newCores > 0) {
-            String coreString = String.valueOf(VmCUtils.memUnitConvert(newCores));
-            Node cpu = document.getElementsByTagName("cpu").item(0);
-            Element cpuElement = (Element) cpu;
-            Node topology = cpuElement.getElementsByTagName("topology").item(0);
-            NamedNodeMap topologyNodeMap = topology.getAttributes();
-            Node cores = topologyNodeMap.getNamedItem("cores");
-            cores.setTextContent(coreString);
-        }
-        if (newMemory > 0) {
-            String memoryString = String.valueOf(newMemory);
-            Node memory = document.getElementsByTagName("memory").item(0);
-            Node currentMemory = document.getElementsByTagName("currentMemory").item(0);
-            Element memoryElement = (Element) memory;
-            Element currentMemoryElement = (Element) currentMemory;
-            memoryElement.setTextContent(memoryString);
-            currentMemoryElement.setTextContent(memoryString);
-        }
-        resultXml = documentToString(document);
-        log.info("modifyXml ---- end ----");
-        return resultXml;
-    }
-     */
 
     public String modifyXml(String originXML, int newCores, int newMemory) {
         log.info("modifyXml ---- start ----");
@@ -111,7 +87,7 @@ public class XmlConfig {
         return resultXml;
     }
 
-    //
+    // ABANDON: no need to edit XML manually.
     public String attachDisk(String originXML, Volume volume) {
         log.info("attachDisk ---- start ----");
         //1、根据volume信息生成一段xml信息，然后插入到originXml disk之后
@@ -148,6 +124,7 @@ public class XmlConfig {
         return resultXml;
     }
 
+    // ABANDON: no need to edit XML manually.
     public String detachDisk(String originXML, String uuid) {
         log.info("detachDisk ---- start ----");
         String resultXml = null;

@@ -5,11 +5,12 @@ import kubeiaas.common.bean.Image;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
-import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.dao.feign.VmController;
 import kubeiaas.iaascore.dao.feign.VolumeController;
+import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.process.MountProcess;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -131,6 +132,20 @@ public class VmScheduler {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public VmStatusEnum getStatus(Vm vm) throws BaseException {
+        VmStatusEnum vmStatusEnum = null;
+        try {
+            String statusStr = vmController.status(getSelectedUri(vm.getUuid()), vm.getUuid());
+            vmStatusEnum = JSON.parseObject(statusStr, VmStatusEnum.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (null == vmStatusEnum) {
+            throw new BaseException("err: failed to get current vm status, uuid " + vm.getUuid());
+        }
+        return vmStatusEnum;
     }
 
     public void deleteVmInDataBase(String vmUuid){

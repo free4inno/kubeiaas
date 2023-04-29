@@ -6,6 +6,7 @@ import kubeiaas.common.utils.IpUtils;
 import kubeiaas.common.utils.MacUtils;
 import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.iaasagent.config.DhcpConfig;
+import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.VelocityContext;
@@ -18,6 +19,7 @@ import java.io.FileWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -32,6 +34,10 @@ public class DhcpService {
     public boolean updateIpSeg(int ipSegId) {
         // -------- 1. 获取 ipSegId 信息 --------
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegId);
+        if (!ipSegment.getHostUuid().equals(HostConfig.thisHost.getUuid())) {
+            log.info(" -- not Network Node");
+            return true;
+        }
 
         // -------- 2. 构造配置串 --------
         String segName = "IP_SEG_" + ipSegment.getBridge();

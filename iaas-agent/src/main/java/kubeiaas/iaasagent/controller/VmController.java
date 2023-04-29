@@ -1,10 +1,10 @@
 package kubeiaas.iaasagent.controller;
 
+import com.alibaba.fastjson.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaasagent.service.VmService;
-import kubeiaas.iaasagent.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -139,5 +139,13 @@ public class VmController {
             log.info("modifyVm ==== failed");
             return ResponseMsgConstants.FAILED;
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATUS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String status(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("status == vmUuid: " + vmUuid);
+        return JSON.toJSONString(vmService.status(vmUuid));
     }
 }

@@ -6,7 +6,7 @@ package kubeiaas.common.enums.vm;
 public enum VmStatusEnum {
 
     ACTIVE, STARTING ,APPLYING, BUILDING, REBUILDING, PAUSED, SUSPENDED, RESCUED, DELETED, STOPPED, STOPPING,
-    MIGRATING, RESIZING, ERROR, REJECTED, REBOOTING, SUSPENDING ,RESUMING, DELETING;
+    MIGRATING, RESIZING, ERROR, REJECTED, REBOOTING, SUSPENDING ,RESUMING, DELETING, UNKNOWN;
 
     public String toString() {
         switch (this) {
@@ -48,6 +48,8 @@ public enum VmStatusEnum {
                 return "resuming";
             case DELETING:
                 return "deleting";
+            case UNKNOWN:
+                return "unknown";
         }
         return super.toString();
     }

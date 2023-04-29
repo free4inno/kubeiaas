@@ -13,8 +13,12 @@ import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
 import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
+import kubeiaas.iaascore.response.ResponseEnum;
+import kubeiaas.iaascore.scheduler.DeviceScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -40,6 +44,9 @@ public class VmService {
 
     @Resource
     private VncProcess vncProcess;
+
+    @Resource
+    private DeviceScheduler deviceScheduler;
 
     /**
      * 创建虚拟机
@@ -102,7 +109,7 @@ public class VmService {
         // ----- check if exist -----
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         if (vm == null) {
-            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")");
+            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")", ResponseEnum.VM_DELETE_ERROR);
         }
 
         /* ----- judge status ----
@@ -115,44 +122,35 @@ public class VmService {
         }
 
         try {
-            /* -----0. set status -----
-            Set deleting status
-             */
+            // -- 0. set status -- Set deleting status
             vmProcess.setVmStatus(vmUuid, VmStatusEnum.DELETING);
 
-            /* -----1. choose host ----
-            Select the host where the VM to be deleted resides
-            */
+            // -- 1. choose host -- Select the host where the VM to be deleted resides
             resourceProcess.selectHostByVmUuid(vmUuid);
 
-            /* -----2. delete VM ----
-            Delete the VM and then delete other information
-            */
+            // ┌- 2. delete VM -- Delete the VM and then delete other information -┐
             vmProcess.deleteVM(vmUuid);
 
-            /* -----3. Delete Volume ----
-            Delete disks, including Linux files and database information
-            */
+            // ├- 3. Delete Volume -- Delete disks, including Linux files and database information
             volumeProcess.deleteSystemVolume(vmUuid);
 
-            /* -----4. Delete Ip ----
-            Delete Ip information
-            */
+            // ├- 4. Delete Ip -- Delete Ip information
             networkProcess.deleteIps(vmUuid);
 
-            /* -----5. delete in database ----
-            Delete VM records from the database
-            */
-            vmProcess.deleteVmInDataBase(vmUuid);
+            // ├- 5. Delete Device -- Delete Device information (while Step.2 already detached)
+            deviceScheduler.deleteDevice(vmUuid);
 
-            /* -----6. delete vnc ----
-            delete vnc in token.config
-            */
+            vmProcess.deleteVmInDataBase(vmUuid);
+            // └- 6. delete in database -- Delete VM records from the database -┘
+
+            // -- 7. delete vnc -- delete vnc in token.config
             vncProcess.deleteVncToken(vmUuid);
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new VmException(vm, "ERR: error while delete! (uuid: " + vmUuid + ")");
+            String log = (e instanceof BaseException) ? ((BaseException) e).getMsg() : "";
+            throw new VmException(vm,
+                    String.format("err: delete failed (uuid: %s)! %s", vmUuid, log), ResponseEnum.VM_DELETE_ERROR);
         }
 
         return ResponseMsgConstants.SUCCESS;
@@ -288,7 +286,7 @@ public class VmService {
         return vmPage;
     }
 
-    public Vm queryByUuid(String uuid) {
+    public Vm queryByUuid(String uuid) throws BaseException {
         Vm vm = tableStorage.vmQueryByUuid(uuid);
 
         // get ips
@@ -307,6 +305,10 @@ public class VmService {
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
         vm.setHost(host);
 
+        // get devices
+        List<Device> deviceList = deviceScheduler.queryByVm(vm);
+        vm.setDevices(deviceList);
+
         return vm;
     }
 
@@ -316,14 +318,19 @@ public class VmService {
      * 2. 根据配置中获取 Domain 域名模板
      */
     public String getVncUrl(String vmUuid) {
+        String domainUrl = "";
+        // 1. get config from DB
         List<SpecConfig> vncConfigs = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VNC_DOMAIN);
-        if (vncConfigs == null || vncConfigs.isEmpty()) {
-            // 1. Analyze `vnc` host from DB hostRoles.
+        if (!CollectionUtils.isEmpty(vncConfigs)) {
+            domainUrl = vncConfigs.get(0).getValue();
+        }
+        // 2. build and return
+        if (StringUtils.isEmpty(domainUrl)) {
+            // - Analyze `vnc` host from DB hostRoles.
             Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
             return String.format(VmConstants.VNC_URL_IP_TEMPLATE, host.getIp(), vmUuid);
         } else {
-            // 2. Analyze `vnc` host from Domain Name.
-            String domainUrl = vncConfigs.get(0).getValue();
+            // - Analyze `vnc` host from Domain Name.
             return String.format(VmConstants.VNC_URL_DOMAIN_TEMPLATE, domainUrl, vmUuid);
         }
     }
@@ -398,5 +405,42 @@ public class VmService {
         }
 
         return resMap;
+    }
+
+    /**
+     * 获取并刷新状态
+     */
+    public VmStatusEnum status(String uuid) throws BaseException {
+        // 1. get status now
+        Vm vm = tableStorage.vmQueryByUuid(uuid);
+        if (null == vm) {
+            throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
+        }
+        VmStatusEnum vmStatus = vmProcess.getStatus(vm);
+        log.info("status -- old status: {}, now status: {}.", vm.getStatus(), vmStatus);
+
+        // 2.1. do UNKNOWN
+        if (vmStatus.equals(VmStatusEnum.UNKNOWN)) {
+            if (vm.getStatus().equals(VmStatusEnum.BUILDING)
+                    || vm.getStatus().equals(VmStatusEnum.ERROR)) {
+                log.info("status -- no need to update status of {}", uuid);
+            } else {
+                vm.setStatus(VmStatusEnum.ERROR);
+            }
+            tableStorage.vmSave(vm);
+            return vm.getStatus();
+        }
+
+        // 2.2. update status if needed
+        if (!vmStatus.equals(vm.getStatus())) {
+            log.info("status -- update status of {}", uuid);
+            // 3. flush VNC if is ACTIVE
+            if (vmStatus.equals(VmStatusEnum.ACTIVE)) {
+                vm = vncProcess.flushVncToken(uuid);
+            }
+            vm.setStatus(vmStatus);
+            tableStorage.vmSave(vm);
+        }
+        return vm.getStatus();
     }
 }

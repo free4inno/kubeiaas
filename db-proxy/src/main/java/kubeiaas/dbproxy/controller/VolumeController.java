@@ -102,7 +102,7 @@ public class VolumeController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
         log.info("save ==== start ====");
         VolumeTable volumeTable = JSON.parseObject(volumeObjectStr, VolumeTable.class);
@@ -113,7 +113,7 @@ public class VolumeController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_UUID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void deleteByUuid(
+    public synchronized void deleteByUuid(
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid) {
         log.info("deleteVolumeByUuid ==== start ==== uuid:" + volumeUuid);
         volumeDao.deleteByUuid(volumeUuid);

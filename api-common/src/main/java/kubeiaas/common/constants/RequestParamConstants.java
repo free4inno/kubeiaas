@@ -8,9 +8,11 @@ public class RequestParamConstants {
     public static final String UUID = "uuid";
     public static final String DESCRIPTION = "description";
     public static final String ID = "id";
+    public static final String OBJECT = "object";
 
     public static final String IMAGE_UUID = "image_uuid";
     public static final String HOST_UUID = "host_uuid";
+    public static final String HOST_NAME = "host_name";
     public static final String VM_UUID = "vm_uuid";
     public static final String VOLUME_UUID = "volume_uuid";
 
@@ -62,4 +64,7 @@ public class RequestParamConstants {
     public static final String SERVICE_NAME = "service_name";
     public static final String NODE_NAME = "node_name";
     public static final String TIMESTAMP = "timestamp";
+
+    /* ==== DEVICE ===== */
+    public static final String DEVICE_OBJECT = "device_object";
 }

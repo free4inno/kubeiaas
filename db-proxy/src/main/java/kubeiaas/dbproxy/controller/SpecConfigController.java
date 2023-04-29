@@ -8,6 +8,7 @@ import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.dbproxy.dao.SpecConfigDao;
 import kubeiaas.dbproxy.table.SpecConfigTable;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +37,32 @@ public class SpecConfigController {
         List<SpecConfigTable> specConfigTableList = specConfigDao.findAll(specification);
         log.info("queryAllByType ==== end ====");
         return JSON.toJSONString(specConfigTableList);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAll() {
+        log.info("queryAll == ");
+        Sort s = Sort.by(Sort.Direction.ASC, SpecConfigConstants.TYPE);
+        return JSON.toJSONString(specConfigDao.findAll(s));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public synchronized String save(
+            @RequestParam(value = RequestParamConstants.OBJECT) String objectStr) {
+        log.info("save == ");
+        SpecConfigTable table = JSON.parseObject(objectStr, SpecConfigTable.class);
+        specConfigDao.saveAndFlush(table);
+        return JSON.toJSONString(table);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public synchronized void deleteById(
+            @RequestParam(value = RequestParamConstants.ID) Integer id) {
+        log.info("delete == id: " + id);
+        specConfigDao.deleteById(id);
     }
 
 }

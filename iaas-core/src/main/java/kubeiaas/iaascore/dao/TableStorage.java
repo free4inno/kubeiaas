@@ -163,6 +163,16 @@ public class TableStorage {
         }
     }
 
+    public Host hostQueryByName(String name) {
+        String jsonString = dbProxy.hostQueryAllBySingleKey(HostConstants.NAME, name);
+        List<Host> hostList = JSON.parseArray(jsonString, Host.class);
+        if (hostList != null && !hostList.isEmpty()) {
+            return hostList.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public Host hostQueryByRole(String role) {
         String jsonString = dbProxy.hostQueryAllLikeBySingleKey(HostConstants.ROLE, "\"" + role + "\"");
         List<Host> hostList = JSON.parseArray(jsonString, Host.class);
@@ -320,5 +330,47 @@ public class TableStorage {
     public List<SpecConfig> specConfigQueryAllByType(SpecTypeEnum type) {
         String jsonString = dbProxy.specConfigQueryAllByType(type);
         return JSON.parseArray(jsonString, SpecConfig.class);
+    }
+
+    public List<SpecConfig> specConfigQueryAll() {
+        String jsonString = dbProxy.specConfigQueryAll();
+        return JSON.parseArray(jsonString, SpecConfig.class);
+    }
+
+    public SpecConfig specConfigSave(SpecConfig specConfig) {
+        String specConfigObjectStr = JSON.toJSONString(specConfig);
+        specConfigObjectStr = dbProxy.specConfigSave(specConfigObjectStr);
+        return JSON.parseObject(specConfigObjectStr, SpecConfig.class);
+    }
+
+    public void specConfigDelete(Integer specConfigId){
+        dbProxy.specConfigDeleteById(specConfigId);
+    }
+
+    // ======================== device ==============================
+
+    public List<Device> deviceQueryAllByHostUuid(String uuid) {
+        String jsonString = dbProxy.deviceQueryAllBySingleKey(DeviceConstants.HOST_UUID, uuid);
+        return JSON.parseArray(jsonString, Device.class);
+    }
+
+    public List<Device> deviceQueryByVmUuid(String uuid) {
+        String jsonString = dbProxy.deviceQueryAllBySingleKey(DeviceConstants.INSTANCE_UUID, uuid);
+        return JSON.parseArray(jsonString, Device.class);
+    }
+
+    public Device deviceSave(Device device) {
+        String deviceObjectStr = JSON.toJSONString(device);
+        deviceObjectStr = dbProxy.deviceSave(deviceObjectStr);
+        return JSON.parseObject(deviceObjectStr, Device.class);
+    }
+
+    public boolean deviceDelete(Device device) {
+        Integer id = device.getId();
+        if (null == id) {
+            return false;
+        }
+        dbProxy.deviceDelete(id);
+        return true;
     }
 }

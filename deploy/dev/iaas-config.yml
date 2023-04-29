@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iaas-config
+  # kubectl create namespace kubeiaas
+  namespace: kubeiaas
+data:
+  # kubectl get node --show-labels
+  # -------- 工作节点 --------
+  # kubectl label node <node_name> kubeiaas/node=true
+  nodes.work.list: "hf-node-01,hf-node-02"
+
+  # -------- 管控组件 --------
+  # kubectl label node <node_name> kubeiaas/ctl=true
+  nodes.control: "hf-master-01"
+  # kubectl label node <node_name> kubeiaas/img=true
+  nodes.image: "hf-node-02"
+
+  # -------- 基础服务 --------
+  # kubectl label node <node_name> kubeiaas/vnc=true
+  nodes.vnc: "hf-node-01"
+  nodes.dhcp: "hf-node-01"
+  nodes.nfs: "192.168.33.7"
+
+  nfs.dir.img: "/usr/local/kubeiaas/data/images"
+  nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
+
+  # -------- 网络配置 --------
+  # MACV / Linux / OVS
+  network.bridge.type: "Linux"

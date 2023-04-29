@@ -43,7 +43,7 @@ public class MacUtils {
             segment = 1;
         }
         id = (id << 4) + segment;
-        String upper = Integer.toHexString((id & 0x0000ff00) >>> 8);
+        String upper = Integer.toHexString((id & 0x0000fe00) >>> 8); // 避免出现多播地址
         String lower = Integer.toHexString(id & 0x000000ff);
         return upper.toUpperCase() + ":" + lower.toUpperCase();
     }

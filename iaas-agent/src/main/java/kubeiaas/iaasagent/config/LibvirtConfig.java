@@ -1,22 +1,24 @@
 package kubeiaas.iaasagent.config;
 
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
-import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.VmCUtils;
+import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.eclipse.aether.util.ConfigUtils;
+import org.libvirt.Connect;
+import org.libvirt.LibvirtException;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -27,26 +29,36 @@ import java.util.List;
 @Configuration
 public class LibvirtConfig {
 
-    private static final String MAX_MEMORY = "16";
-    private static final String MAX_CPU = "16";
+    @Resource
+    private TableStorage tableStorage;
 
-    public static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
-    public static String virConStr = "qemu:///system";
+    private static Integer MAX_MEMORY = 16;
+    private static Integer MAX_CPU = 16;
 
-    public static String defaultNetwork = "bridge";
-    public static String networkBridgeType = System.getenv("NETWORK_BRIDGE_TYPE");
-    public static final String BR_TYPE_LINUX = "Linux";
-    public static final String BR_TYPE_OVS = "OVS";
+    private static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
+    private static final String virConStr = "qemu:///system";
+
+    public static String networkType = System.getenv("NETWORK_BRIDGE_TYPE");
+    public static final String NETWORK_TYPE_LINUX = "Linux";
+    public static final String NETWORK_TYPE_OVS = "OVS";
+    public static final String NETWORK_TYPE_MACV = "MACVLAN";
 
     public static String getVncPort = "virsh vncdisplay ";
 
-    /**
-     * old：使用构造函数在启动时调用
-     * now：在kvm操作前主动调用
-     * （为了启动时不依赖宿主机的 libvirt 安装，暂时不考虑额外造成的开销）
-     */
-    public void initEmulator() {
+    public LibvirtConfig() {
         emulatorName = getEmulatorLocation();
+    }
+
+    public static Connect getVirtCon() {
+        String conStr = LibvirtConfig.virConStr;
+        Connect connect = null;
+        try {
+            connect = new Connect(conStr);
+        } catch (LibvirtException e) {
+            log.error("get virt connection error");
+            log.error(e.getMessage());
+        }
+        return connect;
     }
 
     /**
@@ -81,6 +93,36 @@ public class LibvirtConfig {
     }
 
     /**
+     * 刷新用户计算资源上限配置
+     *
+     * 从配置表中读取配置，并按照配置设置最大值，期间需要防止用户的 空配置 / 错误配置
+     * 在每次生产新的 XML 前刷新
+     */
+    private void refreshMaxCompute() {
+        List<SpecConfig> confList = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VM_COMPUTE);
+        if (CollectionUtils.isEmpty(confList)) {
+            return;
+        }
+        int tempMaxMem = MAX_MEMORY;
+        int tempMaxCpu = MAX_CPU;
+        for (SpecConfig conf : confList) {
+            String[] cm = conf.getValue().split(",");
+            if (cm.length == 2) {
+                try {
+                    int nowCpu = Integer.parseInt(cm[0]);
+                    int nowMem = Integer.parseInt(cm[1]);
+                    tempMaxCpu = Math.max(nowCpu, tempMaxCpu);
+                    tempMaxMem = Math.max(nowMem, tempMaxMem);
+                } catch (Exception e) {
+                    log.warn("bad config value '{}'. {}", conf.getValue(), e.getMessage());
+                }
+            }
+        }
+        MAX_CPU = tempMaxCpu;
+        MAX_MEMORY = tempMaxMem;
+    }
+
+    /**
      * 生成xml描述文件.
      * 参数解析、流程控制.
      */
@@ -93,6 +135,9 @@ public class LibvirtConfig {
             int memory) {
         log.info("generateDesXML ---- start ----");
 
+        // refresh MAX setting
+        this.refreshMaxCompute();
+
         Document document = DocumentHelper.createDocument();
         Element domain = document.addElement("domain").addAttribute("type", "kvm")
                 .addNamespace("qemu", "http://libvirt.org/schemas/domain/qemu/1.0");
@@ -102,39 +147,39 @@ public class LibvirtConfig {
         domain.addElement("uuid")
                 .setText(instance.getUuid());
         domain.addElement("memory")
-                .setText(String.valueOf(VmCUtils.memUnitConvert(Integer.valueOf(MAX_MEMORY))));
+                .setText(String.valueOf(VmCUtils.memUnitConvert(MAX_MEMORY)));
         domain.addElement("currentMemory")
                 .setText(String.valueOf(VmCUtils.memUnitConvert(memory)));
         domain.addElement("vcpu")
                 .addAttribute("placement", "static")
                 .addAttribute("current", String.valueOf(cpu))
-                .setText(MAX_CPU);
+                .setText(String.valueOf(MAX_CPU));
         domain.addElement("cpu")
                 .addElement("topology")
                 .addAttribute("sockets", "1")
-                .addAttribute("cores", MAX_CPU)
+                .addAttribute("cores", String.valueOf(MAX_CPU))
                 .addAttribute("threads", "1");
 
         Element os = domain.addElement("os");
         os.addElement("type").setText(image.getOsMode().toString()); //需验证参数是否为空
         os.addElement("bootmenu").addAttribute("enable", "yes");        //为了兼容windows，不能指定boot dev
 
-        //一些确定值
+        // static value
         Element features = domain.addElement("features");
         features.addElement("acpi");
         features.addElement("apic");
-        if(image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+        if (image.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
             Element hyperv = features.addElement("hyperv");
             hyperv.addElement("relaxed").addAttribute("state", "on");
             hyperv.addElement("vapic").addAttribute("state", "on");
             hyperv.addElement("spinlocks").addAttribute("state", "on").addAttribute("retries", "8191");
-        }else{
+        } else {
             features.addElement("pae");
         }
         Element clock = domain.addElement("clock").addAttribute("offset", "localtime");
         clock.addElement("timer").addAttribute("name", "pit").addAttribute("tickpolicy", "delay");
         clock.addElement("timer").addAttribute("name", "rtc").addAttribute("tickpolicy", "catchup");
-        if(image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+        if (image.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
             clock.addElement("timer").addAttribute("name", "hpet").addAttribute("present", "no");
             clock.addElement("timer").addAttribute("name", "hypervclock").addAttribute("present", "yes");
         }
@@ -142,27 +187,31 @@ public class LibvirtConfig {
         domain.addElement("on_reboot").setText("restart");
         domain.addElement("on_crash").setText("restart");
 
-        //volume设置
+
         Element devices = domain.addElement("devices");
-        initEmulator();  // get emulator path
-        if (emulatorName != null) {
-            devices.addElement("emulator").setText(emulatorName);          //通过conf类加载，默认为 kvm 在Linux中的位置，可以在properties中更改
-        }
 
+        // emulator
+        devices.addElement("emulator").setText(emulatorName);  // init 时加载
+
+        // volume设置
         for (Volume volume : volumes) {
-            volumeToDiskXml(volume, devices);
+            this.volumeToDiskXml(volume, devices);
         }
 
-        //网络设置
+        // USB控制器设置 (must support USB 3.0)
+        devices.addElement("controller")
+                .addAttribute("type", "usb").addAttribute("model", "nec-xhci");
+
+        // 网络设置
         for (IpUsed ip : ips) {
-            ipToNetworkXml(ip, devices);
+            this.ipToNetworkXml(ip, devices);
         }
 
-        //Tab设置
+        // Tablet设置
         devices.addElement("input").addAttribute("type", "tablet")
                 .addAttribute("bus", "usb");
 
-        //VNC设置
+        // VNC设置
         Element graphicsVNC = devices.addElement("graphics")
                 .addAttribute("type", "vnc")
                 .addAttribute("port", "-1")
@@ -177,6 +226,11 @@ public class LibvirtConfig {
         return document.asXML();
     }
 
+    // ===== NETWORK ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
     public String ipToNetwork(IpUsed ip) {
         log.info("ipToNetwork ---- start ----");
         Document root = DocumentHelper.createDocument();
@@ -189,55 +243,81 @@ public class LibvirtConfig {
         return res.trim();
     }
 
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
     private void ipToNetworkXml(IpUsed ip, Element devices) {
         log.info("ipToNetworkXml ---- start ----");
-        Element netInterface = devices.addElement("interface")
-                .addAttribute("type", defaultNetwork);     //通过conf类加载，默认为 bridge，可以在properties中更改
-        // 采用桥接网络,如下配置:
-        if (defaultNetwork.equals("bridge")) {
-            //设置基本网卡信息
-            netInterface.addElement("mac")
-                    .addAttribute("address", ip.getMac());
-            //设置所用网桥
-            netInterface.addElement("source")
-                    .addAttribute("bridge", ip.getBridge());
+        Element netInterface = devices.addElement("interface");
 
-            /*
-            if (ip.getType().equals(IpTypeEnum.PRIVATE)) {
-                // old: 通过conf类加载，默认私网为br0，可以在properties中更改
+        switch (networkType) {
+            case NETWORK_TYPE_LINUX:
+                // == Linux: target & device
+                log.info("---- NETWORK_TYPE: Linux (tap={})", getTap(ip.getMac()));
+
+                netInterface.addAttribute("type", "bridge");
+                // 设置基本网卡信息
+                netInterface.addElement("mac")
+                        .addAttribute("address", ip.getMac());
+                // 设置所用网桥
                 netInterface.addElement("source")
-                        .addAttribute("bridge", privateNetwork);
-            } else {
-                // old: 通过conf类加载，默认公网为br1，可以在properties中更改
+                        .addAttribute("bridge", ip.getBridge());
+                // set target
+                netInterface.addElement("target").
+                        addAttribute("dev", getTap(ip.getMac()));
+                break;
+
+            case NETWORK_TYPE_OVS:
+                // == OVS: virtualPort & type(OpenVSwitch)
+                log.info("---- NETWORK_TYPE: OVS");
+
+                netInterface.addAttribute("type", "bridge");
+                // 设置基本网卡信息
+                netInterface.addElement("mac")
+                        .addAttribute("address", ip.getMac());
+                // 设置所用网桥
                 netInterface.addElement("source")
-                        .addAttribute("bridge", publicNetwork);
-            }
-             */
+                        .addAttribute("bridge", ip.getBridge());
+                // set virtualport
+                netInterface.addElement("virtualport").
+                        addAttribute("type", "openvswitch");
+                break;
 
-            // 网卡接入配置
-            switch (networkBridgeType) {
-                case BR_TYPE_LINUX:
-                    // Linux: target & device
-                    log.info("---- BR_TYPE: Linux (tap={})", getTap(ip.getMac()));
-                    netInterface.addElement("target").
-                            addAttribute("dev", getTap(ip.getMac()));
-                    break;
-                case BR_TYPE_OVS:
-                    // OVS: virtualPort & type(OpenVSwitch)
-                    log.info("---- BR_TYPE: OVS");
-                    netInterface.addElement("virtualport").
-                            addAttribute("type", "openvswitch");
-                    break;
-            }
+            case NETWORK_TYPE_MACV:
+            default:
+                // == MACV: macvlan & macvtap
+                log.info("---- NETWORK_TYPE: MACV");
 
-            // 设置网卡模式类型为 Virtio
-            netInterface.addElement("model").
-                    addAttribute("type", "virtio");
+                netInterface.addAttribute("type", "direct");
+                // 设置基本网卡信息
+                netInterface.addElement("mac")
+                        .addAttribute("address", ip.getMac());
+                // 设置直连设备
+                netInterface.addElement("source")
+                        .addAttribute("dev", ip.getBridge()).addAttribute("mode", "bridge");
+                // set target
+                netInterface.addElement("target").
+                        addAttribute("dev", getTap(ip.getMac()));
+                break;
         }
+
+        // 设置网卡模式类型为 Virtio
+        netInterface.addElement("model").
+                addAttribute("type", "virtio");
+
         log.info("ipToNetworkXml ---- end ----");
     }
 
-    //目前dom4j没有办法获取部分xml内容，只能使用这种笨方法
+    private String getTap(String str) {
+        str = str.replaceAll(":", "");
+        return VolumeConstants.TAP_PREFIX + str;
+    }
+
+    // ===== VOLUME ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
     public String volumeToDisk(Volume volume) {
         log.info("volumeToDisk ---- start ----");
         Document root = DocumentHelper.createDocument();
@@ -250,6 +330,9 @@ public class LibvirtConfig {
         return res.trim();
     }
 
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
     private void volumeToDiskXml(Volume volume, Element devices) {
         log.info("volumeToDiskXml ---- start ----");
         String volumeType = getVolumeDiskDevice(volume.getFormatType());
@@ -283,9 +366,42 @@ public class LibvirtConfig {
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 
-    private String getTap(String str) {
-        str = str.replaceAll(":", "");
-        return VolumeConstants.TAP_PREFIX + str;
+    // ===== DEVICE ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
+    public String usbToDevice(Device device) {
+        log.info("usbToDevice ---- start ----");
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        usbToDeviceXml(device, devices);
+        String res = devices.asXML();
+        res = res.replaceAll("<root>", "");
+        res = res.replaceAll("</root>", "");
+        log.info("usbToDevice ---- end ---- res: " + res.trim());
+        return res.trim();
     }
 
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
+    private void usbToDeviceXml(Device device, Element devices) {
+        log.info("usbToDeviceXml ---- start ----");
+
+        Element hostdev = devices.addElement("hostdev")
+                .addAttribute("mode", "subsystem")
+                .addAttribute("type", "usb");
+
+        Element source = hostdev.addElement("source");
+        source.addElement("vendor")
+                .addAttribute("id", device.getVendor());
+        source.addElement("product")
+                .addAttribute("id", device.getProduct());
+        source.addElement("address")
+                .addAttribute("bus", device.getBus())
+                .addAttribute("device", device.getDev());
+
+        log.info("usbToDeviceXml ---- end ----");
+    }
 }

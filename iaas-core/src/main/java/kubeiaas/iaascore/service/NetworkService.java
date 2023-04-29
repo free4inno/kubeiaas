@@ -54,16 +54,30 @@ public class NetworkService {
         Map<String, Integer> resMap = new HashMap<>();
         // 1. 私网IP - 总量
         Integer privateIpTotal = networkProcess.getAllTotalNum(IpTypeEnum.PRIVATE);
-        resMap.put(IpSegmentConstants.PRIVATE_TOTAL, privateIpTotal);
+        resMap.put(IpTypeEnum.PRIVATE + "_" + IpSegmentConstants.TOTAL, privateIpTotal);
         // 2. 私网IP - 用量
         Integer privateIpUsed = networkProcess.getAllUsedNum(IpTypeEnum.PRIVATE);
-        resMap.put(IpSegmentConstants.PRIVATE_USED, privateIpUsed);
+        resMap.put(IpTypeEnum.PRIVATE + "_" + IpSegmentConstants.USED, privateIpUsed);
         // 3. 公网IP - 总量
         Integer publicIpTotal = networkProcess.getAllTotalNum(IpTypeEnum.PUBLIC);
-        resMap.put(IpSegmentConstants.PUBLIC_TOTAL, publicIpTotal);
+        resMap.put(IpTypeEnum.PUBLIC + "_" + IpSegmentConstants.TOTAL, publicIpTotal);
         // 4. 公网IP - 用量
         Integer publicIpUsed = networkProcess.getAllUsedNum(IpTypeEnum.PUBLIC);
-        resMap.put(IpSegmentConstants.PUBLIC_USED, publicIpUsed);
+        resMap.put(IpTypeEnum.PUBLIC + "_" + IpSegmentConstants.USED, publicIpUsed);
+
+        return resMap;
+    }
+
+    public Map<String, Integer> getIpCount(Integer segId) throws BaseException {
+        Map<String, Integer> resMap = new HashMap<>();
+
+        // 1. 总量
+        Integer total = networkProcess.getAllNumBySegId(segId);
+        resMap.put(IpSegmentConstants.TOTAL, total);
+
+        // 2. 用量
+        Integer used = networkProcess.getAllUsedNumBySegId(segId);
+        resMap.put(IpSegmentConstants.USED, used);
 
         return resMap;
     }
@@ -109,7 +123,11 @@ public class NetworkService {
      * 网段基本详情
      */
     public IpSegment queryById(Integer ipSegmentId) {
-        return tableStorage.ipSegmentQueryById(ipSegmentId);
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        String hostUuid = ipSegment.getHostUuid();
+        String hostName = tableStorage.hostQueryByUuid(hostUuid).getName();
+        ipSegment.setHostName(hostName);
+        return ipSegment;
     }
 
     /**

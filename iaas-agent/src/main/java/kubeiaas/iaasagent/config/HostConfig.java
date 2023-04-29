@@ -25,8 +25,17 @@ public class HostConfig {
     @Resource
     private HostService hostService;
 
+    public static Host thisHost;
+
     private final String hostIp = System.getenv("HOST_IP");
     private final String hostName = System.getenv("HOST_NAME");
+
+    public String getHostIp() {
+        return hostIp;
+    }
+    public String getHostName() {
+        return hostName;
+    }
 
     private final Map<String ,String> roleNodes = new HashMap<>();
     HostConfig() {
@@ -35,14 +44,9 @@ public class HostConfig {
         roleNodes.put(HostConstants.ROLE_NFS, System.getenv("NFS_NODE"));
     }
 
-    private final List<String> agentList = this.splitByComma(System.getenv("AGENT_NODE_LIST"));
-    private final List<String> vCPU_LIST = this.splitByComma(System.getenv("AGENT_VCPUS_LIST"));
-    private final List<String> MEM_LIST = this.splitByComma(System.getenv("AGENT_MEM_LIST"));
-    private final List<String> STORAGE_LIST = this.splitByComma(System.getenv("AGENT_STORAGE_LIST"));
-
-    private String vCPU = "0";
-    private String MEM = "0";
-    private String STORAGE = "0";
+    private static final int DEFAULT_vCPU = 0;
+    private static final int DEFAULT_MEM = 0;
+    private static final int DEFAULT_STORAGE = 0;
 
     public static String CMD_CPU_CORE = "cat /proc/cpuinfo| grep \"processor\" | wc -l";
     public static String CMD_CPU_MHZ = "cat /proc/cpuinfo | grep MHz|head -1|awk '{print $4}'";
@@ -55,17 +59,6 @@ public class HostConfig {
     public void hostInitialize() {
         // get host resource config
         log.info("hostIp:" + hostIp + ", hostName:" + hostName);
-
-        int index = 0;
-        for (String agent : agentList) {
-            if (agent.equals(hostName) || agent.equals(hostIp)) {
-                vCPU = vCPU_LIST.get(index);
-                MEM = MEM_LIST.get(index);
-                STORAGE = STORAGE_LIST.get(index);
-            }
-            index += 1;
-        }
-        log.info("vCPU:" + vCPU + ", MEM:" + MEM + ", STORAGE:" + STORAGE);
 
         // check is this host registered in DB
         Host host = tableStorage.hostQueryByIp(hostIp);
@@ -91,6 +84,11 @@ public class HostConfig {
             String os = ShellUtils.getCmd(CMD_VERSION);
             host.setConfig(String.format("系统版本：%s；处理器：%s核心，%sMHz；内存：%sGB；磁盘：%sGB", os, cpuCore, cpuMhz, memSize, diskSize));
 
+            // - set resource config
+            host.setVCPU(DEFAULT_vCPU);
+            host.setMemory(DEFAULT_MEM);
+            host.setStorage(DEFAULT_STORAGE);
+
             // - generate uuid
             host.setUuid(UuidUtils.getRandomUuid());
 
@@ -101,11 +99,6 @@ public class HostConfig {
         } else {
             log.info("this host is registered.");
         }
-
-        // - set resource config
-        host.setVCPU(Integer.parseInt(vCPU));
-        host.setMemory(Integer.parseInt(MEM));
-        host.setStorage(Integer.parseInt(STORAGE));
 
         // - set roles
         List<String> roleList = new ArrayList<>();
@@ -127,18 +120,14 @@ public class HostConfig {
             host.setStatus(HostStatusEnum.ERROR);
             log.error("== host check done, total failed! == ");
         }
+
+        // - save
         tableStorage.hostSave(host);
+        thisHost = host;
     }
 
     private List<String> splitByComma(String str) {
         return Arrays.asList(str.split(","));
     }
 
-    public String getHostIp() {
-        return hostIp;
-    }
-
-    public String getHostName() {
-        return hostName;
-    }
 }

@@ -38,7 +38,7 @@ public class IpUsedController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String save(
+    public synchronized String save(
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr) {
         log.info("save ==== start ====");
         IpUsedTable ipUsedTable = JSON.parseObject(ipUsedObjectStr, IpUsedTable.class);
@@ -49,7 +49,7 @@ public class IpUsedController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_ALL_BY_UUID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void deleteByVmUuid(
+    public synchronized void deleteByVmUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
         log.info("deleteUsedIpsByInstanceUuid ==== start ==== vmUuid:" + vmUuid);
         ipUsedDao.deleteAllByInstanceUuid(vmUuid);
