@@ -149,7 +149,7 @@ cd ./kubeiaas-1.0-release
 sudo vi iaas-config.yml
 ```
 
-如下是一份示例配置，各项配置的具体说明可参考：[config-example](https://gitee.com/free4inno-team/kubeiaas/blob/master/docsdocs/lib/config-example.yml)
+如下是一份示例配置，各项配置的具体说明可参考：[config-example](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs//docs/lib/config-example.yml)
 
 ```
 # -------- 工作节点 --------
@@ -207,6 +207,6 @@ kubectl get pods -o wide -n kubeiaas
 ## 4. 成功！
 
 访问 `<IP>:32200` 转到系统登录页面（此处所用 `<IP>` 为集群内任一节点 IP）
-，后续请参考 [用户使用手册](https://gitee.com/free4inno-team/kubeiaas/blob/master/docsuser-manual-cn.md)。 
+，后续请参考 [用户使用手册](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs//user-manual-cn.md)。 
 
 ![](../img/front-login.png)

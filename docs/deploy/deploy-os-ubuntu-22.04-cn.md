@@ -37,7 +37,7 @@
 
 > 在系统分区过程中，请确保 /usr/local 目录下有足够的可用空间用于承载 IaaS 云业务，同时建议使用 LVM 分区以便于后期可能需要的系统扩容。
 
-完成操作系统安装后，请转到 [Kubernetes 部署文档](https://gitee.com/free4inno-team/kubeiaas/blob/master/docsdeploy/deploy-kubernetes-1.23-cn.md) 继续完成 Kubernetes 集群环境搭建。
+完成操作系统安装后，请转到 [Kubernetes 部署文档](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/deploy/deploy-kubernetes-1.23-cn.md) 继续完成 Kubernetes 集群环境搭建。
 
 ## 常见问题
 
