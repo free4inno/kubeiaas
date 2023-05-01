@@ -23,7 +23,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3306
-              hostPort: 33066
+              # hostPort: 33066
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: MYSQL@free

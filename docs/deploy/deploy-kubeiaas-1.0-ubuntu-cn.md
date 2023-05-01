@@ -119,7 +119,7 @@ showmount -e
 
 ### 3.1 下载安装包
 
-下载并解压 [kubeiaas-1.0-release.tar.gz]() 包，
+下载并解压 [kubeiaas-1.0-release.tar.gz](https://gitee.com/free4inno-team/kubeiaas/releases/tag/v1.0) 包，
 
 ```
 sudo tar -xzvf kubeiaas-1.0-release.tar.gz
