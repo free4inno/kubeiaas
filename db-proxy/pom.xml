@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.free4inno.kubeiaas</groupId>
+        <artifactId>kubeiaas</artifactId>
+        <version>1.0-RELEASE</version>
+    </parent>
+
+    <artifactId>db-proxy</artifactId>
+    <name>db-proxy</name>
+    <description>db-proxy</description>
+
+    <properties>
+    </properties>
+
+    <dependencies>
+        <!-- api-common -->
+        <dependency>
+            <groupId>com.free4inno.kubeiaas</groupId>
+            <artifactId>api-common</artifactId>
+            <version>1.0-RELEASE</version>
+        </dependency>
+        <!-- spring jpa -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <!-- MySQL -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.21</version>
+        </dependency>
+        <!-- sqlite -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.20.0</version>
+        </dependency>
+        <!-- HikariCP -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.5</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- springBoot -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.4.4</version>
+                <configuration>
+                    <mainClass>kubeiaas.dbproxy.DBProxyApplication</mainClass>
+                    <outputDirectory>${basedir}\target</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- docker -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.26.0</version>
+
+                <!-- global -->
+                <configuration>
+                    <!-- =============== docker control =============== -->
+                    <dockerHost>${docker.host}</dockerHost>
+
+                    <!-- =============== registry control =============== -->
+                    <authConfig>
+                        <push>
+                            <username>${docker.repo.username}</username>
+                            <password>${docker.repo.password}</password>
+                        </push>
+                    </authConfig>
+
+                    <!-- =============== image control =============== -->
+                    <images>
+                        <image>
+                            <!-- ######## SQLITE ######## -->
+                            <name>${docker.repo.address}/${project.name}:${project.version}-sqlite</name>
+                            <!-- ######## MySQL ######## -->
+<!--                            <name>registry.cn-beijing.aliyuncs.com/kubeiaas/${project.name}:${project.version}-mysql</name>-->
+                            <build>
+                                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
+                            </build>
+                            <run>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                        <version>1.11</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>

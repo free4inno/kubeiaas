@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.free4inno.kubeiaas</groupId>
+        <artifactId>kubeiaas</artifactId>
+        <version>1.0-RELEASE</version>
+    </parent>
+
+    <artifactId>iaas-core</artifactId>
+    <name>iaas-core</name>
+    <description>iaas-core</description>
+
+    <properties>
+    </properties>
+
+    <dependencies>
+        <!-- api-common -->
+        <dependency>
+            <groupId>com.free4inno.kubeiaas</groupId>
+            <artifactId>api-common</artifactId>
+            <version>1.0-RELEASE</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <!-- springBoot -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.4.4</version>
+                <configuration>
+                    <mainClass>kubeiaas.iaascore.IaasCoreApplication</mainClass>
+                    <outputDirectory>${basedir}\target</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- docker -->
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.26.0</version>
+
+                <!-- global -->
+                <configuration>
+                    <!-- =============== docker control =============== -->
+                    <!-- docker主机地址,用于完成docker各项功能,注意是tcp不是http -->
+                    <dockerHost>${docker.host}</dockerHost>
+                    <!--docker远程访问所需证书地址,如果docker远程主机没有启用TLS验证则不需要配证书-->
+                    <!--                    <certPath>${project.basedir}/docker/ssh</certPath>-->
+
+                    <!-- =============== registry control =============== -->
+                    <!-- registry地址,用于推送,拉取镜像,例如阿里的registry -->
+                    <!--                    <registry>registry.cn-beijing.aliyuncs.com</registry>-->
+                    <!-- 不填写即是官方 docker-hub -->
+
+                    <!-- 认证配置,用于私有registry认证,如果忘记了可以去对应的registry查看-->
+                    <authConfig>
+                        <push>
+                            <username>${docker.repo.username}</username>
+                            <password>${docker.repo.password}</password>
+                        </push>
+                    </authConfig>
+
+                    <!-- =============== image control =============== -->
+                    <!--镜像相关配置,支持多镜像-->
+                    <images>
+                        <!-- 单个镜像配置 -->
+                        <image>
+                            <!--镜像名(含版本号)-->
+                            <name>${docker.repo.address}/${project.name}:${project.version}</name>
+                            <!--镜像build相关配置-->
+                            <build>
+                                <!--使用dockerFile文件-->
+                                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
+                            </build>
+                            <!--容器run相关配置-->
+                            <!--我们需要在 k8s 集群上run，因此不需要用 docker run-->
+                            <run>
+                                <!--配置运行时容器命名策略为:别名,如果不指定则默认为none,即使用随机分配名称-->
+                                <!--                                <namingStrategy>alias</namingStrategy>-->
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <dependencies>
+                    <!--该插件需要这个依赖-->
+                    <dependency>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                        <version>1.11</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

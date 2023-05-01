@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-mysql
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iaas-mysql
+  template:
+    metadata:
+      labels:
+        app: iaas-mysql
+    spec:
+      nodeName: node2   # appointed node
+      containers:
+        - name: iaas-mysql
+          image: mysql:8.0.27
+          ports:
+            - containerPort: 3306
+              hostPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: MYSQL@free   # password
+          volumeMounts:
+            - name: iaas-mysql-data
+              mountPath: /var/lib/mysql
+            - name: iaas-mysql-conf
+              mountPath: /var/lib/mysql-files
+      volumes:
+        - name: iaas-mysql-data
+          hostPath:
+            path: /usr/local/kubeiaas/mysql/data
+        - name: iaas-mysql-conf
+          hostPath:
+            path: /usr/local/kubeiaas/mysql/cnf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-mysql
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-mysql
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP

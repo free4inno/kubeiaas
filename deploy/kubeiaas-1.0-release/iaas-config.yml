@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iaas-config
+  namespace: kubeiaas
+data:
+  # ---- WORK NODES ----
+  nodes.work.list: ""
+
+  # ---- CONTROL ----
+  nodes.control: ""
+  nodes.image: ""
+
+  # ---- SERVICES ----
+  nodes.vnc: ""
+  nodes.dhcp: ""
+  nodes.nfs: ""
+
+  nfs.dir.img: "/usr/local/kubeiaas/data/images"
+  nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
+
+  # ---- NETWORK ----
+  network.bridge.type: "MACV"

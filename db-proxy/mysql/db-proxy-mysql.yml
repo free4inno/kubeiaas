@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-proxy
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-proxy
+  template:
+    metadata:
+      labels:
+        app: db-proxy
+    spec:
+      containers:
+        - name: db-proxy
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/db-proxy.jar
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.1-SNAPSHOT-mysql
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+          env:
+            - name: MYSQL_IP
+#              value: "iaas-mysql" # deploy by K8S, use service name.
+              value: "192.168.33.1"
+            - name: MYSQL_ROOT_PASSWORD
+#              value: "MYSQL@free"
+              value: "telestar"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-proxy
+  namespace: kubeiaas
+spec:
+  selector:
+    app: db-proxy
+  type: ClusterIP
+  ports:
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP

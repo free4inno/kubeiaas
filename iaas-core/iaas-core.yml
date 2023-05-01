@@ -1,0 +1,97 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-core
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iaas-core
+  template:
+    metadata:
+      labels:
+        app: iaas-core
+    spec:
+      nodeSelector:
+        kubeiaas/ctl: "true"
+      containers:
+        - name: iaas-core
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/iaas-core.jar
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:0.1.1-SNAPSHOT
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9080
+              hostPort: 9080
+              protocol: TCP
+          env:
+            # -------- BASIC ENV --------
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            # -------- SERVICE CONFIG --------
+            - name: IAAS_CORE_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.control
+            - name: DB_PROXY_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.control
+            - name: RS_OPT_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.control
+            - name: IMG_OPT_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.image
+            - name: AGENT_NODE_NAME_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.work.list
+            - name: DHCP_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
+            - name: VNC_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.vnc
+            - name: NFS_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
+            # ----------------------------------
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-core
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-core
+  type: ClusterIP
+  ports:
+    - port: 9080
+      targetPort: 9080
+      protocol: TCP

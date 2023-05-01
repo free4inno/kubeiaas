@@ -1,0 +1,101 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: front-config
+  namespace: kubeiaas
+data:
+  nginx.conf: |
+    server {
+      listen       80;
+      server_name  hf-portal-test;
+    
+      client_max_body_size 500M;
+      client_body_buffer_size 100m;
+    
+      #charset koi8-r;
+      error_log  /var/log/nginx/error2.log info;
+      rewrite_log on;
+      access_log /var/log/nginx/access2.log;
+    
+      location / {
+          root   /usr/share/nginx/html;
+          index  index.html index.htm;
+      }
+    
+      location /api/ {
+          rewrite  /api/(.*)  /$1  break;
+          proxy_pass http://localhost:8089;
+      }
+    
+      #error_page  404              /404.html;
+    
+      # redirect server error pages to the static page /50x.html
+      #
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+          root   /usr/share/nginx/html;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-web
+  namespace: kubeiaas
+  labels:
+    app: front-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front-web
+  template:
+    metadata:
+      labels:
+        app: front-web
+    spec:
+      nodeSelector:
+        kubeiaas/ctl: "true"
+      containers:
+        - name: front-web-jarpackage
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.0-SNAPSHOT
+          command: ['sh']
+          args:
+            - "-c"
+            - |
+              java -jar /workdir/iaas-front.war
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+        - name: nginx
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-nginx:1.0-SNAPSHOT
+          command: [ "/bin/sh", "-c", "--" ]
+          args: [ "tar -xvf /workdir/iaas-vue.tar.gz -C /tmp; cp -rf /tmp/dist/* /usr/share/nginx/html/; nginx -g \"daemon off;\"" ]
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/
+              readOnly: true
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: front-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-web
+  namespace: kubeiaas
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 32200
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: front-web
+---

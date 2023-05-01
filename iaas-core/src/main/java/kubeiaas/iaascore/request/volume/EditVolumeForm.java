@@ -1,0 +1,18 @@
+package kubeiaas.iaascore.request.volume;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+@Slf4j
+@Data
+public class EditVolumeForm {
+    @NotNull
+    @NotEmpty
+    private String volumeUuid;
+
+    private String name;
+    private String description;
+}

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 控制台彩色日志格式（默认） -->
+<!--    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(-&#45;&#45;){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>-->
+
+    <!-- 日志格式（默认） -->
+<!--    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"/>-->
+
+    <!-- 控制台彩色日志格式（自定义） -->
+    <property name="CONSOLE_LOG_PATTERN" value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%-40.40logger{39}]){cyan} %clr([%-15.15M : %4.4L]){cyan} %clr(---){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+    <!-- 日志格式（自定义） -->
+    <property name="LOG_PATTERN" value="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%p] [%t] [%c] [%M:%L] : %m%n"/>
+
+    <!-- 彩色日志依赖的渲染类 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <!-- 控制台日志 -->
+    <appender name="LOG_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+<!--            <pattern>${LOG_PATTERN}</pattern>-->
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 文件日志 -->
+<!--    <appender name="LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+<!--        <encoder>-->
+<!--            <pattern></pattern>-->
+<!--        </encoder>-->
+<!--        <file>logs/zhi.log</file>-->
+<!--        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
+<!--            <fileNamePattern>logs/zhi.-%d{yyyyMMdd}.%i.log</fileNamePattern>-->
+<!--            &lt;!&ndash; 每天一个日志文件，当天的日志文件超过10MB时，生成新的日志文件，当天的日志文件数量超过totalSizeCap/maxFileSize，日志文件就会被回滚覆盖。 &ndash;&gt;-->
+<!--            <maxFileSize>10MB</maxFileSize>-->
+<!--            <maxHistory>30</maxHistory>-->
+<!--            <totalSizeCap>10GB</totalSizeCap>-->
+<!--        </rollingPolicy>-->
+<!--    </appender>-->
+
+    <!-- 定义特定包 -->
+    <logger name="kubeiaas.iaascore" level="DEBUG" additivity="false">
+        <appender-ref ref="LOG_CONSOLE"/>
+        <!--<appender-ref ref="LOG_FILE"/>-->
+    </logger>
+
+    <!-- 定义全局 -->
+    <root level="INFO">
+        <appender-ref ref="LOG_CONSOLE"/>
+        <!--<appender-ref ref="LOG_FILE"/>-->
+    </root>
+</configuration>
