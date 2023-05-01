@@ -37,13 +37,13 @@ Users can easily download and manage the images required for virtual machines in
 
 ## 🚀 Quick Start
 
-- Deploy on Bare Metal [link](./deploy/deploy-os-ubuntu-22.04-cn.md)
+- Deploy on Bare Metal [link](./docs/deploy/deploy-os-ubuntu-22.04-cn.md)
 
-- Deploy on Ubuntu without Kubernetes [link](./deploy/deploy-kubernetes-1.23-cn.md)
+- Deploy on Ubuntu without Kubernetes [link](./docs/deploy/deploy-kubernetes-1.23-cn.md)
 
-- Deploy on Ubuntu with Kubernetes [link](./deploy/deploy-kubeiaas-1.0-ubuntu-cn.md)
+- Deploy on Ubuntu with Kubernetes [link](./docs/deploy/deploy-kubeiaas-1.0-ubuntu-cn.md)
 
-- Deploy on other OS [link](./deploy/deploy-kubeiaas-1.0-general-cn.md)
+- Deploy on other OS [link](./docs/deploy/deploy-kubeiaas-1.0-general-cn.md)
 
 ## 🎞️ Showcase
 
@@ -51,27 +51,27 @@ Below are screenshots of the system interface:
 
 Home Page: Displays various data such as resource usage and cluster status metrics through dashboard cards.
 
-![](./img/readme/img_0.png)
+![](./docs/img/readme/img_0.png)
 
 System Management: Monitor system operation status and resource usage, and configure and manage the system.
 
-![](./img/readme/img_1.png)
+![](./docs/img/readme/img_1.png)
 
 Cloud VM List: Manage all cloud VM resources in the system, displaying information such as name, status, operating system, and configuration.
 
-![](./img/readme/img_2.png)
+![](./docs/img/readme/img_2.png)
 
 Cloud VM Details: Display various parameters of the cloud VM such as computing, network, storage, etc., and provide cloud VM control functions.
 
-![](./img/readme/img_3.png)
+![](./docs/img/readme/img_3.png)
 
 Cloud Disk List: Uniformly manage cloud disk resources in the system, display information such as name and description, mount information, storage capacity, etc.
 
-![](./img/readme/img_4.png)
+![](./docs/img/readme/img_4.png)
 
 Cloud Image List: Unified management of cloud image resources within the system, displaying information such as name, description, system type, and image parameters.
 
-![](./img/readme/img_5.png)
+![](./docs/img/readme/img_5.png)
 
 ## 📦 Functions
 
