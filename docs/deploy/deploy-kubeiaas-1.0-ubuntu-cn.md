@@ -119,7 +119,7 @@ showmount -e
 
 ### 3.1 下载安装包
 
-下载并解压 [kubeiaas-1.0-release.tar.gz](https://gitee.com/free4inno-team/kubeiaas/releases/tag/v1.0) 包，
+下载并解压 [kubeiaas-1.0-release.tar.gz](https://github.com/free4inno/kubeiaas/releases/tag/v1.0) 包，
 
 ```
 sudo tar -xzvf kubeiaas-1.0-release.tar.gz
@@ -149,7 +149,7 @@ cd ./kubeiaas-1.0-release
 sudo vi iaas-config.yml
 ```
 
-如下是一份示例配置，各项配置的具体说明可参考：[config-example](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/lib/config-example.yml)
+如下是一份示例配置，各项配置的具体说明可参考：[config-example](https://github.com/free4inno/kubeiaas/blob/v1.0/docs/lib/config-example.yml)
 
 ```
 # -------- 工作节点 --------
@@ -207,6 +207,6 @@ kubectl get pods -o wide -n kubeiaas
 ## 4. 成功！
 
 访问 `<IP>:32200` 转到系统登录页面（此处所用 `<IP>` 为集群内任一节点 IP）
-，后续请参考 [用户使用手册](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md)。 
+，后续请参考 [用户使用手册](https://github.com/free4inno/kubeiaas/blob/v1.0/docs/user-manual-cn.md)。 
 
 ![](../img/front-login.png)
