@@ -1,6 +1,6 @@
 # KubeIaaS - Private IaaS Cloud Solution based on Kubernetes.
 
-> Chinese version: [README-CN](./README-CN.md)
+> [中文文档](./README-CN.md)
 
 Developed by ["free4inno"](http://www.free4inno.com).
 
