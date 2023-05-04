@@ -17,6 +17,8 @@ It is designed to leverage the powerful capabilities of Kubernetes and extend it
 
 - Compared to other Kubernetes virtual machine resource extension components such as Kubevirt and Virtlet, KubeIaaS offers a more comprehensive set of IaaS cloud control capabilities, including cloud instances, cloud disks, and cloud images, along with a user-friendly web management interface.
 
+[Watch introduction and demo.](https://www.bilibili.com/video/BV1em4y1C7uE/)
+
 ## 💡 Key Features
 
 - **Easy Deployment**
