@@ -17,6 +17,8 @@ KubeIaaS 是基于 Kubernetes 的易于部署和运维、功能完备且易用�
 
 - 相比其他 Kubernetes 虚拟机资源扩展组件（如 Kubevirt、Virtlet 等），KubeIaaS 提供了更为全面的云主机、云硬盘以及云镜像等 IaaS 云管控能力和更为友好易用的 Web 管理界面。
 
+[观看产品介绍及演示视频](https://www.bilibili.com/video/BV1em4y1C7uE/)
+
 ## 💡 关键特征
 
 - **部署便捷**
