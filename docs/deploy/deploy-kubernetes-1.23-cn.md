@@ -173,9 +173,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 curl -O https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
-> 如果无法正常通过外网下载，可以在本地通过如下链接下载后上传到集群 master 节点
->
-> https://gitee.com/free4inno-team/kubeiaas/blob/master/docs//lib/kube-flannel.yml
+> 如果无法正常通过外网下载，可以在本地下载后上传到集群 master 节点 [链接](/docs/lib/kube-flannel.yml)
 
 部署 Flannel
 
@@ -189,7 +187,7 @@ kubectl create -f kube-flannel.yml
 kubectl get pods --all-namespaces
 ```
 
-至此，已成功在 Ubuntu 上安装了 Kubernetes 1.35。现在可以按照 [KubeIaaS 部署文档](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/deploy/deploy-kubeiaas-1.0-ubuntu-cn.md) 开始在集群上部署 KubeIaaS 了。
+至此，已成功在 Ubuntu 上安装了 Kubernetes 1.35。现在可以按照 [KubeIaaS 部署文档](/docs/deploy/deploy-kubeiaas-1.0-ubuntu-cn.md) 开始在集群上部署 KubeIaaS 了。
 
 ## 常见问题
 

@@ -18,17 +18,17 @@
 
 在正式创建云主机并进行系统使用之前，还需要关注以下几项配置：
 
-1. [修改管理员密码](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#11-%E4%BF%AE%E6%94%B9%E5%AF%86%E7%A0%81)
+1. [修改管理员密码](/docs/user-manual-cn.md#11-%E4%BF%AE%E6%94%B9%E5%AF%86%E7%A0%81)
 
-2. [检查服务状态](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#1-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1)
+2. [检查服务状态](/docs/user-manual-cn.md#1-%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1)
 
-3. [配置节点资源](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#2-%E8%8A%82%E7%82%B9%E6%9C%8D%E5%8A%A1%E8%B5%84%E6%BA%90)
+3. [配置节点资源](/docs/user-manual-cn.md#2-%E8%8A%82%E7%82%B9%E6%9C%8D%E5%8A%A1%E8%B5%84%E6%BA%90)
 
-4. [创建网络资源](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#4-%E7%BD%91%E7%BB%9C%E8%B5%84%E6%BA%90)
+4. [创建网络资源](/docs/user-manual-cn.md#4-%E7%BD%91%E7%BB%9C%E8%B5%84%E6%BA%90)
 
-5. [导入或自定义云镜像](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#1-%E5%AF%BC%E5%85%A5%E4%BA%91%E9%95%9C%E5%83%8F)
+5. [导入或自定义云镜像](/docs/user-manual-cn.md#1-%E5%AF%BC%E5%85%A5%E4%BA%91%E9%95%9C%E5%83%8F)
 
-确认完成以上相关配置后，即可 [创建云主机](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#1-%E6%96%B0%E5%BB%BA%E4%BA%91%E4%B8%BB%E6%9C%BA) 并开始使用其他IaaS云功能！
+确认完成以上相关配置后，即可 [创建云主机](/docs/user-manual-cn.md#1-%E6%96%B0%E5%BB%BA%E4%BA%91%E4%B8%BB%E6%9C%BA) 并开始使用其他IaaS云功能！
 
 ## 云主机
 
@@ -44,7 +44,7 @@
 ![](./img/vm-create-02.png)
 
 通过下拉列表选择合适的计算资源（CPU、内存）规格
-> 在 [系统配置](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#5-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE) 中可自定义规格选项
+> 在 [系统配置](/docs/user-manual-cn.md#5-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE) 中可自定义规格选项
 
 ![](./img/vm-create-03.png)
 
@@ -52,7 +52,7 @@
 
 （如果您选择的系统盘空间小于镜像规定的最小空间需求，将会自动扩增到镜像最小需求空间）
 
-> 在 [系统配置](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#5-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE) 中可自定义规格选项
+> 在 [系统配置](/docs/user-manual-cn.md#5-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE) 中可自定义规格选项
 
 ![](./img/vm-create-04.png)
 
@@ -72,7 +72,7 @@
 
 将在云主机中创建两块虚拟网卡，并自动在所选网段内为两块网卡分配不同IP。需要后期在主机内自行控制路由。
 
-> 如果此处为空，请先 [创建网络资源](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#4-%E7%BD%91%E7%BB%9C%E8%B5%84%E6%BA%90) 并 选择主机节点
+> 如果此处为空，请先 [创建网络资源](/docs/user-manual-cn.md#4-%E7%BD%91%E7%BB%9C%E8%B5%84%E6%BA%90) 并 选择主机节点
 
 ![](./img/vm-create-06.png)
 
@@ -155,7 +155,7 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
 
 ### 3. 从云主机发布
 
-详见前文 [云主机-发布镜像](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#4-%E5%8F%91%E5%B8%83%E9%95%9C%E5%83%8F)。
+详见前文 [云主机-发布镜像](/docs/user-manual-cn.md#4-%E5%8F%91%E5%B8%83%E9%95%9C%E5%83%8F)。
 
 ## 云硬盘
 
@@ -163,7 +163,7 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
 
 支持设置云硬盘名称、描述、容量。
 
-> 在 [系统配置](https://gitee.com/free4inno-team/kubeiaas/blob/master/docs/user-manual-cn.md#5-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE) 中可自定义云硬盘容量规格选项
+> 在 [系统配置](/docs/user-manual-cn.md#5-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE) 中可自定义云硬盘容量规格选项
 
 ### 2. 挂载与卸载
 
