@@ -23,7 +23,7 @@ spec:
             - "-c"
             - |
               java -jar /root/iaas-core.jar
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:0.1.1-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:1.1.0-SNAPSHOT
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           ports:
@@ -117,7 +117,7 @@ spec:
         kubeiaas/ctl: "true"
       containers:
         - name: db-proxy
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:0.1.1-SNAPSHOT-sqlite
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:1.1.0-SNAPSHOT-sqlite
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           ports:
@@ -204,7 +204,7 @@ spec:
       hostIPC: true
       initContainers:
         - name: iaas-prepare
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:0.1
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.0-RELEASE
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -252,7 +252,7 @@ spec:
             - "-c"
             - |
               /bin/bash /kubeiaas/RUN.sh
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:0.1.1-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:1.1.0-SNAPSHOT
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           securityContext:
@@ -401,7 +401,7 @@ spec:
             - "-c"
             - |
               java -jar /root/image-operator.jar
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/image-operator:0.1.1-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/image-operator:1.1.0-SNAPSHOT
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           ports:
@@ -458,7 +458,7 @@ spec:
             - "-c"
             - |
               java -jar /root/resource-operator.jar
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/resource-operator:0.1.1-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/resource-operator:1.1.0-SNAPSHOT
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           ports:
