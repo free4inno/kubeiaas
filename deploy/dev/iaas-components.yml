@@ -1,4 +1,5 @@
 ---
+# *************************** IAAS-CORE ***************************
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,12 +24,13 @@ spec:
             - "-c"
             - |
               java -jar /root/iaas-core.jar
+          # [ATTENTION] --------------------------------------------- CHECK VERSION!
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:1.1.0-SNAPSHOT
-          # -------- change to IfNotPresent when prod
+          # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           ports:
             - containerPort: 9080
-              # -------- comment when prod
+              # [ATTENTION] -- comment when prod
               hostPort: 9080
               protocol: TCP
           env:
@@ -98,6 +100,7 @@ spec:
       targetPort: 9080
       protocol: TCP
 ---
+# *************************** DB-PROXY ***************************
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -117,8 +120,9 @@ spec:
         kubeiaas/ctl: "true"
       containers:
         - name: db-proxy
+          # [ATTENTION] -------------------------------------------- CHECK VERSION!
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:1.1.0-SNAPSHOT-sqlite
-          # -------- change to IfNotPresent when prod
+          # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           ports:
             - containerPort: 9091
@@ -150,6 +154,7 @@ spec:
       targetPort: 9091
       protocol: TCP
 ---
+# *************************** sqlite-tunnel ***************************
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -173,7 +178,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8011
-              # -------- comment when prod
+              # [ATTENTION] -- comment when prod
               hostPort: 8011
               protocol: TCP
           volumeMounts:
@@ -184,6 +189,7 @@ spec:
           hostPath:
             path: /usr/local/kubeiaas/sqlite
 ---
+# *************************** IAAS-AGENT ***************************
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -204,7 +210,9 @@ spec:
       hostIPC: true
       initContainers:
         - name: iaas-prepare
+          # [ATTENTION] -------------------------------------------- CHECK VERSION! (if updated)
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.0-RELEASE
+          # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -252,8 +260,9 @@ spec:
             - "-c"
             - |
               /bin/bash /kubeiaas/RUN.sh
+          # [ATTENTION] ---------------------------------------------- CHECK VERSION!
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:1.1.0-SNAPSHOT
-          # -------- change to IfNotPresent when prod
+          # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           securityContext:
             privileged: true
@@ -326,6 +335,7 @@ spec:
       targetPort: 9090
       protocol: TCP
 ---
+# *************************** NOVNC ***************************
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -377,6 +387,7 @@ spec:
       targetPort: 8787
       protocol: TCP
 ---
+# *************************** IMAGE_OPERATOR ***************************
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -401,8 +412,9 @@ spec:
             - "-c"
             - |
               java -jar /root/image-operator.jar
+          # [ATTENTION] -------------------------------------------------- CHECK VERSION!
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/image-operator:1.1.0-SNAPSHOT
-          # -------- change to IfNotPresent when prod
+          # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           ports:
             - containerPort: 9093
@@ -434,6 +446,7 @@ spec:
       targetPort: 9093
       protocol: TCP
 ---
+# *************************** RESOURCE_OPERATOR ***************************
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -458,8 +471,9 @@ spec:
             - "-c"
             - |
               java -jar /root/resource-operator.jar
+          # [ATTENTION] --------------------------------------------------- CHECK VERSION!
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/resource-operator:1.1.0-SNAPSHOT
-          # -------- change to IfNotPresent when prod
+          # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           ports:
             - containerPort: 9092
