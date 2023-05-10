@@ -79,7 +79,7 @@ Cloud Image List: Unified management of cloud image resources within the system,
 
 The main functions provided by KubeIaaS to users are shown in the following table,
 
-| **Type**         | **Function**         | **Deatils**                                                                                       |
+| **Type**         | **Function**         | **Details**                                                                                       |
 |------------------|----------------------|---------------------------------------------------------------------------------------------------|
 | Cloud VM         | Create               | Support Linux and Windows                                                                         |
 |                  | Configuration        | Basic: name, description                                                                          |
