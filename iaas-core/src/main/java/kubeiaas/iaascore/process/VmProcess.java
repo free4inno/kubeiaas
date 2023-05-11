@@ -299,11 +299,20 @@ public class VmProcess {
         newImage.setName(name);
         newImage.setDescription(description);
 
-        newImage.setVdSize(vdSize);
         newImage.setFormat(parentImage.getFormat());
         newImage.setOsArch(parentImage.getOsArch());
         newImage.setOsType(parentImage.getOsType());
         newImage.setOsMode(parentImage.getOsMode());
+
+        // *Calculate extraSize
+        int extraSize = vdSize - parentImage.getVdSize();
+        if (extraSize < 0) {
+            newImage.setVdSize(parentImage.getVdSize());
+            extraSize = 0;
+        } else {
+            newImage.setVdSize(vdSize);
+        }
+        log.info("publishImage -- extraSize: " + extraSize);
 
         // 4. get new imagePath
         String suffix = ImageUtils.getImageSuffix(newImage.getFormat());
@@ -313,7 +322,7 @@ public class VmProcess {
         String imagePath = ImageConstants.IMAGE_PATH + newImage.getUuid() + suffix;
 
         // 5. copy volume file
-        vmScheduler.volumePublishImage(vmUuid, imagePath, volume.getProviderLocation(), newImage);
+        vmScheduler.volumePublishImage(vmUuid, imagePath, volume.getProviderLocation(), extraSize);
 
         // 6. build volume yaml
         if (!imageScheduler.imageCreateYaml(newImage)) {

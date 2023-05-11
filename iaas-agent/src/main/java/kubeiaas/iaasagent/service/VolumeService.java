@@ -104,8 +104,8 @@ public class VolumeService {
         }
 
         String format = VolumeConfig.CREATE_VOLUME_DISK_CMD;
-        //String format = "qemu-img create -f %s %s %sG";
-        //String command = "qemu-img create -f qcow2 /srv/nfs4/volumes/z/p/xx.img 4.5G
+        // String format = "qemu-img create -f %s %s %sG";
+        // String command = "qemu-img create -f qcow2 /srv/nfs4/volumes/z/p/xx.img 4.5G
         String command = String.format(format,
                 VolumeConstants.DEFAULT_DISK_TYPE,
                 volumeFullPath,
@@ -222,7 +222,7 @@ public class VolumeService {
         return true;
     }
 
-    public boolean volumeToImage(String volumePath, String imagePath) {
+    public boolean volumeToImage(String volumePath, String imagePath, int extraSize) {
         log.info("volumeToImage ==== start ====  volumePath: " + volumePath + " imagePath: " + imagePath);
 
         // 1. ------------ getFullPath ------------
@@ -236,7 +236,16 @@ public class VolumeService {
         }
         new Thread(() -> {
             try {
-                FileUtils.copy(volumeImageFullPath, imageImageFullPath);       //拷贝镜像
+                // copy image
+                FileUtils.copy(volumeImageFullPath, imageImageFullPath);
+                // adjust size
+                if (extraSize > 0) {
+                    String cmd = String.format(VolumeConfig.RESIZE_VOLUME_WITH_BLOCK_SIZE_CMD,
+                            imageImageFullPath,
+                            extraSize);
+                    String res = ShellUtils.getCmd(cmd);
+                    log.info("resize result: " + res);
+                }
             } catch (IOException e) {
                 log.error("File copy Error!!!");
                 e.printStackTrace();

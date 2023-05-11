@@ -66,7 +66,7 @@ public interface VolumeController {
             URI uri,
             @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
-            @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr
+            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) Integer extraSize
     );
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DATA_VOLUME_STORAGE)

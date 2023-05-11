@@ -123,10 +123,9 @@ public class VmScheduler {
         }
     }
 
-    public boolean volumePublishImage(String vmUuid, String imagePath, String volumePath, Image image) {
-        String imageObjectStr = JSON.toJSONString(image);
+    public boolean volumePublishImage(String vmUuid, String imagePath, String volumePath, Integer extraSize) {
         try {
-            return volumeController.volumePublishImage(getSelectedUri(vmUuid), imagePath, volumePath, imageObjectStr)
+            return volumeController.volumePublishImage(getSelectedUri(vmUuid), imagePath, volumePath, extraSize)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
             e.printStackTrace();

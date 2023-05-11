@@ -127,9 +127,11 @@ public class VolumeController {
     @ResponseBody
     public String volumePublishImage(
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
-            @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath) {
+            @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
+            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) Integer extraSize) {
         log.info("publishImage ==== start ====");
-        if (volumeService.volumeToImage(volumePath, imagePath)) {
+        if (null == extraSize) extraSize = 0;
+        if (volumeService.volumeToImage(volumePath, imagePath, extraSize)) {
             log.info("publishImage -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
