@@ -51,9 +51,16 @@ public class XmlConfig {
     }
 
     public String getUsbDevice(Device device) {
-        log.info("getVolumeDevice ---- start ----");
+        log.info("getUsbDevice ---- start ----");
         String res = libvirtConfig.usbToDevice(device);
-        log.info("getVolumeDevice ---- end ----");
+        log.info("getUsbDevice ---- end ----");
+        return res;
+    }
+
+    public String getPciDevice(Device device) {
+        log.info("getPCIDevice ---- start ----");
+        String res = libvirtConfig.pciToDevice(device);
+        log.info("getPCIDevice ---- end ----");
         return res;
     }
 

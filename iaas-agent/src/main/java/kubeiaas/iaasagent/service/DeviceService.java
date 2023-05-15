@@ -7,7 +7,8 @@ import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
-import kubeiaas.iaasagent.utils.UsbUtils;
+import kubeiaas.iaasagent.utils.PCIUtils;
+import kubeiaas.iaasagent.utils.USBUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
@@ -15,6 +16,7 @@ import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,11 +28,15 @@ public class DeviceService {
     private XmlConfig xmlConfig;
 
     public List<Device> queryAll() {
-        List<Device> devList = UsbUtils.getUsbDevice();
-        for (Device device : devList) {
-            device.setStatus(DeviceStatusEnum.AVAILABLE);
-            device.setHostUuid(HostConfig.thisHost.getUuid());
-        }
+        List<Device> devList = new ArrayList<>();
+        devList.addAll(USBUtils.getHostDevices());
+        devList.addAll(PCIUtils.getHostDevices());
+        devList.forEach(
+            d -> {
+                d.setStatus(DeviceStatusEnum.AVAILABLE);
+                d.setHostUuid(HostConfig.thisHost.getUuid());
+            }
+        );
         return devList;
     }
 
@@ -60,6 +66,7 @@ public class DeviceService {
                 break;
             case PCI:
                 log.info(" -- PCI Device");
+                deviceXml = xmlConfig.getPciDevice(device);
                 break;
         }
         if (deviceXml.isEmpty()) {
@@ -101,7 +108,7 @@ public class DeviceService {
             e.printStackTrace();
             return false;
         }
-        log.info("operateDevice ---- end ----");
+        log.info("operateDevice ---- done ----");
         return true;
     }
 

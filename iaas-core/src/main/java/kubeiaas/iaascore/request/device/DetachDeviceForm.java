@@ -13,12 +13,14 @@ public class DetachDeviceForm {
     @NotNull @NotEmpty
     String type;
 
+    /**
+     * A sign to identity union device.
+     *
+     * USB DEVICE:
+     *      bus:dev:vendor:product
+     * PCI DEVICE:
+     *      domain:bus:slot:function
+     */
     @NotNull @NotEmpty
-    String bus;
-    @NotNull @NotEmpty
-    String dev;
-    @NotNull @NotEmpty
-    String vendor;
-    @NotNull @NotEmpty
-    String product;
+    String sign;
 }

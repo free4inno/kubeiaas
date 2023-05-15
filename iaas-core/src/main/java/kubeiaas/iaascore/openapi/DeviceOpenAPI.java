@@ -93,7 +93,15 @@ public class DeviceOpenAPI {
         }
 
         // 3. build a temp device for compare with list
-        Device tempDevice = new Device(deviceTypeEnum, f.getBus(), f.getDev(), f.getVendor(), f.getProduct());
+        Device tempDevice;
+        try {
+            tempDevice = new Device(deviceTypeEnum, f.getSign());
+        } catch (Exception e) {
+            throw new BaseException(
+                    String.format("attach -- error: device sign %s parse failed.", f.getSign()),
+                    ResponseEnum.ARGS_ERROR);
+        }
+
         deviceScheduler.attachDevice(tempDevice, host, vm);
 
         // 4. response
@@ -111,7 +119,8 @@ public class DeviceOpenAPI {
         Vm vm = tableStorage.vmQueryByUuid(f.getVmUuid());
         if (null == vm) {
             throw new BaseException(
-                    String.format("detach -- error: vm_uuid %s unknown.", f.getVmUuid()), ResponseEnum.ARGS_ERROR);
+                    String.format("detach -- error: vm_uuid %s unknown.", f.getVmUuid()),
+                    ResponseEnum.ARGS_ERROR);
         }
         // 1.2. get host
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
@@ -120,11 +129,20 @@ public class DeviceOpenAPI {
         DeviceTypeEnum deviceTypeEnum = EnumUtils.getEnumFromString(DeviceTypeEnum.class, f.getType());
         if (null == deviceTypeEnum) {
             throw new BaseException(
-                    String.format("detach -- error: type %s unknown.", f.getType()), ResponseEnum.ARGS_ERROR);
+                    String.format("detach -- error: type %s unknown.", f.getType()),
+                    ResponseEnum.ARGS_ERROR);
         }
 
         // 3. build a temp device for compare with list
-        Device tempDevice = new Device(deviceTypeEnum, f.getBus(), f.getDev(), f.getVendor(), f.getProduct());
+        Device tempDevice;
+        try {
+            tempDevice = new Device(deviceTypeEnum, f.getSign());
+        } catch (Exception e) {
+            throw new BaseException(
+                    String.format("detach -- error: device sign %s parse failed.", f.getSign()),
+                    ResponseEnum.ARGS_ERROR);
+        }
+
         deviceScheduler.detachDevice(tempDevice, host, vm);
 
         // 4. return

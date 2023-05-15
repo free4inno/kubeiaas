@@ -6,6 +6,7 @@ import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.device.DeviceStatusEnum;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.dao.feign.DeviceController;
@@ -58,10 +59,16 @@ public class DeviceScheduler {
             if (!addFlag) deviceList.add(rawDev);
         }
 
+        // 3.1. set UNREACHABLE
         for (Device dbDev : dbDevices) {
             dbDev.setStatus(DeviceStatusEnum.UNREACHABLE);
         }
         deviceList.addAll(dbDevices);
+
+        // 3.2. set SIGN
+        for (Device device : deviceList) {
+            device.setSign(device.encodeSign());
+        }
 
         return deviceList;
     }
@@ -101,10 +108,19 @@ public class DeviceScheduler {
             }
         }
 
+        // 3.1. set SIGN
+        for (Device device : deviceList) {
+            device.setSign(device.encodeSign());
+        }
+
         return deviceList;
     }
 
     public void attachDevice(Device attachDevice, Host host, Vm vm) throws BaseException {
+        if (!checkOperate(vm, attachDevice)) {
+            throw new BaseException(
+                    "err: device operate unavailable on VM (not support VM status)!", ResponseEnum.DEVICE_ATTACH_ERROR);
+        }
         List<Device> deviceList = this.queryAll(host);
         for (Device device : deviceList) {
             if (device.equals(attachDevice) && device.getStatus().equals(DeviceStatusEnum.AVAILABLE)) {
@@ -125,6 +141,10 @@ public class DeviceScheduler {
     }
 
     public void detachDevice(Device detachDevice, Host host, Vm vm) throws BaseException {
+        if (!checkOperate(vm, detachDevice)) {
+            throw new BaseException(
+                    "err: device operate unavailable on VM (not support VM status)!", ResponseEnum.DEVICE_ATTACH_ERROR);
+        }
         List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vm.getUuid());
         for (Device device : deviceList) {
             // from DB only has ATTACHED, no UNREACHABLE
@@ -155,6 +175,19 @@ public class DeviceScheduler {
                         "error: device delete failed! id: " + device.getId());
             }
         }
+    }
+
+    /**
+     * check if device operate available on vm
+     */
+    private boolean checkOperate(Vm vm, Device device) {
+        switch (device.getType()) {
+            case USB:
+                return true;
+            case PCI:
+                return vm.getStatus().equals(VmStatusEnum.STOPPED);
+        }
+        return false;
     }
 
     private URI getUri(Host host) {

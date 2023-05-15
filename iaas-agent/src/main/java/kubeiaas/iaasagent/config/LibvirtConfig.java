@@ -366,7 +366,7 @@ public class LibvirtConfig {
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 
-    // ===== DEVICE ====================================================================================================
+    // ===== USB DEVICE ====================================================================================================
 
     /**
      * TYPE 1: 截取部分，供外部类调用
@@ -395,13 +395,54 @@ public class LibvirtConfig {
 
         Element source = hostdev.addElement("source");
         source.addElement("vendor")
-                .addAttribute("id", device.getVendor());
+                .addAttribute("id", "0x" + Integer.toHexString(device.getVendor()));
         source.addElement("product")
-                .addAttribute("id", device.getProduct());
+                .addAttribute("id", "0x" + Integer.toHexString(device.getProduct()));
         source.addElement("address")
-                .addAttribute("bus", device.getBus())
-                .addAttribute("device", device.getDev());
+                .addAttribute("bus", "0x" + Integer.toHexString(device.getBus()))
+                .addAttribute("device", "0x" + Integer.toHexString(device.getDev()));
 
         log.info("usbToDeviceXml ---- end ----");
+    }
+
+    // ===== PCIE DEVICE ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
+    public String pciToDevice(Device device) {
+        log.info("pciToDevice ---- start ----");
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        pciToDeviceXml(device, devices);
+        String res = devices.asXML();
+        res = res.replaceAll("<root>", "");
+        res = res.replaceAll("</root>", "");
+        log.info("pciToDevice ---- end ---- res: " + res.trim());
+        return res.trim();
+    }
+
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
+    private void pciToDeviceXml(Device device, Element devices) {
+        log.info("pciToDeviceXml ---- start ----");
+
+        Element hostdev = devices.addElement("hostdev")
+                .addAttribute("mode", "subsystem")
+                .addAttribute("type", "pci")
+                .addAttribute("managed", "yes");
+
+        Element source = hostdev.addElement("source");
+        source.addElement("address")
+                .addAttribute("domain", "0x" + Integer.toHexString(device.getDomain()))
+                .addAttribute("bus", "0x" + Integer.toHexString(device.getBus()))
+                .addAttribute("slot", "0x" + Integer.toHexString(device.getSlot()))
+                .addAttribute("function", "0x" + Integer.toHexString(device.getFunction()));
+
+        Element driver = hostdev.addElement("driver")
+                .addAttribute("name", "vfio");
+
+        log.info("pciToDeviceXml ---- end ----");
     }
 }
