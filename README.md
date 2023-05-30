@@ -1,133 +1,121 @@
-# KubeIaaS-基于Kubernetes的私有IaaS云解决方案
+# KubeIaaS - Private IaaS Cloud Solution based on Kubernetes.
 
-> [Change to English](/docs/README-EN.md)
+> [中文文档](/docs/README-CN.md)
 
-本项目由 [“自邮之翼”](http://www.free4inno.com) 团队研发。
+Developed by ["free4inno"](http://www.free4inno.com).
 
-## ⭐ 产品介绍
+## ⭐ Introduction
 
-KubeIaaS 是基于 Kubernetes 的易于部署和运维、功能完备且易用的私有 IaaS 云解决方案，
-旨在充分利用 Kubernetes 的强大能力，将其应用场景从容器云领域拓展到 IaaS 云领域，从而进一步提高基于 Kubernetes 的 IT 基础架构的灵活性和可扩展性。 
+KubeIaaS is a feature-rich and user-friendly private IaaS cloud solution based on Kubernetes. 
+It is designed to leverage the powerful capabilities of Kubernetes and extend its application scope from the container cloud domain to the IaaS cloud domain, thereby enhancing the flexibility and scalability of IT infrastructure based on Kubernetes.
 
-**为什么选择 KubeIaaS ？**
+**Why Choose KubeIaaS ？**
 
-- 相比原生 Kubernetes，引入了 KubeIaaS 的 Kubernetes 可以同时提供容器云和 IaaS 云能力，可支撑的 IT 基础架构的灵活性和可扩展性大大提升；
+- Compared to native Kubernetes, introducing KubeIaaS into Kubernetes enables it to provide both container cloud and IaaS cloud capabilities simultaneously, greatly improving the flexibility and scalability of supported IT infrastructure.
 
-- 相比其他 IaaS 云平台（如 OpenStack、CloudStack 等），KubeIaaS 利用 Kubernetes 部署和管理 KubeIaaS 的各个组件，使其部署和运维更为轻量便捷；
+- Compared to other IaaS cloud platforms such as OpenStack and CloudStack, KubeIaaS utilizes Kubernetes to deploy and manage its various components, making deployment and operations more lightweight and convenient.
 
-- 相比其他 Kubernetes 虚拟机资源扩展组件（如 Kubevirt、Virtlet 等），KubeIaaS 提供了更为全面的云主机、云硬盘以及云镜像等 IaaS 云管控能力和更为友好易用的 Web 管理界面。
+- Compared to other Kubernetes virtual machine resource extension components such as Kubevirt and Virtlet, KubeIaaS offers a more comprehensive set of IaaS cloud control capabilities, including cloud instances, cloud disks, and cloud images, along with a user-friendly web management interface.
 
-[观看产品介绍及演示视频](https://www.bilibili.com/video/BV1em4y1C7uE/)
+[Watch introduction and demo.](https://www.bilibili.com/video/BV1em4y1C7uE/)
 
-## 💡 关键特征
+## 💡 Key Features
 
-- **部署便捷**
+- **Easy Deployment**
 
-KubeIaaS 通过在 Kubernetes 中利用 YAML 资源清单统一编排容器化组件，简化了繁琐的部署流程，避免了大量的重复操作。为适应 “裸机集群” 和 “已存在的Kubernetes集群” 等不同场景，KubeIaaS 提供了详细的部署指南。
+KubeIaaS simplifies the complex deployment process by using YAML resource manifests to orchestrate containerized components within Kubernetes, eliminating the need for repetitive tasks. Detailed deployment guides are provided to adapt to different scenarios such as "bare-metal clusters" and "exist Kubernetes clusters".
 
-- **维护简单**
+- **Simplified Maintenance**
 
-KubeIaaS 利用 Kubernetes 的资源调度能力和 Prometheus、Loki 等云原生运维套件，充分降低了系统的运维成本。用户可以轻松获取系统组件的运行情况，监控宿主机和云主机的运行状态，以及掌握系统资源的使用状况。
+KubeIaaS leverages Kubernetes' resource scheduling capabilities and cloud-native operations suites such as Prometheus and Loki to significantly reduce system maintenance costs. Users can easily access the running status of system components, monitor the running status of host machines and virtual machines, and understand the usage status of system resources.
 
-- **功能完备**
+- **Comprehensive Functionality**
 
-作为一套完备的私有 IaaS 云解决方案，KubeIaaS 通过直观且易于操作的 Web 管理界面，使用户能够轻松地创建、配置和管理云主机、云硬盘和云镜像等各类云资源，从而显著提升云基础设施的使用效率和管理便捷性。
+As a comprehensive private IaaS cloud solution, KubeIaaS offers an intuitive and user-friendly web management interface that enables users to easily create, configure, and manage various cloud resources such as virtual machines, cloud disks, and cloud images, significantly improving the efficiency and convenience of cloud infrastructure management.
 
-- **资源丰富**
+- **Rich Resources**
 
-用户可以通过 KubeIaaS 官方提供的或是自行搭建的云镜像中心轻松下载和管理集群内云主机所需的镜像。
+Users can easily download and manage the images required for virtual machines in the cluster through KubeIaaS's official or self-built cloud image center.
 
-## 🚀 安装部署
+## 🚀 Quick Start
 
-- 在裸机上进行部署 [链接](/docs/deploy/deploy-os-ubuntu-22.04-cn.md)
+- Deploy on Bare Metal [link](/docs/deploy/deploy-os-ubuntu-22.04-cn.md)
 
-- 在未安装 Kubernetes 的 Ubuntu 系统上部署 [链接](/docs/deploy/deploy-kubernetes-1.23-cn.md)
+- Deploy on Ubuntu without Kubernetes [link](/docs/deploy/deploy-kubernetes-1.23-cn.md)
 
-- 在已安装 Kubernetes 的 Ubuntu 系统上部署 [链接](/docs/deploy/deploy-kubeiaas-1.0-ubuntu-cn.md)
+- Deploy on Ubuntu with Kubernetes [link](/docs/deploy/deploy-kubeiaas-1.0-ubuntu-cn.md)
 
-- 在其他操作系统上进行部署 [链接](/docs/deploy/deploy-kubeiaas-1.0-general-cn.md)
+- Deploy on other OS [link](/docs/deploy/deploy-kubeiaas-1.0-general-cn.md)
 
-## 🎞️ 系统展示
+## 🎞️ Showcase
 
-系统内界面截图展示如下，
+Below are screenshots of the system interface:
 
-首页：通过仪表卡片展示包括资源使用状况、集群状态指标等各类数据
+Home Page: Displays various data such as resource usage and cluster status metrics through dashboard cards.
 
 ![](/docs/img/readme/img_0.png)
 
-系统管理：监控系统运行状态、资源使用情况，并能够对系统进行配置管理。
+System Management: Monitor system operation status and resource usage, and configure and manage the system.
 
 ![](/docs/img/readme/img_1.png)
 
-云主机列表：统一管理系统内云主机资源，展示名称、状态、操作系统、配置等信息。
+Cloud VM List: Manage all cloud VM resources in the system, displaying information such as name, status, operating system, and configuration.
 
 ![](/docs/img/readme/img_2.png)
 
-云主机详情：展示云主机计算、网络、存储等各项参数，提供云主机管控功能。
+Cloud VM Details: Display various parameters of the cloud VM such as computing, network, storage, etc., and provide cloud VM control functions.
 
 ![](/docs/img/readme/img_3.png)
 
-云硬盘列表：统一管理系统内云硬盘资源，展示名称描述、挂载信息、存储容量等信息。
+Cloud Disk List: Uniformly manage cloud disk resources in the system, display information such as name and description, mount information, storage capacity, etc.
 
 ![](/docs/img/readme/img_4.png)
 
-云镜像列表：统一管理系统内云镜像资源，展示名称描述、系统类型、镜像参数等信息。
+Cloud Image List: Unified management of cloud image resources within the system, displaying information such as name, description, system type, and image parameters.
 
 ![](/docs/img/readme/img_5.png)
 
-## 📦 功能说明
+## 📦 Functions
 
-KubeIaaS向用户提供的主要功能如下表所示。
+The main functions provided by KubeIaaS to users are shown in the following table,
 
-| **类型** | **功能** | **详情**                   |
-|--------|--------|--------------------------|
-| 云主机    | 主机创建   | 支持Linux与Windows          |
-|        | 主机配置   | 基本：名称、描述                 |
-|        |        | 计算：CPU、内存（支持热增加）         |
-|        |        | 存储：挂载云硬盘（支持热插拔）          |
-|        |        | *存储：系统盘扩缩容               |
-|        |        | 网络：自动IP分配（支持云主机双网卡）      |
-|        |        | *网络：IP绑定                 |
-|        | 主机控制   | 支持启停、挂起                  |
-|        | 远程访问   | 支持Web VNC远程连接            |
-|        | *主机迁移  | *离线迁移                    |
-| 云硬盘    | 硬盘创建   | 自定义容量                    |
-|        | 硬盘配置   | 挂载到云主机（支持热插拔）            |
-|        |        | *扩缩容                     |
-| 云镜像    | 镜像发布   | 将云主机一键发布为云镜像             |
-|        | 镜像中心   | 手动导入：下载预制镜像，上传到系统直接使用    |
-|        |        | *自动导入：通过镜像中心一键导入预制镜像     |
-|        | 自定义镜像  | 支持基于KubeIaaS镜像规范自定义镜像    |
-| 系统运维   | 资源管控   | 系统服务组件状态监控               |
-|        |        | 宿主机自动配置与加入               |
-|        |        | *宿主机、云主机指标监控             |
-|        | 系统配置   | 资源配置（CPU内存超售、存储上限、网段管理）  |
-|        |        | 系统配置（主机规格可选项、Web VNC域名等） |
-|        | 用户管理   | 用户与用户组                   |
+| **Type**         | **Function**         | **Details**                                                                                       |
+|------------------|----------------------|---------------------------------------------------------------------------------------------------|
+| Cloud VM         | Create               | Support Linux and Windows                                                                         |
+|                  | Configuration        | Basic: name, description                                                                          |
+|                  |                      | Compute: CPU, memory (support hot addition)                                                       |
+|                  |                      | Storage: mount cloud disk (support hot plug and play)                                             |
+|                  |                      | *Storage: system disk expansion and contraction                                                   |
+|                  |                      | Network: automatic IP allocation (support dual NIC)                                               |
+|                  |                      | *Network: IP binding                                                                              |
+|                  | Control              | Support start and stop, suspend                                                                   |
+|                  | Access               | Support Web VNC remote connection                                                                 |
+|                  | *Migration           | *Offline migration                                                                                |
+| Cloud Disk       | Create               | Custom capacity                                                                                   |
+|                  | Configuration        | Mounted to the Cloud VM (support hot plug)                                                        |
+|                  |                      | *Expansion and contraction                                                                        |
+| Cloud Image      | Image release	       | One-click release of cloud VM as cloud image                                                      |
+|                  | Image center         | Manual import: download the pre-installed image and upload it to the system for direct use        |
+|                  |                      | *Automatic import: one-click import of pre-installed image through the image center               |
+|                  | Custom image         | Support custom image based on KubeIaaS image specification                                        |
+| System operation | Resource control     | System service component status monitoring                                                        |
+|                  |                      | Automatic configuration and addition of host                                                      |
+|                  |                      | *Metrics monitoring of host and cloud VM                                                          |
+|                  | System configuration | Resource configuration (CPU and memory overcommitment, storage limit, network segment management) |
+|                  |                      | System configuration (optional host specifications, Web VNC domain name, etc.)                    |
+|                  | User management      | Users and user groups                                                                             |
 
-（带有*标记的功能表示将在近期推出的新版本中实现）
-
-## 📖 技术架构
-
-KubeIaaS 的设计与实现遵循以下原则:
-
-**调度能力一体化，运维能力一体化**
-
-KubeIaaS 充分利用 Kubernetes 的资源调度能力和 Prometheus、Loki 等云原生运维组件，实现容器环境与 IaaS 云环境的资源调度和平台运维一体化。
-
-**管控能力组件化，组件部署容器化**
-
-KubeIaaS 将 IaaS 云管控能力封装为一系列可部署于 Kubernetes 之上的云原生应用组件，因此可以利用 Kubernetes 的应用管理能力非常便捷的部署和维护 KubeIaaS。
+(Functions marked with * indicate that they will be implemented in the upcoming new version.)
 
 
+## 📖 Architecture
 
-## 🎓 贡献说明
+The design and implementation of KubeIaaS adhere to the following principles:
 
-本项目由 [“自邮之翼”](http://www.free4inno.com) 团队研发，指导老师为北京邮电大学徐鹏老师，贡献人员名单如下：
+**Integrated scheduling capability, Integrated operations capability**
 
-- 北京邮电大学 2022级硕士研究生 赵浩天
-- 北京邮电大学 2021级硕士研究生 娄昂子渝
-- 北京邮电大学 2022级硕士研究生 陈言飘
-- 北京邮电大学 2019级本科生 张啸宇
-- 北京邮电大学 2019级本科生 王昊然
-- 北京邮电大学 2019级本科生 杨王颖
+KubeIaaS fully utilizes the resource scheduling capabilities of Kubernetes and cloud-native operation and maintenance components such as Prometheus and Loki, realizing the integration of resource scheduling and platform operation and maintenance between container environments and IaaS cloud environments.
+
+**Modularized control capabilities, Containerized component deployment**
+
+KubeIaaS encapsulates IaaS cloud control capabilities into a series of cloud-native application components that can be deployed on top of Kubernetes, making it very convenient to deploy and maintain KubeIaaS using Kubernetes' application management capabilities.
