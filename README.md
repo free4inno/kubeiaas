@@ -1,10 +1,10 @@
 # KubeIaaS - Private IaaS Cloud Solution based on Kubernetes.
 
-> [中文文档](/docs/README-CN.md)
-
 ![](https://img.shields.io/badge/-free4inno-blue)
 ![](https://img.shields.io/github/license/free4inno/kubeiaas)
 ![](https://img.shields.io/github/v/release/free4inno/kubeiaas)
+
+> [中文文档](/docs/README-CN.md)
 
 Developed by ["free4inno"](http://www.free4inno.com).
 
