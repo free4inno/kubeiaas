@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Configuration
@@ -47,7 +48,7 @@ public class AgentConfig {
      *
      *  缓存当前访问 uuid 与 host 关联关系
      */
-    private static final Map<String, Agent> selected_host_ip = new HashMap<>();
+    private static final Map<String, Agent> selected_host_ip = new ConcurrentHashMap<>();
 
     public static void setSelectedHost(String uuid, Host host) {
         Agent agent = selected_host_ip.get(uuid);
