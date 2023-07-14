@@ -211,6 +211,21 @@ public class LibvirtConfig {
         devices.addElement("input").addAttribute("type", "tablet")
                 .addAttribute("bus", "usb");
 
+        // QGA (Qemu-Guest-Agent)
+        Element channel = devices.addElement("channel")
+                .addAttribute("type", "unix");
+        channel.addElement("source")
+                .addAttribute("mode", "bind")
+                .addAttribute("path", "/var/lib/libvirt/qemu/org.qemu.guest_agent.0");
+        channel.addElement("target")
+                .addAttribute("type", "virtio")
+                .addAttribute("name", "org.qemu.guest_agent.0");
+
+        Element memballoon = devices.addElement("memballoon")
+                .addAttribute("model", "virtio");
+        memballoon.addElement("stats")
+                .addAttribute("period", "10");
+
         // VNC设置
         Element graphicsVNC = devices.addElement("graphics")
                 .addAttribute("type", "vnc")
