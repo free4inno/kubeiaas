@@ -41,7 +41,7 @@ function main(){
     info_cpu_core=$(cat /proc/cpuinfo| grep "processor" | wc -l)
     info_cpu_mhz=$(cat /proc/cpuinfo | grep MHz|head -1|awk '{print $4}')
     info_mem_size=$(cat /proc/meminfo | grep MemTotal | awk '{print $2/1024/1024}')
-    info_disk_size=$(df | grep '/$' | awk '{print int($2*1/1024/1024)}')
+    info_disk_size=$(df -l / | grep '/$' | awk '{print int($2*1/1024/1024)}')
 
     echo " ===== [BASIC INFO] ===== "
     printf "%-15s %-20s\n" " - Host name" ": $info_name"
@@ -76,9 +76,9 @@ function main(){
     check_and_make_dir workdir/checker
     check_and_make_dir workdir/log
 
-    check_and_make_dir data/images
+    # check_and_make_dir data/images
     check_and_make_dir data/sys-volumes
-    check_and_make_dir data/data-volumes
+    # check_and_make_dir data/data-volumes
 
     check_and_make_dir libvirt
 

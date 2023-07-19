@@ -61,6 +61,11 @@ function log(){
 
 # ----------------------- Main -----------------------
 
+check_mount_status() {
+  mountpoint -q $1
+  echo $?
+}
+
 function main(){
 
     SERVICE_NFS=nfs
@@ -131,8 +136,8 @@ $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry
 
     # 4. check mount status ====================
     echo "[4] check mount status"
-    res=$(df -h)
-    if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
+    # res=$(df -h)
+    if [[ $(check_mount_status "$KUBEIAAS_PATH_IMAGES") == 0 && $(check_mount_status "$KUBEIAAS_PATH_DATA_VOLUMES") == 0 ]]; then
         echo "[-] mount is OK."
         echo ">>> success"
         log mnt success
@@ -140,16 +145,22 @@ $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry
         exit
     else
         echo "[-] have not mount!"
+
+        # umount
+        echo "[-] first try umount"
+        umount -lf "$KUBEIAAS_PATH_IMAGES"
+        umount -lf "$KUBEIAAS_PATH_DATA_VOLUMES"
+
+        # mount
         echo "[-] start to mount..."
-        
-        # write fstab
-        mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_IMG $KUBEIAAS_PATH_IMAGES
-        mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES
+        mount -a
+        # nohup mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_IMG $KUBEIAAS_PATH_IMAGES &
+        # nohup mount -t nfs -o rw,soft,timeo=30,retry=3 $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES &
         
         # recheck
         echo "[+] recheck mount status"
-        res=$(df -h)
-        if [[ $res =~ $KUBEIAAS_PATH_IMAGES && $res =~ $KUBEIAAS_PATH_DATA_VOLUMES ]]; then
+        # res=$(df -h)
+        if [[ $(check_mount_status "$KUBEIAAS_PATH_IMAGES") == 0 && $(check_mount_status "$KUBEIAAS_PATH_DATA_VOLUMES") == 0 ]]; then
             echo "[-] mount success."
             echo ">>> success"
             log mnt success
