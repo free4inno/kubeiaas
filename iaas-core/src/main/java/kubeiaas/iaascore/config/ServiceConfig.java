@@ -84,7 +84,7 @@ public class ServiceConfig {
         // 清理超过 2T = 2 * 1min = 2min 的注册记录
         // -> 2 * 60 * 1000 = 120000
         activeList.removeIf(record -> (timeNow - record.getLastTs() > 120000));
-        log.info("== SERVICE : activeList == \n" + activeList);
+        log.debug("== SERVICE : activeList == \n" + activeList);
     }
 
     public void register(String svcName, String nodeName, Long timeStamp) {

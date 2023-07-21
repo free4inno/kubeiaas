@@ -44,9 +44,9 @@ public class ServiceOpenAPI {
             @RequestParam(value = RequestParamConstants.SERVICE_NAME) @NotNull @NotEmpty String serviceName,
             @RequestParam(value = RequestParamConstants.NODE_NAME) @NotNull @NotEmpty String nodeName,
             @RequestParam(value = RequestParamConstants.TIMESTAMP) @NotNull Long timestamp) {
-        log.info("register ==== start ====");
+        log.debug("register ==== start ====");
         serviceConfig.register(serviceName, nodeName, timestamp);
-        log.info("register ==== end ====");
+        log.debug("register ==== end ====");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 

@@ -56,12 +56,17 @@ public class VolumeProcess {
             Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
 
             int waitLoop = VolumeConstants.CREATING_WAIT_LOOP;
-            try {   // when copy is done, volume status will change in database, so query volume status at regular time.
+            int backOffTime = VolumeConstants.CREATING_WAIT_TIME;
+            try {
+                TimeUnit.SECONDS.sleep(backOffTime);
+                // when copy is done, volume status will change in database, so query volume status at regular time.
                 while (!volume.getStatus().equals(VolumeStatusEnum.AVAILABLE) &&
                         !volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE) &&
                         waitLoop > 0) {
                     waitLoop--;
-                    TimeUnit.SECONDS.sleep(VolumeConstants.CREATING_WAIT_TIME);
+                    backOffTime += VolumeConstants.CREATING_WAIT_TIME;
+                    log.info(" -- volume not ready, loop back off ({} seconds) ...", backOffTime);
+                    TimeUnit.SECONDS.sleep(backOffTime);
                     volume = tableStorage.volumeQueryByUuid(volumeUuid);
                 }
                 if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {

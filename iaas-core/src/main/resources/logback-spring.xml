@@ -43,7 +43,7 @@
 <!--    </appender>-->
 
     <!-- 定义特定包 -->
-    <logger name="kubeiaas.iaascore" level="DEBUG" additivity="false">
+    <logger name="kubeiaas.iaascore" level="INFO" additivity="false">
         <appender-ref ref="LOG_CONSOLE"/>
         <!--<appender-ref ref="LOG_FILE"/>-->
     </logger>

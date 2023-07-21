@@ -24,7 +24,7 @@ public class IaasAgentRegister {
     private static final String nodeName = System.getenv("HOST_NAME");
 
     public void agentRegister() {
-        log.info("== AGENT REGISTER");
+        log.debug("== AGENT REGISTER");
         try {
             register.register(svcName, nodeName, System.currentTimeMillis());
         } catch (Exception e) {
@@ -34,7 +34,7 @@ public class IaasAgentRegister {
 
     @Scheduled(cron = "0 0/1 * * * ?")
     private void register() {
-        log.info("== REGISTER");
+        log.debug("== REGISTER");
         boolean errorFlag = false;
 
         // == 1. Agent =====
