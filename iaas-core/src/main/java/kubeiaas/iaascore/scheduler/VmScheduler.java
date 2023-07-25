@@ -147,6 +147,16 @@ public class VmScheduler {
         return vmStatusEnum;
     }
 
+    public boolean setPasswd(Vm vm, String user, String passwd) throws BaseException {
+        try {
+            return vmController.setPasswd(getSelectedUri(vm.getUuid()), vm.getUuid(), user, passwd)
+                    .equals(ResponseMsgConstants.SUCCESS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BaseException("err: failed to connect with agent.");
+        }
+    }
+
     public void deleteVmInDataBase(String vmUuid){
         tableStorage.vmDeleteByUuid(vmUuid);
     }

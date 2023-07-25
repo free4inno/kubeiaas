@@ -344,4 +344,17 @@ public class VmOpenAPI {
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(vmStatusEnum.toString())));
     }
 
+    /**
+     * 修改密码
+     */
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SET_PASSWD, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String setPasswd(
+            @Valid @RequestBody SetPasswdForm f) throws BaseException {
+        log.info("setPasswd ==== start ====");
+        vmService.setPasswd(f.getVmUuid(), f.getUser(), f.getPasswd());
+        log.info("setPasswd ==== end ====");
+        return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+    }
+
 }

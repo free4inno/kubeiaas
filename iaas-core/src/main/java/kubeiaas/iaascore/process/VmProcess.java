@@ -401,4 +401,16 @@ public class VmProcess {
         AgentConfig.clearSelectedHost(vm.getUuid());
         return vmStatusEnum;
     }
+
+    /**
+     * 修改密码
+     */
+    public void setPasswd(Vm vm, String user, String passwd) throws BaseException {
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        AgentConfig.setSelectedHost(vm.getUuid(), host);
+        if (!vmScheduler.setPasswd(vm, user, passwd)) {
+            throw new BaseException("err: failed to set passwd, please check Agent logs for exact reason.");
+        }
+        AgentConfig.clearSelectedHost(vm.getUuid());
+    }
 }

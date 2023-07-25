@@ -148,4 +148,20 @@ public class VmController {
         log.info("status == vmUuid: " + vmUuid);
         return JSON.toJSONString(vmService.status(vmUuid));
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SET_PASSWD, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    String setPasswd(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.USER) String user,
+            @RequestParam(value = RequestParamConstants.PASSWD) String passwd) {
+        log.info("setPasswd == vmUuid: " + vmUuid);
+        if (vmService.setPasswd(vmUuid, user, passwd)) {
+            log.info("setPasswd ==== success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.info("setPasswd ==== failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
 }

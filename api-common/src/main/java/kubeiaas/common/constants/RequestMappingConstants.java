@@ -52,6 +52,7 @@ public class RequestMappingConstants {
     public static final String STATISTICS_BY_ID = "statistics_by_id";
     public static final String NODE_RESOURCE = "node_resource";
     public static final String NET_STO_RESOURCE = "net_sto_resource";
+    public static final String SET_PASSWD = "set_passwd";
     // -- query all
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";

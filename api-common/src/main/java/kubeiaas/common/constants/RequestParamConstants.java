@@ -37,6 +37,9 @@ public class RequestParamConstants {
     public static final String MEMORY = "memory";
     public static final String DISK_SIZE = "disk_size";
 
+    public static final String USER = "user";
+    public static final String PASSWD = "passwd";
+
     /* ===== IMAGE ===== */
     public static final String IMAGE_OBJECT = "image_object";
     public static final String CONTENT = "content";

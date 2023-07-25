@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.eclipse.aether.util.ConfigUtils;
 import org.libvirt.Connect;
 import org.libvirt.LibvirtException;
 import org.springframework.context.annotation.Configuration;
@@ -35,15 +34,22 @@ public class LibvirtConfig {
     private static Integer MAX_MEMORY = 16;
     private static Integer MAX_CPU = 16;
 
+    // ------ qemu conf ------
     private static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     private static final String virConStr = "qemu:///system";
 
+    // ------ network ------
     public static String networkType = System.getenv("NETWORK_BRIDGE_TYPE");
     public static final String NETWORK_TYPE_LINUX = "Linux";
     public static final String NETWORK_TYPE_OVS = "OVS";
     public static final String NETWORK_TYPE_MACV = "MACVLAN";
 
+    // ------ command template ------
     public static String getVncPort = "virsh vncdisplay ";
+
+    public static final String SET_PASSWD = "virsh set-user-password %s --user '%s' --password '%s' 2>&1";
+    public static final String ERROR_FLAG = "error";
+    // ------------------------------
 
     public LibvirtConfig() {
         emulatorName = getEmulatorLocation();

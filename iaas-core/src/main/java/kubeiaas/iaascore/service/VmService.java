@@ -443,4 +443,18 @@ public class VmService {
         }
         return vm.getStatus();
     }
+
+    /**
+     * 修改密码
+     */
+    public void setPasswd(String uuid, String user, String passwd) throws BaseException {
+        // 1. get vm
+        Vm vm = tableStorage.vmQueryByUuid(uuid);
+        if (null == vm) {
+            throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
+        }
+
+        // 2. process
+        vmProcess.setPasswd(vm, user, passwd);
+    }
 }

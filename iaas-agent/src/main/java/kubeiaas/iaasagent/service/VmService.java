@@ -581,4 +581,24 @@ public class VmService {
         tableStorage.vmSave(vm);
     }
 
+    public boolean setPasswd(String uuid, String user, String passwd) {
+        log.info("setPasswd ---- start ---- vmUuid: " + uuid);
+        // 修改密码的操作没有封装在 Libvirt Java SDK 内，因此需要使用 virsh 命令操作
+        try {
+            String cmd = String.format(LibvirtConfig.SET_PASSWD, uuid, user, passwd);
+            log.info("setPasswd -- " + cmd);
+            String res = ShellUtils.getCmd(cmd);
+            if (res.contains(LibvirtConfig.ERROR_FLAG)) {
+                log.error("setPasswd ---- failed ---- " + res);
+                return false;
+            } else {
+                log.info("setPasswd ---- success ---- " + res);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("setPasswd ---- failed ---- command run failed!");
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
