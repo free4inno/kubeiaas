@@ -7,5 +7,9 @@ COPY iaas-front.war /workdir
 # spring.datasource.url=jdbc:mysql://front-mysql:3306/hufu-front?serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
 # spring.datasource.password=MYSQL@free
 # --------------------------
+
+# ----- Package -----
 # docker build -t registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT .
 # docker push registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT
+# ---
+# docker buildx build --platform linux/amd64 -t registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT . --push
