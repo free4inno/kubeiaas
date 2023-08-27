@@ -32,47 +32,45 @@ public class ServiceConfig {
 
     /* Set */
     private final Set<String> serviceSet;
-    private final Set<String> nodeSet;
 
-    /* Need Map */
-    private static final Map<String, List<String>> needMap = new HashMap<>();
+    /*
+        static need map describes the node-specific deployment: the service's deployment is
+        limited to the nodes provided by map value
+      */
+    private static final Map<String, List<String>> staticNeedMap = new HashMap<>();
 
-    /* serviceList */
+    /*
+        dynamic need set describes the node-independent deployment: the service's deployment is
+        not bound to specific nodes
+     */
+    private static final Set<String> dynamicNeedSet = new HashSet<>();
+
+    /* serviceList maintain active service */
     private static final List<Record> activeList = new ArrayList<>();
 
     /* init */
     ServiceConfig() {
-        // 1. build Need Map
-        needMap.put(ComponentConstants.IAAS_CORE,
-                ConfigUtils.splitByComma(System.getenv("IAAS_CORE_NODE_NAME")));
-        needMap.put(ComponentConstants.DB_PROXY,
-                ConfigUtils.splitByComma(System.getenv("DB_PROXY_NODE_NAME")));
-        needMap.put(ComponentConstants.RESOURCE_OPERATOR,
-                ConfigUtils.splitByComma(System.getenv("RS_OPT_NODE_NAME")));
-        needMap.put(ComponentConstants.IMAGE_OPERATOR,
-                ConfigUtils.splitByComma(System.getenv("IMG_OPT_NODE_NAME")));
-        needMap.put(ComponentConstants.IAAS_AGENT,
-                ConfigUtils.splitByComma(System.getenv("AGENT_NODE_NAME_LIST")));
-        needMap.put(ComponentConstants.LIBVIRT,
-                ConfigUtils.splitByComma(System.getenv("AGENT_NODE_NAME_LIST")));
-        needMap.put(ComponentConstants.DHCP,
+        // 1. build static Need Map and dynamic Need Set
+        staticNeedMap.put(ComponentConstants.DHCP,
                 ConfigUtils.splitByComma(System.getenv("DHCP_NODE_NAME")));
-        needMap.put(ComponentConstants.VNC,
-                ConfigUtils.splitByComma(System.getenv("VNC_NODE_NAME")));
-        log.info("== SERVICE : needMap == \n" + needMap);
+        log.info("== SERVICE : staticNeedMap == \n" + staticNeedMap);
+
+        dynamicNeedSet.add(ComponentConstants.IAAS_CORE);
+        dynamicNeedSet.add(ComponentConstants.DB_PROXY);
+        dynamicNeedSet.add(ComponentConstants.RESOURCE_OPERATOR);
+        dynamicNeedSet.add(ComponentConstants.VNC);
+        dynamicNeedSet.add(ComponentConstants.IMAGE_OPERATOR);
+        dynamicNeedSet.add(ComponentConstants.LIBVIRT);
+        dynamicNeedSet.add(ComponentConstants.IAAS_AGENT);
+        log.info("== SERVICE : dynamicNeedSet == \n" + dynamicNeedSet);
 
         // 2. build Service Set
-        serviceSet = needMap.keySet();
+        serviceSet = new HashSet<>();
+        serviceSet.addAll(staticNeedMap.keySet());
+        serviceSet.addAll(dynamicNeedSet);
         log.info("== SERVICE : serviceSet == \n" + serviceSet);
 
-        // 3. build Node Set
-        nodeSet = new HashSet<>();
-        for (String svc : serviceSet) {
-            nodeSet.addAll(needMap.get(svc));
-        }
-        log.info("== SERVICE : nodeSet == \n" + nodeSet);
-
-        // 4. init service list
+        // 3. init service list
         activeList.add(new Record(ComponentConstants.IAAS_CORE, this.HOST_NAME, System.currentTimeMillis()));
     }
 
@@ -94,49 +92,55 @@ public class ServiceConfig {
                 return;
             }
         }
+        if (staticNeedMap.containsKey(svcName) && !staticNeedMap.get(svcName).contains(nodeName)) {
+            log.warn("== SERVICE : newRegister(svcName:{}, nodeName:{}, ts:{}), but not in needMap",
+                    svcName, nodeName, timeStamp);
+        }
         activeList.add(new Record(svcName, nodeName, timeStamp));
         log.info("== SERVICE : newRegister(svcName:{}, nodeName:{}, ts:{})", svcName, nodeName, timeStamp);
     }
 
-    public Map<String, Map<String, ServiceStatusEnum>> getSvc() {
-        Map<String, Map<String, ServiceStatusEnum>> resMap = new HashMap<>();
-        for (String node : nodeSet) {
-            Map<String, ServiceStatusEnum> rowMap = new HashMap<>();
-            for (String svc : serviceSet) {
-                if (isInNeedMap(svc, node)) {
-                    if (isInActiveList(svc, node)) {
-                        rowMap.put(svc, ServiceStatusEnum.ACTIVE);
-                    } else {
-                        rowMap.put(svc, ServiceStatusEnum.DEAD);
-                    }
-                } else {
-                    if (isInActiveList(svc, node)) {
-                        rowMap.put(svc, ServiceStatusEnum.NON);
-                    } else {
-                        rowMap.put(svc, ServiceStatusEnum.NON);
-                    }
+    public Map<String, List<String>> getSvc() {
+        Map<String, List<String>> resMap = new HashMap<>();
+        for (String svc : serviceSet) {
+            List<String> nodeList = new ArrayList<>();
+            for (Record record : activeList) {
+                if (svc.equals(record.getSvcName())) {
+                    nodeList.add(record.getNodeName());
                 }
             }
-            resMap.put(node, rowMap);
+            resMap.put(svc, nodeList);
         }
         return resMap;
     }
 
+    /* Get active and dead service number */
     public Map<String, Integer> getSvcCount() {
-        int activeNum = 0;
-        int deadNum = 0;
-        Map<String, Integer> resMap = new HashMap<>();
-        for (String node : nodeSet) {
-            for (String svc : serviceSet) {
-                if (isInNeedMap(svc, node)) {
-                    if (isInActiveList(svc, node)) {
-                        activeNum += 1;
-                    } else {
-                        deadNum += 1;
-                    }
+        cleanServiceList();
+        Map<String, Integer>resMap = new HashMap<>();
+        int activeNum = 0,
+            deadNum = 0;
+        int svcCnt;
+        for (String svc : dynamicNeedSet) {
+            svcCnt = getSvcCnt(svc);
+            if (svcCnt == 0) {
+                deadNum += 1;
+            } else {
+                activeNum += svcCnt;
+            }
+        }
+        // iterate staticNeedMap
+        for (Map.Entry<String, List<String>> entry : staticNeedMap.entrySet()) {
+            String svc = entry.getKey();
+            for (String node : entry.getValue()) {
+                if (isInActiveList(svc, node)) {
+                    activeNum += 1;
+                } else {
+                    deadNum += 1;
                 }
             }
         }
+
         resMap.put("total", activeNum + deadNum);
         resMap.put("active", activeNum);
         return resMap;
@@ -163,11 +167,6 @@ public class ServiceConfig {
 
     // -----------------------------------------------------------------------------------
 
-    private boolean isInNeedMap(String svcName, String nodeName) {
-        List<String> nodes = needMap.get(svcName);
-        return nodes.contains(nodeName);
-    }
-
     private boolean isInActiveList(String svcName, String nodeName) {
         for (Record record : activeList) {
             if (svcName.equals(record.getSvcName())
@@ -176,5 +175,16 @@ public class ServiceConfig {
             }
         }
         return false;
+    }
+
+    /* Get active service count by service name */
+    private Integer getSvcCnt(String svcName) {
+        int cnt = 0;
+        for (Record record : activeList) {
+            if (svcName.equals(record.getSvcName())) {
+                cnt += 1;
+            }
+        }
+        return cnt;
     }
 }

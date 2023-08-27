@@ -95,6 +95,10 @@ sudo systemctl daemon-reload
 sudo mkdir -p /usr/local/kubeiaas/data/images
 # 云主机数据盘存储目录
 sudo mkdir -p /usr/local/kubeiaas/data/data-volumes
+# db-proxy sqlite 数据库存储目录
+sudo mkdir -p /usr/local/kubeiaas/sqlite
+# noVNC token 存储目录
+sudo mkdir -p /usr/local/kubeiaas/vnc/token
 ```
 
 开放目录，使其可被其他工作节点挂载，
@@ -106,6 +110,8 @@ sudo su
 cat << EOF >> /etc/exports
 /usr/local/kubeiaas/data/images *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/data/data-volumes *(rw,no_root_squash,no_subtree_check)
+/usr/local/kubeiaas/sqlite *(rw,no_root_squash,no_subtree_check)
+/usr/local/kubeiaas/vnc/token *(rw,no_root_squash,no_subtree_check)
 EOF
 
 # 使上述修改生效
@@ -171,7 +177,7 @@ nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 network.bridge.type: "MACV"
 ```
 
-### 3.3 标记节点
+### 3.3 标记节点（已废弃）
 
 完成上述配置后，您还需要使用 kubectl 创建一个 namespace 并按照配置的内容为各个节点打上标签，
 

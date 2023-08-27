@@ -73,10 +73,10 @@ public class IaasAgentRegister {
         return res.contains("active");
     }
 
-    private static final String CMD_CHECK_DHCP = "service dhcpd status";
+    private static final String CMD_CHECK_DHCP = "ps -ef | grep dhcp | awk -F ' ' '$1 == \"dhcpd\" {print}'";
     private boolean checkDHCP() {
         String res = ShellUtils.getCmd(CMD_CHECK_DHCP);
-        return res.contains("active");
+        return res.contains("dhcpd");
     }
 
     private static final String CMD_CHECK_VNC = "ps -ef | grep noVNC";

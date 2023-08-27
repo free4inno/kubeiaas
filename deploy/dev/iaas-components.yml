@@ -15,8 +15,6 @@ spec:
       labels:
         app: iaas-core
     spec:
-      nodeSelector:
-        kubeiaas/ctl: "true"
       containers:
         - name: iaas-core
           command: ["sh"]
@@ -30,8 +28,6 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 9080
-              # [ATTENTION] -- comment when prod
-              hostPort: 9080
               protocol: TCP
           env:
             # -------- BASIC ENV --------
@@ -44,41 +40,11 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             # -------- SERVICE CONFIG --------
-            - name: IAAS_CORE_NODE_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.control
-            - name: DB_PROXY_NODE_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.control
-            - name: RS_OPT_NODE_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.control
-            - name: IMG_OPT_NODE_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.image
-            - name: AGENT_NODE_NAME_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.work.list
             - name: DHCP_NODE_NAME
               valueFrom:
                 configMapKeyRef:
                   name: iaas-config
                   key: nodes.dhcp
-            - name: VNC_NODE_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.vnc
             - name: NFS_IP
               valueFrom:
                 configMapKeyRef:
@@ -94,10 +60,11 @@ metadata:
 spec:
   selector:
     app: iaas-core
-  type: ClusterIP
+  type: NodePort
   ports:
     - port: 9080
       targetPort: 9080
+      nodePort: 32210
       protocol: TCP
 ---
 # *************************** DB-PROXY ***************************
@@ -116,8 +83,6 @@ spec:
       labels:
         app: db-proxy
     spec:
-      nodeSelector:
-        kubeiaas/ctl: "true"
       containers:
         - name: db-proxy
           # [ATTENTION] -------------------------------------------- CHECK VERSION!
@@ -137,8 +102,9 @@ spec:
               mountPath: /db
       volumes:
         - name: sqlite-data
-          hostPath:
+          nfs:
             path: /usr/local/kubeiaas/sqlite
+            server: 192.168.33.7
 ---
 apiVersion: v1
 kind: Service
@@ -170,8 +136,6 @@ spec:
       labels:
         app: sqlite-tunnel
     spec:
-      nodeSelector:
-        kubeiaas/ctl: "true"
       containers:
         - name: sqlite-tunnel
           image: registry.cn-beijing.aliyuncs.com/kubeiaas/sqlite-tunnel:1.0
@@ -186,7 +150,8 @@ spec:
               mountPath: /db
       volumes:
         - name: sqlite-db
-          hostPath:
+          nfs:
+            server: 192.168.33.7
             path: /usr/local/kubeiaas/sqlite
 ---
 # *************************** IAAS-AGENT ***************************
@@ -204,8 +169,6 @@ spec:
       labels:
         app: iaas-agent
     spec:
-      nodeSelector:
-        kubeiaas/node: "true"
       hostPID: true
       hostIPC: true
       initContainers:
@@ -288,11 +251,6 @@ spec:
                 configMapKeyRef:
                   name: iaas-config
                   key: nodes.dhcp
-            - name: VNC_NODE
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nodes.vnc
             - name: NFS_NODE
               valueFrom:
                 configMapKeyRef:
@@ -351,8 +309,6 @@ spec:
       labels:
         app: iaas-novnc
     spec:
-      nodeSelector:
-        kubeiaas/vnc: "true"
       containers:
         - name: iaas-novnc
           command: [ "sh" ]
@@ -369,8 +325,9 @@ spec:
               mountPath: /usr/local/vnc/token
       volumes:
         - name: novnc-token
-          hostPath:
+          nfs:
             path: /usr/local/kubeiaas/vnc/token
+            server: 192.168.33.7
 ---
 apiVersion: v1
 kind: Service
@@ -403,8 +360,6 @@ spec:
       labels:
         app: image-operator
     spec:
-      nodeSelector:
-        kubeiaas/img: "true"
       containers:
         - name: image-operator
           command: ["sh"]
@@ -429,8 +384,9 @@ spec:
               mountPath: /host-images
       volumes:
         - name: host-image
-          hostPath:
+          nfs:
             path: /usr/local/kubeiaas/data/images
+            server: 192.168.33.7
 ---
 apiVersion: v1
 kind: Service
@@ -462,8 +418,6 @@ spec:
       labels:
         app: resource-operator
     spec:
-      nodeSelector:
-        kubeiaas/ctl: "true"
       containers:
         - name: resource-operator
           command: ["sh"]

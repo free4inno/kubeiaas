@@ -18,6 +18,7 @@ import javax.annotation.Resource;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class ServiceOpenAPI {
     @ResponseBody
     public String queryService() {
         log.info("queryService ==== start ====");
-        Map<String, Map<String, ServiceStatusEnum>> resMap = serviceConfig.getSvc();
+        Map<String, List<String>> resMap = serviceConfig.getSvc();
         log.info("queryService ==== end ====");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }

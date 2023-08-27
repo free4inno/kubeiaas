@@ -40,7 +40,7 @@ public class HostConfig {
     private final Map<String ,String> roleNodes = new HashMap<>();
     HostConfig() {
         roleNodes.put(HostConstants.ROLE_DHCP, System.getenv("DHCP_NODE"));
-        roleNodes.put(HostConstants.ROLE_VNC, System.getenv("VNC_NODE"));
+        roleNodes.put(HostConstants.ROLE_VNC, System.getenv("NFS_NODE"));
         roleNodes.put(HostConstants.ROLE_NFS, System.getenv("NFS_NODE"));
     }
 
