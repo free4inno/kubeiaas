@@ -8,10 +8,7 @@ import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
-import kubeiaas.iaascore.request.volume.AttachVolumeForm;
-import kubeiaas.iaascore.request.volume.CreateVolumeForm;
-import kubeiaas.iaascore.request.volume.DeleteVolumeForm;
-import kubeiaas.iaascore.request.volume.EditVolumeForm;
+import kubeiaas.iaascore.request.volume.*;
 import kubeiaas.iaascore.response.*;
 import kubeiaas.iaascore.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +44,34 @@ public class VolumeOpenAPI {
         Volume newVolume = volumeService.createDataVolume(f.getName(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
         log.info("create ==== end ====");
         return JSON.toJSONString(BaseResponse.success(newVolume));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESIZE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String resizeSystemVolume(@Valid @RequestBody ResizeVolumeForm f) throws VolumeException, BaseException {
+        log.info("resize system volume ==== start ====");
+        String result = volumeService.resizeSystemVolume(f.getVolumeUuid(), f.getDiskSize());
+        if (result.equals(ResponseMsgConstants.SUCCESS)) {
+            log.info("resize system volume ==== end ====");
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.info("resize system volume ==== error ====");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESIZE_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String resizeDataVolume(@Valid @RequestBody ResizeVolumeForm f) throws VolumeException, BaseException {
+        log.info("resize data volume ==== start ====");
+        String result = volumeService.resizeDataVolume(f.getVolumeUuid(), f.getDiskSize());
+        if (result.equals(ResponseMsgConstants.SUCCESS)) {
+            log.info("resize data volume ==== end ====");
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.info("resize data volume ==== error ====");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+        }
     }
 
     /**
@@ -149,9 +174,14 @@ public class VolumeOpenAPI {
     @ResponseBody
     public String edit(@Valid @RequestBody EditVolumeForm f) throws BaseException {
         log.info("edit ==== start ====");
-        Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription());
-        log.info("edit ==== end ====");
-        return JSON.toJSONString(BaseResponse.success(volume));
+        Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription(), f.getDiskSize());
+        if (volume != null) {
+            log.info("edit ==== end ====");
+            return JSON.toJSONString(BaseResponse.success(volume));
+        } else {
+            log.info("edit ==== error ====");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+        }
     }
 
     /**

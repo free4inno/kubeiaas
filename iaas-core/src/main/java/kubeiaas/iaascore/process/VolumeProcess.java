@@ -117,6 +117,24 @@ public class VolumeProcess {
         AgentConfig.clearSelectedHost(volumeUuid);
     }
 
+    public void resizeSystemVolume(Volume volume, int diskSize) throws VolumeException {
+        log.info("resizeSystemVolume ==== start ====  volumeUuid: " + volume.getUuid());
+        if (!volumeScheduler.resizeSystemVolume(volume.getProviderLocation(), volume.getUuid(), diskSize)) {
+            throw new VolumeException(volume, "ERROR: resize system volume:" + volume.getUuid() + " failed!");
+        }
+        AgentConfig.clearSelectedHost(volume.getUuid());
+        log.info("resizeSystemVolume ==== end ==== volumeUuid:" + volume.getUuid());
+    }
+
+    public void resizeDataVolume(Volume volume, int diskSize) throws VolumeException {
+        log.info("resizeDataVolume ==== start ====  volumeUuid: " + volume.getUuid());
+        if (!volumeScheduler.resizeDataVolume(volume.getProviderLocation(), volume.getUuid(), diskSize)) {
+            throw new VolumeException(volume, "ERROR: resize data volume:" + volume.getUuid() + " failed!");
+        }
+        AgentConfig.clearSelectedHost(volume.getUuid());
+        log.info("resizeDataVolume ==== end ==== volumeUuid:" + volume.getUuid());
+    }
+
     public void deleteSystemVolume(String vmUuid) throws BaseException {
         log.info("deleteVolume ==== start ==== vmUuid: " + vmUuid);
         List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);

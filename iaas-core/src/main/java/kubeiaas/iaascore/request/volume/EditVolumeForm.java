@@ -15,4 +15,5 @@ public class EditVolumeForm {
 
     private String name;
     private String description;
+    private Integer diskSize;
 }

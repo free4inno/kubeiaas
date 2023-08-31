@@ -156,6 +156,30 @@ public class VolumeScheduler {
         }
     }
 
+    public boolean resizeSystemVolume(String volumePath, String volumeUuid, int diskSize){
+        log.info("resizeSystemVolume ==== start ====  volumeUuid: " + volumeUuid);
+        if (volumeController.resizeSystemVolume(getSelectedUri(volumeUuid), volumePath,
+                volumeUuid, diskSize).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("resizeSystemVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else {
+            log.info("resizeSystemVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
+    public boolean resizeDataVolume(String volumePath, String volumeUuid, int diskSize){
+        log.info("resizeDataVolume ==== start ====  volumeUuid: " + volumeUuid);
+        if (volumeController.resizeDataVolume(getSelectedUri(volumeUuid), volumePath,
+                volumeUuid, diskSize).equals(ResponseMsgConstants.SUCCESS)){
+            log.info("resizeDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+            return true;
+        }else {
+            log.info("resizeDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            return false;
+        }
+    }
+
     public boolean deleteSystemVolume(String vmUuid, String volumeUuid, String volumePath){
         log.info("deleteSysVolume ==== start ====  volumeUuid: " + volumeUuid);
         //删除Linux主机中的物理硬盘

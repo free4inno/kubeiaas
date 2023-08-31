@@ -38,4 +38,7 @@ public class VolumeConstants {
     public static final String TAP_PREFIX = "v_";
     public static final String VOLUME_DEVICE_CDROM = "cdrom";
     public static final String VOLUME_DEVICE_DISK = "disk";
+
+    // resize
+    public static final String SHRINK_OPTION = "--shrink";
 }

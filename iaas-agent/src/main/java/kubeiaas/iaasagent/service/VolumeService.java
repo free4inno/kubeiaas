@@ -119,6 +119,59 @@ public class VolumeService {
         return true;
     }
 
+    public boolean resizeVolume(String volumePath, String volumeUuid, int newSize) {
+        log.info("resizeVolume ==== start ==== volumePath: " + volumePath + " volumeUuid: " + volumeUuid + " newSize: " + newSize);
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        log.info("Current volume: " + volume);
+        if (newSize <= 0) {
+            return false;
+        }
+        int sizeDelta = newSize - volume.getSize();
+
+        // 1. Get full path of volume
+        String volumeFullPath = PathUtils.genFullPath(volumePath);
+
+        // 2. Check if the volume exists
+        if (FileUtils.isEmptyString(volumePath)) {
+            log.error("Lack of volumePath Params :" + volumePath);
+            return false;
+        }
+        if (!FileUtils.exists(volumeFullPath)) {
+            log.error("Resize non-existent data volume: " + volumeFullPath);
+            volume.setStatus(VolumeStatusEnum.DELETED);
+            tableStorage.volumeSave(volume);
+            return false;
+        }
+
+        // 3. Resize volume
+        String command = String.format(
+                VolumeConfig.RESIZE_VOLUME_CMD,
+                sizeDelta > 0 ? "": VolumeConstants.SHRINK_OPTION,
+                volumeFullPath,
+                newSize
+        );
+        log.info("Resize volume command: " + command);
+        if (!ShellUtils.run(command)) {
+            log.error("Resize volume failed");
+            return false;
+        }
+
+        // 4. Verify volume size
+        String volumeSize = ShellUtils.getCmd(String.format(VolumeConfig.QUERY_VOLUME_VIRTUAL_SIZE, volumeFullPath));
+        // Since getCmd returns not null value, we can use equals directly
+        if (!volumeSize.equals(String.valueOf(newSize))) {
+            log.error("Resize volume failed");
+            return false;
+        }
+
+        // 5. Update volume size
+        volume.setSize(newSize);
+        tableStorage.volumeSave(volume);
+        log.info("resizeVolume ==== end ==== volume size: " + newSize);
+
+        return true;
+    }
+
     public boolean deleteVolume(String volumeUuid, String volumePath) {
         log.info("deleteVolume ==== start ==== volumePath: " + volumePath);
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);

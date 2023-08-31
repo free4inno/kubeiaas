@@ -59,6 +59,38 @@ public class VolumeController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.RESIZE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String resizeSystemVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize) {
+        log.info("resizeSystemVolume ==== " + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        if (volumeService.resizeVolume(volumePath, volumeUuid, diskSize)) {
+            log.info("resizeSystemVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("resizeSystemVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.RESIZE_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String resizeDataVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize) {
+        log.info("resizeDataVolume ==== " + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        if (volumeService.resizeVolume(volumePath, volumeUuid, diskSize)) {
+            log.info("resizeDataVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("resizeDataVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteSystemVolume(

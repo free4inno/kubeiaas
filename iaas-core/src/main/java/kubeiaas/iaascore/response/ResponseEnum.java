@@ -22,6 +22,7 @@ public enum ResponseEnum {
     VOLUME_DELETE_ERROR(202.11f,"云硬盘删除失败"),
     VOLUME_ATTACH_ERROR(202.12f,"云硬盘挂载失败"),
     VOLUME_DETACH_ERROR(202.13f,"云硬盘卸载失败"),
+    VOLUME_RESIZE_ERROR(202.14f, "云硬盘容量修改失败"),
     IMAGE_SAVE_ERROR(203.01f,"云镜像保存失败"),
     IMAGE_DELETE_ERROR(203.02f,"云镜像删除失败"),
     DEVICE_ATTACH_ERROR(204.01f,"设备挂载失败"),

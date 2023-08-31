@@ -1,8 +1,10 @@
 package kubeiaas.iaascore.service;
 
+import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
@@ -78,6 +80,48 @@ public class VolumeService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    public String resizeSystemVolume(String volumeUuid, Integer diskSize) throws VolumeException, BaseException {
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        /* -----1. check volume and vm status ----
+         */
+        if (!isAttachedVmStopped(volume)) {
+            log.error("ERR: VM is not STOPPED! You can't resize a running VM!");
+            return ResponseMsgConstants.FAILED;
+        }
+
+        /* -----2. choose host ----
+        Select the host where the Volume to be resized
+         */
+        resourceProcess.selectHostByVolumeUuid(volumeUuid);
+
+        /* -----3. resize data Volume ----
+         */
+        volumeProcess.resizeSystemVolume(volume, diskSize);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String resizeDataVolume(String volumeUuid, Integer diskSize) throws VolumeException, BaseException {
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        /* -----1. check volume and vm status ----
+        */
+        if (!isAttachedVmStopped(volume)) {
+            log.error("ERR: VM is not STOPPED! You can't resize a running VM!");
+            return ResponseMsgConstants.FAILED;
+        }
+
+        /* -----2. choose host ----
+        Select the host where the Volume to be resized
+         */
+        resourceProcess.selectHostByVolumeUuid(volumeUuid);
+
+        /* -----3. resize data Volume ----
+        */
+        volumeProcess.resizeDataVolume(volume, diskSize);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
     public String attachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
         /* -----1. choose host ----
         Select the host where the VM to be attached
@@ -127,7 +171,7 @@ public class VolumeService {
      * 编辑基本信息
      * 支持字段：名称、描述
      */
-    public Volume editVolume(String volumeUuid, String name, String description) throws BaseException {
+    public Volume editVolume(String volumeUuid, String name, String description, Integer diskSize) throws BaseException {
         // 1. find Volume
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         if (volume == null) {
@@ -136,6 +180,22 @@ public class VolumeService {
 
         // 2. check is edit changed
         boolean editFlag = false;
+        if (diskSize != null && diskSize > 0 && !diskSize.equals(volume.getSize())) {
+            log.info("INFO: resize volume start!");
+            try {
+                if (resizeDataVolume(volumeUuid, diskSize).equals(ResponseMsgConstants.FAILED)) {
+                    log.info("INFO: resize volume failed!");
+                    return null;
+                } else {
+                    log.info("INFO: resize volume success!");
+                }
+            } catch (VolumeException e) {
+                log.info("INFO: resize volume failed!");
+                return null;
+            }
+            volume.setSize(diskSize);
+            editFlag = true;
+        }
         if (name != null && !name.isEmpty() && !name.equals(volume.getName())) {
             volume.setName(name);
             editFlag = true;
@@ -214,6 +274,16 @@ public class VolumeService {
         List<Volume> volumeList = volumePage.getContent();
         volumePage.setContent(volumeProcess.buildVolumeList(volumeList));
         return volumePage;
+    }
+
+    private boolean isAttachedVmStopped(Volume volume) {
+        log.info("volume instanceUuid: " + volume.getInstanceUuid());
+        if (volume.getInstanceUuid() != null && !volume.getInstanceUuid().isEmpty()) {
+            Vm vm = tableStorage.vmQueryByUuid(volume.getInstanceUuid());
+            log.info("vm status: " + vm.getStatus());
+            return vm.getStatus().equals(VmStatusEnum.STOPPED);
+        }
+        return true;
     }
 
 }

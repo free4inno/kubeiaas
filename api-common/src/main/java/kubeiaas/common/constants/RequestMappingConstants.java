@@ -27,6 +27,7 @@ public class RequestMappingConstants {
     /* =============== action =============== */
     public static final String TEST = "test";
     public static final String CREATE = "create";
+    public static final String RESIZE = "resize";
     public static final String DELETE = "delete";
     public static final String ATTACH = "attach";
     public static final String DETACH = "detach";
@@ -98,6 +99,8 @@ public class RequestMappingConstants {
     // >>> Volume Controller <<<
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
     public static final String CREATE_DATA_VOLUME = "create_data_volume";
+    public static final String RESIZE_SYSTEM_VOLUME = "resize_system_volume";
+    public static final String RESIZE_DATA_VOLUME = "resize_data_volume";
     public static final String DELETE_SYSTEM_VOLUME = "delete_system_volume";
     public static final String DELETE_DATA_VOLUME = "delete_data_volume";
     public static final String ATTACH_DATA_VOLUME = "attach_data_volume";

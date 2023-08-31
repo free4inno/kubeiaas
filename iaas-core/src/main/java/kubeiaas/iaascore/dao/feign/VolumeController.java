@@ -32,6 +32,22 @@ public interface VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.RESIZE_SYSTEM_VOLUME)
+    @ResponseBody
+    String resizeSystemVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.RESIZE_DATA_VOLUME)
+    @ResponseBody
+    String resizeDataVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize);
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DELETE_SYSTEM_VOLUME)
     @ResponseBody
     String deleteSystemVolume(

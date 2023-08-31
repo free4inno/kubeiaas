@@ -59,6 +59,7 @@ public class RequestParamConstants {
     public static final String EXTRA_SIZE = "extra_size";
     public static final String IMAGE_PATH = "image_path";
     public static final String VOLUME_PATH = "volume_path";
+    public static final String VOLUME_TYPE = "volume_type";
 
     /* ===== HOST ===== */
     public static final String HOST_OBJECT = "host_object";
