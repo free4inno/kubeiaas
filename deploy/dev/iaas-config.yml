@@ -16,4 +16,4 @@ data:
 
   # -------- 网络配置 --------
   # MACV / Linux / OVS
-  network.bridge.type: "Linux"
+  network.bridge.type: "MACV"
