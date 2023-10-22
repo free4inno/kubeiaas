@@ -104,15 +104,16 @@ public class VolumeProcess {
     }
 
     public void createDataVolume(Volume newVolume) throws VolumeException {
-        log.info("createVm -- Volume");
-
         String volumeUuid = newVolume.getUuid();
         if (volumeUuid.isEmpty()) {
-            throw new VolumeException(newVolume,"ERROR: create Data volume failed! (pre error)");
+            log.error("ERROR: create Data volume failed! error in preCreate");
+            throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in preCreate");
         }
         int diskSize = newVolume.getSize();
+        log.info(String.format("invoke iaas-agent -- volumeUuid: %s", volumeUuid));
         if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, diskSize)){
-            throw new VolumeException(newVolume, "ERROR create Data volume:"+newVolume.getUuid()+" failed!");
+            log.error(String.format("ERROR: create Data volume failed! error in agent -- volumeUuid: %s", volumeUuid));
+            throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in agent");
         }
         AgentConfig.clearSelectedHost(volumeUuid);
     }
@@ -204,11 +205,12 @@ public class VolumeProcess {
             String name,
             String description,
             String hostUUid,
-            Integer diskSize
-    ){
+            Integer diskSize){
         String volumeUuid = UuidUtils.getRandomUuid();
         Volume newVolume = new Volume();
         newVolume.setUuid(volumeUuid);
+        log.info(String.format("volume uuid allocated -- volumeUuid: %s", volumeUuid));
+
         newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
         if (name == null || name.isEmpty()) {
             newVolume.setName(volumeUuid);
@@ -222,9 +224,12 @@ public class VolumeProcess {
         newVolume.setUsageType(VolumeUsageEnum.DATA);
         newVolume.setFormatType(VolumeFormatEnum.QCOW2);
         newVolume.setStatus(VolumeStatusEnum.CREATING);
+        log.info(String.format("volume set status -- status: %s", volumeUuid));
 
         // save into DB
         newVolume = tableStorage.volumeSave(newVolume);
+        log.info(String.format("volume created in DB -- volumeUuid: %s", volumeUuid));
+
         return newVolume;
     }
 

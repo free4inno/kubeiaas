@@ -40,9 +40,9 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String create(@Valid @RequestBody CreateVolumeForm f) throws VolumeException {
-        log.info("create ==== start ====");
+        log.info("-- start -- createDataVolume");
         Volume newVolume = volumeService.createDataVolume(f.getName(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
-        log.info("create ==== end ====");
+        log.info("-- end -- createDataVolume");
         return JSON.toJSONString(BaseResponse.success(newVolume));
     }
 

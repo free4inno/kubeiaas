@@ -131,16 +131,19 @@ public class ResourceProcess {
             selectedHost = resourceScheduler.selectHostByHostOperator(HostSelectStrategyConstants.ROUND_ROBIN);
         }
         if (selectedHost == null) {
-            throw new VolumeException(newVolume,"ERROR: no available host.");
+            log.error("ERROR: resource operator failed to select host.");
+            throw new VolumeException(newVolume, "ERROR: no available host.");
         }
-        log.info("selected host: " + selectedHost.getName());
+        log.info(String.format("volume host selected -- hostName: %s", selectedHost.getName()));
+
         // set scheduler of iaas-agent
         AgentConfig.setSelectedHost(newVolume.getUuid(), selectedHost);
+
         // save into DB
         newVolume.setHostUuid(selectedHost.getUuid());
         newVolume = tableStorage.volumeSave(newVolume);
+        log.info("DB updated -- volume host info");
 
-        log.info("createVolume -- Resource Operator success!");
         return newVolume;
     }
 

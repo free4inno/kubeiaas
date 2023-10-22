@@ -145,15 +145,8 @@ public class VolumeScheduler {
     }
 
     public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
-        log.info("createDataVolume ==== start ====  volumeUuid: " + volumeUuid);
-        if (volumeController.createDataVolume(getSelectedUri(volumeUuid), volumePath,
-                volumeUuid, extraSize).equals(ResponseMsgConstants.SUCCESS)){
-            log.info("createDataVolume ==== end ====  volumeUuid: " + volumeUuid);
-            return true;
-        }else {
-            log.info("createDataVolume ==== error ====  volumeUuid: " + volumeUuid);
-            return false;
-        }
+        return volumeController.createDataVolume(getSelectedUri(volumeUuid), volumePath,
+                volumeUuid, extraSize).equals(ResponseMsgConstants.SUCCESS);
     }
 
     public boolean resizeSystemVolume(String volumePath, String volumeUuid, int diskSize){
