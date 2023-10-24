@@ -43,18 +43,18 @@ public class VolumeService {
         // ---- 1. pre create Volume ----
         // Generate and Set basic info of volume.
         // 数据库预处理：设置基础参数，保存云硬盘信息
-        log.info("STEP 1. create volume in DB");
+        log.info("STEP 1: create volume in DB");
         Volume newVolume= volumeProcess.preCreateVolume(name, description, hostUuid, diskSize);
 
         // ---- 2. check host ----
         // Use Resource Operator to allocate Host
         // 资源调度：分配宿主机
-        log.info("STEP 2. select and check host");
+        log.info("STEP 2: select and check host");
         newVolume = resourceProcess.createVolumeOperate(newVolume);
 
         // ---- 3. create volume ----
         // 创建虚拟机数据盘
-        log.info(String.format("STEP 3. create volume on host by agent -- volumeUuid: %s, hostUuid: %s",
+        log.info(String.format("STEP 3: create volume on host by agent -- volumeUuid: %s, hostUuid: %s",
                 newVolume.getUuid(), newVolume.getHostUuid()));
         volumeProcess.createDataVolume(newVolume);
 

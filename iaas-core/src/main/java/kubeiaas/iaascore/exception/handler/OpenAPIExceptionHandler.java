@@ -36,7 +36,7 @@ public class OpenAPIExceptionHandler {
         if (e instanceof BaseException) {
             // ----- base ------
             BaseException baseE = (BaseException) e;
-            log.error(baseE.getMsg());
+            log.error(String.format("-- end -- error, %s", baseE.getMsg()));
             return BaseResponse.error(baseE.getResEnum(), baseE.getMsg());
 
         } else if (e instanceof VmException){
@@ -45,7 +45,7 @@ public class OpenAPIExceptionHandler {
             Vm vm = (vmE.getVm());
             vm.setStatus(VmStatusEnum.ERROR);
             tableStorage.vmSave(vm);
-            log.error(vmE.getMsg());
+            log.error(String.format("-- end -- error, %s", vmE.getMsg()));
             return BaseResponse.error(vmE.getResEnum(), vmE.getMsg());
 
         } else if (e instanceof VolumeException){
@@ -54,7 +54,7 @@ public class OpenAPIExceptionHandler {
             Volume volume = volE.getVolume();
             volume.setStatus(VolumeStatusEnum.ERROR);
             tableStorage.volumeSave(volume);
-            log.error(volE.getMsg());
+            log.error(String.format("-- end -- error, %s", volE.getMsg()));
             return BaseResponse.error(volE.getResEnum(), volE.getMsg());
 
         } else if (e instanceof ConstraintViolationException ||

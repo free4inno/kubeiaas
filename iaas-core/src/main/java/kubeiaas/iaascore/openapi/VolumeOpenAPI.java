@@ -42,20 +42,20 @@ public class VolumeOpenAPI {
     public String create(@Valid @RequestBody CreateVolumeForm f) throws VolumeException {
         log.info("-- start -- createDataVolume");
         Volume newVolume = volumeService.createDataVolume(f.getName(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
-        log.info("-- end -- createDataVolume");
+        log.info("-- end -- createDataVolume -- success");
         return JSON.toJSONString(BaseResponse.success(newVolume));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESIZE_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String resizeSystemVolume(@Valid @RequestBody ResizeVolumeForm f) throws VolumeException, BaseException {
-        log.info("resize system volume ==== start ====");
+        log.info("-- start -- resizeSystemVolume");
         String result = volumeService.resizeSystemVolume(f.getVolumeUuid(), f.getDiskSize());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("resize system volume ==== end ====");
+            log.info("-- end -- resizeSystemVolume -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("resize system volume ==== error ====");
+            log.warn("-- end -- resizeSystemVolume -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
         }
     }

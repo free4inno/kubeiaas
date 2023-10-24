@@ -123,6 +123,7 @@ public class ResourceProcess {
         Host selectedHost;
         String hostUUid = newVolume.getHostUuid();
 
+        log.info("-> invoke resourceScheduler -- select host");
         if (hostUUid != null && !hostUUid.isEmpty()) {
             // 指定 host：检查可用性
             selectedHost = resourceScheduler.vmSelectHostByHostUuid(hostUUid);
@@ -130,6 +131,8 @@ public class ResourceProcess {
             // 未指定 host：主动选择
             selectedHost = resourceScheduler.selectHostByHostOperator(HostSelectStrategyConstants.ROUND_ROBIN);
         }
+        log.info("<- invoke resourceScheduler -- done");
+
         if (selectedHost == null) {
             log.error("ERROR: resource operator failed to select host.");
             throw new VolumeException(newVolume, "ERROR: no available host.");
@@ -141,8 +144,9 @@ public class ResourceProcess {
 
         // save into DB
         newVolume.setHostUuid(selectedHost.getUuid());
+        log.info("-> invoke DB -- update volume host info");
         newVolume = tableStorage.volumeSave(newVolume);
-        log.info("DB updated -- volume host info");
+        log.info("<- invoke DB -- done");
 
         return newVolume;
     }

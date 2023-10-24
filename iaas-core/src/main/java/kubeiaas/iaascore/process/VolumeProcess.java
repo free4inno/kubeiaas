@@ -110,11 +110,12 @@ public class VolumeProcess {
             throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in preCreate");
         }
         int diskSize = newVolume.getSize();
-        log.info(String.format("invoke iaas-agent -- volumeUuid: %s", volumeUuid));
+        log.info(String.format("-> invoke iaas-agent -- createDataVolume, volumeUuid: %s", volumeUuid));
         if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, diskSize)){
             log.error(String.format("ERROR: create Data volume failed! error in agent -- volumeUuid: %s", volumeUuid));
             throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in agent");
         }
+        log.info("<- invoke iaas-agent -- done");
         AgentConfig.clearSelectedHost(volumeUuid);
     }
 
@@ -209,7 +210,7 @@ public class VolumeProcess {
         String volumeUuid = UuidUtils.getRandomUuid();
         Volume newVolume = new Volume();
         newVolume.setUuid(volumeUuid);
-        log.info(String.format("volume uuid allocated -- volumeUuid: %s", volumeUuid));
+        log.info(String.format("uuid allocated -- volumeUuid: %s", volumeUuid));
 
         newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
         if (name == null || name.isEmpty()) {
@@ -224,11 +225,12 @@ public class VolumeProcess {
         newVolume.setUsageType(VolumeUsageEnum.DATA);
         newVolume.setFormatType(VolumeFormatEnum.QCOW2);
         newVolume.setStatus(VolumeStatusEnum.CREATING);
-        log.info(String.format("volume set status -- status: %s", volumeUuid));
+        log.info(String.format("set status -- status: %s", volumeUuid));
 
         // save into DB
+        log.info(String.format("-> invoke DB -- volume create, volumeUuid: %s", volumeUuid));
         newVolume = tableStorage.volumeSave(newVolume);
-        log.info(String.format("volume created in DB -- volumeUuid: %s", volumeUuid));
+        log.info("<- invoke DB -- done");
 
         return newVolume;
     }
