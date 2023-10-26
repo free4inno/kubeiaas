@@ -58,13 +58,15 @@ public class HostConfig {
 
     public void hostInitialize() {
         // get host resource config
-        log.info("hostIp:" + hostIp + ", hostName:" + hostName);
+        log.info(String.format("hostInitialize -- hostIp: %s, hostName: %s", hostIp, hostName));
 
         // check is this host registered in DB
+        log.info("-> invoke DB -- hostQueryByIp");
         Host host = tableStorage.hostQueryByIp(hostIp);
+        log.info("-> invoke DB -- done");
         if (host == null) {
             // do register
-            log.info("this host is not registered! Start to register.");
+            log.debug("this host is not registered! Start to register.");
             host = new Host();
             host.setIp(hostIp);
             host.setName(hostName);
@@ -93,11 +95,13 @@ public class HostConfig {
             host.setUuid(UuidUtils.getRandomUuid());
 
             // save into DB
+            log.info("-> invoke DB -- hostSave");
             host = tableStorage.hostSave(host);
-            log.info(JSON.toJSONString(host));
+            log.info("<- invoke DB -- done");
+            log.debug(JSON.toJSONString(host));
 
         } else {
-            log.info("this host is registered.");
+            log.debug("this host is registered.");
         }
 
         // - set roles
@@ -115,14 +119,16 @@ public class HostConfig {
         totalSuccessFlag = hostService.getEnvPrepareRes(roleList);
         if (totalSuccessFlag) {
             host.setStatus(HostStatusEnum.READY);
-            log.info("== host check done, total success. == ");
+            log.debug("== host check done, total success. == ");
         } else {
             host.setStatus(HostStatusEnum.ERROR);
-            log.error("== host check done, total failed! == ");
+            log.error(String.format("ERROR: host check done, total failed! "));
         }
 
         // - save
+        log.info("-> invoke DB -- hostSave");
         tableStorage.hostSave(host);
+        log.info("<- invoke DB -- done");
         thisHost = host;
     }
 

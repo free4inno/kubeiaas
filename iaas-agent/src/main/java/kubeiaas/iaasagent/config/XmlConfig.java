@@ -44,35 +44,26 @@ public class XmlConfig {
     }
 
     public String getVolumeDevice(Volume volume) {
-        log.info("getVolumeDevice ---- start ----");
         String res = libvirtConfig.volumeToDisk(volume);
-        log.info("getVolumeDevice ---- end ----");
         return res;
     }
 
     public String getUsbDevice(Device device) {
-        log.info("getUsbDevice ---- start ----");
         String res = libvirtConfig.usbToDevice(device);
-        log.info("getUsbDevice ---- end ----");
         return res;
     }
 
     public String getPciDevice(Device device) {
-        log.info("getPCIDevice ---- start ----");
         String res = libvirtConfig.pciToDevice(device);
-        log.info("getPCIDevice ---- end ----");
         return res;
     }
 
     public String getIpDevice(IpUsed ip) {
-        log.info("getIpDevice ---- start ----");
         String res = libvirtConfig.ipToNetwork(ip);
-        log.info("getIpDevice ---- end ----");
         return res;
     }
 
     public String modifyXml(String originXML, int newCores, int newMemory) {
-        log.info("modifyXml ---- start ----");
         //1、判断newCores是否为空，不为空再进行修改之后返回String类型的修改结果
         String resultXml = null;
         Document document = stringToDocument(originXML);
@@ -90,13 +81,11 @@ public class XmlConfig {
             currentMemoryElement.setTextContent(memoryString);
         }
         resultXml = documentToString(document);
-        log.info("modifyXml ---- end ----");
         return resultXml;
     }
 
     // ABANDON: no need to edit XML manually.
     public String attachDisk(String originXML, Volume volume) {
-        log.info("attachDisk ---- start ----");
         //1、根据volume信息生成一段xml信息，然后插入到originXml disk之后
         String resultXml = null;
         Document document = stringToDocument(originXML);
@@ -127,13 +116,11 @@ public class XmlConfig {
             nodeDrivers.appendChild(newDiskElement);
             resultXml = documentToString(document);
         }
-        log.info("attachDisk ---- end ----");
         return resultXml;
     }
 
     // ABANDON: no need to edit XML manually.
     public String detachDisk(String originXML, String uuid) {
-        log.info("detachDisk ---- start ----");
         String resultXml = null;
         Document document = stringToDocument(originXML);
         if (uuid != null) {
@@ -152,12 +139,10 @@ public class XmlConfig {
                 }
             }
         }
-        log.info("detachDisk ---- end ----");
         return resultXml;
     }
 
     public Document stringToDocument(String xml) {
-        log.info("stringToDocument ---- start ---- xml");
         StringReader stringReader = new StringReader(xml);
         InputSource inputSource = new InputSource(stringReader);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -168,12 +153,10 @@ public class XmlConfig {
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
-        log.info("stringToDocument ---- end ----");
         return document;
     }
 
     public String documentToString(Document doc) {
-        log.info("documentToString ---- start ---- xml");
         // XML转字符串
         String xmlStr = "";
         try {
@@ -184,19 +167,16 @@ public class XmlConfig {
             transformer.transform(source, result);
             xmlStr = writer.getBuffer().toString();
         } catch (TransformerException e) {
+            log.error(String.format("ERROR: documentToString error"));
             e.printStackTrace();
         }
-        log.info("documentToString ---- end ----");
         return xmlStr;
     }
 
     private String getVolumeDiskDevice(VolumeFormatEnum volumeType) {
-        log.info("getVolumeDiskDevice ---- start ----");
         if (volumeType.equals(VolumeFormatEnum.ISO)) {
-            log.info("getVolumeDiskDevice ---- end ---- ISO");
             return VolumeConstants.VOLUME_DEVICE_CDROM;
         }
-        log.info("getVolumeDiskDevice ---- end ---- not ISO");
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 

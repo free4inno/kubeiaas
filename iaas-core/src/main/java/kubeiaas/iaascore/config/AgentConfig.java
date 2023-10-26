@@ -80,7 +80,8 @@ public class AgentConfig {
     public static String getSelectedUri(String uuid) {
         Agent agent = selected_host_ip.get(uuid);
         if (agent == null || agent.isEmpty()) {
-            log.error("getSelectedUri -- no selected ip for " + uuid);
+            //log.error("getSelectedUri -- no selected ip for " + uuid);
+            log.error(String.format("getSelectedUri -- no selected ip for %s", uuid));
             return "";
         }
         return HTTP_URI + agent.getIp() + AGENT_PORT;
@@ -91,8 +92,11 @@ public class AgentConfig {
      */
     public String getDhcpUri() throws BaseException {
         // analyze from DB hostRoles.
+        log.info("-> invoke DB -- hostQueryByRole");
         Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_DHCP);
+        log.info("<- invoke DB -- done");
         if (host == null) {
+            log.error(String.format("ERROR: getDhcpUri error"));
             throw new BaseException("getDhcpUri -- dhcp host not found!");
         }
 
@@ -101,8 +105,11 @@ public class AgentConfig {
 
     public String getVncUri() throws BaseException {
         // analyze from DB hostRoles.
+        log.info("-> invoke DB -- hostQueryByRole");
         Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
+        log.info("<- invoke DB -- done");
         if (host == null) {
+            log.error(String.format("ERROR: getVncUri error"));
             throw new BaseException("getVncUri -- vnc host not found!");
         }
 

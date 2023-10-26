@@ -28,6 +28,7 @@ public class IaasAgentRegister {
         try {
             register.register(svcName, nodeName, System.currentTimeMillis());
         } catch (Exception e) {
+            log.error(String.format("ERROR: agentRegister error"));
             e.printStackTrace();
         }
     }

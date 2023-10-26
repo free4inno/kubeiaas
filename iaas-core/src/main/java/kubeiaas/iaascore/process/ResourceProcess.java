@@ -38,12 +38,15 @@ public class ResourceProcess {
      * @throws VmException VmException
      */
     public Vm createVmOperate(Vm newVm, int privateIpSegId, boolean needPublicIp, int publicIpSegId) throws VmException {
-        log.info("createVm -- 2. Resource Operator");
+        log.debug("createVm -- 2. Resource Operator");
 
         // 2.1. check image
         // available
+        log.info("-> invoke DB -- imageQueryByUuid");
         Image image = tableStorage.imageQueryByUuid(newVm.getImageUuid());
+        log.info("<- invoke DB -- done");
         if (image == null || image.getStatus() != ImageStatusEnum.AVAILABLE) {
+            log.error(String.format("ERROR: image not available!"));
             throw new VmException(newVm,"ERROR: image not available!");
         }
         // mem
@@ -66,27 +69,36 @@ public class ResourceProcess {
 
         if (hostUUid != null && !hostUUid.isEmpty()) {
             // 指定 host：检查可用性
+            log.info("-> invoke resourceScheduler -- vmSelectHostByAppoint");
             selectedHost = resourceScheduler.vmSelectHostByAppoint(newVm.getUuid(), hostUUid);
+            log.info("<- invoke resourceScheduler -- done");
         } else {
             // 未指定 host：主动选择
+            log.info("-> invoke resourceScheduler -- vmSelectHostByOperator");
             selectedHost = resourceScheduler.vmSelectHostByOperator(newVm.getUuid(), HostSelectStrategyConstants.ROUND_ROBIN);
+            log.info("<- invoke resourceScheduler -- done");
         }
         if (selectedHost == null) {
+            log.error(String.format("ERROR: no available host."));
             throw new VmException(newVm, "ERROR: no available host.");
         }
-        log.info("selected host: " + selectedHost.getName());
+        log.info(String.format("selected host: %s", selectedHost.getName()));
 
         // 2.3. check IP segment
         IpSegment privateIpSeg;
         if (privateIpSegId == -1) {
             // no select private ip
             // TODO: call resourceScheduler to alloc
+            log.error(String.format("ERROR: no available privateIpSeg."));
             throw new VmException(newVm, "ERROR: no available privateIpSeg.");
         } else {
             // check private host
+            log.info("-> invoke DB -- ipSegmentQueryById");
             privateIpSeg = tableStorage.ipSegmentQueryById(privateIpSegId);
+            log.info("<- invoke DB -- done");
             if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
                     || !privateIpSeg.getType().equals(IpTypeEnum.PRIVATE)) {
+                log.error(String.format("ERROR: not available privateIpSeg."));
                 throw new VmException(newVm, "ERROR: not available privateIpSeg.");
             }
         }
@@ -96,15 +108,19 @@ public class ResourceProcess {
             if (needPublicIp) {
                 // no select public ip
                 // TODO: call resourceScheduler to alloc
+                log.error(String.format("ERROR: no available publicIpSeg."));
                 throw new VmException(newVm, "ERROR: no available publicIpSeg.");
             } else {
-                log.info("-- no need public ip");
+                log.debug("-- no need public ip");
             }
         } else {
             // check public host
+            log.info("-> invoke DB -- ipSegmentQueryById");
             publicIpSeg = tableStorage.ipSegmentQueryById(publicIpSegId);
+            log.info("<- invoke DB -- done");
             if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
                     || !publicIpSeg.getType().equals(IpTypeEnum.PUBLIC)) {
+                log.error(String.format("ERROR: not available publicIpSeg."));
                 throw new VmException(newVm, "ERROR: not available publicIpSeg.");
             }
         }
@@ -113,9 +129,11 @@ public class ResourceProcess {
         AgentConfig.setSelectedHost(newVm.getUuid(), selectedHost);
         // save into DB
         newVm.setHostUuid(selectedHost.getUuid());
+        log.info("-> invoke DB -- vmSave");
         tableStorage.vmSave(newVm);
+        log.info("<- invoke DB -- done");
 
-        log.info("createVm -- 2. Resource Operator success!");
+        log.debug("createVm -- 2. Resource Operator success!");
         return newVm;
     }
 
@@ -123,18 +141,20 @@ public class ResourceProcess {
         Host selectedHost;
         String hostUUid = newVolume.getHostUuid();
 
-        log.info("-> invoke resourceScheduler -- select host");
         if (hostUUid != null && !hostUUid.isEmpty()) {
             // 指定 host：检查可用性
+            log.info("-> invoke resourceScheduler -- vmSelectHostByHostUuid");
             selectedHost = resourceScheduler.vmSelectHostByHostUuid(hostUUid);
+            log.info("<- invoke resourceScheduler -- done");
         } else {
             // 未指定 host：主动选择
+            log.info("-> invoke resourceScheduler -- selectHostByHostOperator");
             selectedHost = resourceScheduler.selectHostByHostOperator(HostSelectStrategyConstants.ROUND_ROBIN);
+            log.info("<- invoke resourceScheduler -- done");
         }
-        log.info("<- invoke resourceScheduler -- done");
 
         if (selectedHost == null) {
-            log.error("ERROR: resource operator failed to select host.");
+            log.error(String.format("ERROR: resource operator failed to select host."));
             throw new VolumeException(newVolume, "ERROR: no available host.");
         }
         log.info(String.format("volume host selected -- hostName: %s", selectedHost.getName()));
@@ -157,23 +177,29 @@ public class ResourceProcess {
     public void selectHostByVmUuid(String VmUuid) throws BaseException {
 
         // get Vm By VmUuid
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+        log.info("<- invoke DB -- done");
 
         // SelectHost
         Host selectedHost;
         String hostUUid = vm.getHostUuid();
         if (hostUUid != null && !hostUUid.isEmpty()) {
             // 获取Vm所在的Host
+            log.info("-> invoke resourceScheduler -- vmSelectHostByAppoint");
             selectedHost = resourceScheduler.vmSelectHostByAppoint(vm.getUuid(), hostUUid);
+            log.info("<- invoke resourceScheduler -- done");
         } else {
             // 若不存在，抛出服务器异常错误
+            log.error(String.format("ERROR: HostUuid error!"));
             throw new BaseException("Error: HostUuid error!");
         }
         if (selectedHost == null) {
+            log.error(String.format("ERROR: no available host."));
             throw new BaseException("ERROR: no available host.");
         }
 
-        log.info("selected host: " + selectedHost.getName());
+        log.info(String.format("selected host: %S", selectedHost.getName()));
         AgentConfig.setSelectedHost(vm.getUuid(), selectedHost);
     }
 
@@ -183,23 +209,29 @@ public class ResourceProcess {
     public void selectHostByVolumeUuid(String volumeUuid) throws BaseException {
 
         // get Volume By volumeUuid
+        log.info("-> invoke DB -- volumeQueryByUuid");
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        log.info("<- invoke DB -- done");
 
         // SelectHost
         Host selectedHost;
         String hostUUid = volume.getHostUuid();
         if (hostUUid != null && !hostUUid.isEmpty()) {
             // 获取Volume所在的Host
+            log.info("-> invoke resourceScheduler -- vmSelectHostByHostUuid");
             selectedHost = resourceScheduler.vmSelectHostByHostUuid(hostUUid);
+            log.info("<- invoke resourceScheduler -- done");
         } else {
             // 若不存在，抛出服务器异常错误
+            log.error(String.format("ERROR: HostUuid error!"));
             throw new BaseException("Error: HostUuid error!");
         }
         if (selectedHost == null) {
+            log.error(String.format("ERROR: no available host."));
             throw new BaseException("ERROR: no available host.");
         }
 
-        log.info("selected host: " + selectedHost.getName());
+        log.info(String.format("selected host: %s", selectedHost.getName()));
         AgentConfig.setSelectedHost(volume.getUuid(), selectedHost);
     }
 

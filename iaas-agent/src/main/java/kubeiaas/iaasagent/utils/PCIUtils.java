@@ -2,6 +2,7 @@ package kubeiaas.iaasagent.utils;
 
 import kubeiaas.common.bean.Device;
 import kubeiaas.common.enums.device.DeviceTypeEnum;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class PCIUtils {
 
     public static List<Device> getHostDevices () {
@@ -56,6 +58,7 @@ public class PCIUtils {
             }
             proc.destroy();
         } catch (Exception ex) {
+            log.error(String.format("ERROR: getHostDevices error"));
             ex.printStackTrace();
         }
         // close BufferedReader
@@ -63,6 +66,7 @@ public class PCIUtils {
             try {
                 br.close();
             } catch (Exception ex) {
+                log.error(String.format("ERROR: getHostDevices error, br != null"));
                 ex.printStackTrace();
             }
         }
@@ -71,6 +75,7 @@ public class PCIUtils {
             try {
                 is.close();
             } catch (Exception ex) {
+                log.error(String.format("ERROR: getHostDevices error, is != null"));
                 ex.printStackTrace();
             }
         }

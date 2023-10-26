@@ -61,8 +61,8 @@ public class LibvirtConfig {
         try {
             connect = new Connect(conStr);
         } catch (LibvirtException e) {
-            log.error("get virt connection error");
-            log.error(e.getMessage());
+            log.error(String.format("get virt connection error"));
+            log.error(String.format(e.getMessage()));
         }
         return connect;
     }
@@ -78,7 +78,7 @@ public class LibvirtConfig {
      * 三个方法有先后顺序，一个生效之后，则不执行剩下的步骤，所以更改时，一定注意先后顺序。
      */
     private static String getEmulatorLocation() {
-        log.info("execute \"whereis qemu-system-x86_64\" cmd ");
+        log.debug("execute \"whereis qemu-system-x86_64\" cmd ");
         String tempLocation = ShellUtils.getCmd("whereis qemu-system-x86_64");
         /* CentOS:
          *      qemu-system-x86_64: /usr/local/bin/qemu-system-x86_64
@@ -105,7 +105,9 @@ public class LibvirtConfig {
      * 在每次生产新的 XML 前刷新
      */
     private void refreshMaxCompute() {
+        log.info("-> invoke DB -- specConfigQueryAllByType");
         List<SpecConfig> confList = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VM_COMPUTE);
+        log.info("-> invoke DB -- done");
         if (CollectionUtils.isEmpty(confList)) {
             return;
         }
@@ -120,7 +122,7 @@ public class LibvirtConfig {
                     tempMaxCpu = Math.max(nowCpu, tempMaxCpu);
                     tempMaxMem = Math.max(nowMem, tempMaxMem);
                 } catch (Exception e) {
-                    log.warn("bad config value '{}'. {}", conf.getValue(), e.getMessage());
+                    log.warn(String.format("bad config value -- '{%s}'. {%s}", conf.getValue(), e.getMessage()));
                 }
             }
         }
@@ -139,7 +141,6 @@ public class LibvirtConfig {
             List<IpUsed> ips,
             int cpu,
             int memory) {
-        log.info("generateDesXML ---- start ----");
 
         // refresh MAX setting
         this.refreshMaxCompute();
@@ -243,7 +244,6 @@ public class LibvirtConfig {
                 .addAttribute("type", "address")
                 .addAttribute("address", "0.0.0.0");
 
-        log.info("generateDesXML ---- end ----");
         return document.asXML();
     }
 
@@ -253,14 +253,12 @@ public class LibvirtConfig {
      * TYPE 1: 截取部分，供外部类调用
      */
     public String ipToNetwork(IpUsed ip) {
-        log.info("ipToNetwork ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         ipToNetworkXml(ip, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("ipToNetwork ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -268,13 +266,12 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void ipToNetworkXml(IpUsed ip, Element devices) {
-        log.info("ipToNetworkXml ---- start ----");
         Element netInterface = devices.addElement("interface");
 
         switch (networkType) {
             case NETWORK_TYPE_LINUX:
                 // == Linux: target & device
-                log.info("---- NETWORK_TYPE: Linux (tap={})", getTap(ip.getMac()));
+                log.debug("---- NETWORK_TYPE: Linux (tap={})", getTap(ip.getMac()));
 
                 netInterface.addAttribute("type", "bridge");
                 // 设置基本网卡信息
@@ -290,7 +287,7 @@ public class LibvirtConfig {
 
             case NETWORK_TYPE_OVS:
                 // == OVS: virtualPort & type(OpenVSwitch)
-                log.info("---- NETWORK_TYPE: OVS");
+                log.debug("---- NETWORK_TYPE: OVS");
 
                 netInterface.addAttribute("type", "bridge");
                 // 设置基本网卡信息
@@ -307,7 +304,7 @@ public class LibvirtConfig {
             case NETWORK_TYPE_MACV:
             default:
                 // == MACV: macvlan & macvtap
-                log.info("---- NETWORK_TYPE: MACV");
+                log.debug("---- NETWORK_TYPE: MACV");
 
                 netInterface.addAttribute("type", "direct");
                 // 设置基本网卡信息
@@ -326,7 +323,6 @@ public class LibvirtConfig {
         netInterface.addElement("model").
                 addAttribute("type", "virtio");
 
-        log.info("ipToNetworkXml ---- end ----");
     }
 
     private String getTap(String str) {
@@ -340,14 +336,12 @@ public class LibvirtConfig {
      * TYPE 1: 截取部分，供外部类调用
      */
     public String volumeToDisk(Volume volume) {
-        log.info("volumeToDisk ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         volumeToDiskXml(volume, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("volumeToDisk ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -355,7 +349,6 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void volumeToDiskXml(Volume volume, Element devices) {
-        log.info("volumeToDiskXml ---- start ----");
         String volumeType = getVolumeDiskDevice(volume.getFormatType());
 
         Element disk = devices.addElement("disk")
@@ -377,7 +370,6 @@ public class LibvirtConfig {
                 .addAttribute("dev", volume.getMountPoint())
                 .addAttribute("bus", volume.getBus());
 
-        log.info("volumeToDiskXml ---- end ----");
     }
 
     private String getVolumeDiskDevice(VolumeFormatEnum volumeType) {
@@ -393,14 +385,12 @@ public class LibvirtConfig {
      * TYPE 1: 截取部分，供外部类调用
      */
     public String usbToDevice(Device device) {
-        log.info("usbToDevice ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         usbToDeviceXml(device, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("usbToDevice ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -408,7 +398,6 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void usbToDeviceXml(Device device, Element devices) {
-        log.info("usbToDeviceXml ---- start ----");
 
         Element hostdev = devices.addElement("hostdev")
                 .addAttribute("mode", "subsystem")
@@ -423,7 +412,6 @@ public class LibvirtConfig {
                 .addAttribute("bus", "0x" + Integer.toHexString(device.getBus()))
                 .addAttribute("device", "0x" + Integer.toHexString(device.getDev()));
 
-        log.info("usbToDeviceXml ---- end ----");
     }
 
     // ===== PCIE DEVICE ====================================================================================================
@@ -432,14 +420,12 @@ public class LibvirtConfig {
      * TYPE 1: 截取部分，供外部类调用
      */
     public String pciToDevice(Device device) {
-        log.info("pciToDevice ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         pciToDeviceXml(device, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("pciToDevice ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -447,7 +433,6 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void pciToDeviceXml(Device device, Element devices) {
-        log.info("pciToDeviceXml ---- start ----");
 
         Element hostdev = devices.addElement("hostdev")
                 .addAttribute("mode", "subsystem")
@@ -464,6 +449,5 @@ public class LibvirtConfig {
         Element driver = hostdev.addElement("driver")
                 .addAttribute("name", "vfio");
 
-        log.info("pciToDeviceXml ---- end ----");
     }
 }

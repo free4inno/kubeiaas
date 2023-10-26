@@ -20,53 +20,60 @@ public class VncProcess {
     private VncScheduler vncScheduler;
 
     public void addVncToken(Vm newVm){
-        log.info("createVm -- setting VNC start");
         // 1. GET VM UUID
         String vmUuid = newVm.getUuid();
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
 
         // 2. GET VNC PORT
         String vncPort = vm.getVncPort();
         if (vncPort == null || vncPort.isEmpty()) {
-            log.info("createVm -- no port available, setting VNC end");
             return;
         }
 
         // 3. GET HOST IP
+        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
         String vncIp = host.getIp();
 
         // 4. BUILD ADDRESS AND ADD
         String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
+        log.info("-> invoke vncScheduler -- addVncToken");
         vncScheduler.addVncToken(vmUuid, address);
-        log.info("createVm -- success, setting VNC end");
+        log.info("<- invoke vncScheduler -- done");
     }
 
     public void deleteVncToken(String vmUuid){
-        log.info("deleteVm --  delete VNC start");
+        log.info("-> invoke vncScheduler -- deleteVncToken");
         vncScheduler.deleteVncToken(vmUuid);
-        log.info("deleteVm --  delete VNC end");
+        log.info("<- invoke vncScheduler -- done");
     }
 
     public Vm flushVncToken(String vmUuid){
-        log.info("flush VNC start");
 
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
 
         // 2. GET VNC PORT
         String vncPort = vm.getVncPort();
 
         // 3. GET HOST IP
+        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
         String vncIp = host.getIp();
 
         // 4. BUILD ADDRESS AND ADD
         String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
+        log.info("-> invoke vncScheduler -- flushVncToken");
         vncScheduler.flushVncToken(vmUuid, address);
+        log.info("<- invoke DB -- done");
 
-        log.info("flush VNC end");
         return vm;
     }
 

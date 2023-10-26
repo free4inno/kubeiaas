@@ -53,7 +53,7 @@ public class ServiceConfig {
         // 1. build static Need Map and dynamic Need Set
         staticNeedMap.put(ComponentConstants.DHCP,
                 ConfigUtils.splitByComma(System.getenv("DHCP_NODE_NAME")));
-        log.info("== SERVICE : staticNeedMap == \n" + staticNeedMap);
+        log.debug("== SERVICE : staticNeedMap == \n" + staticNeedMap);
 
         dynamicNeedSet.add(ComponentConstants.IAAS_CORE);
         dynamicNeedSet.add(ComponentConstants.DB_PROXY);
@@ -62,13 +62,13 @@ public class ServiceConfig {
         dynamicNeedSet.add(ComponentConstants.IMAGE_OPERATOR);
         dynamicNeedSet.add(ComponentConstants.LIBVIRT);
         dynamicNeedSet.add(ComponentConstants.IAAS_AGENT);
-        log.info("== SERVICE : dynamicNeedSet == \n" + dynamicNeedSet);
+        log.debug("== SERVICE : dynamicNeedSet == \n" + dynamicNeedSet);
 
         // 2. build Service Set
         serviceSet = new HashSet<>();
         serviceSet.addAll(staticNeedMap.keySet());
         serviceSet.addAll(dynamicNeedSet);
-        log.info("== SERVICE : serviceSet == \n" + serviceSet);
+        log.debug("== SERVICE : serviceSet == \n" + serviceSet);
 
         // 3. init service list
         activeList.add(new Record(ComponentConstants.IAAS_CORE, this.HOST_NAME, System.currentTimeMillis()));
@@ -93,11 +93,10 @@ public class ServiceConfig {
             }
         }
         if (staticNeedMap.containsKey(svcName) && !staticNeedMap.get(svcName).contains(nodeName)) {
-            log.warn("== SERVICE : newRegister(svcName:{}, nodeName:{}, ts:{}), but not in needMap",
-                    svcName, nodeName, timeStamp);
+            log.warn(String.format("== SERVICE : newRegister(svcName: %s, nodeName: %s, ts: %s), but not in needMap", svcName, nodeName, timeStamp));
         }
         activeList.add(new Record(svcName, nodeName, timeStamp));
-        log.info("== SERVICE : newRegister(svcName:{}, nodeName:{}, ts:{})", svcName, nodeName, timeStamp);
+        log.info(String.format("== SERVICE : newRegister(svcName: %s, nodeName: %s, ts: %s)", svcName, nodeName, timeStamp));
     }
 
     public Map<String, List<String>> getSvc() {

@@ -13,6 +13,7 @@ import kubeiaas.common.utils.MacUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
+import kubeiaas.iaascore.request.vm.SetPasswdForm;
 import kubeiaas.iaascore.scheduler.DhcpScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,13 +40,14 @@ public class NetworkProcess {
      * use synchronized to ensure synchronous execution, avoid ip allocation conflicts.
      */
     public synchronized IpUsed createVmNetwork(Vm newVm, int ipSegmentId) throws VmException {
-        log.info("createVm -- 3. Network");
-
+        log.debug("createVm -- 3. Network");
+        log.info("-> invoke DB -- ipSegmentQueryById");
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-
+        log.info("<- invoke DB -- done");
         String newMac = getNewMac(ipSegment);
         IpUsed newIpUsed = getNewIp(ipSegment);
         if (newIpUsed == null) {
+            log.error(String.format("ERROR: createVmNetwork error"));
             throw new VmException(newVm, "ERROR: ip allocated failed!");
         }
 
@@ -57,17 +59,20 @@ public class NetworkProcess {
         newIpUsed.setType(ipSegment.getType());
         newIpUsed.setBridge(ipSegment.getBridge());
 
-        log.info("new mac: " + newIpUsed.getMac());
-        log.info("new ip: " + newIpUsed.getIp());
+        log.info(String.format("new mac: %s", newIpUsed.getMac()));
+        log.info(String.format("new ip: %s", newIpUsed.getIp()));
 
         // save into DB
+        log.info("-> invoke DB -- ipUsedSave");
         newIpUsed = tableStorage.ipUsedSave(newIpUsed);
+        log.info("<- invoke DB -- done");
 
         // bind in DHCP-Controller
         if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
+            log.error(String.format("ERROR: dhcp bind mac & ip failed!"));
             throw new VmException(newVm, "ERROR: dhcp bind mac & ip failed!");
         }
-        log.info("createVm -- 3. network success!");
+        log.debug("createVm -- 3. network success!");
         return newIpUsed;
     }
 
@@ -94,10 +99,14 @@ public class NetworkProcess {
         ipSegment.setGateway(gateway);
         ipSegment.setNetmask(netmask);
         ipSegment.setType(EnumUtils.getEnumFromString(IpTypeEnum.class, type));
+        log.info("-> invoke DB -- ipSegmentSave");
         ipSegment = tableStorage.ipSegmentSave(ipSegment);
+        log.info("<- invoke DB -- done");
 
         // 2. update DHCP config
+        log.info("-> invoke dhcpScheduler -- updateIpSeg");
         dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
+        log.info("<- invoke dhcpScheduler -- done");
 
         return ipSegment;
     }
@@ -106,16 +115,17 @@ public class NetworkProcess {
      * Delete IP
      */
     public void deleteIps(String vmUuid) throws BaseException {
-        log.info("deleteIps ==== start ====  vmUuid: " + vmUuid);
 
         // DHCP中解绑
         if (!dhcpScheduler.unbindMacAndIp(vmUuid)){
+            log.error(String.format("ERROR: dhcp unbind failed!"));
             throw new BaseException("ERROR: dhcp unbind failed!");
         }
 
         // 数据库中删除
+        log.info("-> invoke DB -- ipUsedDeleteByVmUuid");
         tableStorage.ipUsedDeleteByVmUuid(vmUuid);
-        log.info("deleteIps ==== end ====");
+        log.info("<- invoke DB -- done");
     }
 
     // =================================================================================================================
@@ -125,7 +135,9 @@ public class NetworkProcess {
      */
     public Integer getAllTotalNum(IpTypeEnum type) {
         int count = 0;
+        log.info("-> invoke DB -- ipSegmentQueryAll");
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
+        log.info("<- invoke DB -- done");
         for (IpSegment ipSegment : ipSegmentList) {
             if (ipSegment.getType().equals(type)) {
                 count += IpUtils.getTotalIpNum(ipSegment);
@@ -139,7 +151,9 @@ public class NetworkProcess {
      */
     public Integer getAllUsedNum(IpTypeEnum type) {
         int count = 0;
+        log.info("-> invoke DB -- ipSegmentQueryAll");
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
+        log.info("<- invoke DB -- done");
         for (IpSegment ipSegment : ipSegmentList) {
             if (ipSegment.getType().equals(type)) {
                 count += getAllUsedIp(ipSegment.getId()).size();
@@ -152,8 +166,11 @@ public class NetworkProcess {
      * 获取 SegId IP Seg 总量
      */
     public Integer getAllNumBySegId(Integer id) throws BaseException {
+        log.info("-> invoke DB -- ipSegmentQueryById");
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(id);
+        log.info("<- invoke DB -- done");
         if (ipSegment == null) {
+            log.error(String.format("ERROR: ipSegmentId illegal"));
             throw new BaseException("err: ipSegmentId illegal");
         }
         return IpUtils.getTotalIpNum(ipSegment);
@@ -163,8 +180,11 @@ public class NetworkProcess {
      * 获取 SegId IP Seg 用量
      */
     public Integer getAllUsedNumBySegId(Integer id) throws BaseException {
+        log.info("-> invoke DB -- ipSegmentQueryById");
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(id);
+        log.info("<- invoke DB -- done");
         if (ipSegment == null) {
+            log.error(String.format("ERROR: ipSegmentId illegal"));
             throw new BaseException("err: ipSegmentId illegal");
         }
         return getAllUsedIp(ipSegment.getId()).size();
@@ -189,7 +209,9 @@ public class NetworkProcess {
 
     // 已经使用的ip地址，通过Map方式存放，key是Ip
     public Map<String, IpUsed> getAllUsedIp(int ipSegmentId) {
+        log.info("-> invoke DB -- ipUsedQueryAllByIpSegmentId");
         List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
+        log.info("<- invoke DB -- done");
         Map<String, IpUsed> allUsedIp = new HashMap<>();
         for (IpUsed ipUsed : ipUsedList) {
             allUsedIp.put(ipUsed.getIp(), ipUsed);

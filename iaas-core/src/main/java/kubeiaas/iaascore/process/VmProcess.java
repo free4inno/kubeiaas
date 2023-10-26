@@ -47,7 +47,7 @@ public class VmProcess {
             Integer diskSize,
             String description,
             String hostUUid) {
-        log.info("createVm -- 1. pre create VM");
+        log.debug("createVm -- 1. pre create VM");
         Vm newVm = new Vm();
         String newVmUuid = UuidUtils.getRandomUuid();
 
@@ -84,8 +84,10 @@ public class VmProcess {
         newVm.setCreateTime(new Timestamp(System.currentTimeMillis()));
 
         // 1.6. save into DB
+        log.info("-> invoke DB -- vmSave");
         newVm = tableStorage.vmSave(newVm);
-        log.info("createVm -- 1. pre create success!");
+        log.info("<- invoke DB -- done");
+        log.debug("createVm -- 1. pre create success!");
 
         return newVm;
     }
@@ -96,11 +98,12 @@ public class VmProcess {
      * 5. VM Controller create
      */
     public void createVM(String newVmUuid) throws BaseException {
-        log.info("createVm -- 5. VM");
+        log.debug("createVm -- 5. VM");
         if (!vmScheduler.createVmInstance(newVmUuid)) {
+            log.error(String.format("ERROR: create vm instance failed!"));
             throw new BaseException("ERROR: create vm instance failed!");
         }
-        log.info("createVm -- 5. VM create success!");
+        log.debug("createVm -- 5. VM create success!");
     }
 
 
@@ -108,93 +111,98 @@ public class VmProcess {
      * Delete VM
      */
     public void deleteVM(String vmUuid) throws BaseException {
-        log.info("deleteVm --  VM");
+        log.debug("deleteVm --  VM");
         //先停止，否则无法删除正在使用的磁盘文件
         if (!vmScheduler.deleteVmInstance(vmUuid)){
+            log.error(String.format("ERROR: delete vm instance failed!"));
             throw new BaseException("ERROR: delete vm instance failed!");
         }
-        log.info("deleteVm success!");
+        log.debug("deleteVm success!");
     }
 
     public void stopVM(String vmUuid) throws BaseException {
-        log.info("stopVm ==== start ====  vmUuid: " + vmUuid);
         setVmStatus(vmUuid, VmStatusEnum.STOPPING);
         if (!vmScheduler.stopVmInstance(vmUuid)){
+            log.error(String.format("ERROR: stop vm instance failed!"));
             throw new BaseException("ERROR: stop vm instance failed!");
         }
-        log.info("stopVm ==== end ==== ");
     }
 
     public void startVM(String vmUuid) throws BaseException {
-        log.info("startVm ==== start ====  vmUuid: " + vmUuid);
         setVmStatus(vmUuid, VmStatusEnum.STARTING);
         if (!vmScheduler.startVmInstance(vmUuid)){
+            log.error(String.format("ERROR: start vm instance failed!"));
             throw new BaseException("ERROR: start vm instance failed!");
         }
-        log.info("stopVm ==== end ==== ");
     }
 
     public void rebootVM(String vmUuid) throws BaseException {
-        log.info("rebootVm ==== start ====  vmUuid: " + vmUuid);
         //将虚拟机状态设置为rebooting
         setVmStatus(vmUuid, VmStatusEnum.REBOOTING);
         if (!vmScheduler.rebootVmInstance(vmUuid)){
+            log.error(String.format("ERROR: reboot vm instance failed!"));
             throw new BaseException("ERROR: reboot vm instance failed!");
         }
-        log.info("rebootVm ==== end ==== ");
     }
 
     public void resumeVM(String vmUuid) throws BaseException {
-        log.info("resumeVM ==== start ====  vmUuid: " + vmUuid);
         //将虚拟机状态设置为resuming
         setVmStatus(vmUuid, VmStatusEnum.RESUMING);
         if (!vmScheduler.resumeVmInstance(vmUuid)){
+            log.error(String.format("ERROR: resume vm instance failed!"));
             throw new BaseException("ERROR: resume vm instance failed!");
         }
-        log.info("resumeVM ==== end ==== ");
     }
 
     public void suspendVM(String vmUuid) throws BaseException {
-        log.info("suspendVM ==== start ====  vmUuid: " + vmUuid);
         //将虚拟机状态设置为suspending
         setVmStatus(vmUuid, VmStatusEnum.SUSPENDING);
         if (!vmScheduler.suspendVmInstance(vmUuid)){
+            log.error(String.format("ERROR: suspend vm instance failed!"));
             throw new BaseException("ERROR: suspend vm instance failed!");
         }
-        log.info("suspendVM ==== end ==== ");
     }
 
     /**
      * Delete VM in dataBase
      */
     public void deleteVmInDataBase(String vmUuid){
-        log.info("deleteVm --  VM in dataBase");
+        log.debug("deleteVm --  VM in dataBase");
+        log.info("-> invoke vmScheduler -- deleteVmInDataBase");
         vmScheduler.deleteVmInDataBase(vmUuid);
+        log.info("<- invoke vmScheduler -- done");
         AgentConfig.clearSelectedHost(vmUuid);
-        log.info("deleteVm in dataBase success!");
+        log.debug("deleteVm in dataBase success!");
     }
 
     /**
      * Save VM Statue in dataBase (ABANDON)
      */
     public void stopVmInDataBase(String vmUuid){
-        log.info("stopVm --  VM in dataBase");
+        log.debug("stopVm --  VM in dataBase");
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
         vm.setStatus(VmStatusEnum.STOPPED);
+        log.info("-> invoke DB -- vmSave");
         tableStorage.vmSave(vm);
+        log.info("<- invoke DB -- done");
         AgentConfig.clearSelectedHost(vmUuid);
-        log.info("stopVm in dataBase success!");
+        log.debug("stopVm in dataBase success!");
     }
 
     /**
      * Modify VM
      */
     public void modifyVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
-        log.info("modifyVm --  VM");
+        log.debug("modifyVm --  VM");
 
         // 1. find VM
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
         if (vm == null) {
+            log.error(String.format("ERROR: vm is not found!"));
             throw new BaseException("ERROR: vm is not found!");
         }
 
@@ -208,15 +216,18 @@ public class VmProcess {
             vm.setMemory(memory);
             cpuMemFlag = true;
         }
-        log.info("cpuMemFlag --" + cpuMemFlag);
+        log.info(String.format("cpuMemFlag -- %s", cpuMemFlag));
 
         if (cpuMemFlag) {
             // 3. iaas-agent do
             if (!vmScheduler.modifyVmInstance(vmUuid, cpus, memory)) {
+                log.error(String.format("ERROR: modify vm instance failed!"));
                 throw new BaseException("ERROR: modify vm instance failed!");
             }
             // 4. update DB
+            log.info("-> invoke DB -- vmUpdate");
             vm = tableStorage.vmUpdate(vm);
+            log.info("<- invoke DB -- done");
         }
 
         // 5. clear select cache
@@ -227,16 +238,20 @@ public class VmProcess {
      * Modify  VM
      */
     public void reduceVM(String vmUuid, Integer cpus, Integer memory) throws BaseException {
-        log.info("reduce --  VM");
+        log.debug("reduce --  VM");
 
         // 1. find VM
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
         if (vm == null) {
+            log.error(String.format("ERROR: vm is not found!"));
             throw new BaseException("ERROR: vm is not found!");
         }
 
         // 2. only STOPPED can be reduced
         if (vm.getStatus() != VmStatusEnum.STOPPED){
+            log.error(String.format("ERROR: vm is still active"));
             throw new BaseException("ERROR: vm is still active");
         }
 
@@ -245,6 +260,7 @@ public class VmProcess {
         if (cpus != null && cpus != 0 && !cpus.equals(vm.getCpus())) {
             // 3.1. must be larger
             if (cpus >= vm.getCpus()) {
+                log.error(String.format("ERROR: vm is not reducing"));
                 throw new BaseException("ERROR: vm is not reducing");
             }
             // 3.2. adjust
@@ -254,6 +270,7 @@ public class VmProcess {
         if (memory != null && memory != 0 && !memory.equals(vm.getMemory())) {
             // 3.1. must be larger
             if (memory >= vm.getMemory()) {
+                log.error(String.format("ERROR: vm is not reducing"));
                 throw new BaseException("ERROR: vm is not reducing");
             }
             // 3.2. adjust
@@ -265,10 +282,13 @@ public class VmProcess {
         if (cpuMemFlag) {
             // 4. iaas-agent do
             if (!vmScheduler.modifyVmInstance(vmUuid, cpus, memory)) {
+                log.error(String.format("ERROR: reduce vm instance failed!"));
                 throw new BaseException("ERROR: reduce vm instance failed!");
             }
             // 5. update DB
+            log.info("-> invoke DB -- vmUpdate");
             vm = tableStorage.vmUpdate(vm);
+            log.info("<- invoke DB -- done");
         }
 
         // 6. clear select cache
@@ -281,14 +301,20 @@ public class VmProcess {
     public void publishImage(String vmUuid, String name, String description, Integer vdSize) throws BaseException {
 
         // 1. find systemVolume
+        log.info("-> invoke DB -- systemVolumeQueryByUuid");
         Volume volume = tableStorage.systemVolumeQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
         if (volume == null){
+            log.error(String.format("ERROR: volume is not found!"));
             throw new BaseException("ERROR: volume is not found!");
         }
 
         // 2. get parentImage
+        log.info("-> invoke DB -- imageQueryByUuid");
         Image parentImage = tableStorage.imageQueryByUuid(volume.getImageUuid());
+        log.info("<- invoke DB -- done");
         if (parentImage == null){
+            log.error(String.format("ERROR: image is not found!"));
             throw new BaseException("ERROR: image is not found!");
         }
 
@@ -312,20 +338,24 @@ public class VmProcess {
         } else {
             newImage.setVdSize(vdSize);
         }
-        log.info("publishImage -- extraSize: " + extraSize);
+        log.info(String.format("publishImage -- extraSize: %s", extraSize));
 
         // 4. get new imagePath
         String suffix = ImageUtils.getImageSuffix(newImage.getFormat());
         if (suffix == null) {
+            log.error(String.format("ERROR: can't get imageSuffix!"));
             throw new BaseException("ERROR: can't get imageSuffix!");
         }
         String imagePath = ImageConstants.IMAGE_PATH + newImage.getUuid() + suffix;
 
         // 5. copy volume file
+        log.info("-> invoke vmScheduler -- volumePublishImage");
         vmScheduler.volumePublishImage(vmUuid, imagePath, volume.getProviderLocation(), extraSize);
+        log.info("<- invoke vmScheduler -- done");
 
         // 6. build volume yaml
         if (!imageScheduler.imageCreateYaml(newImage)) {
+            log.error(String.format("ERROR: build volume yaml failed!"));
             throw new BaseException("ERROR: build volume yaml failed!");
         }
 
@@ -338,9 +368,13 @@ public class VmProcess {
      * Set VM Status in DB
      */
     public void setVmStatus(String VmUuid, VmStatusEnum status) {
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(VmUuid);
+        log.info("<- invoke DB -- done");
         vm.setStatus(status);
+        log.info("-> invoke DB -- vmSave");
         tableStorage.vmSave(vm);
+        log.info("<- invoke DB -- done");
     }
 
 
@@ -350,14 +384,18 @@ public class VmProcess {
      */
     public List<Vm> buildVmList(List<Vm> vmList) {
         // 1.1. 构造 imageMap，根据 uuid 索引
+        log.info("-> invoke DB -- imageQueryAll");
         List<Image> imageList = tableStorage.imageQueryAll();
+        log.info("<- invoke DB -- done");
         Map<String, Image> imageMap = new HashMap<>();
         for (Image image : imageList) {
             imageMap.put(image.getUuid(), image);
         }
 
         // 1.2. 构造 hostMap，根据 uuid 索引
+        log.info("-> invoke DB -- hostQueryAll");
         List<Host> hostList = tableStorage.hostQueryAll();
+        log.info("<- invoke DB -- done");
         Map<String, Host> hostMap = new HashMap<>();
         for (Host host : hostList) {
             hostMap.put(host.getUuid(), host);
@@ -365,7 +403,9 @@ public class VmProcess {
 
         // 3. 逐个处理 vm，填入 ips & image
         for (Vm vm : vmList) {
+            log.info("-> invoke DB -- ipUsedQueryAllByInstanceUuid");
             List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
+            log.info("<- invoke DB -- done");
             vm.setIps(ipUsedList);
 
             // set image
@@ -380,7 +420,9 @@ public class VmProcess {
             vm.setHost(new Host(host.getName(), host.getIp()));
 
             // set volume
+            log.info("-> invoke DB -- volumeQueryAllByInstanceUuid");
             List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
+            log.info("<- invoke DB -- done");
             vm.setVolumes(volumeList);
 
             // remove useless/sensitive info
@@ -395,9 +437,13 @@ public class VmProcess {
      * 获取状态
      */
     public VmStatusEnum getStatus(Vm vm) throws BaseException {
+        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
         AgentConfig.setSelectedHost(vm.getUuid(), host);
+        log.info("-> invoke vmScheduler -- getStatus");
         VmStatusEnum vmStatusEnum = vmScheduler.getStatus(vm);
+        log.info("<- invoke vmScheduler -- done");
         AgentConfig.clearSelectedHost(vm.getUuid());
         return vmStatusEnum;
     }
@@ -406,9 +452,12 @@ public class VmProcess {
      * 修改密码
      */
     public void setPasswd(Vm vm, String user, String passwd) throws BaseException {
+        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
         AgentConfig.setSelectedHost(vm.getUuid(), host);
         if (!vmScheduler.setPasswd(vm, user, passwd)) {
+            log.error(String.format("ERROR: failed to set passwd, please check Agent logs for exact reason."));
             throw new BaseException("err: failed to set passwd, please check Agent logs for exact reason.");
         }
         AgentConfig.clearSelectedHost(vm.getUuid());
