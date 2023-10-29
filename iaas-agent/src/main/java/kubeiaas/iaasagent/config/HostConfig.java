@@ -58,15 +58,13 @@ public class HostConfig {
 
     public void hostInitialize() {
         // get host resource config
-        log.info(String.format("hostInitialize -- hostIp: %s, hostName: %s", hostIp, hostName));
+        log.info(String.format("-- start -- hostInitialize -- hostIp: %s, hostName: %s", hostIp, hostName));
 
         // check is this host registered in DB
-        log.info("-> invoke DB -- hostQueryByIp");
         Host host = tableStorage.hostQueryByIp(hostIp);
-        log.info("-> invoke DB -- done");
         if (host == null) {
             // do register
-            log.debug("this host is not registered! Start to register.");
+            log.info("start to register -- this host is not registered ");
             host = new Host();
             host.setIp(hostIp);
             host.setName(hostName);
@@ -119,10 +117,10 @@ public class HostConfig {
         totalSuccessFlag = hostService.getEnvPrepareRes(roleList);
         if (totalSuccessFlag) {
             host.setStatus(HostStatusEnum.READY);
-            log.debug("== host check done, total success. == ");
+            log.info("host check -- success");
         } else {
             host.setStatus(HostStatusEnum.ERROR);
-            log.error(String.format("ERROR: host check done, total failed! "));
+            log.error("ERROR: host check -- failed");
         }
 
         // - save
@@ -130,6 +128,8 @@ public class HostConfig {
         tableStorage.hostSave(host);
         log.info("<- invoke DB -- done");
         thisHost = host;
+
+        log.info("-- end -- hostInitialize");
     }
 
     private List<String> splitByComma(String str) {

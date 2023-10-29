@@ -44,23 +44,19 @@ public class XmlConfig {
     }
 
     public String getVolumeDevice(Volume volume) {
-        String res = libvirtConfig.volumeToDisk(volume);
-        return res;
+        return libvirtConfig.volumeToDisk(volume);
     }
 
     public String getUsbDevice(Device device) {
-        String res = libvirtConfig.usbToDevice(device);
-        return res;
+        return libvirtConfig.usbToDevice(device);
     }
 
     public String getPciDevice(Device device) {
-        String res = libvirtConfig.pciToDevice(device);
-        return res;
+        return libvirtConfig.pciToDevice(device);
     }
 
     public String getIpDevice(IpUsed ip) {
-        String res = libvirtConfig.ipToNetwork(ip);
-        return res;
+        return libvirtConfig.ipToNetwork(ip);
     }
 
     public String modifyXml(String originXML, int newCores, int newMemory) {
@@ -151,6 +147,7 @@ public class XmlConfig {
             DocumentBuilder builder = factory.newDocumentBuilder();
             document = builder.parse(inputSource);
         } catch (ParserConfigurationException | IOException | SAXException e) {
+            log.error("ERROR: XML stringToDocument error");
             e.printStackTrace();
         }
         return document;
@@ -167,7 +164,7 @@ public class XmlConfig {
             transformer.transform(source, result);
             xmlStr = writer.getBuffer().toString();
         } catch (TransformerException e) {
-            log.error(String.format("ERROR: documentToString error"));
+            log.error("ERROR: XML documentToString error");
             e.printStackTrace();
         }
         return xmlStr;

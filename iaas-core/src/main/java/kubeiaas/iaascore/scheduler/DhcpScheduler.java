@@ -31,7 +31,7 @@ public class DhcpScheduler {
             if (dhcpController.bindMacAndIp(getDhcpUri(), ipUsed.getInstanceUuid(), ipUsed.getMac(), ipUsed.getIp())
                     .equals(ResponseMsgConstants.SUCCESS)) {
                 ipUsed.setStatus(IpAttachEnum.ATTACHED);
-                log.info("-> invoke DB -- ipUsedSave");
+                log.info("-> invoke DB -- ipUsedSave, status ATTACHED");
                 tableStorage.ipUsedSave(ipUsed);
                 log.info("<- invoke DB -- done");
                 return true;
@@ -39,8 +39,7 @@ public class DhcpScheduler {
                 return false;
             }
         } catch (Exception e) {
-            log.error(String.format("ERROR: bindMacAndIp"));
-            e.printStackTrace();
+            log.error(String.format("ERROR: bindMacAndIp. Exception: %s", e));
             return false;
         }
     }
@@ -50,8 +49,7 @@ public class DhcpScheduler {
             return dhcpController.unbindMacAndIp(getDhcpUri(), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: unbindMacAndIp"));
-            e.printStackTrace();
+            log.error(String.format("ERROR: unbindMacAndIp. Exception: %s", e));
             return false;
         }
     }
@@ -61,8 +59,7 @@ public class DhcpScheduler {
             return dhcpController.updateIpSeg(getDhcpUri(), ipSegId)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: updateIpSeg"));
-            e.printStackTrace();
+            log.error(String.format("ERROR: updateIpSeg. Exception: %s", e));
             return false;
         }
     }
@@ -71,9 +68,7 @@ public class DhcpScheduler {
         try {
             return new URI(agentConfig.getDhcpUri());
         } catch (URISyntaxException | BaseException e) {
-            log.error(String.format("ERROR: getDhcpUri"));
-            e.printStackTrace();
-            log.error("build URI failed!");
+            log.error(String.format("ERROR: build URI failed! %s", e));
             return null;
         }
     }

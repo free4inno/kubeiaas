@@ -42,11 +42,9 @@ public class ResourceProcess {
 
         // 2.1. check image
         // available
-        log.info("-> invoke DB -- imageQueryByUuid");
         Image image = tableStorage.imageQueryByUuid(newVm.getImageUuid());
-        log.info("<- invoke DB -- done");
         if (image == null || image.getStatus() != ImageStatusEnum.AVAILABLE) {
-            log.error(String.format("ERROR: image not available!"));
+            log.error("ERROR: image not available!");
             throw new VmException(newVm,"ERROR: image not available!");
         }
         // mem
@@ -79,7 +77,7 @@ public class ResourceProcess {
             log.info("<- invoke resourceScheduler -- done");
         }
         if (selectedHost == null) {
-            log.error(String.format("ERROR: no available host."));
+            log.error("ERROR: no available host.");
             throw new VmException(newVm, "ERROR: no available host.");
         }
         log.info(String.format("selected host: %s", selectedHost.getName()));
@@ -89,16 +87,14 @@ public class ResourceProcess {
         if (privateIpSegId == -1) {
             // no select private ip
             // TODO: call resourceScheduler to alloc
-            log.error(String.format("ERROR: no available privateIpSeg."));
+            log.error("ERROR: no available privateIpSeg.");
             throw new VmException(newVm, "ERROR: no available privateIpSeg.");
         } else {
             // check private host
-            log.info("-> invoke DB -- ipSegmentQueryById");
             privateIpSeg = tableStorage.ipSegmentQueryById(privateIpSegId);
-            log.info("<- invoke DB -- done");
             if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
                     || !privateIpSeg.getType().equals(IpTypeEnum.PRIVATE)) {
-                log.error(String.format("ERROR: not available privateIpSeg."));
+                log.error("ERROR: not available privateIpSeg.");
                 throw new VmException(newVm, "ERROR: not available privateIpSeg.");
             }
         }
@@ -108,19 +104,17 @@ public class ResourceProcess {
             if (needPublicIp) {
                 // no select public ip
                 // TODO: call resourceScheduler to alloc
-                log.error(String.format("ERROR: no available publicIpSeg."));
+                log.error("ERROR: no available publicIpSeg.");
                 throw new VmException(newVm, "ERROR: no available publicIpSeg.");
             } else {
                 log.debug("-- no need public ip");
             }
         } else {
             // check public host
-            log.info("-> invoke DB -- ipSegmentQueryById");
             publicIpSeg = tableStorage.ipSegmentQueryById(publicIpSegId);
-            log.info("<- invoke DB -- done");
             if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
                     || !publicIpSeg.getType().equals(IpTypeEnum.PUBLIC)) {
-                log.error(String.format("ERROR: not available publicIpSeg."));
+                log.error("ERROR: not available publicIpSeg.");
                 throw new VmException(newVm, "ERROR: not available publicIpSeg.");
             }
         }
@@ -154,7 +148,7 @@ public class ResourceProcess {
         }
 
         if (selectedHost == null) {
-            log.error(String.format("ERROR: resource operator failed to select host."));
+            log.error("ERROR: resource operator failed to select host.");
             throw new VolumeException(newVolume, "ERROR: no available host.");
         }
         log.info(String.format("volume host selected -- hostName: %s", selectedHost.getName()));
@@ -175,11 +169,8 @@ public class ResourceProcess {
     * SelectHost by VmUuid
      */
     public void selectHostByVmUuid(String VmUuid) throws BaseException {
-
         // get Vm By VmUuid
-        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(VmUuid);
-        log.info("<- invoke DB -- done");
 
         // SelectHost
         Host selectedHost;
@@ -191,11 +182,11 @@ public class ResourceProcess {
             log.info("<- invoke resourceScheduler -- done");
         } else {
             // 若不存在，抛出服务器异常错误
-            log.error(String.format("ERROR: HostUuid error!"));
+            log.error("ERROR: HostUuid error!");
             throw new BaseException("Error: HostUuid error!");
         }
         if (selectedHost == null) {
-            log.error(String.format("ERROR: no available host."));
+            log.error("ERROR: no available host.");
             throw new BaseException("ERROR: no available host.");
         }
 
@@ -223,11 +214,11 @@ public class ResourceProcess {
             log.info("<- invoke resourceScheduler -- done");
         } else {
             // 若不存在，抛出服务器异常错误
-            log.error(String.format("ERROR: HostUuid error!"));
+            log.error("ERROR: HostUuid error!");
             throw new BaseException("Error: HostUuid error!");
         }
         if (selectedHost == null) {
-            log.error(String.format("ERROR: no available host."));
+            log.error("ERROR: no available host.");
             throw new BaseException("ERROR: no available host.");
         }
 

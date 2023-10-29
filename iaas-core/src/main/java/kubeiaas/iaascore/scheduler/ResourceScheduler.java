@@ -20,8 +20,7 @@ public class ResourceScheduler {
             String hostObjectStr = resourceOperator.selectHostByAppoint(vmUuid, hostUuid);
             return JSON.parseObject(hostObjectStr, Host.class);
         } catch (Exception e) {
-            log.error(String.format("ERROR: vmSelectHostByAppoint"));
-            e.printStackTrace();
+            log.error(String.format("ERROR: vmSelectHostByAppoint. Exception: %s", e));
             return null;
         }
     }
@@ -36,8 +35,7 @@ public class ResourceScheduler {
             String hostObjectStr = resourceOperator.selectHostByOperator(vmUuid, strategy);
             return JSON.parseObject(hostObjectStr, Host.class);
         } catch (Exception e) {
-            log.error(String.format("ERROR: vmSelectHostByOperator"));
-            e.printStackTrace();
+            log.error(String.format("ERROR: vmSelectHostByOperator. Exception: %s", e));
             return null;
         }
     }

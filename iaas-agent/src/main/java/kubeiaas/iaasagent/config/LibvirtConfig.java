@@ -61,8 +61,7 @@ public class LibvirtConfig {
         try {
             connect = new Connect(conStr);
         } catch (LibvirtException e) {
-            log.error(String.format("get virt connection error"));
-            log.error(String.format(e.getMessage()));
+            log.error(String.format("ERROR: get libvirt connection error, %s", e.getMessage()));
         }
         return connect;
     }
@@ -105,9 +104,7 @@ public class LibvirtConfig {
      * 在每次生产新的 XML 前刷新
      */
     private void refreshMaxCompute() {
-        log.info("-> invoke DB -- specConfigQueryAllByType");
         List<SpecConfig> confList = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VM_COMPUTE);
-        log.info("-> invoke DB -- done");
         if (CollectionUtils.isEmpty(confList)) {
             return;
         }
@@ -122,7 +119,7 @@ public class LibvirtConfig {
                     tempMaxCpu = Math.max(nowCpu, tempMaxCpu);
                     tempMaxMem = Math.max(nowMem, tempMaxMem);
                 } catch (Exception e) {
-                    log.warn(String.format("bad config value -- '{%s}'. {%s}", conf.getValue(), e.getMessage()));
+                    log.warn(String.format("WARN: bad config value -- '{%s}'. {%s}", conf.getValue(), e.getMessage()));
                 }
             }
         }

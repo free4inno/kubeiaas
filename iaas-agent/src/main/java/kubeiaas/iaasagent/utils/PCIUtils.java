@@ -58,7 +58,7 @@ public class PCIUtils {
             }
             proc.destroy();
         } catch (Exception ex) {
-            log.error(String.format("ERROR: getHostDevices error"));
+            log.error("ERROR: getHostDevices failed");
             ex.printStackTrace();
         }
         // close BufferedReader
@@ -66,7 +66,7 @@ public class PCIUtils {
             try {
                 br.close();
             } catch (Exception ex) {
-                log.error(String.format("ERROR: getHostDevices error, br != null"));
+                log.error("ERROR: BufferedReader close failed");
                 ex.printStackTrace();
             }
         }
@@ -75,7 +75,7 @@ public class PCIUtils {
             try {
                 is.close();
             } catch (Exception ex) {
-                log.error(String.format("ERROR: getHostDevices error, is != null"));
+                log.error("ERROR: InputStream close failed");
                 ex.printStackTrace();
             }
         }

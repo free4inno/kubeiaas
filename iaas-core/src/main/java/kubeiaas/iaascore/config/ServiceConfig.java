@@ -93,10 +93,10 @@ public class ServiceConfig {
             }
         }
         if (staticNeedMap.containsKey(svcName) && !staticNeedMap.get(svcName).contains(nodeName)) {
-            log.warn(String.format("== SERVICE : newRegister(svcName: %s, nodeName: %s, ts: %s), but not in needMap", svcName, nodeName, timeStamp));
+            log.debug(String.format("== SERVICE : newRegister(svcName: %s, nodeName: %s, ts: %s), but not in needMap", svcName, nodeName, timeStamp));
         }
         activeList.add(new Record(svcName, nodeName, timeStamp));
-        log.info(String.format("== SERVICE : newRegister(svcName: %s, nodeName: %s, ts: %s)", svcName, nodeName, timeStamp));
+        log.debug(String.format("== SERVICE : newRegister(svcName: %s, nodeName: %s, ts: %s)", svcName, nodeName, timeStamp));
     }
 
     public Map<String, List<String>> getSvc() {

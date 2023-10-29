@@ -21,8 +21,7 @@ public class ImageScheduler {
         try {
             return imageOperator.imageCreateYaml(imageObjectStr).equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: imageCreateYaml"));
-            e.printStackTrace();
+            log.error(String.format("ERROR: imageCreateYaml failed. %s", e));
             return false;
         }
     }

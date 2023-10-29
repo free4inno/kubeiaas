@@ -23,9 +23,7 @@ public class VncProcess {
         // 1. GET VM UUID
         String vmUuid = newVm.getUuid();
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
-        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
-        log.info("<- invoke DB -- done");
 
         // 2. GET VNC PORT
         String vncPort = vm.getVncPort();
@@ -34,9 +32,7 @@ public class VncProcess {
         }
 
         // 3. GET HOST IP
-        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
-        log.info("<- invoke DB -- done");
         String vncIp = host.getIp();
 
         // 4. BUILD ADDRESS AND ADD
@@ -55,17 +51,13 @@ public class VncProcess {
     public Vm flushVncToken(String vmUuid){
 
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
-        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
-        log.info("<- invoke DB -- done");
 
         // 2. GET VNC PORT
         String vncPort = vm.getVncPort();
 
         // 3. GET HOST IP
-        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
-        log.info("<- invoke DB -- done");
         String vncIp = host.getIp();
 
         // 4. BUILD ADDRESS AND ADD

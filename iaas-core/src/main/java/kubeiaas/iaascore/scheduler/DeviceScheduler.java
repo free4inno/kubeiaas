@@ -37,15 +37,12 @@ public class DeviceScheduler {
             String jsonObjectString = deviceController.queryAll(getUri(host));
             rawDevices = JSON.parseArray(jsonObjectString, Device.class);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error(String.format("ERROR: device query all failed, host name is %s", host.getName()));
+            log.error(String.format("ERROR: device query all failed, host name is %s. Exception: %s", host.getName(), e));
             throw new BaseException("err: device query all failed, host name is " + host.getName());
         }
 
         // 2. Devices from DB
-        log.info("-> invoke DB -- deviceQueryAllByHostUuid");
         List<Device> dbDevices = tableStorage.deviceQueryAllByHostUuid(host.getUuid());
-        log.info("<- invoke DB -- done");
 
         // 3. build total (device amount will not too large, this method O(n^2) is ok)
         List<Device> deviceList = new ArrayList<>();
@@ -78,24 +75,19 @@ public class DeviceScheduler {
 
     public List<Device> queryByVm(Vm vm) throws BaseException {
         // 1. Devices from DB
-        log.info("-> invoke DB -- deviceQueryByVmUuid");
         List<Device> dbDevices = tableStorage.deviceQueryByVmUuid(vm.getUuid());
-        log.info("<- invoke DB -- done");
         if (CollectionUtils.isEmpty(dbDevices)) {
             return new ArrayList<>();
         }
 
         // 2. Devices form host RAW
-        log.info("-> invoke DB -- hostQueryByUuid");
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
-        log.info("<- invoke DB -- done");
         List<Device> rawDevices;
         try {
             String jsonObjectString = deviceController.queryAll(getUri(host));
             rawDevices = JSON.parseArray(jsonObjectString, Device.class);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error(String.format("ERROR: device query all failed, host name is %s", host.getName()));
+            log.error(String.format("ERROR: device query all failed, host name is %s. Exception: %s", host.getName(), e));
             throw new BaseException("err: device query all failed, host name is " + host.getName());
         }
 
@@ -126,7 +118,7 @@ public class DeviceScheduler {
 
     public void attachDevice(Device attachDevice, Host host, Vm vm) throws BaseException {
         if (!checkOperate(vm, attachDevice)) {
-            log.error(String.format("ERROR: device operate unavailable on VM (not support VM status)!"));
+            log.error("ERROR: device operate unavailable on VM (not support VM status)!");
             throw new BaseException(
                     "err: device operate unavailable on VM (not support VM status)!", ResponseEnum.DEVICE_ATTACH_ERROR);
         }
@@ -136,60 +128,56 @@ public class DeviceScheduler {
                 // attach device
                 if (!deviceController.attach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
                         .equals(ResponseMsgConstants.SUCCESS)) {
-                    log.error(String.format("ERROR: AGENT do attach failed!"));
+                    log.error("ERROR: AGENT do attach failed!");
                     throw new BaseException(
                             "err: AGENT do attach failed!", ResponseEnum.DEVICE_ATTACH_ERROR);
                 }
                 device.setStatus(DeviceStatusEnum.ATTACHED);
                 device.setInstanceUuid(vm.getUuid());
-                log.info("-> invoke DB -- deviceSave");
+                log.info(String.format("-> invoke DB -- deviceSave, set status %s", device.getStatus()));
                 tableStorage.deviceSave(device);
                 log.info("<- invoke DB -- done");
                 return;
             }
         }
-        log.error(String.format("ERROR: device not found!"));
+        log.error("ERROR: device not found!");
         throw new BaseException(
                 "err: device not found!", ResponseEnum.DEVICE_ATTACH_ERROR);
     }
 
     public void detachDevice(Device detachDevice, Host host, Vm vm) throws BaseException {
         if (!checkOperate(vm, detachDevice)) {
-            log.error(String.format("ERROR: device operate unavailable on VM (not support VM status)!"));
+            log.error("ERROR: device operate unavailable on VM (not support VM status)!");
             throw new BaseException(
                     "err: device operate unavailable on VM (not support VM status)!", ResponseEnum.DEVICE_ATTACH_ERROR);
         }
-        log.info("-> invoke DB -- deviceQueryByVmUuid");
         List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vm.getUuid());
-        log.info("<- invoke DB -- done");
         for (Device device : deviceList) {
             // from DB only has ATTACHED, no UNREACHABLE
             if (device.equals(detachDevice) && device.getStatus().equals(DeviceStatusEnum.ATTACHED)) {
                 // detach device
                 if (!deviceController.detach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
                         .equals(ResponseMsgConstants.SUCCESS)) {
-                    log.error(String.format("ERROR: AGENT do detach failed!"));
+                    log.error("ERROR: AGENT do detach failed!");
                     throw new BaseException(
                             "err: AGENT do detach failed!", ResponseEnum.DEVICE_DETACH_ERROR);
                 }
                 // delete in db
                 if (!tableStorage.deviceDelete(device)) {
-                    log.error(String.format("ERROR: DB do delete failed!"));
+                    log.error("ERROR: DB do delete failed!");
                     throw new BaseException(
                             "err: DB do delete failed!", ResponseEnum.DEVICE_DETACH_ERROR);
                 }
                 return;
             }
         }
-        log.error(String.format("ERROR: device not found!"));
+        log.error("ERROR: device not found!");
         throw new BaseException(
                 "err: device not found!", ResponseEnum.DEVICE_DETACH_ERROR);
     }
 
     public void deleteDevice(String vmUuid) throws BaseException {
-        log.info("-> invoke DB -- deviceQueryByVmUuid");
         List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vmUuid);
-        log.info("<- invoke DB -- done");
         for (Device device : deviceList) {
             if (!tableStorage.deviceDelete(device)) {
                 log.error(String.format("ERROR: device delete failed! id: %s",device.getId()));
@@ -216,8 +204,7 @@ public class DeviceScheduler {
         try {
             return new URI(AgentConfig.getHostUri(host));
         } catch (URISyntaxException e) {
-            e.printStackTrace();
-            log.error("build URI failed!");
+            log.error(String.format("ERROR: build URI failed! %s", e));
             return null;
         }
     }
