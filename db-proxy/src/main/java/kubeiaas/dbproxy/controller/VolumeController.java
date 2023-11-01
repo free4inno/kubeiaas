@@ -38,11 +38,11 @@ public class VolumeController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAllDataVolume() {
-        log.info("queryAllDataVolume ==== start ====");
+        log.info("-- start -- queryAllDataVolume");
         Specification<VolumeTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(VolumeConstants.USAGE_TYPE), VolumeUsageEnum.DATA));
         List<VolumeTable> volumeTableList = volumeDao.findAll(specification);
-        log.info("queryAllDataVolume ==== end ====");
+        log.info("-- end -- queryAllDataVolume");
         return JSON.toJSONString(volumeTableList);
     }
 
@@ -51,7 +51,7 @@ public class VolumeController {
     public String pageQueryAllDataVolume(
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("pageQueryAllDataVolume ==== start ====");
+        log.info("-- start -- pageQueryAllDataVolume -- pageNum: {}, pageSize: {}", pageNum, pageSize);
         Specification<VolumeTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(VolumeConstants.USAGE_TYPE), VolumeUsageEnum.DATA));
         // 1. build pageable
@@ -59,7 +59,7 @@ public class VolumeController {
         Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
         // 2. do query
         Page<VolumeTable> volumePage = volumeDao.findAll(specification, pageable);
-        log.info("pageQueryAllDataVolume ==== end ====");
+        log.info("-- end -- pageQueryAllDataVolume");
         return JSON.toJSONString(volumePage);
     }
 
@@ -70,7 +70,7 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("fuzzyQueryDataVolume ==== start ====");
+        log.info("-- start -- fuzzyQueryDataVolume");
         // 1. build pageable
         //    - pageNum in Pageable is from 0-n, so we need to `pageNum - 1`
         // 2. build specification
@@ -82,8 +82,9 @@ public class VolumeController {
         } else {
             specification = buildFuzzySpec(keywords, status);
         }
+        log.info("fuzzyQuery specification: {}", specification);
         Page<VolumeTable> volumePage = volumeDao.findAll(specification, pageable);
-        log.info("fuzzyQueryDataVolume ==== end ====");
+        log.info("-- end -- fuzzyQueryDataVolume");
         return JSON.toJSONString(volumePage);
     }
 
@@ -92,11 +93,11 @@ public class VolumeController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<VolumeTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<VolumeTable> volumeTableList = volumeDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(volumeTableList);
     }
 
@@ -104,10 +105,10 @@ public class VolumeController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- volumeObjectStr: {}", volumeObjectStr);
         VolumeTable volumeTable = JSON.parseObject(volumeObjectStr, VolumeTable.class);
         volumeDao.saveAndFlush(volumeTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(volumeTable);
     }
 
@@ -115,9 +116,9 @@ public class VolumeController {
     @ResponseBody
     public synchronized void deleteByUuid(
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid) {
-        log.info("deleteVolumeByUuid ==== start ==== uuid:" + volumeUuid);
+        log.info("-- start -- deleteByUuid -- volumeUuid: {}", volumeUuid);
         volumeDao.deleteByUuid(volumeUuid);
-        log.info("deleteVolumeByUuid ==== end ====");
+        log.info("-- end -- deleteByUuid");
     }
 
     // =================================================================================================================

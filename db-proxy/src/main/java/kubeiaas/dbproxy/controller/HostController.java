@@ -26,9 +26,9 @@ public class HostController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<HostTable> hostTableList = hostDao.findAll();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll");
         return JSON.toJSONString(hostTableList);
     }
 
@@ -37,11 +37,11 @@ public class HostController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<HostTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<HostTable> hostTableList = hostDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(hostTableList);
     }
 
@@ -50,11 +50,11 @@ public class HostController {
     public String queryAllLikeBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllLikeBySingleKey ==== start ====");
+        log.info("-- start -- queryAllLikeBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<HostTable> specification = (root, cq, cb) ->
                 cb.and(cb.like(root.get(key1), "%" + value1 + "%"));
         List<HostTable> hostTableList = hostDao.findAll(specification);
-        log.info("queryAllLikeBySingleKey ==== end ====");
+        log.info("-- end -- queryAllLikeBySingleKey");
         return JSON.toJSONString(hostTableList);
     }
 
@@ -62,10 +62,10 @@ public class HostController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.HOST_OBJECT) String hostObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- hostObjectStr: {}", hostObjectStr);
         HostTable hostTable = JSON.parseObject(hostObjectStr, HostTable.class);
         hostDao.saveAndFlush(hostTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(hostTable);
     }
 }

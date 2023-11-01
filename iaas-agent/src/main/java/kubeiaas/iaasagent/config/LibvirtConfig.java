@@ -61,7 +61,7 @@ public class LibvirtConfig {
         try {
             connect = new Connect(conStr);
         } catch (LibvirtException e) {
-            log.error(String.format("ERROR: get libvirt connection error, %s", e.getMessage()));
+            log.error("ERROR: get libvirt connection error", e);
         }
         return connect;
     }

@@ -37,7 +37,7 @@ public class VncScheduler {
         try {
             return new URI(agentConfig.getVncUri());
         } catch (URISyntaxException | BaseException e) {
-            log.error(String.format("ERROR: build URI failed! %s", e));
+            log.error("ERROR: build URI failed! %s", e);
             return null;
         }
     }

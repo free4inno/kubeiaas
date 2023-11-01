@@ -81,7 +81,7 @@ public class VolumeProcess {
                     return;
                 }
             } catch (InterruptedException e) {
-                log.error(String.format("ERROR: create system volume failed! (loop error). Exception: %s", e));
+                log.error("ERROR: create system volume failed! (loop error). ", e);
 
                 newVm.setStatus(VmStatusEnum.ERROR);
                 log.info(String.format("-> invoke DB -- vmSave, uuid: %s, set status: %s", newVm.getUuid(), newVm.getStatus()));

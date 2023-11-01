@@ -48,7 +48,7 @@ public class VmScheduler {
             vmController.createVmInstance(getSelectedUri(vmUuid), vmUuid);
             return true;
         } catch (Exception e) {
-            log.error(String.format("ERROR: createVmInstance. Exception: %s", e));
+            log.error("ERROR: createVmInstance. ", e);
             return false;
         }
     }
@@ -57,7 +57,7 @@ public class VmScheduler {
         try {
             return vmController.deleteVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: deleteVmInstance. Exception: %s", e));
+            log.error("ERROR: deleteVmInstance. ", e);
             return false;
         }
     }
@@ -67,7 +67,7 @@ public class VmScheduler {
             return vmController.stopVmInstance(getSelectedUri(vmUuid), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: stopVmInstance. Exception: %s", e));
+            log.error("ERROR: stopVmInstance. ", e);
             return false;
         }
     }
@@ -77,7 +77,7 @@ public class VmScheduler {
             return vmController.startVmInstance(getSelectedUri(vmUuid), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: startVmInstance. Exception: %s", e));
+            log.error("ERROR: startVmInstance. ", e);
             return false;
         }
     }
@@ -87,7 +87,7 @@ public class VmScheduler {
             return vmController.rebootVmInstance(getSelectedUri(vmUuid), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: rebootVmInstance. Exception: %s", e));
+            log.error("ERROR: rebootVmInstance. ", e);
             return false;
         }
     }
@@ -97,7 +97,7 @@ public class VmScheduler {
             return vmController.suspendVmInstance(getSelectedUri(vmUuid), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: suspendVmInstance. Exception: %s", e));
+            log.error("ERROR: suspendVmInstance. ", e);
             return false;
         }
     }
@@ -107,7 +107,7 @@ public class VmScheduler {
             return vmController.resumeVmInstance(getSelectedUri(vmUuid), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: resumeVmInstance. Exception: %s", e));
+            log.error("ERROR: resumeVmInstance. ", e);
             return false;
         }
     }
@@ -118,7 +118,7 @@ public class VmScheduler {
             return vmController.modifyVmInstance(getSelectedUri(vmUuid), vmUuid, cpus, memory)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: modifyVmInstance. Exception: %s", e));
+            log.error("ERROR: modifyVmInstance. ", e);
             return false;
         }
     }
@@ -128,7 +128,7 @@ public class VmScheduler {
             return volumeController.volumePublishImage(getSelectedUri(vmUuid), imagePath, volumePath, extraSize)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: volumePublishImage. Exception: %s", e));
+            log.error("ERROR: volumePublishImage. ", e);
             return false;
         }
     }
@@ -139,7 +139,7 @@ public class VmScheduler {
             String statusStr = vmController.status(getSelectedUri(vm.getUuid()), vm.getUuid());
             vmStatusEnum = JSON.parseObject(statusStr, VmStatusEnum.class);
         } catch (Exception e) {
-            log.error(String.format("ERROR: getStatus. Exception: %s", e));
+            log.error("ERROR: getStatus.", e);
         }
         if (null == vmStatusEnum) {
             log.error(String.format("ERROR: failed to get current vm status, uuid %s",vm.getUuid()));
@@ -153,7 +153,7 @@ public class VmScheduler {
             return vmController.setPasswd(getSelectedUri(vm.getUuid()), vm.getUuid(), user, passwd)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: setPasswd. Exception: %s", e));
+            log.error("ERROR: setPasswd. ", e);
             throw new BaseException("err: failed to connect with agent.");
         }
     }
@@ -168,7 +168,7 @@ public class VmScheduler {
         try {
             return new URI(AgentConfig.getSelectedUri(vmUuid));
         } catch (URISyntaxException e) {
-            log.error(String.format("ERROR: build URI failed! %s", e));
+            log.error("ERROR: build URI failed! %s", e);
             return null;
         }
     }

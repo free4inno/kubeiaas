@@ -28,11 +28,11 @@ public class IpUsedController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<IpUsedTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<IpUsedTable> ipUsedTableList = ipUsedDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(ipUsedTableList);
     }
 
@@ -40,10 +40,10 @@ public class IpUsedController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- ipUsedObjectStr: {}", ipUsedObjectStr);
         IpUsedTable ipUsedTable = JSON.parseObject(ipUsedObjectStr, IpUsedTable.class);
         ipUsedDao.saveAndFlush(ipUsedTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(ipUsedTable);
     }
 
@@ -51,9 +51,9 @@ public class IpUsedController {
     @ResponseBody
     public synchronized void deleteByVmUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("deleteUsedIpsByInstanceUuid ==== start ==== vmUuid:" + vmUuid);
+        log.info("-- start -- deleteByVmUuid -- vmUuid: {}", vmUuid);
         ipUsedDao.deleteAllByInstanceUuid(vmUuid);
-        log.info("deleteUsedIpsByInstanceUuid ==== end ==== ");
+        log.info("-- end -- deleteByVmUuid");
     }
 
 }

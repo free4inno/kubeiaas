@@ -37,7 +37,7 @@ public class DeviceScheduler {
             String jsonObjectString = deviceController.queryAll(getUri(host));
             rawDevices = JSON.parseArray(jsonObjectString, Device.class);
         } catch (Exception e) {
-            log.error(String.format("ERROR: device query all failed, host name is %s. Exception: %s", host.getName(), e));
+            log.error(String.format("ERROR: device query all failed, host name is %s.", host.getName()), e);
             throw new BaseException("err: device query all failed, host name is " + host.getName());
         }
 
@@ -204,7 +204,7 @@ public class DeviceScheduler {
         try {
             return new URI(AgentConfig.getHostUri(host));
         } catch (URISyntaxException e) {
-            log.error(String.format("ERROR: build URI failed! %s", e));
+            log.error("ERROR: build URI failed! %s", e);
             return null;
         }
     }

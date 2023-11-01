@@ -36,9 +36,9 @@ public class VmController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<VmTable> vmTableList = vmDao.findAll();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll");
         return JSON.toJSONString(vmTableList);
     }
 
@@ -47,11 +47,11 @@ public class VmController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<VmTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<VmTable> vmTableList = vmDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(vmTableList);
     }
 
@@ -60,13 +60,13 @@ public class VmController {
     public String pageQueryAll(
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("pageQueryAll ==== start ====");
+        log.info("-- start -- pageQueryAll -- pageNum: {}, pageSize: {}", pageNum, pageSize);
         // 1. build pageable
         // (pageNum in Pageable is from 0-n, so we need to `pageNum - 1`)
         Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
         // 2. do query
         Page<VmTable> vmPage = vmDao.findAll(pageable);
-        log.info("pageQueryAll ==== end ====");
+        log.info("-- end -- pageQueryAll");
         return JSON.toJSONString(vmPage);
     }
 
@@ -79,7 +79,7 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("pageQueryFuzzy ==== start ====");
+        log.info("-- start -- fuzzyQuery");
         // 1. build pageable
         //    - pageNum in Pageable is from 0-n, so we need to `pageNum - 1`
         // 2. build specification
@@ -89,9 +89,10 @@ public class VmController {
             vmPage = vmDao.findAll(pageable);
         } else {
             Specification<VmTable> specification = buildFuzzySpec(keywords, status, hostUuid, imageUuid, false);
+            log.info("fuzzyQuery specification: {}", specification);
             vmPage = vmDao.findAll(specification, pageable);
         }
-        log.info("pageQueryFuzzy ==== end ====");
+        log.info("-- end -- fuzzyQuery");
         return JSON.toJSONString(vmPage);
     }
 
@@ -101,15 +102,16 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("fuzzyQueryAttach ==== start ====");
+        log.info("-- start -- fuzzyQueryAttach");
         // 1. build pageable
         //    - pageNum in Pageable is from 0-n, so we need to `pageNum - 1`
         Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
         // 2. build specification
         Specification<VmTable> specification = buildFuzzySpec(keywords, null, null, null, true);
+        log.info("fuzzyQueryAttach specification: {}", specification);
         // 3. do query
         Page<VmTable> vmPage = vmDao.findAll(specification, pageable);
-        log.info("fuzzyQueryAttach ==== end ====");
+        log.info("-- end -- fuzzyQueryAttach");
         return JSON.toJSONString(vmPage);
     }
 
@@ -117,10 +119,10 @@ public class VmController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- vmObjectStr: {}", vmObjectStr);
         VmTable vmTable = JSON.parseObject(vmObjectStr, VmTable.class);
         vmDao.saveAndFlush(vmTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(vmTable);
     }
 
@@ -128,9 +130,9 @@ public class VmController {
     @ResponseBody
     public synchronized void deleteByUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("deleteInstanceByUuid ==== start ==== vmUuid:" + vmUuid);
+        log.info("-- start -- deleteByUuid -- vmUuid: {}", vmUuid);
         vmDao.deleteByUuid(vmUuid);
-        log.info("deleteInstanceByUuid ==== end ====");
+        log.info("-- end -- deleteByUuid");
     }
 
     // =================================================================================================================

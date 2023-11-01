@@ -39,7 +39,7 @@ public class DhcpScheduler {
                 return false;
             }
         } catch (Exception e) {
-            log.error(String.format("ERROR: bindMacAndIp. Exception: %s", e));
+            log.error("ERROR: bindMacAndIp. ", e);
             return false;
         }
     }
@@ -49,7 +49,7 @@ public class DhcpScheduler {
             return dhcpController.unbindMacAndIp(getDhcpUri(), vmUuid)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: unbindMacAndIp. Exception: %s", e));
+            log.error("ERROR: unbindMacAndIp. ", e);
             return false;
         }
     }
@@ -59,7 +59,7 @@ public class DhcpScheduler {
             return dhcpController.updateIpSeg(getDhcpUri(), ipSegId)
                     .equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            log.error(String.format("ERROR: updateIpSeg. Exception: %s", e));
+            log.error("ERROR: updateIpSeg. ", e);
             return false;
         }
     }
@@ -68,7 +68,7 @@ public class DhcpScheduler {
         try {
             return new URI(agentConfig.getDhcpUri());
         } catch (URISyntaxException | BaseException e) {
-            log.error(String.format("ERROR: build URI failed! %s", e));
+            log.error("ERROR: build URI failed! %s", e);
             return null;
         }
     }

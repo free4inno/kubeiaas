@@ -30,9 +30,9 @@ public class IpSegmentController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<IpSegmentTable> ipSegmentTableList = ipSegmentDao.findAll();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll");
         return JSON.toJSONString(ipSegmentTableList);
     }
 
@@ -41,11 +41,11 @@ public class IpSegmentController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<IpSegmentTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<IpSegmentTable> ipSegmentTableList = ipSegmentDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(ipSegmentTableList);
     }
 
@@ -56,7 +56,7 @@ public class IpSegmentController {
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1,
             @RequestParam(value = RequestParamConstants.KEY_2) String key2,
             @RequestParam(value = RequestParamConstants.VALUE_2) String value2) {
-        log.info("queryAllByDoubleKey ==== start ====");
+        log.info("-- start -- queryAllByDoubleKey -- key1: {}, value1: {}, key2: {}, value2: {}", key1, value1, key2, value2);
         Specification<IpSegmentTable> specification;
         if (key2.equals(IpSegmentConstants.TYPE)) {
             IpTypeEnum type = EnumUtils.getEnumFromString(IpTypeEnum.class, value2);
@@ -67,7 +67,7 @@ public class IpSegmentController {
                     cb.and(cb.equal(root.get(key1), value1), cb.equal(root.get(key2), value2));
         }
         List<IpSegmentTable> ipSegmentTableList = ipSegmentDao.findAll(specification);
-        log.info("queryAllByDoubleKey ==== end ====");
+        log.info("-- end -- queryAllByDoubleKey");
         return JSON.toJSONString(ipSegmentTableList);
     }
 
@@ -75,10 +75,10 @@ public class IpSegmentController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_OBJECT) String ipSegmentObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- ipSegmentObjectStr: {}", ipSegmentObjectStr);
         IpSegmentTable ipSegmentTable = JSON.parseObject(ipSegmentObjectStr, IpSegmentTable.class);
         ipSegmentDao.saveAndFlush(ipSegmentTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(ipSegmentTable);
     }
 
@@ -86,8 +86,8 @@ public class IpSegmentController {
     @ResponseBody
     public synchronized void deleteById(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId) {
-        log.info("deleteById ==== start ==== id:" + ipSegmentId);
+        log.info("-- start -- deleteById -- ipSegmentId: {}", ipSegmentId);
         ipSegmentDao.deleteById(ipSegmentId);
-        log.info("deleteById ==== end ====");
+        log.info("-- end -- deleteById");
     }
 }

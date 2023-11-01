@@ -26,9 +26,9 @@ public class DeviceController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<DeviceTable> deviceTableList = deviceDao.findAll();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll");
         return JSON.toJSONString(deviceTableList);
     }
 
@@ -37,11 +37,11 @@ public class DeviceController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<DeviceTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<DeviceTable> deviceTableList = deviceDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(deviceTableList);
     }
 
@@ -49,10 +49,10 @@ public class DeviceController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- deviceObjectStr: {}", deviceObjectStr);
         DeviceTable deviceTable = JSON.parseObject(deviceObjectStr, DeviceTable.class);
         deviceDao.saveAndFlush(deviceTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(deviceTable);
     }
 
@@ -60,8 +60,8 @@ public class DeviceController {
     @ResponseBody
     public synchronized void deleteById(
             @RequestParam(value = RequestParamConstants.ID) Integer id) {
-        log.info("deleteById ==== start ==== id:" + id);
+        log.info("-- start -- deleteById -- id: {}", id);
         deviceDao.deleteById(id);
-        log.info("deleteById ==== end ====");
+        log.info("-- end -- deleteById");
     }
 }

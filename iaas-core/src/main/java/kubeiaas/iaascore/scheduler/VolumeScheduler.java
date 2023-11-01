@@ -267,7 +267,7 @@ public class VolumeScheduler {
         try {
             return new URI(AgentConfig.getSelectedUri(vmUuid));
         } catch (URISyntaxException e) {
-            log.error(String.format("ERROR: build URI failed! %s", e));
+            log.error("ERROR: build URI failed! %s", e);
             return null;
         }
     }
