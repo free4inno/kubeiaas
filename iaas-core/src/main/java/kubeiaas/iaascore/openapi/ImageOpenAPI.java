@@ -36,9 +36,13 @@ public class ImageOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("image queryAll ==== start ====");
+        log.info("-- start -- queryAll");
+
+        log.info("-> invoke DB -- imageQueryAll");
         List<Image> imageList = tableStorage.imageQueryAll();
-        log.info("image queryAll ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(imageList));
     }
 
@@ -47,9 +51,13 @@ public class ImageOpenAPI {
     public String pageQueryAll(
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("image pageQueryAll ==== start ====");
+        log.info("-- start -- pageQueryAll");
+
+        log.info(String.format("-> invoke DB -- imagePageQueryAll. pageNum: %s, pageSize: %s", pageNum, pageSize));
         PageResponse<Image> res = tableStorage.imagePageQueryAll(pageNum, pageSize);
-        log.info("image pageQueryAll ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- pageQueryAll -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -59,9 +67,13 @@ public class ImageOpenAPI {
             @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("image fuzzyQuery ==== start ====");
+        log.info("-- start -- fuzzyQuery");
+
+        log.info(String.format("-> invoke DB -- imageFuzzyQuery. keywords: %s, pageNum: %s, pageSize: %s", keywords, pageNum, pageSize));
         PageResponse<Image> res = tableStorage.imageFuzzyQuery(keywords, pageNum, pageSize);
-        log.info("image fuzzyQuery ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- fuzzyQuery -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -69,22 +81,30 @@ public class ImageOpenAPI {
     @ResponseBody
     public String queryRaw(
             @RequestParam(value = RequestParamConstants.UUID) @NotNull @NotEmpty String uuid) {
-        log.info("image queryRaw ==== start ====");
+        log.info("-- start -- queryRaw");
+
+        log.info(String.format("-> invoke DB -- imageGetRaw. uuid: %s", uuid));
         String content = tableStorage.imageGetRaw(uuid);
+        log.info("<- invoke DB -- done");
+
         SingleContentResponse res = new SingleContentResponse(content);
-        log.info("image queryRaw ==== end ====");
+        log.info("-- end -- queryRaw -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String save(@Valid @RequestBody SaveImageForm f) {
-        log.info("image save ==== start ====");
-        if (tableStorage.imageSave(f.getUuid(), f.getContent())) {
-            log.info("image save ==== end ====");
+        log.info("-- start -- save");
+
+        log.info(String.format("-> invoke DB -- imageSave. uuid: %s, content: %s", f.getUuid(), f.getContent()));
+        boolean status = tableStorage.imageSave(f.getUuid(), f.getContent());
+        log.info("<- invoke DB -- done");
+        if (status) {
+            log.info("-- end -- save -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("image save ==== error ====");
+            log.warn("-- end -- save -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.IMAGE_SAVE_ERROR));
         }
     }
@@ -92,12 +112,16 @@ public class ImageOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String delete(@Valid @RequestBody DeleteImageForm f) {
-        log.info("image delete ==== start ====");
-        if (tableStorage.imageDelete(f.getUuid())) {
-            log.info("image delete ==== end ====");
+        log.info("-- start -- delete");
+
+        log.info(String.format("-> invoke DB -- imageDelete. uuid: %s", f.getUuid()));
+        boolean status = tableStorage.imageDelete(f.getUuid());
+        log.info("<- invoke DB -- done");
+        if (status) {
+            log.info("-- end -- delete -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("image delete ==== error ====");
+            log.warn("-- end -- delete -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.IMAGE_DELETE_ERROR));
         }
     }
@@ -105,11 +129,15 @@ public class ImageOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
-        log.info("statistics ==== start ====");
+        log.info("-- start -- statistics");
         Map<String, Integer> resMap = new HashMap<>();
+
+        log.info("-> invoke DB -- imageTotalNum");
         Integer totalNum = tableStorage.imageTotalNum();
+        log.info("<- invoke DB -- done");
+
         resMap.put(ImageConstants.TOTAL, totalNum);
-        log.info("statistics ==== end ====");
+        log.info("-- end -- statistics -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 

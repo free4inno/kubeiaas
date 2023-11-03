@@ -44,14 +44,22 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String queryAllByHostName(
             @RequestParam(value = RequestParamConstants.HOST_NAME) @NotEmpty @NotNull String hostName) throws BaseException {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAllByHostName");
+
+        log.info(String.format("-> invoke DB -- hostQueryByName. hostName: %s", hostName));
         Host host = tableStorage.hostQueryByName(hostName);
+        log.info("<- invoke DB -- done");
         if (null == host) {
+            log.error(String.format("ERROR: host_name %s unknown.", hostName));
             throw new BaseException(
                     String.format("attach -- error: host_name %s unknown.", hostName), ResponseEnum.ARGS_ERROR);
         }
+
+        log.info(String.format("-> invoke deviceScheduler -- queryAll. hostName: %s", hostName));
         List<Device> deviceList = deviceScheduler.queryAll(host);
-        log.info("queryAll ==== end ====");
+        log.info("<- invoke deviceScheduler -- done");
+
+        log.info("-- end -- queryAllByHostName -- success");
         return JSON.toJSONString(BaseResponse.success(deviceList));
     }
 
@@ -59,14 +67,22 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String queryAllByHostUuid(
             @RequestParam(value = RequestParamConstants.HOST_UUID) @NotEmpty @NotNull String hostUuid) throws BaseException {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAllByHostUuid");
+
+        log.info(String.format("-> invoke DB -- hostQueryByUuid. hostUuid: %s", hostUuid));
         Host host = tableStorage.hostQueryByUuid(hostUuid);
+        log.info("<- invoke DB -- done");
         if (null == host) {
+            log.error(String.format("ERROR: host_uuid %s unknown.", hostUuid));
             throw new BaseException(
                     String.format("attach -- error: host_uuid %s unknown.", hostUuid), ResponseEnum.ARGS_ERROR);
         }
+
+        log.info(String.format("-> invoke deviceScheduler -- queryAll. hostUuid: %s", hostUuid));
         List<Device> deviceList = deviceScheduler.queryAll(host);
-        log.info("queryAll ==== end ====");
+        log.info("<- invoke deviceScheduler -- done");
+
+        log.info("-- end -- queryAllByHostUuid -- success");
         return JSON.toJSONString(BaseResponse.success(deviceList));
     }
 
@@ -74,38 +90,52 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String attach(
             @Valid @RequestBody AttachDeviceForm f) throws BaseException {
-        log.info("attach ==== start ====");
+        log.info("-- start -- attach");
 
         // 1.1. get vm and check
+        log.info("STEP 1: get virtual machine and host");
+
+        log.info(String.format("-> invoke DB -- vmQueryByUuid. vmUuid: %s", f.getVmUuid()));
         Vm vm = tableStorage.vmQueryByUuid(f.getVmUuid());
+        log.info("<- invoke DB -- done");
         if (null == vm) {
+            log.error(String.format("ERROR: vm_uuid %s unknown.", f.getVmUuid()));
             throw new BaseException(
                     String.format("attach -- error: vm_uuid %s unknown.", f.getVmUuid()), ResponseEnum.ARGS_ERROR);
         }
+
         // 1.2. get host
+        log.info(String.format("-> invoke DB -- hostQueryByUuid. hostUuid: %s", vm.getHostUuid()));
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
 
         // 2. get device and check
+        log.info("STEP 2: get device and check");
         DeviceTypeEnum deviceTypeEnum = EnumUtils.getEnumFromString(DeviceTypeEnum.class, f.getType());
         if (null == deviceTypeEnum) {
+            log.error(String.format("ERROR: type %s unknown.", f.getType()));
             throw new BaseException(
                     String.format("attach -- error: type %s unknown.", f.getType()), ResponseEnum.ARGS_ERROR);
         }
 
         // 3. build a temp device for compare with list
+        log.info("STEP 3: build a temp device for compare with list and attachment");
         Device tempDevice;
         try {
             tempDevice = new Device(deviceTypeEnum, f.getSign());
         } catch (Exception e) {
+            log.error(String.format("ERROR: device sign %s parse failed.", f.getSign()));
             throw new BaseException(
                     String.format("attach -- error: device sign %s parse failed.", f.getSign()),
                     ResponseEnum.ARGS_ERROR);
         }
 
+        log.info(String.format("-> invoke deviceScheduler -- attachDevice. hostUuid: %s, vmUuid: %s", host.getUuid(), vm.getUuid()));
         deviceScheduler.attachDevice(tempDevice, host, vm);
+        log.info("<- invoke deviceScheduler -- done");
 
         // 4. response
-        log.info("attach ==== end ====");
+        log.info("-- end -- attach -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
@@ -113,40 +143,55 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String detach(
             @Valid @RequestBody DetachDeviceForm f) throws BaseException {
-        log.info("detach ==== start ====");
+        log.info("-- start -- detach");
 
         // 1.1. get vm and check
+        log.info("STEP 1: get virtual machine and host");
+
+        log.info(String.format("-> invoke DB -- vmQueryByUuid. vmUuid: %s", f.getVmUuid()));
         Vm vm = tableStorage.vmQueryByUuid(f.getVmUuid());
+        log.info("<- invoke DB -- done");
         if (null == vm) {
+            log.error(String.format("ERROR: vm_uuid %s unknown.", f.getVmUuid()));
             throw new BaseException(
                     String.format("detach -- error: vm_uuid %s unknown.", f.getVmUuid()),
                     ResponseEnum.ARGS_ERROR);
         }
+
         // 1.2. get host
+        log.info(String.format("-> invoke DB -- hostQueryByUuid. hostUuid: %s", vm.getHostUuid()));
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
 
         // 2. get device and check
+        log.info("STEP 2: get device and check");
         DeviceTypeEnum deviceTypeEnum = EnumUtils.getEnumFromString(DeviceTypeEnum.class, f.getType());
         if (null == deviceTypeEnum) {
+            String type = f.getType();
+            log.error(String.format("ERROR: type %s unknown.", type));
             throw new BaseException(
-                    String.format("detach -- error: type %s unknown.", f.getType()),
+                    String.format("detach -- error: type %s unknown.", type),
                     ResponseEnum.ARGS_ERROR);
         }
 
         // 3. build a temp device for compare with list
+        log.info("STEP 3: build a temp device for compare with list and detach");
         Device tempDevice;
         try {
             tempDevice = new Device(deviceTypeEnum, f.getSign());
         } catch (Exception e) {
+            log.error(String.format("ERROR: device sign %s parse failed.", f.getSign()));
             throw new BaseException(
                     String.format("detach -- error: device sign %s parse failed.", f.getSign()),
                     ResponseEnum.ARGS_ERROR);
         }
 
+        log.info(String.format("-> invoke deviceScheduler -- detachDevice. hostUuid: %s, vmUuid: %s", host.getUuid(), vm.getUuid()));
         deviceScheduler.detachDevice(tempDevice, host, vm);
+        log.info("<- invoke deviceScheduler -- done");
 
         // 4. return
-        log.info("detach ==== end ====");
+        log.info("-- end -- detach -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 }

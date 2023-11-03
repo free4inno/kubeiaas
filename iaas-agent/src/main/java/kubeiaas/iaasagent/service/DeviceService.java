@@ -28,6 +28,7 @@ public class DeviceService {
     private XmlConfig xmlConfig;
 
     public List<Device> queryAll() {
+        log.info("query all devices");
         List<Device> devList = new ArrayList<>();
         devList.addAll(USBUtils.getHostDevices());
         devList.addAll(PCIUtils.getHostDevices());
@@ -56,23 +57,22 @@ public class DeviceService {
      * @return operate result
      */
     private boolean operate(Device device, Vm vm, int flag) {
-        log.info("operateDevice ---- start ----");
-        log.info(" -- device: " + device.toString() + "vm: " + vm.toString());
+        log.info(String.format("operateDevice info -- device: %s, vm: %s, flag: %d", device, vm, flag));
         String deviceXml = "";
         switch (device.getType()) {
             case USB:
-                log.info(" -- USB Device");
+                log.debug("-- USB Device");
                 deviceXml = xmlConfig.getUsbDevice(device);
                 break;
             case PCI:
-                log.info(" -- PCI Device");
+                log.debug("-- PCI Device");
                 deviceXml = xmlConfig.getPciDevice(device);
                 break;
         }
         if (deviceXml.isEmpty()) {
             return false;
         }
-        log.info(" -- operate device info: " + deviceXml);
+        log.debug("-- operate device info: " + deviceXml);
 
         String vmUuid = vm.getUuid();
         try {
@@ -90,33 +90,36 @@ public class DeviceService {
                 int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);
                 switch (flag) {
                     case DeviceOperateFlags.ATTACH:
+                        log.debug("-- attach device");
                         domain.attachDeviceFlags(deviceXml, virtFlag);
                         break;
 
                     case DeviceOperateFlags.DETACH:
+                        log.debug("-- detach device");
                         domain.detachDeviceFlags(deviceXml, virtFlag);
                         break;
 
                     default:
-                        log.info("-- do nothing");
+                        log.debug("-- do nothing");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("operateDevice error: " + e.getMessage());
                 return false;
             }
         } catch (LibvirtException e) {
-            e.printStackTrace();
+            log.error("operateDevice error: " + e.getMessage());
             return false;
         }
-        log.info("operateDevice ---- done ----");
         return true;
     }
 
     public boolean attach(Device device, Vm vm) {
+        log.info(String.format("attachDevice info -- device: %s, vm: %s", device, vm));
         return this.operate(device, vm, DeviceOperateFlags.ATTACH);
     }
 
     public boolean detach(Device device, Vm vm) {
+        log.info(String.format("detachDevice info -- device: %s, vm: %s", device, vm));
         return this.operate(device, vm, DeviceOperateFlags.DETACH);
     }
 }

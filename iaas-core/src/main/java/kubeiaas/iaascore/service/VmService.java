@@ -18,6 +18,7 @@ import kubeiaas.iaascore.scheduler.DeviceScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -61,17 +62,21 @@ public class VmService {
             Integer diskSize,
             String description,
             String hostUUid) throws VmException {
+        log.info(String.format("createVm info -- name: %s, cpus: %d, memory: %d, imageUuid: %s, ipSegmentId: %d, publicIpSegId: %d, diskSize: %d, description: %s, hostUUid: %s",
+                name, cpus, memory, imageUuid, ipSegmentId, publicIpSegId, diskSize, description, hostUUid));
 
         /* ---- 1. pre create VM ----
         Generate and Set basic info of vm.
         （预处理：设置基础参数，保存虚拟机信息）
          */
+        log.info("STEP 1: pre create VM");
         Vm newVm = vmProcess.preCreateVm(name, cpus, memory, imageUuid, diskSize, description, hostUUid);
 
         /* ---- 2. Resource Operator ----
         Use Resource Operator to allocate Host and check Resource available
         （资源调度：分配宿主机，检查资源合法性）
          */
+        log.info("STEP 2: Resource Operator");
         if (publicIpSegId == null || publicIpSegId <= 0) {
             newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, false, -1);
         } else {
@@ -82,6 +87,7 @@ public class VmService {
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
+        log.info("STEP 3: Get mac-info ip-info and bind in DHCP-Controller");
         List<IpUsed> newIpUsedList = new ArrayList<>();
         // -- 3.1. PRIVATE --------
         IpUsed newPrivateIpUsed = networkProcess.createVmNetwork(newVm, ipSegmentId);
@@ -97,6 +103,7 @@ public class VmService {
         Create system volume.
         （系统盘：使用 image 创建 system volume）
          */
+        log.info("STEP 4: Create system volume");
         volumeProcess.createVmVolume(newVm);
 
         return newVm;
@@ -106,9 +113,13 @@ public class VmService {
      * 删除虚拟机
      */
     public String deleteVM(String vmUuid, boolean isForce) throws BaseException, VmException {
+        log.info(String.format("deleteVM info -- vmUuid: %s, isForce: %s", vmUuid, isForce));
         // ----- check if exist -----
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, vmUuid: %s", vmUuid));
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
         if (vm == null) {
+            log.error(String.format("ERROR: vm not found! (uuid: %s)", vmUuid));
             throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")", ResponseEnum.VM_DELETE_ERROR);
         }
 
@@ -123,31 +134,41 @@ public class VmService {
 
         try {
             // -- 0. set status -- Set deleting status
+            log.info("STEP 0: Set deleting status");
             vmProcess.setVmStatus(vmUuid, VmStatusEnum.DELETING);
 
             // -- 1. choose host -- Select the host where the VM to be deleted resides
+            log.info("STEP 1: Select the host where the VM to be deleted resides");
             resourceProcess.selectHostByVmUuid(vmUuid);
 
             // ┌- 2. delete VM -- Delete the VM and then delete other information -┐
+            log.info("STEP 2: Delete the VM and then delete other information");
             vmProcess.deleteVM(vmUuid);
 
             // ├- 3. Delete Volume -- Delete disks, including Linux files and database information
+            log.info("STEP 3: Delete disks, including Linux files and database information");
             volumeProcess.deleteSystemVolume(vmUuid);
 
             // ├- 4. Delete Ip -- Delete Ip information
+            log.info("STEP 4: Delete Ip information");
             networkProcess.deleteIps(vmUuid);
 
             // ├- 5. Delete Device -- Delete Device information (while Step.2 already detached)
+            log.info("STEP 5: Delete Device information");
+            log.info(String.format("-> invoke DB -- deviceQueryByVm, vmUuid: %s", vmUuid));
             deviceScheduler.deleteDevice(vmUuid);
+            log.info("<- invoke DB -- done");
 
-            vmProcess.deleteVmInDataBase(vmUuid);
             // └- 6. delete in database -- Delete VM records from the database -┘
+            log.info("STEP 6: Delete VM records from the database");
+            vmProcess.deleteVmInDataBase(vmUuid);
 
             // -- 7. delete vnc -- delete vnc in token.config
+            log.info("STEP 7: delete vnc in token.config");
             vncProcess.deleteVncToken(vmUuid);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(String.format("ERROR: delete failed (uuid: %s)!", vmUuid), e);
             String log = (e instanceof BaseException) ? ((BaseException) e).getMsg() : "";
             throw new VmException(vm,
                     String.format("err: delete failed (uuid: %s)! %s", vmUuid, log), ResponseEnum.VM_DELETE_ERROR);
@@ -161,14 +182,17 @@ public class VmService {
      * 支持：CPU、内存
      */
     public String modifyVm(String vmUuid, Integer cpus, Integer memory, boolean isReduce) throws BaseException {
+        log.info(String.format("modifyVm info -- vmUuid: %s, cpus: %d, memory: %d, isReduce: %s", vmUuid, cpus, memory, isReduce));
         /* -----1. choose host ----
         Select the host where the VM to be modified
         */
+        log.info("STEP 1: Select the host where the VM to be modified");
         resourceProcess.selectHostByVmUuid(vmUuid);
 
         /* -----2. modify VM ----
         Modify cpu and memory
         */
+        log.info("STEP 2: Modify cpu and memory");
         if (isReduce) {
             vmProcess.reduceVM(vmUuid, cpus, memory);
         } else {
@@ -183,13 +207,16 @@ public class VmService {
      * 支持：STOP、START、REBOOT、RESUME、SUSPEND
      */
     public String operateVm(String vmUuid, VmOperateEnum operation) throws BaseException {
+        log.info(String.format("operateVm info -- vmUuid: %s, operation: %s", vmUuid, operation));
         /* -----1. choose host ----
         Select the host where the VM to be modified
             > AgentConfig.setSelectedHost();
         */
+        log.info("STEP 1: Select the host where the VM to be modified");
         resourceProcess.selectHostByVmUuid(vmUuid);
 
         /* -----2. operate VM ----*/
+        log.info("STEP 2: operate VM");
         switch (operation) {
             case STOP:
                 // Stop VM ----
@@ -223,10 +250,12 @@ public class VmService {
                 break;
 
             default:
+                log.error("ERROR: unknown vm operation!");
                 AgentConfig.clearSelectedHost(vmUuid);
                 throw new BaseException("ERR: unknown vm operation!");
         }
 
+        log.info("STEP 3: clear selected host");
         AgentConfig.clearSelectedHost(vmUuid);
 
         return ResponseMsgConstants.SUCCESS;
@@ -254,14 +283,19 @@ public class VmService {
 
     public List<Vm> queryAll() {
         // 1. get from DB
+        log.info("-> invoke DB -- vmQueryAll");
         List<Vm> vmList = tableStorage.vmQueryAll();
+        log.info("<- invoke DB -- done");
         // 2. build & return
         return vmProcess.buildVmList(vmList);
     }
 
     public PageResponse<Vm> pageQueryAll(Integer pageNum, Integer pageSize) {
+        log.info(String.format("pageQueryAll info -- pageNum: %d, pageSize: %d", pageNum, pageSize));
         // 1. get from DB
+        log.info(String.format("-> invoke DB -- vmPageQueryAll, pageNum: %d, pageSize: %d", pageNum, pageSize));
         PageResponse<Vm> vmPage = tableStorage.vmPageQueryAll(pageNum, pageSize);
+        log.info("<- invoke DB -- done");
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));
@@ -269,8 +303,13 @@ public class VmService {
     }
 
     public PageResponse<Vm> fuzzyQuery(String keywords, String status, String hostUuid, String imageUuid, Integer pageNum, Integer pageSize) {
+        log.info(String.format("fuzzyQuery info -- keywords: %s, status: %s, hostUuid: %s, imageUuid: %s, pageNum: %d, pageSize: %d",
+                keywords, status, hostUuid, imageUuid, pageNum, pageSize));
         // 1. get from DB
+        log.info(String.format("-> invoke DB -- vmFuzzyQuery, keywords: %s, status: %s, hostUuid: %s, imageUuid: %s, pageNum: %d, pageSize: %d",
+                keywords, status, hostUuid, imageUuid, pageNum, pageSize));
         PageResponse<Vm> vmPage = tableStorage.vmFuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
+        log.info("<- invoke DB -- done");
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));
@@ -278,8 +317,11 @@ public class VmService {
     }
 
     public PageResponse<Vm> fuzzyQueryAttach(String keywords, Integer pageNum, Integer pageSize) {
+        log.info(String.format("fuzzyQueryAttach info -- keywords: %s, pageNum: %d, pageSize: %d", keywords, pageNum, pageSize));
         // 1. get from DB
+        log.info(String.format("-> invoke DB -- vmFuzzyQueryAttach, keywords: %s, pageNum: %d, pageSize: %d", keywords, pageNum, pageSize));
         PageResponse<Vm> vmPage = tableStorage.vmFuzzyQueryAttach(keywords, pageNum, pageSize);
+        log.info("<- invoke DB -- done");
         // 2. build & return
         List<Vm> vmList = vmPage.getContent();
         vmPage.setContent(vmProcess.buildVmList(vmList));
@@ -287,26 +329,40 @@ public class VmService {
     }
 
     public Vm queryByUuid(String uuid) throws BaseException {
+        log.info(String.format("queryByUuid info -- uuid: %s", uuid));
+
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, uuid: %s", uuid));
         Vm vm = tableStorage.vmQueryByUuid(uuid);
+        log.info("<- invoke DB -- done");
 
         // get ips
+        log.info(String.format("-> invoke DB -- ipUsedQueryAllByInstanceUuid, uuid: %s", uuid));
         List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
+        log.info("<- invoke DB -- done");
         vm.setIps(ipUsedList);
 
         // get images
+        log.info(String.format("-> invoke DB -- imageQueryByUuid, uuid: %s", uuid));
         Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+        log.info("<- invoke DB -- done");
         vm.setImage(image);
 
         // get volumes
+        log.info(String.format("-> invoke DB -- volumeQueryAllByInstanceUuid, uuid: %s", uuid));
         List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
+        log.info("<- invoke DB -- done");
         vm.setVolumes(volumeList);
 
         // get hosts
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, uuid: %s", uuid));
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
         vm.setHost(host);
 
         // get devices
+        log.info(String.format("-> invoke Scheduler -- deviceQueryByVm, uuid: %s", uuid));
         List<Device> deviceList = deviceScheduler.queryByVm(vm);
+        log.info("<- invoke Scheduler -- done");
         vm.setDevices(deviceList);
 
         return vm;
@@ -318,16 +374,23 @@ public class VmService {
      * 2. 根据配置中获取 Domain 域名模板
      */
     public String getVncUrl(String vmUuid) {
+        log.info(String.format("getVncUrl info -- vmUuid: %s", vmUuid));
         String domainUrl = "";
         // 1. get config from DB
+        log.info("STEP 1: get config from DB");
+        log.info(String.format("-> invoke DB -- specConfigQueryAllByType, type: %s", SpecTypeEnum.VNC_DOMAIN));
         List<SpecConfig> vncConfigs = tableStorage.specConfigQueryAllByType(SpecTypeEnum.VNC_DOMAIN);
+        log.info("<- invoke DB -- done");
         if (!CollectionUtils.isEmpty(vncConfigs)) {
             domainUrl = vncConfigs.get(0).getValue();
         }
         // 2. build and return
+        log.info("STEP 2: build and return");
         if (StringUtils.isEmpty(domainUrl)) {
             // - Analyze `vnc` host from DB hostRoles.
+            log.info(String.format("-> invoke DB -- hostQueryByRole, role: %s", HostConstants.ROLE_VNC));
             Host host = tableStorage.hostQueryByRole(HostConstants.ROLE_VNC);
+            log.info("<- invoke DB -- done");
             return String.format(VmConstants.VNC_URL_IP_TEMPLATE, host.getIp(), vmUuid);
         } else {
             // - Analyze `vnc` host from Domain Name.
@@ -340,13 +403,19 @@ public class VmService {
      * 支持字段：名称、描述
      */
     public Vm editVm(String vmUuid, String name, String description) throws BaseException {
+        log.info(String.format("editVm info -- vmUuid: %s, name: %s, description: %s", vmUuid, name, description));
         // 1. find VM
+        log.info("STEP 1: find VM");
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, vmUuid: %s", vmUuid));
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
         if (vm == null) {
+            log.error("ERROR: vm is not found!");
             throw new BaseException("ERROR: vm is not found!");
         }
 
         // 2. check is edit changed
+        log.info("STEP 2: check is edit changed");
         boolean editFlag = false;
         if (name != null && !name.isEmpty() && !name.equals(vm.getName())) {
             vm.setName(name);
@@ -358,6 +427,7 @@ public class VmService {
         }
 
         // 3. save into DB
+        log.info("STEP 3: save into DB");
         if (editFlag) {
             vm = tableStorage.vmUpdate(vm);
         }
@@ -369,13 +439,16 @@ public class VmService {
      * 发布镜像
      */
     public String publishImage(String vmUuid, String name, String description, Integer vdSize) throws BaseException {
+        log.info(String.format("publishImage info -- vmUuid: %s, name: %s, description: %s, vdSize: %d", vmUuid, name, description, vdSize));
 
         // 1. ----- choose host ----
         // Select the host where the VM to be deleted resides
+        log.info("STEP 1: Select the host where the VM to be deleted resides");
         resourceProcess.selectHostByVmUuid(vmUuid);
 
         // 2. ----- publish Image ----
         // Publish system volume to image
+        log.info("STEP 2: Publish system volume to image");
         vmProcess.publishImage(vmUuid, name, description, vdSize);
 
         return ResponseMsgConstants.SUCCESS;
@@ -386,7 +459,9 @@ public class VmService {
      */
     public Map<String, Integer> getStatistics() {
         Map<String, Integer> resMap = new HashMap<>();
+        log.info("-> invoke DB -- vmQueryAll");
         List<Vm> vmList = tableStorage.vmQueryAll();
+        log.info("<- invoke DB -- done");
 
         // 1. total
         resMap.put(VmConstants.TOTAL, vmList.size());
@@ -411,23 +486,30 @@ public class VmService {
      * 获取并刷新状态
      */
     public VmStatusEnum status(String uuid) throws BaseException {
+        log.info(String.format("status info -- uuid: %s", uuid));
         // 1. get status now
+        log.info("STEP 1: get status now");
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, uuid: %s", uuid));
         Vm vm = tableStorage.vmQueryByUuid(uuid);
+        log.info("<- invoke DB -- done");
         if (null == vm) {
+            log.error(String.format("ERROR: vm_uuid not found %s", uuid));
             throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
         }
         VmStatusEnum vmStatus = vmProcess.getStatus(vm);
-        log.info("status -- old status: {}, now status: {}.", vm.getStatus(), vmStatus);
 
+        log.info("STEP 2: update status");
         // 2.1. do UNKNOWN
         if (vmStatus.equals(VmStatusEnum.UNKNOWN)) {
             if (vm.getStatus().equals(VmStatusEnum.BUILDING)
                     || vm.getStatus().equals(VmStatusEnum.ERROR)) {
-                log.info("status -- no need to update status of {}", uuid);
+                log.debug(String.format("No need to update status for %s", uuid));
             } else {
                 vm.setStatus(VmStatusEnum.ERROR);
             }
+            log.info(String.format("-> invoke DB -- vmSave, uuid: %s", uuid));
             tableStorage.vmSave(vm);
+            log.info("<- invoke DB -- done");
             return vm.getStatus();
         }
 
@@ -439,7 +521,9 @@ public class VmService {
                 vm = vncProcess.flushVncToken(uuid);
             }
             vm.setStatus(vmStatus);
+            log.info(String.format("-> invoke DB -- vmSave, uuid: %s", uuid));
             tableStorage.vmSave(vm);
+            log.info("<- invoke DB -- done");
         }
         return vm.getStatus();
     }
@@ -448,9 +532,11 @@ public class VmService {
      * 修改密码
      */
     public void setPasswd(String uuid, String user, String passwd) throws BaseException {
+        log.info(String.format("setPasswd info -- uuid: %s, user: %s, passwd: %s", uuid, user, passwd));
         // 1. get vm
         Vm vm = tableStorage.vmQueryByUuid(uuid);
         if (null == vm) {
+            log.error(String.format("ERROR: vm_uuid not found %s", uuid));
             throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
         }
 

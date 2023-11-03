@@ -38,26 +38,14 @@ public class VmOpenAPI {
     private VmService vmService;
 
     /**
-     * 测试接口
-     */
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.TEST, produces = RequestMappingConstants.APP_JSON)
-    @ResponseBody
-    public String test(HttpServletRequest request) {
-        log.info("test ==== start ====");
-        log.info("URI " + request.getRemoteAddr() + " " + request.getRemoteHost() + " " + request.getRemotePort());
-        log.info("test ==== end ====");
-        return "hello";
-    }
-
-    /**
      * 创建
      */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String create(@Valid @RequestBody CreateVmForm f) throws VmException {
-        log.info("create ==== start ====");
+        log.info("-- start -- create");
         Vm newVm = vmService.createVm(f.getName(), f.getCpus(), f.getMemory(), f.getImageUuid(), f.getIpSegmentId(), f.getPublicIpSegId(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
-        log.info("create ==== end ====");
+        log.info("-- end -- create -- success");
         return JSON.toJSONString(BaseResponse.success(newVm));
     }
 
@@ -67,7 +55,7 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException, VmException {
-        log.info("delete ==== start ====");
+        log.info("-- start -- delete");
         String result;
         if (f.getDeleteType().equals(VmConstants.DELETE_FORCE)) {
             result = vmService.deleteVM(f.getVmUuid(), true);
@@ -75,10 +63,10 @@ public class VmOpenAPI {
             result = vmService.deleteVM(f.getVmUuid(), false);
         }
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("delete ==== end ====");
+            log.info("-- end -- delete -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("delete ==== error ====");
+            log.warn("-- end -- delete -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_DELETE_ERROR));
         }
     }
@@ -89,13 +77,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.STOP, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String stop(@Valid @RequestBody OperateVmForm f) throws BaseException {
-        log.info("stop ==== start ====");
+        log.info("-- start -- stop");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.STOP)
                 .equals(ResponseMsgConstants.SUCCESS)){
-            log.info("stop ==== end ====");
+            log.info("-- end -- stop -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("stop ==== error ====");
+            log.warn("-- end -- stop -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_STOP_ERROR));
         }
     }
@@ -106,13 +94,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.START, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String start(@Valid @RequestBody OperateVmForm f) throws BaseException {
-        log.info("startVm ==== start ====");
+        log.info("-- start -- start");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.START)
                 .equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("startVm ==== end ====");
+            log.info("-- end -- start -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("startVm ==== error ====");
+            log.warn("-- end -- start -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_START_ERROR));
         }
     }
@@ -123,13 +111,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REBOOT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reboot(@Valid @RequestBody OperateVmForm f) throws BaseException {
-        log.info("rebootVm  ==== start ====");
+        log.info("-- start -- reboot");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.REBOOT)
                 .equals(ResponseMsgConstants.SUCCESS)){
-            log.info("rebootVm ==== end ====");
+            log.info("-- end -- reboot -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("rebootVm ==== error ====");
+            log.warn("-- end -- reboot -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
         }
     }
@@ -140,13 +128,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SUSPEND, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String suspend(@Valid @RequestBody OperateVmForm f) throws BaseException {
-        log.info("suspendVm  ==== start ====");
+        log.info("-- start -- suspend");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.SUSPEND)
                 .equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("suspendVm ==== end ====");
+            log.info("-- end -- suspend -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("suspendVm ==== error ====");
+            log.warn("-- end -- suspend -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_SUSPEND_ERROR));
         }
     }
@@ -157,13 +145,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String resume(@Valid @RequestBody OperateVmForm f) throws BaseException {
-        log.info("resumeVm  ==== start ====");
+        log.info("-- start -- resume");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.RESUME)
                 .equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("resumeVm ==== end ====");
+            log.info("-- end -- resume -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("resumeVm ==== error ====");
+            log.warn("-- end -- resume -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_RESUME_ERROR));
         }
     }
@@ -174,13 +162,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPDATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String modify(@Valid @RequestBody ModifyVmForm f) throws BaseException {
-        log.info("modify ==== start ====");
+        log.info("-- start -- modify");
         if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory(), false)
                 .equals(ResponseMsgConstants.SUCCESS)){
-            log.info("modify ==== end ====");
+            log.info("-- end -- modify -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("modify ==== error ====");
+            log.warn("-- end -- modify -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
@@ -191,13 +179,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REDUCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reduce(@Valid @RequestBody ModifyVmForm f) throws BaseException {
-        log.info("reduce ==== start ====");
+        log.info("-- start -- reduce");
         if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory(), true)
                 .equals(ResponseMsgConstants.SUCCESS)){
-            log.info("reduce ==== end ====");
+            log.info("-- end -- reduce -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("reduce ==== error ====");
+            log.warn("-- end -- reduce -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
@@ -208,9 +196,9 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<Vm> vmList = vmService.queryAll();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(vmList));
     }
 
@@ -223,9 +211,9 @@ public class VmOpenAPI {
     public String pageQueryAll(
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("pageQueryAll ==== start ====");
+        log.info("-- start -- pageQueryAll");
         PageResponse<Vm> res = vmService.pageQueryAll(pageNum, pageSize);
-        log.info("pageQueryAll ==== end ====");
+        log.info("-- end -- pageQueryAll -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -242,9 +230,9 @@ public class VmOpenAPI {
             @RequestParam(value = RequestParamConstants.IMAGE_UUID) String imageUuid,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("fuzzyQuery ==== start ====");
+        log.info("-- start -- fuzzyQuery");
         PageResponse<Vm> res = vmService.fuzzyQuery(keywords, status, hostUuid, imageUuid, pageNum, pageSize);
-        log.info("fuzzyQuery ==== end ====");
+        log.info("-- end -- fuzzyQuery -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -258,9 +246,9 @@ public class VmOpenAPI {
             @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("fuzzyQueryAttach ==== start ====");
+        log.info("-- start -- fuzzyQueryAttach");
         PageResponse<Vm> res = vmService.fuzzyQueryAttach(keywords, pageNum, pageSize);
-        log.info("fuzzyQueryAttach ==== end ====");
+        log.info("-- end -- fuzzyQueryAttach -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -271,9 +259,9 @@ public class VmOpenAPI {
     @ResponseBody
     public String queryByUuid(
             @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) throws BaseException {
-        log.info("queryByUuid ==== start ====");
+        log.info("-- start -- queryByUuid");
         Vm vm = vmService.queryByUuid(uuid);
-        log.info("queryByUuid ==== end ====");
+        log.info("-- end -- queryByUuid -- success");
         return JSON.toJSONString(BaseResponse.success(vm));
     }
 
@@ -284,9 +272,11 @@ public class VmOpenAPI {
     @ResponseBody
     public String vncUrl(
             @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) {
+        log.info("-- start -- vncUrl");
         String url = vmService.getVncUrl(uuid);
         Map<String, String> resMap = new HashMap<>();
         resMap.put(RequestMappingConstants.VNC_URL, url);
+        log.info("-- end -- vncUrl -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -296,9 +286,9 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String edit(@Valid @RequestBody EditVmForm f) throws BaseException {
-        log.info("edit ==== start ====");
+        log.info("-- start -- edit");
         Vm vm = vmService.editVm(f.getVmUuid(), f.getName(), f.getDescription());
-        log.info("edit ==== end ====");
+        log.info("-- end -- edit -- success");
         return JSON.toJSONString(BaseResponse.success(vm));
     }
 
@@ -308,13 +298,13 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.PUBLISH_IMAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String publishImage(@Valid @RequestBody PublishImageForm f) throws BaseException {
-        log.info("publishImage ==== start ====");
+        log.info("-- start -- publishImage");
         if (vmService.publishImage(f.getVmUuid(), f.getName(), f.getDescription(), f.getVdSize())
                 .equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("publishImage ==== end ====");
+            log.info("-- end -- publishImage -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("publishImage ==== error ====");
+            log.warn("-- end -- publishImage -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.PUBLISH_IMAGE_ERROR));
         }
     }
@@ -325,9 +315,9 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
-        log.info("statistics ==== start ====");
+        log.info("-- start -- statistics");
         Map<String, Integer> resMap = vmService.getStatistics();
-        log.info("statistics ==== end ====");
+        log.info("-- end -- statistics -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -338,9 +328,9 @@ public class VmOpenAPI {
     @ResponseBody
     public String status(
             @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) throws BaseException {
-        log.info("refresh ==== start ====");
+        log.info("-- start -- status");
         VmStatusEnum vmStatusEnum = vmService.status(uuid);
-        log.info("refresh ==== end ====");
+        log.info("-- end -- status -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(vmStatusEnum.toString())));
     }
 
@@ -351,9 +341,9 @@ public class VmOpenAPI {
     @ResponseBody
     public String setPasswd(
             @Valid @RequestBody SetPasswdForm f) throws BaseException {
-        log.info("setPasswd ==== start ====");
+        log.info("-- start -- setPasswd");
         vmService.setPasswd(f.getVmUuid(), f.getUser(), f.getPasswd());
-        log.info("setPasswd ==== end ====");
+        log.info("-- end -- setPasswd -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 

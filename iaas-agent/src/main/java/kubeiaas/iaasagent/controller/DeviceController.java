@@ -28,8 +28,9 @@ public class DeviceController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== ");
+        log.info("-- start -- queryAll");
         List<Device> deviceList = deviceService.queryAll();
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(deviceList);
     }
 
@@ -39,14 +40,14 @@ public class DeviceController {
             @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr,
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObject
     ) {
-        log.info("attach ==== start");
+        log.info("-- start -- attach");
         Vm vm = JSON.parseObject(vmObject, Vm.class);
         Device device = JSON.parseObject(deviceObjectStr, Device.class);
         if (deviceService.attach(device, vm)) {
-            log.info("attach -- success");
+            log.info("-- end -- attach -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("attach -- failed");
+            log.info("-- end -- attach -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -57,14 +58,14 @@ public class DeviceController {
             @RequestParam(value = RequestParamConstants.DEVICE_OBJECT) String deviceObjectStr,
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObject
     ) {
-        log.info("detach ==== start");
+        log.info("-- start -- detach");
         Vm vm = JSON.parseObject(vmObject, Vm.class);
         Device device = JSON.parseObject(deviceObjectStr, Device.class);
         if (deviceService.detach(device, vm)) {
-            log.info("detach -- success");
+            log.info("-- end -- detach -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("detach -- failed");
+            log.info("-- end -- detach -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }

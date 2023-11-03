@@ -43,26 +43,32 @@ public class SpecConfigOpenAPI {
     @ResponseBody
     public String queryAllByType(
             @RequestParam(value = RequestParamConstants.TYPE) @NotNull @NotEmpty String type) {
-        log.info("queryAllByType ==== start ====");
+        log.info("-- start -- queryAllByType");
         // 1. check Enum param
         SpecTypeEnum specTypeEnum = EnumUtils.getEnumFromString(SpecTypeEnum.class, type);
         if (specTypeEnum == null) {
-            log.info("queryAllByType ==== error ====");
+            log.error(String.format("ERROR: type %s unknown.", type));
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
         }
         // 2. call request
+        log.info(String.format("<- invoke DB -- specConfigQueryAllByType. type: %s", type));
         List<SpecConfig> specConfigList = tableStorage.specConfigQueryAllByType(specTypeEnum);
-        log.info("queryAllByType ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- queryAllByType -- success");
         return JSON.toJSONString(BaseResponse.success(specConfigList));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         // 1. call request
+        log.info("<- invoke DB -- specConfigQueryAll");
         List<SpecConfig> specConfigList = tableStorage.specConfigQueryAll();
-        log.info("queryAll ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(specConfigList));
     }
 
@@ -72,9 +78,9 @@ public class SpecConfigOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String create(@Valid @RequestBody CreateSpecConfigForm f) throws BaseException {
-        log.info("create ==== start ====");
+        log.info("-- start -- create");
         SpecConfig specConfig = configService.specConfigSave(null, f.getType(), f.getValue(), f.getDescription());
-        log.info("create ==== end ====");
+        log.info("-- end -- create -- success");
         return JSON.toJSONString(BaseResponse.success(specConfig));
     }
 
@@ -84,8 +90,9 @@ public class SpecConfigOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String delete(@Valid @RequestBody DeleteSpecConfigForm f) throws BaseException {
-        log.info("delete == id: " + f.getId());
+        log.info("-- start -- delete");
         configService.specConfigDelete(f.getId());
+        log.info("-- end -- delete -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
@@ -95,9 +102,9 @@ public class SpecConfigOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String edit(@Valid @RequestBody EditSpecConfigForm f) throws BaseException {
-        log.info("edit ==== start ====");
+        log.info("-- start -- edit");
         SpecConfig specConfig = configService.specConfigSave(f.getId(), f.getType(), f.getValue(), f.getDescription());
-        log.info("edit ==== end ====");
+        log.info("-- end -- edit -- success");
         return JSON.toJSONString(BaseResponse.success(specConfig));
     }
 
@@ -107,7 +114,7 @@ public class SpecConfigOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.TYPE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String type() {
-        log.info("type == ");
+        log.info("-- end -- type -- success");
         return JSON.toJSONString(BaseResponse.success(SpecTypeEnum.toJSONArray()));
     }
 

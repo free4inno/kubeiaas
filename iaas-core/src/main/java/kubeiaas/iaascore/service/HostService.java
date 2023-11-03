@@ -38,7 +38,10 @@ public class HostService {
      */
     public Map<String, Integer> getStatistics() {
         Map<String, Integer> resMap = new HashMap<>();
+
+        log.info("-> invoke DB -- hostQueryAll");
         List<Host> hostList = tableStorage.hostQueryAll();
+        log.info("<- invoke DB -- done");
 
         // 1. total
         resMap.put(HostConstants.TOTAL_NODE, hostList.size());
@@ -64,7 +67,10 @@ public class HostService {
         int usedImgStorage = 0;
 
         // calculate used
+        log.info("-> invoke DB -- vmQueryAll");
         List<Vm> vmList = tableStorage.vmQueryAll();
+        log.info("<- invoke DB -- done");
+
         for (Vm vm : vmList) {
             usedVCPU += vm.getCpus();
             usedMEM += vm.getMemory();
@@ -119,11 +125,17 @@ public class HostService {
      */
     public Map<String, Object> getNodeResource() {
         Map<String, Object> resMap = new HashMap<>();
+
+        log.info("-> invoke DB -- hostQueryAll");
         List<Host> hostList = tableStorage.hostQueryAll();
+        log.info("<- invoke DB -- done");
+
         // 1. total num
         resMap.put(HostConstants.TOTAL_NODE, hostList.size());
         // 2. build node map
+        log.info("-> invoke DB -- vmQueryAll");
         List<Vm> vmList = tableStorage.vmQueryAll();
+        log.info("<- invoke DB -- done");
         for (Host host : hostList) {
             Map<String, Object> nodeMap = new HashMap<>();
 
@@ -156,7 +168,9 @@ public class HostService {
      */
     public Map<String, Object> getNetStoResource() {
         Map<String, Object> resMap = new HashMap<>();
+        log.info("-> invoke DB -- hostQueryAll");
         List<Host> hostList = tableStorage.hostQueryAll();
+        log.info("<- invoke DB -- done");
 
         List<String> queryTypes = new ArrayList<>();
         queryTypes.add(RequestMappingConstants.DATA_VOLUME_STORAGE);
@@ -222,8 +236,14 @@ public class HostService {
      * 配置节点资源限制
      */
     public Host setResource(String uuid, int vcpu, int mem, int storage) throws BaseException {
+        log.info(String.format("setResource info -- uuid: %s, vcpu: %d, mem: %d, storage: %d", uuid, vcpu, mem, storage));
+
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, uuid: %s", uuid));
         Host host = tableStorage.hostQueryByUuid(uuid);
+        log.info("<- invoke DB -- done");
+
         if (null == host) {
+            log.error(String.format("ERROR: invalid host_uuid %s", uuid));
             throw new BaseException("err: invalid host_uuid " + uuid, ResponseEnum.ARGS_ERROR);
         }
         host.setVCPU(vcpu);
@@ -232,7 +252,7 @@ public class HostService {
         try {
             return tableStorage.hostSave(host);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: host save failed. {}", e.getMessage());
             throw new BaseException("err: host save failed. " + e.getMessage());
         }
     }
@@ -243,15 +263,20 @@ public class HostService {
      */
     @Scheduled(cron = "0 0/1 * * * ?") // every 1 min
     private void cleanServiceList() {
+        log.info("Scheduled task: cleanServiceList start");
+
+        log.info("-> invoke DB -- hostQueryAll");
         List<Host> hostList = tableStorage.hostQueryAll();
+        log.info("<- invoke DB -- done");
         for (Host host : hostList) {
             if (!serviceConfig.getAgent(host.getName())
                     && !host.getStatus().equals(HostStatusEnum.OFFLINE)) {
                 // agent offline -> set host status offline
                 host.setStatus(HostStatusEnum.OFFLINE);
+                log.info(String.format("-> invoke DB -- hostSave, host: %s", host));
                 tableStorage.hostSave(host);
+                log.info("<- invoke DB -- done");
             }
         }
     }
-
 }

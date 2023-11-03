@@ -33,12 +33,12 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize) {
-        log.info("createSystemVolume ==== " + "IMAGE_PATH: " + imagePath + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        log.info("-- start -- createSystemVolume");
         if (volumeService.createSystemVolume(imagePath, volumePath, volumeUuid, extraSize)) {
-            log.info("createSystemVolume -- success");
+            log.info("-- end -- createSystemVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("createSystemVolume -- failed");
+            log.warn("-- end -- createSystemVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -49,12 +49,12 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize) {
-        log.info("createDataVolume ==== "  + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        log.info("-- start -- createDataVolume");
         if (volumeService.createDataVolume(volumePath, volumeUuid, extraSize)) {
-            log.info("createDataVolume -- success");
+            log.info("-- end -- createDataVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("createDataVolume -- failed");
+            log.warn("-- end -- createDataVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -65,12 +65,12 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize) {
-        log.info("resizeSystemVolume ==== " + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        log.info("-- start -- resizeSystemVolume");
         if (volumeService.resizeVolume(volumePath, volumeUuid, diskSize)) {
-            log.info("resizeSystemVolume -- success");
+            log.info("-- end -- resizeSystemVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("resizeSystemVolume -- failed");
+            log.warn("-- end -- resizeSystemVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -81,12 +81,12 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize) {
-        log.info("resizeDataVolume ==== " + " VOLUME_PATH: " + volumePath + " VOLUME_UUID: " + volumeUuid);
+        log.info("-- start -- resizeDataVolume");
         if (volumeService.resizeVolume(volumePath, volumeUuid, diskSize)) {
-            log.info("resizeDataVolume -- success");
+            log.info("-- end -- resizeDataVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("resizeDataVolume -- failed");
+            log.warn("-- end -- resizeDataVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -96,12 +96,12 @@ public class VolumeController {
     public String deleteSystemVolume(
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath) {
-        log.info("deleteSystemVolume ==== " + " VOLUME_PATH: " + volumePath);
+        log.info("-- start -- deleteSystemVolume");
         if (volumeService.deleteVolume(volumeUuid, volumePath)) {
-            log.info("deleteSystemVolume -- success");
+            log.info("-- end -- deleteSystemVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("deleteSystemVolume -- failed");
+            log.warn("-- end -- deleteSystemVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -111,12 +111,12 @@ public class VolumeController {
     public String deleteDataVolume(
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath) {
-        log.info("deleteDataVolume ==== " + " VOLUME_PATH: " + volumePath);
+        log.info("-- start -- deleteDataVolume");
         if (volumeService.deleteVolume(volumeUuid, volumePath)) {
-            log.info("deleteDataVolume -- success");
+            log.info("-- end -- deleteDataVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("deleteDataVolume -- failed");
+            log.warn("-- end -- deleteDataVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -126,14 +126,14 @@ public class VolumeController {
     public String attachDataVolume(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
-        log.info("attachVolume ==== start ==== volume: " + volumeObjectStr + " vm: " + vmObjectStr);
+        log.info("-- start -- attachDataVolume");
         Vm vm = JSON.parseObject(vmObjectStr, Vm.class);
         Volume volume = JSON.parseObject(volumeObjectStr, Volume.class);
         if(volumeService.attachVolume(vm,volume)){
-            log.info("attachDataVolume -- success");
+            log.info("-- end -- attachDataVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         }else {
-            log.info("attachDataVolume -- failed");
+            log.warn("-- end -- attachDataVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -143,14 +143,14 @@ public class VolumeController {
     public String detachDataVolume(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr) {
-        log.info("detachVolume ==== start ==== volume: " + volumeObjectStr + " vm: " + vmObjectStr);
+        log.info("-- start -- detachVolume");
         Vm vm = JSON.parseObject(vmObjectStr, Vm.class);
         Volume volume = JSON.parseObject(volumeObjectStr, Volume.class);
         if(volumeService.detachVolume(vm,volume)){
-            log.info("detachVolume -- success");
+            log.info("-- end -- detachVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         }else {
-            log.info("detachVolume -- failed");
+            log.warn("-- end -- detachVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -161,13 +161,13 @@ public class VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
             @RequestParam(value = RequestParamConstants.EXTRA_SIZE) Integer extraSize) {
-        log.info("publishImage ==== start ====");
+        log.info("-- start -- publishImage");
         if (null == extraSize) extraSize = 0;
         if (volumeService.volumeToImage(volumePath, imagePath, extraSize)) {
-            log.info("publishImage -- success");
+            log.info("-- end -- publishImage -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("publishImage -- failed");
+            log.warn("-- end -- publishImage -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -175,20 +175,20 @@ public class VolumeController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DATA_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String getDataVolStorage() {
-        log.info("getDataVolStorage ==== start ====");
+        log.info("-- start -- getDataVolStorage");
         String dataDir = VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.DATA_VOLUME_PATH;
         Map<String, String> resMap = volumeService.getVolStorage(dataDir);
-        log.info("getDataVolStorage ==== end ====");
+        log.info("-- end -- getDataVolStorage -- success");
         return JSON.toJSONString(resMap);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IMG_VOLUME_STORAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String getImgVolStorage() {
-        log.info("getImgVolStorage ==== start ====");
+        log.info("-- start -- getImgVolStorage");
         String imageDir = VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.IMAGE_PATH;
         Map<String, String> resMap = volumeService.getVolStorage(imageDir);
-        log.info("getImgVolStorage ==== end ====");
+        log.info("-- end -- getImgVolStorage -- success");
         return JSON.toJSONString(resMap);
     }
 }

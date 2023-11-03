@@ -26,11 +26,12 @@ public class VmController {
     @ResponseBody
     public String createVmInstance(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("-- start -- createVmInstance");
         if (vmService.createVm(vmUuid)) {
-            log.info("createVmInstance -- success");
+            log.info("-- end -- createVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("createVmInstance -- failed");
+            log.error("-- end -- createVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -39,13 +40,12 @@ public class VmController {
     @ResponseBody
     public String deleteVm(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("deleteVm ==== start ==== vmUuid: " + vmUuid);
-        // log.info("This is Vm Controller: " + routingKey);
+        log.info("-- start -- deleteVmInstance");
         if (vmService.deleteVm(vmUuid)) {
-            log.info("deleteVmInstance -- success");
+            log.info("-- end -- deleteVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("deleteVmInstance -- failed");
+            log.error("-- end -- deleteVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -54,13 +54,12 @@ public class VmController {
     @ResponseBody
     public String stopVm(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("stopVm ==== start ==== vmUuid: " + vmUuid);
-        // log.info("This is Vm Controller: " + routingKey);
+        log.info("-- start -- stopVmInstance");
         if (vmService.stopVm(vmUuid)) {
-            log.info("stopVmInstance -- success");
+            log.info("-- end -- stopVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("stopVmInstance -- failed");
+            log.error("-- end -- stopVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -69,13 +68,12 @@ public class VmController {
     @ResponseBody
     public String startVm(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("startVm ==== start ==== vmUuid: " + vmUuid);
-        // log.info("This is Vm Controller: " + routingKey);
+        log.info("-- start -- startVmInstance");
         if (vmService.startVm(vmUuid)) {
-            log.info("startVmInstance -- success");
+            log.info("-- end -- startVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("startVmInstance -- failed");
+            log.error("-- end -- startVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -84,13 +82,12 @@ public class VmController {
     @ResponseBody
     public String rebootVm(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("rebootVm ==== start ==== vmUuid: " + vmUuid);
-        // log.info("This is Vm Controller: " + routingKey);
+        log.info("-- start -- rebootVmInstance");
         if (vmService.rebootVm(vmUuid)) {
-            log.info("rebootVmInstance -- success");
+            log.info("-- end -- rebootVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("rebootVmInstance -- failed");
+            log.error("-- end -- rebootVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -99,13 +96,12 @@ public class VmController {
     @ResponseBody
     public String suspendVm(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("suspend ==== start ==== vmUuid: " + vmUuid);
-        // log.info("This is Vm Controller: " + routingKey);
+        log.info("-- start -- suspendVmInstance");
         if (vmService.suspendVm(vmUuid)) {
-            log.info("suspendVmInstance -- success");
+            log.info("-- end -- suspendVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("suspendVmInstance -- failed");
+            log.error("-- end -- suspendVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -114,13 +110,12 @@ public class VmController {
     @ResponseBody
     public String resumeVm(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("resume ==== start ==== vmUuid: " + vmUuid);
-        // log.info("This is Vm Controller: " + routingKey);
+        log.info("-- start -- resumeVmInstance");
         if (vmService.resumeVm(vmUuid)){
-            log.info("resumeVmInstance -- success");
+            log.info("-- end -- resumeVmInstance -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("resumeVmInstance -- failed");
+            log.error("-- end -- resumeVmInstance -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -131,12 +126,12 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.CPUS) Integer cpus,
             @RequestParam(value = RequestParamConstants.MEMORY) Integer memory) {
-        log.info("modifyVm ==== start ==== vmUuid: " + vmUuid);
+        log.info("-- start -- modifyVm");
         if (vmService.modifyVm(vmUuid, cpus, memory)) {
-            log.info("modifyVm ==== success");
+            log.info("-- end -- modifyVm -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("modifyVm ==== failed");
+            log.info("-- end -- modifyVm -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -145,7 +140,7 @@ public class VmController {
     @ResponseBody
     public String status(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("status == vmUuid: " + vmUuid);
+        log.info("-- end -- status -- success");
         return JSON.toJSONString(vmService.status(vmUuid));
     }
 
@@ -155,12 +150,12 @@ public class VmController {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.USER) String user,
             @RequestParam(value = RequestParamConstants.PASSWD) String passwd) {
-        log.info("setPasswd == vmUuid: " + vmUuid);
+        log.info("-- start -- setPasswd");
         if (vmService.setPasswd(vmUuid, user, passwd)) {
-            log.info("setPasswd ==== success");
+            log.info("-- end -- setPasswd -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("setPasswd ==== failed");
+            log.info("-- end -- setPasswd -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
