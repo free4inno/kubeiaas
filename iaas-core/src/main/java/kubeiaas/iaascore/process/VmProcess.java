@@ -305,9 +305,10 @@ public class VmProcess {
         newImage.setOsMode(parentImage.getOsMode());
 
         // *Calculate extraSize
-        int extraSize = vdSize - parentImage.getVdSize();
+        // extraSize < 0 : 发布镜像大小小于源虚拟机系统盘大小，应该增加发布镜像大小
+        int extraSize = vdSize - volume.getSize();
         if (extraSize < 0) {
-            newImage.setVdSize(parentImage.getVdSize());
+            newImage.setVdSize(volume.getSize());
             extraSize = 0;
         } else {
             newImage.setVdSize(vdSize);
