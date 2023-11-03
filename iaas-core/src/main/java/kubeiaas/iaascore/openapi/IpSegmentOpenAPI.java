@@ -57,7 +57,7 @@ public class IpSegmentOpenAPI {
             @RequestParam(value = RequestParamConstants.TYPE) @NotNull @NotEmpty String type) {
         log.info("-- start -- queryAllByHostAndType");
 
-        log.info(String.format("<- invoke DB -- ipSegmentQueryAllByHostAndType. hostUuid: %s, type: %s", hostUuid, type));
+        log.info(String.format("-> invoke DB -- ipSegmentQueryAllByHostAndType. hostUuid: %s, type: %s", hostUuid, type));
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAllByHostAndType(hostUuid, type);
         log.info("<- invoke DB -- done");
 

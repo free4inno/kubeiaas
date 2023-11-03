@@ -26,9 +26,9 @@ public class ImageController {
     @ResponseBody
     public String imageQueryByUuid(
             @RequestParam(value = RequestParamConstants.UUID) String uuid) {
-        log.info("imageQueryByUuid ==== start ====");
+        log.info("-- start -- imageQueryByUuid");
         Image image = imageService.queryByUuid(uuid);
-        log.info("imageQueryByUuid ==== end ====");
+        log.info("-- end -- imageQueryByUuid");
         return JSON.toJSONString(image);
     }
 
@@ -36,18 +36,18 @@ public class ImageController {
     @ResponseBody
     public String imageQueryRawByUuid(
             @RequestParam(value = RequestParamConstants.UUID) String uuid) {
-        log.info("imageQueryRawByUuid ==== start ====");
+        log.info("-- start -- imageQueryRawByUuid");
         String imageRaw = imageService.queryRawByUuid(uuid);
-        log.info("imageQueryRawByUuid ==== end ====");
+        log.info("-- end -- imageQueryRawByUuid");
         return imageRaw;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_IMAGE_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String imageQueryAll() {
-        log.info("imageQueryAll ==== start ====");
+        log.info("-- start -- imageQueryAll");
         List<Image> imageList = imageService.queryAll();
-        log.info("imageQueryAll ==== end ====");
+        log.info("-- end -- imageQueryAll");
         return JSON.toJSONString(imageList);
     }
 
@@ -56,9 +56,9 @@ public class ImageController {
     public String imagePageQueryAll(
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("imagePageQueryAll ==== start ====");
+        log.info("-- start -- imagePageQueryAll");
         PageResponse<Image> res = imageService.pageQueryAll(pageNum, pageSize);
-        log.info("imagePageQueryAll ==== end ====");
+        log.info("-- end -- imagePageQueryAll");
         return JSON.toJSONString(res);
     }
 
@@ -68,9 +68,9 @@ public class ImageController {
             @RequestParam(value = RequestParamConstants.KEYWORDS) String keywords,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) Integer pageSize) {
-        log.info("imageFuzzyQuery ==== start ====");
+        log.info("-- start -- imageFuzzyQuery");
         PageResponse<Image> res = imageService.fuzzyQuery(keywords, pageNum, pageSize);
-        log.info("imageFuzzyQuery ==== end ====");
+        log.info("-- end -- imageFuzzyQuery");
         return JSON.toJSONString(res);
     }
 
@@ -78,14 +78,14 @@ public class ImageController {
     @ResponseBody
     public String imageCreateYaml(
             @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr) {
-        log.info("imageCreateYaml ==== start ====");
+        log.info("-- start -- imageCreateYaml");
         Image image = JSON.parseObject(imageObjectStr, Image.class);
         boolean res = imageService.imageCreateYaml(image);
         if (res) {
-            log.info("imageCreateYaml ==== success ====");
+            log.info("-- end -- imageCreateYaml -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("imageCreateYaml ==== failed ====");
+            log.info("-- end -- imageCreateYaml -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -93,13 +93,13 @@ public class ImageController {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.IMAGE_SAVE_YAML, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String imageSaveYaml(@RequestBody SaveImageForm f) {
-        log.info("imageSaveYaml ==== start ====");
+        log.info("-- start -- imageSaveYaml");
         boolean res = imageService.imageSaveYaml(f.getUuid(), f.getContent());
         if (res) {
-            log.info("imageSaveYaml ==== success ====");
+            log.info("-- end -- imageSaveYaml -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("imageSaveYaml ==== failed ====");
+            log.info("-- end -- imageSaveYaml -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -108,13 +108,13 @@ public class ImageController {
     @ResponseBody
     public String imageDelete(
             @RequestParam(value = RequestParamConstants.UUID) String uuid) {
-        log.info("imageDelete ==== start ====");
+        log.info("-- start -- imageDelete");
         boolean res = imageService.imageDelete(uuid);
         if (res) {
-            log.info("imageDelete ==== success ====");
+            log.info("-- end -- imageDelete -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.info("imageDelete ==== failed ====");
+            log.info("-- end -- imageDelete -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -122,9 +122,9 @@ public class ImageController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public Integer statistics() {
-        log.info("statistics totalNum ==== start ====");
+        log.info("-- start -- statistics, get total num");
         Integer res = imageService.getTotalNum();
-        log.info("statistics totalNum ==== end ====");
+        log.info("-- end -- statistics");
         return res;
     }
 

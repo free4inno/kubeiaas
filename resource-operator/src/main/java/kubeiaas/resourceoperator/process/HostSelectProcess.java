@@ -19,29 +19,35 @@ public class HostSelectProcess {
     private static int roundRobinCount = 0;
 
 
-    // 选择宿主机算法
+    /**
+     * 选择宿主机算法
+     * -> NO resource limit check
+     */
     public Host RoundRobin() {
         List<Host> hostList = tableStorage.hostQueryAll();
         if (hostList == null || hostList.isEmpty()) {
+            log.warn("WARN: RoundRobin failed -- no available host, return null");
             return null;
         }
 
         Host resultHost = new Host();
-        for (int checkCount = 0; checkCount < hostList.size(); checkCount++) {
-            roundRobinCount += 1;
-            if (roundRobinCount >= hostList.size()) {
-                roundRobinCount = 0;
-            }
-            resultHost = hostList.get(roundRobinCount);
-            return resultHost;
+        roundRobinCount += 1;
+        if (roundRobinCount >= hostList.size()) {
+            roundRobinCount = 0;
         }
-        return null;
+        resultHost = hostList.get(roundRobinCount);
+        log.info("RoundRobin success -- hostName: {}", resultHost.getName());
+        return resultHost;
     }
 
-    // 选择宿主机算法
+    /**
+     * 选择宿主机算法
+     * -> with resource limit check
+     */
     public Host RoundRobin(Vm vm) {
         List<Host> hostList = tableStorage.hostQueryAll();
         if (hostList == null || hostList.isEmpty()) {
+            log.warn("WARN: RoundRobin failed -- no available host, return null");
             return null;
         }
 
@@ -53,9 +59,11 @@ public class HostSelectProcess {
             }
             resultHost = hostList.get(roundRobinCount);
             if (checkHostAvailable(resultHost, vm)) {
+                log.info("RoundRobin success -- hostName: {}", resultHost.getName());
                 return resultHost;
             }
         }
+        log.warn("WARN: RoundRobin failed -- no available host, return null");
         return null;
     }
 

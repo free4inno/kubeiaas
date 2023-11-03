@@ -31,11 +31,9 @@ public class ImageUtils {
             }
             fileReader.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            log.error("getRawFromYaml -- file not exist!");
+            log.error("ERROR: getRawFromYaml -- file not exist!", e);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("getRawFromYaml -- read file failed!");
+            log.error("ERROR: getRawFromYaml -- read file failed!", e);
         }
         return content.toString();
     }
@@ -50,7 +48,7 @@ public class ImageUtils {
             BufferedReader br = new BufferedReader(fr);
             Yaml yaml = new Yaml();
             objectMap = yaml.load(br);
-            log.info("yamlContent: " + JSON.toJSONString(objectMap));
+            log.info("getImageFromYaml -- yamlContent: {}", JSON.toJSONString(objectMap));
 
             Map<String, Object> imageMap = (Map<String, Object>) objectMap.get("image");
             String name = (String) imageMap.get("name");
@@ -89,10 +87,10 @@ public class ImageUtils {
             Image image = new Image(id + 1, uuid, name, description, directory, format, null, vdSize,
                     ImageStatusEnum.AVAILABLE, null, null, osType, osArch, osMode, null, childImageList);
 
-            log.info("image: " + JSON.toJSONString(image));
+            log.info("build imageObject success -- imageObject: {}", JSON.toJSONString(image));
             return image;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: getImageFromYaml -- FILE PARSE ERROR!", e);
             Image image = new Image();
             image.setUuid(uuid);
             image.setName("NA");
@@ -109,7 +107,7 @@ public class ImageUtils {
         // 创建FileWriter
         String uuid = image.getUuid();
         String filepath = ImageConfig.CONTAINER_STORAGE_PATH + uuid + ImageConstants.IMAGE_YAML_SUFFIX;
-        log.info("createImageYaml -- filePath: " + filepath);
+        log.info("createImageYaml -- filePath: {}", filepath);
 
         // new file writer
         FileWriter fileWriter = new FileWriter(filepath);
@@ -154,6 +152,8 @@ public class ImageUtils {
         // 构建最顶层yaml
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("image", imageData);
+
+        log.info("write yaml file -- yamlContent: {}", JSON.toJSONString(dataMap));
         yaml.dump(dataMap, fileWriter);
 
         fileWriter.close();
@@ -169,12 +169,15 @@ public class ImageUtils {
     public static boolean deleteFile(String filePath) {
         try {
             File file = new File(filePath);
+            log.info("deleteFile -- path: {}", filePath);
             return file.delete();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: delete file failed! filePath: {}", filePath, e);
             return false;
         }
     }
+
+    // PRIVATE ------------------------
 
     private static String getImageFileName(String imageUuid, ImageFormatEnum formatEnum){
         switch (formatEnum){

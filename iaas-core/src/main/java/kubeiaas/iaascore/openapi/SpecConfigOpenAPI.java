@@ -51,7 +51,7 @@ public class SpecConfigOpenAPI {
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.ARGS_ERROR));
         }
         // 2. call request
-        log.info(String.format("<- invoke DB -- specConfigQueryAllByType. type: %s", type));
+        log.info(String.format("-> invoke DB -- specConfigQueryAllByType. type: %s", type));
         List<SpecConfig> specConfigList = tableStorage.specConfigQueryAllByType(specTypeEnum);
         log.info("<- invoke DB -- done");
 
@@ -64,7 +64,7 @@ public class SpecConfigOpenAPI {
     public String queryAll() {
         log.info("-- start -- queryAll");
         // 1. call request
-        log.info("<- invoke DB -- specConfigQueryAll");
+        log.info("-> invoke DB -- specConfigQueryAll");
         List<SpecConfig> specConfigList = tableStorage.specConfigQueryAll();
         log.info("<- invoke DB -- done");
 

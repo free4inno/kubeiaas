@@ -32,6 +32,7 @@ public class ImageService {
     private static final String baseDir = ImageConfig.CONTAINER_STORAGE_PATH;
 
     public Image queryByUuid(String uuid) {
+        log.info("image queryByUuid -- uuid: {}", uuid);
         // 1. get all yaml files under image storage path
         List<String> yamlList = getYamlList();
 
@@ -40,20 +41,18 @@ public class ImageService {
             // 3. deal by uuid (which is just yaml file name)
             if (yamlList.get(id).endsWith(uuid)) {
                 Image image = ImageUtils.getImageFromYaml(yamlList.get(id), id);
-                if (image != null) {
-                    log.info("Image Found! (name: " + image.getName() + ")");
-                    return image;
-                }
+                log.info("image found -- name: {}", image.getName());
+                return image;
             }
         }
-        log.warn("Image Not Found (uuid: " + uuid + ")");
+        log.warn("WARN: Image Not Found -- uuid: {}", uuid);
         return null;
     }
 
     public String queryRawByUuid(String uuid) {
         // uuid (which is just yaml file name)
         String imageRaw = ImageUtils.getRawFromYaml(baseDir + uuid);
-        log.info("queryRawByUuid -- raw: \n" + imageRaw);
+        log.info("query rawFileString by uuid -- uuid: {}, raw: {}", uuid, imageRaw);
         return imageRaw;
     }
 
@@ -65,16 +64,15 @@ public class ImageService {
         List<Image> imageList = new ArrayList<>();
         for (int id = 0; id < yamlList.size(); id++) {
             Image image = ImageUtils.getImageFromYaml(yamlList.get(id), id);
-            if (image != null) {
-                imageList.add(image);
-            }
+            imageList.add(image);
         }
-        log.info("imageList: " + JSON.toJSONString(imageList));
+        log.debug("imageList: {}", JSON.toJSONString(imageList));
 
         return imageList;
     }
 
     public PageResponse<Image> pageQueryAll(Integer pageNum, Integer pageSize) {
+        log.info("pageQueryAll -- pageNum: {}, pageSize: {}", pageNum, pageSize);
         // 1. get all yaml files under image storage path
         List<String> yamlList = getYamlList();
 
@@ -83,6 +81,7 @@ public class ImageService {
     }
 
     public PageResponse<Image> fuzzyQuery(String keywords, Integer pageNum, Integer pageSize) {
+        log.info("pageQueryAll -- keywords:{}, pageNum: {}, pageSize: {}", keywords, pageNum, pageSize);
         // 1. get all yaml files under image storage path
         List<String> yamlList = getYamlList();
 
@@ -104,8 +103,7 @@ public class ImageService {
             ImageUtils.createImageYaml(image);
             return true;
         } catch (IOException e) {
-            log.error("imageCreateYaml -- create imageYaml Error!");
-            e.printStackTrace();
+            log.error("ERROR: imageCreateYaml failed -- IOException", e);
             return false;
         }
     }
@@ -117,24 +115,23 @@ public class ImageService {
             ImageUtils.saveImageYaml(filePath, content);
             return true;
         } catch (IOException e) {
-            log.error("imageCreateYaml -- create imageYaml Error!");
-            e.printStackTrace();
+            log.error("ERROR: imageSaveYaml failed -- IOException", e);
             return false;
         }
     }
 
     public boolean imageDelete(String uuid) {
         // 1. check (uuid, which is just yaml file name)
-        String yamlPath = baseDir + uuid;
-        Image image = ImageUtils.getImageFromYaml(yamlPath, 0);
-        if (image == null) {
-            log.info("Image not Found! uuid: " + uuid);
+        if (!getYamlList().contains(uuid)) {
+            log.error("ERROR: image not found. uuid: {}", uuid);
             return false;
         }
+        String yamlPath = baseDir + uuid;
+        Image image = ImageUtils.getImageFromYaml(yamlPath, 0);
         // 2. delete file
         String filePath = baseDir + ImageUtils.getFileNameFromPath(image.getDirectory(), true);
         if (!ImageUtils.deleteFile(filePath)) {
-            log.info("Image file delete error! file: " + filePath);
+            log.error("ERROR: <image file> delete error! file: {}", filePath);
             return false;
         }
         // 3. delete child
@@ -142,15 +139,16 @@ public class ImageService {
         for (Image child : childImages) {
             filePath = baseDir + ImageUtils.getFileNameFromPath(child.getDirectory(), true);
             if (!ImageUtils.deleteFile(filePath)) {
-                log.info("Image childFile delete error! file: " + filePath);
+                log.error("ERROR: <child image file> delete error! file: {}", filePath);
                 return false;
             }
         }
         // 4. delete yaml
         if (!ImageUtils.deleteFile(yamlPath)) {
-            log.info("Image yamlFile delete error! file: " + yamlPath);
+            log.error("ERROR: <image yaml file> delete error! file: {}", filePath);
             return false;
         }
+        log.info("success -- imageDelete");
         return true;
     }
 
@@ -170,11 +168,7 @@ public class ImageService {
         for (int id = 0; id < fileList.size(); id++) {
             if (id >= (pageNum - 1) * pageSize && id < pageNum * pageSize) {
                 Image image = ImageUtils.getImageFromYaml(fileList.get(id), id);
-                if (image != null) {
-                    imageList.add(image);
-                } else {
-                    imageList.add(new Image(null, "UNKNOWN", "Error parsing yaml file: " + fileList.get(id)));
-                }
+                imageList.add(image);
             }
         }
 
@@ -187,9 +181,9 @@ public class ImageService {
         try (Stream<Path> paths = Files.walk(Paths.get(baseDir), 1)) {
             paths.map(Path::toString).filter(f -> f.endsWith(".yaml") || f.endsWith(".yml")).forEach(yamlList::add);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: failed to get yamlFileList.", e);
         }
-        log.info("yamlList: " + JSON.toJSONString(yamlList));
+        log.debug("yamlList: " + JSON.toJSONString(yamlList));
         return yamlList;
     }
 }
