@@ -32,20 +32,28 @@ public class DhcpService {
      * 根据网段更新 DHCP 监听配置
      */
     public boolean updateIpSeg(int ipSegId) {
+        log.info(String.format("updateIpSeg info -- ipSegId: %d", ipSegId));
         // -------- 1. 获取 ipSegId 信息 --------
+        log.info("STEP 1: get ipSegId info and check");
+
+        log.info("<- invoke DB -- ipSegmentQueryById");
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegId);
+        log.info("<- invoke DB -- done");
+
         if (!ipSegment.getHostUuid().equals(HostConfig.thisHost.getUuid())) {
-            log.info(" -- not Network Node");
+            log.warn(String.format("updateIpSeg -- ipSegId %d not belong to this host", ipSegId));
             return true;
         }
 
         // -------- 2. 构造配置串 --------
+        log.info("STEP 2: construct dhcp config line");
         String segName = "IP_SEG_" + ipSegment.getBridge();
         String subnetIP = IpUtils.getSubnet(ipSegment.getIpRangeStart(), ipSegment.getNetmask());
         String confLine = String.format(DhcpConfig.BIND_IP_SEG_TEMPLATE,
                 segName, ipSegment.getBridge(), subnetIP, ipSegment.getNetmask(), ipSegment.getGateway());
 
         // -------- 3. 更新 dhcp conf --------
+        log.info("STEP 3: update dhcp config file");
         try {
             // 先拷贝旧文件
             FileUtils.copy(DhcpConfig.DHCP_CONF_FILE_PATH, DhcpConfig.DHCP_CONF_FILE_TEMP_PATH);
@@ -63,14 +71,14 @@ public class DhcpService {
             writer.close();
 
         } catch (Exception e) {
-            log.error("bindMacAndIp -- IO dhcp config files failed!");
-            e.printStackTrace();
+            log.error("ERROR: IO dhcp config files failed!");
             return false;
         }
 
         // -------- 4. 重启 dhcp server --------
+        log.info("STEP 4: restart dhcp server");
         if (!restartDHCP()) {
-            log.error("updateIpSeg -- restart dhcp server error!");
+            log.error("ERROR: restart dhcp server error!");
             return false;
         }
         return true;
@@ -84,14 +92,17 @@ public class DhcpService {
      * @return 绑定结果
      */
     public boolean bindMacAndIp(String vmUuid, String mac, String ip) {
+        log.info(String.format("bindMacAndIp info -- vmUuid: %s, mac: %s, ip: %s", vmUuid, mac, ip));
         // -------- 1. 打开配置文件 --------
+        log.info("STEP 1: open dhcp config file");
         File dhcpConfigFile = new File(DhcpConfig.DHCP_CONF_FILE_PATH);
         if (!dhcpConfigFile.exists()) {
-            log.error("bindMacAndIp -- Cannot find DHCP config file in path: " + DhcpConfig.DHCP_CONF_FILE_PATH);
+            log.error(String.format("bindMacAndIp -- dhcp config file %s not exist!", DhcpConfig.DHCP_CONF_FILE_PATH));
             return false;
         }
 
         // -------- 2. 构建文件内容 --------
+        log.info("STEP 2: construct dhcp config content");
         // 定义宿主机在 dhcp config 中的名称
         String hostName = vmUuid + MacUtils.deleteAllColon(mac);
 
@@ -108,9 +119,10 @@ public class DhcpService {
         StringWriter stringWriter = new StringWriter();
         Velocity.evaluate(new VelocityContext(params), stringWriter, DhcpConfig.BIND_VM_TEMPLATE_LOG_TAG, template);        //模版引起开始替换模版内容
         String newBindContent = stringWriter.getBuffer().toString();
-        log.info("bindMacAndIp -- new Mac and Ip bind Content: " + newBindContent);
+        log.debug("bindMacAndIp -- new Mac and Ip bind Content: " + newBindContent);
 
         // -------- 3. 读写文件 --------
+        log.info("STEP 3: read and write dhcp config file");
         try {
             // 先拷贝旧文件
             FileUtils.copy(DhcpConfig.DHCP_CONF_FILE_PATH, DhcpConfig.DHCP_CONF_FILE_TEMP_PATH);
@@ -120,14 +132,13 @@ public class DhcpService {
             writer.write(DhcpConfig.ESCAPE_NEWLINE + newBindContent);
             writer.close();
         } catch (Exception e) {
-            log.error("bindMacAndIp -- IO dhcp config files failed!");
-            e.printStackTrace();
+            log.error("ERROR: IO dhcp config files failed!");
             return false;
         }
 
         // -------- 4. 重启 dhcp server --------
         if (!restartDHCP()) {
-            log.error("bindMacAndIp -- restart dhcp server error!");
+            log.error("ERROR: restart dhcp server error!");
             return false;
         }
         return true;
@@ -137,18 +148,17 @@ public class DhcpService {
      * 解绑待删除虚拟机mac地址和其Ip地址
      */
     public boolean unbindMacAndIp(String instanceUuid){
-        log.info("unbindMacAndIp ---- start ---- instanceUuid: " + instanceUuid);
-        if (instanceUuid == null || instanceUuid.equals("")) {
-            log.error("restartDHCP -- DHCP Controller unbind mac and ip error, Because mac and ip params is null");
+        log.info(String.format("unbindMacAndIp info -- instanceUuid: %s", instanceUuid));
+        if (instanceUuid == null || instanceUuid.isEmpty()) {
+            log.error("ERROR: restartDHCP -- DHCP Controller unbind mac and ip error, Because mac and ip params is null");
             return false;
         }
         String cmd = "sed -i '/" + instanceUuid + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
         ShellUtils.getCmd(cmd);
         if (!restartDHCP()) {
-            log.error("unbindMacAndIp -- restart dhcp server error!");
+            log.error("ERROR: unbindMacAndIp -- restart dhcp server error!");
             return false;
         }
-        log.info("unbindMacAndIp ---- end ----");
         return true;
     }
 
@@ -159,11 +169,6 @@ public class DhcpService {
      * @return 重启结果
      */
     private boolean restartDHCP() {
-        if (!ShellUtils.run(DhcpConfig.DHCP_RESTART_CMD)) {
-            log.error("restartDHCP -- restart dhcp server error! please check it.");
-            return false;
-        } else {
-            return true;
-        }
+        return ShellUtils.run(DhcpConfig.DHCP_RESTART_CMD);
     }
 }

@@ -33,9 +33,9 @@ public class ServiceOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_SERVICE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryService() {
-        log.info("queryService ==== start ====");
+        log.info("-- start -- queryService");
         Map<String, List<String>> resMap = serviceConfig.getSvc();
-        log.info("queryService ==== end ====");
+        log.info("-- end -- queryService -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -45,28 +45,28 @@ public class ServiceOpenAPI {
             @RequestParam(value = RequestParamConstants.SERVICE_NAME) @NotNull @NotEmpty String serviceName,
             @RequestParam(value = RequestParamConstants.NODE_NAME) @NotNull @NotEmpty String nodeName,
             @RequestParam(value = RequestParamConstants.TIMESTAMP) @NotNull Long timestamp) {
-        log.debug("register ==== start ====");
+        log.debug("-- start -- register");
         serviceConfig.register(serviceName, nodeName, timestamp);
-        log.debug("register ==== end ====");
+        log.debug("-- end -- register -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_STORAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryStorage() {
-        log.info("queryStorage ==== start ====");
+        log.info("-- start -- queryStorage");
         Map<String, Object> resMap = new HashMap<>();
         resMap.put(ComponentConstants.NFS, serviceConfig.getNfs());
-        log.info("queryStorage ==== end ====");
+        log.info("-- end -- queryStorage -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
-        log.info("statistics ==== start ====");
+        log.info("-- start -- statistics");
         Map<String, Integer> resMap = serviceConfig.getSvcCount();
-        log.info("statistics ==== end ====");
+        log.info("-- end -- statistics -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 }

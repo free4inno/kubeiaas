@@ -63,13 +63,13 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESIZE_DATA_VOLUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String resizeDataVolume(@Valid @RequestBody ResizeVolumeForm f) throws VolumeException, BaseException {
-        log.info("resize data volume ==== start ====");
+        log.info("-- start -- resizeDataVolume");
         String result = volumeService.resizeDataVolume(f.getVolumeUuid(), f.getDiskSize());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("resize data volume ==== end ====");
+            log.info("-- end -- resizeDataVolume -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("resize data volume ==== error ====");
+            log.warn("-- end -- resizeDataVolume -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
         }
     }
@@ -80,13 +80,13 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String delete(@Valid @RequestBody DeleteVolumeForm f) throws BaseException {
-        log.info("delete ==== start ====");
+        log.info("-- start -- deleteDataVolume");
         String result = volumeService.deleteDataVolume(f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("delete ==== end ====");
+            log.info("-- end -- deleteDataVolume -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("delete ==== error ====");
+            log.warn("-- end -- deleteDataVolume -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DELETE_ERROR));
         }
     }
@@ -97,13 +97,13 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.ATTACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String attach(@Valid @RequestBody AttachVolumeForm f) throws BaseException {
-        log.info("attach ==== start ====");
+        log.info("-- start -- attachDataVolume");
         String result = volumeService.attachDataVolume(f.getVmUuid(),f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("attach ==== end ====");
+            log.info("-- end -- attachDataVolume -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("attach ==== error ====");
+            log.warn("-- end -- attachDataVolume -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_ATTACH_ERROR));
         }
     }
@@ -114,13 +114,13 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DETACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String detach(@Valid @RequestBody AttachVolumeForm f) throws BaseException {
-        log.info("detach ==== start ====");
+        log.info("-- start -- detach");
         String result = volumeService.detachDataVolume(f.getVmUuid(),f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("detach ==== end ====");
+            log.info("-- end -- detach -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("detach ==== success ====");
+            log.warn("-- end -- detach -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DETACH_ERROR));
         }
     }
@@ -131,9 +131,9 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<Volume> dataVolumeList = volumeService.queryAllDataVolume();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(dataVolumeList));
     }
 
@@ -145,9 +145,9 @@ public class VolumeOpenAPI {
     public String pageQueryAll(
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("pageQueryAll ==== start ====");
+        log.info("-- start -- pageQueryAll");
         PageResponse<Volume> res = volumeService.pageQueryAllDataVolume(pageNum, pageSize);
-        log.info("pageQueryAll ==== end ====");
+        log.info("-- end -- pageQueryAll -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -161,9 +161,9 @@ public class VolumeOpenAPI {
             @RequestParam(value = RequestParamConstants.STATUS) String status,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("fuzzyQuery ==== start ====");
+        log.info("-- start -- fuzzyQuery");
         PageResponse<Volume> res = volumeService.fuzzyQueryDataVolume(keywords, status, pageNum, pageSize);
-        log.info("fuzzyQuery ==== end ====");
+        log.info("-- end -- fuzzyQuery -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
@@ -173,13 +173,13 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String edit(@Valid @RequestBody EditVolumeForm f) throws BaseException {
-        log.info("edit ==== start ====");
+        log.info("-- start -- edit");
         Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription(), f.getDiskSize());
         if (volume != null) {
-            log.info("edit ==== end ====");
+            log.info("-- end -- edit -- success");
             return JSON.toJSONString(BaseResponse.success(volume));
         } else {
-            log.info("edit ==== error ====");
+            log.warn("-- end -- edit -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
         }
     }
@@ -190,9 +190,9 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
-        log.info("statistics ==== start ====");
+        log.info("-- start -- statistics");
         Map<String, Integer> resMap = volumeService.getStatistics();
-        log.info("statistics ==== end ====");
+        log.info("-- end -- statistics -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 }

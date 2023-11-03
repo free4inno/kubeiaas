@@ -34,18 +34,26 @@ public class VolumeService {
     private XmlConfig xmlConfig;
 
     public boolean createSystemVolume(String imagePath, String volumePath, String volumeUuid, int extraSize) {
+        log.info(String.format("createSystemVolume info -- imagePath: %s, volumePath: %s, volumeUuid: %s, extraSize: %d",
+                imagePath, volumePath, volumeUuid, extraSize));
 
+        log.info("STEP 1: get volume and paths of volume and image");
+        log.info(String.format("-> invoke DB -- volumeQueryByUuid. volumeUuid: %s", volumeUuid));
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        log.info("<- invoke DB -- done");
 
         // 1. ------------ getFullPath ------------
         String imageImageFullPath = PathUtils.genFullPath(imagePath);
         String volumeImageFullPath = PathUtils.genFullPath(volumePath);
 
         // 2. ------------ copy file ------------
+        log.info("STEP 2: copy image file and create system volume");
         if (!FileUtils.createDirIfNotExist(volumeImageFullPath)) {
-            log.error("Create new image file path Error!!!");
+            log.error("ERROR: Create new image file path Error!");
             volume.setStatus(VolumeStatusEnum.ERROR_PREPARE);
+            log.info(String.format("-> invoke DB -- volumeSave. volumeUuid: %s", volumeUuid));
             tableStorage.volumeSave(volume);
+            log.info("<- invoke DB -- done");
             return false;
         }
         new Thread(() -> {
@@ -56,53 +64,59 @@ public class VolumeService {
                 if (extraSize > 0) {
                     String command = String.format(VolumeConfig.RESIZE_VOLUME_WITH_BLOCK_SIZE_CMD, volumeImageFullPath, extraSize);
                     if (!ShellUtils.run(command)) {
-                        log.error("resize system volume size failure, command is: " + command);
+                        log.error(String.format("ERROR: resize system volume size failure, command is: %s", command));
                     }
                 }
             } catch (IOException e) {
-                log.error("CopySystemVolume Error!!!");
+                log.error("ERROR: CopySystemVolume Error!", e);
                 volume.setStatus(VolumeStatusEnum.ERROR_PREPARE);
-                e.printStackTrace();
             } finally {
                 // save into DB
+                log.info(String.format("-> invoke DB -- volumeSave. volumeUuid: %s", volumeUuid));
                 tableStorage.volumeSave(volume);
+                log.info("<- invoke DB -- done");
             }
         }).start();
         return true;
     }
 
     public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
+        log.info(String.format("createDataVolume info -- volumePath: %s, volumeUuid: %s, extraSize: %d",
+                volumePath, volumeUuid, extraSize));
 
+        log.info("STEP 1: get volume and check file path");
+        log.info("-> invoke DB -- volumeQueryByUuid");
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
-        log.info("test:" +volume);
+        log.info("<- invoke DB -- done");
 
         // 1. ------------ getFullPath ------------
         String volumeFullPath = PathUtils.genFullPath(volumePath);
 
         //在 /srv/nfs4/ 检查是否有重名文件 volumes/z/p/xx.img ，如果重名，有可能会覆盖
         if (FileUtils.exists(volumeFullPath)) {
-            log.error("outPutImage "
-                    + volumeFullPath
-                    + " exist. In order to prevent cover, please change its uuid!");
+            log.error(String.format("ERROR: volume file %s already exists", volumeFullPath));
             volume.setStatus(VolumeStatusEnum.ERROR_PREPARE);
+            log.info("-> invoke DB -- volumeSave");
             tableStorage.volumeSave(volume);
+            log.info("<- invoke DB -- done");
             return false;
         }
 
         if (!FileUtils.createDirIfNotExist(volumeFullPath)) {
-            log.error("create outPut Volume "
-                    + volumeFullPath
-                    + " Error. ");
+            log.error(String.format("ERROR: Create new image file path Error! path is: %s", volumeFullPath));
             volume.setStatus(VolumeStatusEnum.ERROR_PREPARE);
+            log.info("-> invoke DB -- volumeSave");
             tableStorage.volumeSave(volume);
+            log.info("<- invoke DB -- done");
             return false;
         }
 
         if (extraSize <= 0) {
-            log.warn("blockSize:parameter invalid," + extraSize + " use default disk size");
+            log.warn(String.format("WARN: extraSize is %d, set to default size %d", extraSize, VmConstants.DEFAULT_DISK_SIZE));
             extraSize = VmConstants.DEFAULT_DISK_SIZE;
         }
 
+        log.info("STEP 2: create data volume");
         String format = VolumeConfig.CREATE_VOLUME_DISK_CMD;
         // String format = "qemu-img create -f %s %s %sG";
         // String command = "qemu-img create -f qcow2 /srv/nfs4/volumes/z/p/xx.img 4.5G
@@ -110,108 +124,103 @@ public class VolumeService {
                 VolumeConstants.DEFAULT_DISK_TYPE,
                 volumeFullPath,
                 extraSize);
-        log.info("cmd" + command);
         String res = ShellUtils.getCmd(command);
-        log.info("Create Volume result: " + res);
-        log.info(" volume: " + volume);
         setVolumeStatus(volumeUuid, VolumeStatusEnum.AVAILABLE);
-        log.info("createDataVolume ==== end ====");
         return true;
     }
 
     public boolean resizeVolume(String volumePath, String volumeUuid, int newSize) {
-        log.info("resizeVolume ==== start ==== volumePath: " + volumePath + " volumeUuid: " + volumeUuid + " newSize: " + newSize);
+        log.info(String.format("resizeVolume info -- volumePath: %s, volumeUuid: %s, newSize: %d",
+                volumePath, volumeUuid, newSize));
+        log.info("STEP 1: get volume object and its path");
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
-        log.info("Current volume: " + volume);
         if (newSize <= 0) {
             return false;
         }
         int sizeDelta = newSize - volume.getSize();
-
-        // 1. Get full path of volume
         String volumeFullPath = PathUtils.genFullPath(volumePath);
 
-        // 2. Check if the volume exists
         if (FileUtils.isEmptyString(volumePath)) {
-            log.error("Lack of volumePath Params :" + volumePath);
+            log.error(String.format("ERROR: Lack of volumePath Params : %s", volumePath));
             return false;
         }
         if (!FileUtils.exists(volumeFullPath)) {
-            log.error("Resize non-existent data volume: " + volumeFullPath);
+            log.error(String.format("ERROR: file %s is not exists", volumeFullPath));
             volume.setStatus(VolumeStatusEnum.DELETED);
+            log.info("-> invoke DB -- volumeSave");
             tableStorage.volumeSave(volume);
+            log.info("<- invoke DB -- done");
             return false;
         }
 
         // 3. Resize volume
+        log.info("STEP 2: resize volume");
         String command = String.format(
                 VolumeConfig.RESIZE_VOLUME_CMD,
                 sizeDelta > 0 ? "": VolumeConstants.SHRINK_OPTION,
                 volumeFullPath,
                 newSize
         );
-        log.info("Resize volume command: " + command);
         if (!ShellUtils.run(command)) {
-            log.error("Resize volume failed");
+            log.error(String.format("ERROR: resize volume failure, command is: %s", command));
             return false;
         }
 
         // 4. Verify volume size
+        log.info("STEP 3: verify volume size");
         String volumeSize = ShellUtils.getCmd(String.format(VolumeConfig.QUERY_VOLUME_VIRTUAL_SIZE, volumeFullPath));
         // Since getCmd returns not null value, we can use equals directly
         if (!volumeSize.equals(String.valueOf(newSize))) {
-            log.error("Resize volume failed");
+            log.error("ERROR: volume size not changed, resize volume failed");
             return false;
         }
 
         // 5. Update volume size
+        log.info("STEP 4: update volume size in DB");
         volume.setSize(newSize);
+        log.info("-> invoke DB -- volumeSave");
         tableStorage.volumeSave(volume);
-        log.info("resizeVolume ==== end ==== volume size: " + newSize);
-
+        log.info("<- invoke DB -- done");
         return true;
     }
 
     public boolean deleteVolume(String volumeUuid, String volumePath) {
-        log.info("deleteVolume ==== start ==== volumePath: " + volumePath);
-        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        log.info(String.format("deleteVolume info -- volumeUuid: %s, volumePath: %s", volumeUuid, volumePath));
+        log.info("STEP 1: get volume object and its path");
 
-        // 1. check path not empty
+        log.info("-> invoke DB -- volumeQueryByUuid");
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        log.info("<- invoke DB -- done");
+
         if (FileUtils.isEmptyString(volumePath)) {
-            log.error("Lack of volumePath Params :" + volumePath);
+            log.error(String.format("ERROR: Lack of volumePath Params : %s", volumePath));
             return false;
         }
-
-        // 2. check file exist
         volumePath = PathUtils.genFullPath(volumePath);
         if (!FileUtils.exists(volumePath)) {
             if (volume.getStatus().equals(VolumeStatusEnum.CREATING)
                     || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)
                     || volume.getStatus().equals(VolumeStatusEnum.ERROR)) {
-                log.info("no file need to delete");
+                log.debug("no file need to delete");
             } else {
-                log.error("file `" + volumePath + "` is not exists");
+                log.error(String.format("ERROR: file %s is not exists", volumePath));
             }
             return true;
         }
 
         // 3. delete
-        log.info("volumePath" + volumePath);
+        log.info("STEP 2: delete volume");
         boolean result = new File(volumePath).delete();
         if (!result) {
-            log.error("Delete volume Error!!! " + volumePath);
+            log.error(String.format("ERROR: delete volume failure, path is: %s", volumePath));
             return false;
         }
-
-        log.info("deleteVolume ==== end ====");
         return true;
     }
 
     public Boolean attachVolume(Vm vm, Volume volume) {
-        log.info("attachVolume ---- start ----");
-        log.info("vm: " + vm.toString() + " volume: " + volume.toString());
+        log.info(String.format("attachVolume info -- vm: %s, volume: %s", vm.toString(), volume.toString()));
         String volumeXml = xmlConfig.getVolumeDevice(volume);
-        log.info("attach volume info: " + volumeXml);
         String vmUuid = vm.getUuid();
         String volumeUuid = volume.getUuid();
         try {
@@ -232,26 +241,26 @@ public class VolumeService {
                 volume.setInstanceUuid("");
                 volume.setMountPoint("");
                 volume.setBus("");
+
+                log.info("-> invoke DB -- volumeSave");
                 tableStorage.volumeSave(volume);
+                log.info("<- invoke DB -- done");
                 setVolumeStatus(volumeUuid, VolumeStatusEnum.AVAILABLE);
-                e.printStackTrace();
+                log.error(String.format("ERROR: attach volume failure, volumeUuid is: %s", volumeUuid), e);
                 return false;
             }
         } catch (LibvirtException e) {
             setVolumeStatus(volumeUuid, VolumeStatusEnum.ERROR);
-            e.printStackTrace();
+            log.error("ERROR: attach volume failed", e);
             return false;
         }
         setVolumeStatus(volumeUuid, VolumeStatusEnum.ATTACHED);
-        log.info("attachVolume ---- end ----");
         return true;
     }
 
     public Boolean detachVolume(Vm vm, Volume volume) {
-        log.info("detachVolume ---- start ----");
-        log.info("vm: " + vm.toString() + " volume: " + volume.toString());
+        log.info(String.format("detachVolume info -- vm: %s, volume: %s", vm.toString(), volume.toString()));
         String volumeXml = xmlConfig.getVolumeDevice(volume);
-        log.info("detach volume info: " + volumeXml);
         String instanceUuid = vm.getUuid();
         String volumeUuid = volume.getUuid();
         try {
@@ -262,21 +271,21 @@ public class VolumeService {
                 domain.detachDeviceFlags(volumeXml, virtFlag);
             } catch (Exception e) {
                 setVolumeStatus(volumeUuid, VolumeStatusEnum.ATTACHED);
-                e.printStackTrace();
+                log.error("ERROR: detach volume failure", e);
                 return false;
             }
         } catch (LibvirtException e) {
             setVolumeStatus(volumeUuid, VolumeStatusEnum.ERROR);
-            e.printStackTrace();
+            log.error("ERROR: detach volume failed", e);
             return false;
         }
         setVolumeStatus(volumeUuid, VolumeStatusEnum.AVAILABLE);
-        log.info("detachVolume ---- end ----");
         return true;
     }
 
     public boolean volumeToImage(String volumePath, String imagePath, int extraSize) {
-        log.info("volumeToImage ==== start ====  volumePath: " + volumePath + " imagePath: " + imagePath);
+        log.info(String.format("volumeToImage info -- volumePath: %s, imagePath: %s, extraSize: %d",
+                volumePath, imagePath, extraSize));
 
         // 1. ------------ getFullPath ------------
         String volumeImageFullPath = PathUtils.genFullPath(volumePath);
@@ -284,7 +293,7 @@ public class VolumeService {
 
         // 2. ------------ copy file ------------
         if (!FileUtils.createDirIfNotExist(imageImageFullPath)) {
-            log.error("Create new image file path Error!!!");
+            log.error("ERROR: Create new image file path Error!");
             return false;
         }
         new Thread(() -> {
@@ -297,11 +306,10 @@ public class VolumeService {
                             imageImageFullPath,
                             extraSize);
                     String res = ShellUtils.getCmd(cmd);
-                    log.info("resize result: " + res);
+                    log.debug(String.format("resize result: %s", res));
                 }
             } catch (IOException e) {
-                log.error("File copy Error!!!");
-                e.printStackTrace();
+                log.error("ERROR: file copy Error!", e);
             }
         }).start();
 
@@ -309,6 +317,7 @@ public class VolumeService {
     }
 
     public Map<String, String> getVolStorage(String directory) {
+        log.info(String.format("getVolStorage info -- directory: %s", directory));
         String command;
         Map<String, String> resMap = new HashMap<>();
 
@@ -330,8 +339,13 @@ public class VolumeService {
     // ---------------------------------------------------------------------------------------------------------------
 
     private void setVolumeStatus(String volumeUuid, VolumeStatusEnum status){
+        log.info(String.format("setVolumeStatus info -- volumeUuid: %s, status: %s", volumeUuid, status));
+        log.info("-> invoke DB -- volumeQueryByUuid");
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        log.info("<- invoke DB -- done");
         volume.setStatus(status);
+        log.info("-> invoke DB -- volumeSave");
         tableStorage.volumeSave(volume);
+        log.info("<- invoke DB -- done");
     }
 }

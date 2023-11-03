@@ -18,37 +18,39 @@ public class VncService {
     private TableStorage tableStorage;
 
     public void saveVncPort(String uuid) {
+        log.info(String.format("saveVncPort info -- uuid: %s", uuid));
         // status
+        log.info("-> invoke DB -- vmQueryByUuid");
         Vm vm = tableStorage.vmQueryByUuid(uuid);
+        log.info("<- invoke DB -- done");
         // new vnc port
         String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + uuid).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");
         vm.setVncPort(vncPort);
         // save
+        log.info("-> invoke DB -- vmSave");
         tableStorage.vmSave(vm);
+        log.info("<- invoke DB -- done");
     }
 
     public void addVncToken(String uuid, String address) {
-        log.info("addVncToken ---- start ---- uuid:" + uuid + " address:" + address);
+        log.info(String.format("addVncToken info -- uuid: %s, address: %s", uuid, address));
         String cmd = "echo \'" + uuid + ": " + address + "\'>> " + VncConfig.TOKEN_FILE_PATH;
+        log.debug(String.format("addVncToken -- Command: %s executed", cmd));
         String result = ShellUtils.getCmd(cmd);
-        log.info("result: " + result);
-        log.info("addVncToken ---- end ----");
+        log.debug(String.format("addVncToken -- result is: %s", result));
     }
 
     public void deleteVncToken(String uuid) {
-        log.info("deleteVncToken ---- start ---- uuid:" + uuid);
+        log.info(String.format("deleteVncToken info -- uuid: %s", uuid));
         String cmd = "sed -i \'/" + uuid + "/d\' " + VncConfig.TOKEN_FILE_PATH;
+        log.debug(String.format("deleteVncToken -- Command: %s executed", cmd));
         String result = ShellUtils.getCmd(cmd);
-        log.debug("deleteVncToken -- Command: " + cmd + " executed");
-        log.debug("deleteVncToken -- Result: " + result);
-        log.info("deleteVncToken ---- end ----");
+        log.debug(String.format("deleteVncToken -- result is: %s", result));
     }
 
     public void flushVncToken(String uuid, String address){
-        log.info("flushVncToken ---- start ---- uuid:" + uuid + " address:" + address);
+        log.info(String.format("flushVncToken info -- uuid: %s, address: %s", uuid, address));
         deleteVncToken(uuid);
         addVncToken(uuid, address);
-        log.debug("flushVncToken -- Vnc Token for " + uuid + " has been flushed.");
-        log.info("flushVncToken ---- end ----");
     }
 }

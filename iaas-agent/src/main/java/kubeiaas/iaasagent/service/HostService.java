@@ -31,6 +31,7 @@ public class HostService {
      * @return boolean result (true: 成功；false：失败）
      */
     public boolean getEnvPrepareRes(List<String> roleList) {
+        log.info(String.format("getEnvPrepareRes info -- roleList: %s", roleList));
         int MAX_CNT = 12;
 
         List<String> typeList = new ArrayList<>();
@@ -53,20 +54,21 @@ public class HostService {
                 while (res == -1 && cnt < MAX_CNT) {
                     cnt += 1;
                     TimeUnit.SECONDS.sleep(5);
-                    log.info("......wait for checking [{}], res code {}", type, res);
+                    log.debug("......wait for checking [{}], res code {}", type, res);
                     res = getEnvPreResByType(type);
                 }
                 if (res == 0) {
                     return false;
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.warn("getEnvPrepareRes -- InterruptedException: {}", e.getMessage());
             }
         }
         return true;
     }
 
     private int getEnvPreResByType(String type) {
+        log.info(String.format("getEnvPreResByType info -- type: %s", type));
         String res = FileUtils.readFile(HostConfig.RESULT_PREPARE).getProperty(type);
         if (res == null) {
             return -1;
@@ -83,7 +85,11 @@ public class HostService {
      * 判断当前节点 host 是否具有该角色 role
      */
     public boolean hasHostRole(String roleName) {
+        log.info(String.format("hasHostRole info -- roleName: %s", roleName));
+
+        log.info("-> invoke DB -- hostQueryByIp");
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        log.info("<- invoke DB -- done");
         JSONArray roles = JSONArray.parseArray(host.getRole());
         return roles.contains(roleName);
     }
@@ -92,7 +98,11 @@ public class HostService {
      * 为当前节点 host 加入角色 role
      */
     public void setHostRole(String roleName) {
+        log.info(String.format("setHostRole info -- roleName: %s", roleName));
+
+        log.info("-> invoke DB -- hostQueryByIp");
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        log.info("<- invoke DB -- done");
         JSONArray roles = JSONArray.parseArray(host.getRole());
         roles.add(roleName);
         host.setRole(roles.toJSONString());
@@ -103,7 +113,11 @@ public class HostService {
      * 为当前节点 host 删除角色 role
      */
     public void delHostRole(String roleName) {
+        log.info(String.format("delHostRole info -- roleName: %s", roleName));
+
+        log.info("-> invoke DB -- hostQueryByIp");
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        log.info("<- invoke DB -- done");
         JSONArray roles = JSONArray.parseArray(host.getRole());
         roles.remove(roleName);
         host.setRole(roles.toJSONString());
@@ -114,17 +128,27 @@ public class HostService {
      * 获取对应角色的节点 host
      */
     public Host getHostByRole(String roleName) {
-        return tableStorage.hostQueryByRole(roleName);
+        log.info(String.format("getHostByRole info -- roleName: %s", roleName));
+        log.info("-> invoke DB -- hostQueryByRole");
+        Host host = tableStorage.hostQueryByRole(roleName);
+        log.info("<- invoke DB -- done");
+        return host;
     }
 
     /**
      * 设置当前节点 host 状态
      */
     public void setHostStatus(HostStatusEnum hostStatus) {
+        log.info(String.format("setHostStatus info -- hostStatus: %s", hostStatus));
+
+        log.info("-> invoke DB -- hostQueryByIp");
         Host host = tableStorage.hostQueryByIp(hostConfig.getHostIp());
+        log.info("<- invoke DB -- done");
         if (!host.getStatus().equals(hostStatus)) {
             host.setStatus(hostStatus);
         }
+        log.info("-> invoke DB -- hostSave");
         tableStorage.hostSave(host);
+        log.info("<- invoke DB -- done");
     }
 }
