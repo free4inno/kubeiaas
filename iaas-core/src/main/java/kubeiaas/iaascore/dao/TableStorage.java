@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -264,6 +265,39 @@ public class TableStorage {
 
     public void ipUsedDeleteByVmUuid(String vmUuid){
         dbProxy.ipUsedDeleteByVmUuid(vmUuid);
+    }
+
+    // ========================= iso =========================
+    public Optional<Iso> isoQueryByUuid(String isoUuid) {
+        String jsonString = dbProxy.isoQueryByUuid(isoUuid);
+        Iso iso = JSON.parseObject(jsonString, Iso.class);
+        return Optional.ofNullable(iso);
+    }
+
+    public Iso isoSave(Iso iso) {
+        String isoObjectStr = JSON.toJSONString(iso);
+        isoObjectStr = dbProxy.isoSave(isoObjectStr);
+        return JSON.parseObject(isoObjectStr, Iso.class);
+    }
+
+    public List<String> queryAllMountPointsByVmUuid(String instanceUuid) {
+        log.info("queryAllMountPointsByVmUuid ==== start ====");
+        String jsonString = dbProxy.queryAllMountPointsByVmUuid(instanceUuid);
+        log.info("queryAllMountPointsByVmUuid ==== end ====");
+        return JSON.parseArray(jsonString, String.class);
+    }
+
+    public List<Mount> queryMountsByVmUuidAndIsoUuid(String instanceUuid, String isoUuid) {
+        log.info("queryMountsByVmUuidAndIsoUuid ==== start ====");
+        String jsonString = dbProxy.queryMountsByVmUuidAndIsoUuid(instanceUuid, isoUuid);
+        log.info("queryMountsByVmUuidAndIsoUuid ==== end ====");
+        return JSON.parseArray(jsonString, Mount.class);
+    }
+
+    public String clearIsoTableAndMountTable() {
+        dbProxy.deleteIsoTable();
+        dbProxy.deleteMountTable();
+        return "";
     }
 
     // ========================= volume =========================

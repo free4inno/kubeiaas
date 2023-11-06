@@ -28,7 +28,7 @@ public class HostController {
     public String queryAll() {
         log.info("queryAll ==== start ====");
         List<HostTable> hostTableList = hostDao.findAll();
-        log.info("queryAll ==== end ====");
+        log.info("queryAll ==== finish ====");
         return JSON.toJSONString(hostTableList);
     }
 
@@ -41,7 +41,7 @@ public class HostController {
         Specification<HostTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<HostTable> hostTableList = hostDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("queryAllBySingleKey ==== finish ====");
         return JSON.toJSONString(hostTableList);
     }
 

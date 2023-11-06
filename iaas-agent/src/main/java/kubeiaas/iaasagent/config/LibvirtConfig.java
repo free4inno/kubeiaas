@@ -387,6 +387,35 @@ public class LibvirtConfig {
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 
+    // ===== ISO ====================================================================================================
+    public String convertMountToLibvirtXML(Mount mount) {
+        log.info("isoAsScsiXml ---- start ----");
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        // Configure device
+        Element disk = devices.addElement("disk")
+                .addAttribute("type", mount.getType())
+                .addAttribute("device", mount.getDevice());
+        disk.addElement("driver")
+                .addAttribute("name", "qemu")
+                .addAttribute("type", mount.getDriverType());
+        disk.addElement("source")
+                .addAttribute("file", mount.getSource());
+        disk.addElement("target")
+            .addAttribute("dev", mount.getMountPoint())
+            .addAttribute("bus", mount.getBus());
+        if (mount.getReadonly() != null && mount.getReadonly()) {
+            disk.addElement("readonly");
+        }
+
+        String xml = devices.asXML();
+        xml = xml.replaceAll("<root>", "")
+                .replaceAll("</root>", "")
+                .trim();
+        log.info("isoAsScsiXml ---- end ---- xml: " + xml);
+        return xml;
+    }
+
     // ===== USB DEVICE ====================================================================================================
 
     /**

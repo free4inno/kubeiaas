@@ -206,6 +206,24 @@ public class TableStorage {
         return JSON.parseObject(volumeObjectStr, Volume.class);
     }
 
+    // ========================= iso =========================
+    public Mount mountSave(Mount mount) {
+        String mountObjectStr = JSON.toJSONString(mount);
+        mountObjectStr = dbProxy.mountSave(mountObjectStr);
+        return JSON.parseObject(mountObjectStr, Mount.class);
+    }
+
+    public Iso isoSave(Iso iso) {
+        String isoObjectStr = JSON.toJSONString(iso);
+        isoObjectStr = dbProxy.isoSave(isoObjectStr);
+        return JSON.parseObject(isoObjectStr, Iso.class);
+    }
+
+    public Integer mountDeleteById(Integer id) {
+        String jsonString = dbProxy.mountDeleteById(id);
+        return JSON.parseObject(jsonString, Integer.class);
+    }
+
     // ========================= specConfig =========================
 
     public List<SpecConfig> specConfigQueryAllByType(SpecTypeEnum type) {

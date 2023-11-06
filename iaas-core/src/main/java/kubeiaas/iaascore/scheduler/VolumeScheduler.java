@@ -218,14 +218,7 @@ public class VolumeScheduler {
 
     public boolean attachDataVolume(String vmUuid, String volumeUuid){
         log.info("attachVolume ==== start ====  vmUuid: " + vmUuid + " volumeUuid: " + volumeUuid);
-        //获取已经挂载的volumes
-        List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
-        log.info("attachVolume ====  volumeList: " + volumeList);
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
-        //设置新volume的盘符等信息
-        if (!mountProcess.attachVolumes(volumeList, vm)) {
-            return false;
-        }
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         String vmObjectStr = JSON.toJSONString(vm);
         String volumeObjectStr = JSON.toJSONString(volume);

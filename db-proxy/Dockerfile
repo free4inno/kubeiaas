@@ -14,3 +14,5 @@ COPY ./sqlite/resource/RUN.sh /root/
 ADD ./target/db-proxy-1.1.0-SNAPSHOT.jar /root/db-proxy.jar
 
 ENTRYPOINT ["/bin/bash", "/root/RUN.sh"]
+
+# docker buildx build --platform linux/amd64 -t registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:1.1.0-SNAPSHOT-sqlite . --push

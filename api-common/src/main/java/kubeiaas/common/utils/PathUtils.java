@@ -109,4 +109,29 @@ public class PathUtils {
         return VolumeConstants.IMAGE_PATH + getImgDir(uuid) + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;
     }
 
+    /**
+     * Merges multiple file paths.
+     *
+     * @param paths Varargs of file paths to be merged
+     * @return The merged file path
+     */
+    public static String mergePaths(String... paths) {
+        if (paths == null || paths.length == 0) {
+            return "";
+        }
+
+        StringBuilder mergedPath = new StringBuilder();
+
+        for (int i = 0; i < paths.length; i++) {
+            mergedPath.append(paths[i]);
+
+            // If it's not the last path and the current path doesn't end with '/', append '/'
+            if (i < paths.length - 1 && !paths[i].endsWith("/")) {
+                mergedPath.append("/");
+            }
+        }
+
+        return mergedPath.toString();
+    }
+
 }

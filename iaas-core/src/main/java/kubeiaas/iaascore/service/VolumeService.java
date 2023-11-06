@@ -9,6 +9,7 @@ import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
+import kubeiaas.iaascore.process.MountProcess;
 import kubeiaas.iaascore.process.ResourceProcess;
 import kubeiaas.iaascore.process.VolumeProcess;
 import kubeiaas.iaascore.response.PageResponse;
@@ -19,6 +20,7 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -29,6 +31,9 @@ public class VolumeService {
 
     @Resource
     ResourceProcess resourceProcess;
+
+    @Resource
+    MountProcess mountProcess;
 
     @Resource
     TableStorage tableStorage;
@@ -138,6 +143,16 @@ public class VolumeService {
         }
         volume.setInstanceUuid(vmUuid);
         volume.setStatus(VolumeStatusEnum.USED);
+        // 此处mountPoint和instance同时保存，在数据库层面完成了挂载。
+        Optional<String> optMountPoint = mountProcess.getVirtioFirstAvailableMountPoint(vmUuid);
+        if (optMountPoint.isPresent()) {
+            volume.setMountPoint(optMountPoint.get());
+        } else {
+            log.error("ERR: MountPoint not enough! (uuid: " + vmUuid + ")");
+            return ResponseMsgConstants.FAILED;
+        }
+        volume.setBus(VolumeConstants.VOLUME_BUS_VIRTIO);
+        log.info("Attached Volume full configure: " + volume.toString());
         tableStorage.volumeSave(volume);
 
         /* -----3. attach data Volume ----

@@ -529,7 +529,7 @@ public class VmService {
      * @throws Exception
      */
     private void destroyDomain(Domain d) throws Exception {
-        log.info("destroyDomain ---- start ----");
+        log.info("---- start ----");
 
         if (d.isActive() > 0) {
             d.destroy();

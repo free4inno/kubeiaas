@@ -56,7 +56,7 @@ public class VolumeOpenAPI {
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.info("resize system volume ==== error ====");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_NOT_SUPPORT));
         }
     }
 
@@ -70,7 +70,7 @@ public class VolumeOpenAPI {
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.info("resize data volume ==== error ====");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_NOT_SUPPORT));
         }
     }
 
@@ -174,13 +174,23 @@ public class VolumeOpenAPI {
     @ResponseBody
     public String edit(@Valid @RequestBody EditVolumeForm f) throws BaseException {
         log.info("edit ==== start ====");
-        Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription(), f.getDiskSize());
+        try {
+            String result = volumeService.resizeDataVolume(f.getVolumeUuid(), f.getDiskSize());
+            if (result.equals(ResponseMsgConstants.FAILED)) {
+                log.info("edit ==== error ====");
+                return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_NOT_SUPPORT));
+            }
+        } catch (VolumeException e) {
+            log.info("edit ==== error ====");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+        }
+        Volume volume = volumeService.editVolume(f.getVolumeUuid(), f.getName(), f.getDescription(), null);
         if (volume != null) {
             log.info("edit ==== end ====");
             return JSON.toJSONString(BaseResponse.success(volume));
         } else {
             log.info("edit ==== error ====");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_RESIZE_ERROR));
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_EDIT_ERROR));
         }
     }
 

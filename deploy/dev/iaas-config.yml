@@ -8,10 +8,11 @@ metadata:
 data:
   # kubectl get node --show-labe ls
   # -------- 工作节点 --------
-  nodes.dhcp: "hf-node-01"
+  nodes.dhcp: "hf-master-01"
   nodes.nfs: "192.168.33.7"
 
   nfs.dir.img: "/usr/local/kubeiaas/data/images"
+  nfs.dir.iso: "/usr/local/kubeiaas/data/iso"
   nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 
   # -------- 网络配置 --------

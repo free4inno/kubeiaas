@@ -61,6 +61,11 @@ public class RequestParamConstants {
     public static final String VOLUME_PATH = "volume_path";
     public static final String VOLUME_TYPE = "volume_type";
 
+    /* ===== ISO ===== */
+    public static final String ISO_UUID = "iso_uuid";
+    public static final String ISO_OBJECT = "iso_object";
+    public static final String MOUNT_OBJECT = "mount_object";
+
     /* ===== HOST ===== */
     public static final String HOST_OBJECT = "host_object";
 

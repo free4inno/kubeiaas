@@ -108,6 +108,24 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr
     );
 
+    // ========================= iso =========================
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String mountSave(
+            @RequestParam(value = RequestParamConstants.MOUNT_OBJECT) String mountObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String isoSave(
+            @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.DELETE_BY_ID)
+    @ResponseBody
+    String mountDeleteById(
+            @RequestParam(value = RequestParamConstants.ID) Integer id);
+
     // ======================== spec ============================
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SPEC_CONFIG + "/" + RequestMappingConstants.QUERY_ALL_BY_TYPE)
     @ResponseBody

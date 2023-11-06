@@ -17,6 +17,7 @@ public class VolumeConstants {
 
     /* config */
     public static final String SPILT = "/";
+    public static final String STORAGE_TYPE = "file";
     public static final String DEFAULT_DISK_TYPE = "qcow2";
     // bus
     public static final String VOLUME_BUS_IDE = "ide";
@@ -25,6 +26,7 @@ public class VolumeConstants {
     public static final String DEFAULT_NFS_SRV_PATH = "/usr/local/kubeiaas/data/";
     public static final String VOLUME_PATH = "sys-volumes/";
     public static final String DATA_VOLUME_PATH = "data-volumes/";
+    public static final String ISO_PATH = "images/iso/";
     public static final String IMAGE_PATH = ImageConstants.IMAGE_PATH;
     // suffix
     public static final String IMG_VOLUME_SUFFIX = ".img";
@@ -35,9 +37,12 @@ public class VolumeConstants {
     // mount
     public static final String DEV_PREFIX = "vd";    //这是硬盘挂载时的盘符名称，比如vda
     public static final String WIN_PREFIX = "hd";    //这是硬盘挂载时的盘符名称，比如vda
+    public static final String ISO_PREFIX = "sr";    //这是ISO挂载时的盘符名称，比如sr0
     public static final String TAP_PREFIX = "v_";
     public static final String VOLUME_DEVICE_CDROM = "cdrom";
     public static final String VOLUME_DEVICE_DISK = "disk";
+    public static final String VOLUME_DRIVER_TYPE_QCOW2 = "qcow2";
+    public static final String VOLUME_DRIVER_TYPE_RAW = "raw";
 
     // resize
     public static final String SHRINK_OPTION = "--shrink";

@@ -14,6 +14,10 @@ public class RequestMappingConstants {
     public static final String SPEC_CONFIG = "spec_config";
     public static final String SERVICE = "service";
     public static final String DEVICE = "device";
+    public static final String ISO = "iso";
+
+    // ========================= action =========================
+    public static final String MOUNT = "mount";
 
     // -- agent component
     public static final String DHCP_C = "dhcp_c";
@@ -22,6 +26,7 @@ public class RequestMappingConstants {
     public static final String VM_C = "vm_c";
     public static final String VOLUME_C = "volume_c";
     public static final String DEVICE_C = "device_c";
+    public static final String ISO_C = "iso_c";
     public static final String HOST_C = "host_c";
 
     /* =============== action =============== */
@@ -64,6 +69,9 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
     public static final String QUERY_ALL_BY_HOST_NAME = "query_all_by_host_name";
     public static final String QUERY_ALL_BY_HOST_UUID = "query_all_by_host_uuid";
+    public static final String QUERY_ALL_BY_VM_UUID = "query_all_by_vm_uuid";
+    public static final String QUERY_ALL_MOUNT_POINT_BY_VM_UUID = "query_all_mount_point_by_vm_uuid";
+    public static final String QUERY_MOUNTS_BY_VM_UUID_AND_ISO_UUID = "query_mounts_by_vm_uuid_and_iso_uuid";
     // -- fuzzy query
     public static final String FUZZY_QUERY = "fuzzy_query";
     public static final String FUZZY_QUERY_ATTACH = "fuzzy_query_attach";
@@ -108,6 +116,11 @@ public class RequestMappingConstants {
     public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
     public static final String DATA_VOLUME_STORAGE = "data_vol_sto";
     public static final String IMG_VOLUME_STORAGE = "img_vol_sto";
+
+    // >>> ISO Controller <<<
+    public static final String ATTACH_ISO = "attach_iso";
+    public static final String DETACH_ISO = "detach_iso";
+    public static final String UPLOAD_ISO = "upload_iso";
 
     // >>> Vm Controller <<<
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";
