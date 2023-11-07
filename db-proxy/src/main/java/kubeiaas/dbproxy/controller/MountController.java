@@ -1,7 +1,6 @@
 package kubeiaas.dbproxy.controller;
 
 import com.alibaba.fastjson.JSON;
-import kubeiaas.common.bean.Mount;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.dbproxy.dao.MountDao;

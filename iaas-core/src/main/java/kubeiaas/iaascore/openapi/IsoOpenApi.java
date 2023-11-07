@@ -29,17 +29,20 @@ public class IsoOpenApi {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.ATTACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String attach(@Valid @RequestBody AttachIsoForm f) throws IsoException, BaseException {
-        log.info("attach ==== start ====");
+        log.info("-- start -- attachIso");
         if (f.getMethod() == null) {
             f.setMethod("virtio");
         }
         if (f.getMethod().equals("virtio")) {
             String result = isoService.attachIsoAsVirtio(f.getVmUuid(), f.getIsoUuid());
+            log.info("-- end -- attachIso -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(result)));
         } else if (f.getMethod().equals("scsi")) {
             String result = isoService.attachIsoAsScsi(f.getVmUuid(), f.getIsoUuid());
+            log.info("-- end -- attachIso -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(result)));
         } else {
+            log.warn("-- end -- attachIso -- failed");
             throw new IsoException("Unsupported mount method: " + f.getMethod());
         }
     }
@@ -47,28 +50,18 @@ public class IsoOpenApi {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DETACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String detach(@Valid @RequestBody DetachIsoForm f) throws IsoException, BaseException {
-        log.info("detach ==== start ====");
+        log.info("-- start -- detachIso");
         String result = isoService.detachIso(f.getVmUuid(), f.getIsoUuid());
-        log.info("detach ==== end ====");
+        log.info("-- end -- detachIso -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(result)));
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "test_upload", produces = RequestMappingConstants.APP_JSON)
-    @ResponseBody
-    public String testUpload() throws IsoException, BaseException {
-        log.info("testUpload ==== start ====");
-        String result = isoService.uploadIsoToDatabase("", "test.iso");
-        log.info("Mount Point: " + result);
-        return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_UUID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryByUuid(@RequestParam(value = "uuid") String isoUuid) throws IsoException, BaseException {
-        log.info("queryByUuid ==== start ====");
-        log.info("isoUuid: {}", isoUuid);
+        log.info("-- start -- queryByUuid");
         String result = isoService.queryByUuid(isoUuid);
-        log.info("queryByUuid ==== end ====");
+        log.info("-- end -- queryByUuid -- success");
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(result)));
     }
 }

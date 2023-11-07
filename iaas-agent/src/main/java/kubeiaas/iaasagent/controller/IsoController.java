@@ -30,14 +30,14 @@ public class IsoController {
     public String attachIso(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
             @RequestParam(value = RequestParamConstants.MOUNT_OBJECT) String mountObjectStr) {
-        log.info("attachIso ==== " + "VM_OBJECT: " + vmObjectStr + " MOUNT_OBJECT: " + mountObjectStr);
+        log.info("-- start -- attachIso");
         Vm vm = JSON.parseObject(vmObjectStr, Vm.class);
         Mount mount = JSON.parseObject(mountObjectStr, Mount.class);
         if (isoService.attachIso(vm, mount)) {
-            log.info("attachIso -- success");
+            log.info("-- end -- attachIso -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("attachIso -- failed");
+            log.error("-- end -- attachIso -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -47,14 +47,14 @@ public class IsoController {
     public String detachIso(
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
             @RequestParam(value = RequestParamConstants.MOUNT_OBJECT) String mountObjectStr) {
-        log.info("detachIso ==== " + "VM_OBJECT: " + vmObjectStr + " MOUNT_OBJECT: " + mountObjectStr);
+        log.info("-- start -- detachIso");
         Vm vm = JSON.parseObject(vmObjectStr, Vm.class);
         Mount mount = JSON.parseObject(mountObjectStr, Mount.class);
         if (isoService.detachIso(vm, mount)) {
-            log.info("detachIso -- success");
+            log.info("-- end -- detachIso -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("detachIso -- failed");
+            log.error("-- end -- detachIso -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -63,18 +63,18 @@ public class IsoController {
     @ResponseBody
     String uploadIso(
             @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr) {
-        log.info("uploadIso ==== " + "ISO_OBJECT: " + isoObjectStr);
+        log.info("uploadIso -- start");
         Iso iso = JSON.parseObject(isoObjectStr, Iso.class);
         if (!isoService.isIsoExistsInServer(iso.getAbsolutePath())) {
-            log.error("uploadIso: iso file not found, isoPath: {}, isoName: {}", iso.getRelativePath(), iso.getName());
+            log.error(String.format("ERROR: iso %s not exists.", iso.getAbsolutePath()));
             return ResponseMsgConstants.FAILED;
         }
         iso.setSize(isoService.getIsoSizeInBytes(iso.getAbsolutePath()).orElse(0L));
         if (isoService.uploadIso(iso)) {
-            log.info("uploadIso -- success");
+            log.info("-- end -- uploadIso -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("uploadIso -- failed");
+            log.error("-- end -- uploadIso -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
