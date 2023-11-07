@@ -1,8 +1,6 @@
 package kubeiaas.iaasagent.config;
 
-import kubeiaas.common.bean.Device;
-import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.VmCUtils;
@@ -57,6 +55,13 @@ public class XmlConfig {
 
     public String getIpDevice(IpUsed ip) {
         return libvirtConfig.ipToNetwork(ip);
+    }
+
+    public String getMountXml(Mount mount) {
+        log.info("getIsoMountXml ---- start ----");
+        String res = libvirtConfig.convertMountToLibvirtXML(mount);
+        log.info("getIsoMountXml ---- end ----");
+        return res;
     }
 
     public String modifyXml(String originXML, int newCores, int newMemory) {

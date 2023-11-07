@@ -17,4 +17,9 @@ public class BaseException extends Exception{
         this.msg = msg;
         this.resEnum = ResponseEnum.WORK_ERROR;
     }
+
+    public BaseException(ResponseEnum resEnum) {
+        this.msg = resEnum.getMsg();
+        this.resEnum = resEnum;
+    }
 }

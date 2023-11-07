@@ -162,6 +162,39 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid
     );
 
+    // ========================= iso =========================
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.QUERY_BY_UUID)
+    @ResponseBody
+    String isoQueryByUuid(
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String isoSave(
+            @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.QUERY_ALL_MOUNT_POINT_BY_VM_UUID)
+    @ResponseBody
+    String queryAllMountPointsByVmUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.QUERY_MOUNTS_BY_VM_UUID_AND_ISO_UUID)
+    @ResponseBody
+    String queryMountsByVmUuidAndIsoUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.DELETE)
+    @ResponseBody
+    String deleteIsoTable();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.DELETE)
+    @ResponseBody
+    String deleteMountTable();
+
     // ========================= volume =========================
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
     @ResponseBody

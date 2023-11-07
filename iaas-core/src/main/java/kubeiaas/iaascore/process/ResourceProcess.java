@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -226,4 +227,7 @@ public class ResourceProcess {
         AgentConfig.setSelectedHost(volume.getUuid(), selectedHost);
     }
 
+    public Optional<Host> selectOptimalHost() {
+        return Optional.ofNullable(resourceScheduler.selectHostByHostOperator(HostSelectStrategyConstants.ROUND_ROBIN));
+    }
 }
