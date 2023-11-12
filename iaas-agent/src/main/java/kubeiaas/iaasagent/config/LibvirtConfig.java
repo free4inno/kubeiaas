@@ -69,11 +69,9 @@ public class LibvirtConfig {
     /**
      * 获取 xml 中 emulator 的位置，目前 CentOS 是 /usr/local/bin/qemu-system-x86_64, Ubuntu 是 /usr/bin/qemu-system-x86_64
      * 为了防止之后 emulator 路径会改变，或者运维时设置错误，目前使用三种方式可以更改：
-     *
      * 1、使用 whereis 命令，查找全部 emulator 的路径，找到中间含有 usr & bin 的路径，然后返回这个值;
      * 2、默认使用查找到的首个位置
      * 3、加载 static 中的 emulatorName 的默认值。
-     *
      * 三个方法有先后顺序，一个生效之后，则不执行剩下的步骤，所以更改时，一定注意先后顺序。
      */
     private static String getEmulatorLocation() {
@@ -99,7 +97,6 @@ public class LibvirtConfig {
 
     /**
      * 刷新用户计算资源上限配置
-     *
      * 从配置表中读取配置，并按照配置设置最大值，期间需要防止用户的 空配置 / 错误配置
      * 在每次生产新的 XML 前刷新
      */

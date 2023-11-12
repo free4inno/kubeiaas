@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Device;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
@@ -18,6 +19,7 @@ import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.response.SingleMsgResponse;
 import kubeiaas.iaascore.scheduler.DeviceScheduler;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -90,6 +92,7 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String attach(
             @Valid @RequestBody AttachDeviceForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- attach");
 
         // 1.1. get vm and check
@@ -136,6 +139,9 @@ public class DeviceOpenAPI {
 
         // 4. response
         log.info("-- end -- attach -- success");
+
+        // ----- clear MDC -----
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
@@ -143,6 +149,8 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String detach(
             @Valid @RequestBody DetachDeviceForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
+
         log.info("-- start -- detach");
 
         // 1.1. get vm and check
@@ -192,6 +200,9 @@ public class DeviceOpenAPI {
 
         // 4. return
         log.info("-- end -- detach -- success");
+
+        // ----- clear MDC -----
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 }

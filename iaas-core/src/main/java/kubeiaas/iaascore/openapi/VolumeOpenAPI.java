@@ -2,6 +2,7 @@ package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
@@ -12,6 +13,7 @@ import kubeiaas.iaascore.request.volume.*;
 import kubeiaas.iaascore.response.*;
 import kubeiaas.iaascore.service.VolumeService;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -97,13 +99,16 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.ATTACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String attach(@Valid @RequestBody AttachVolumeForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- attachDataVolume");
         String result = volumeService.attachDataVolume(f.getVmUuid(),f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- attachDataVolume -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- attachDataVolume -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_ATTACH_ERROR));
         }
     }
@@ -114,13 +119,16 @@ public class VolumeOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DETACH, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String detach(@Valid @RequestBody AttachVolumeForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- detach");
         String result = volumeService.detachDataVolume(f.getVmUuid(),f.getVolumeUuid());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- detach -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- detach -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VOLUME_DETACH_ERROR));
         }
     }

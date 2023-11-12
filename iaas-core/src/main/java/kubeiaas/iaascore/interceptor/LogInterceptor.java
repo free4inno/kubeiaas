@@ -1,5 +1,6 @@
 package kubeiaas.iaascore.interceptor;
 
+import kubeiaas.common.constants.LogInjectionConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ public class LogInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         try {
             String requestURI = request.getRequestURI();
-            MDC.put("requestURI", requestURI);
+            MDC.put(LogInjectionConstants.REQUEST_URI_INJECTION, requestURI);
         } catch (Exception e) {
             // 捕捉异常，不可阻断流程，无需做任何处理
         }
@@ -26,7 +27,7 @@ public class LogInterceptor implements HandlerInterceptor {
  
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        MDC.remove("requestURI");
+        MDC.remove(LogInjectionConstants.REQUEST_URI_INJECTION);
     }
  
     @Override

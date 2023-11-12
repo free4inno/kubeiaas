@@ -2,6 +2,7 @@ package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson.JSON;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
@@ -14,6 +15,7 @@ import kubeiaas.iaascore.request.vm.*;
 import kubeiaas.iaascore.response.*;
 import kubeiaas.iaascore.service.VmService;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,7 @@ public class VmOpenAPI {
         log.info("-- start -- create");
         Vm newVm = vmService.createVm(f.getName(), f.getCpus(), f.getMemory(), f.getImageUuid(), f.getIpSegmentId(), f.getPublicIpSegId(), f.getDiskSize(), f.getDescription(), f.getHostUuid());
         log.info("-- end -- create -- success");
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(newVm));
     }
 
@@ -55,6 +58,7 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String delete(@Valid @RequestBody DeleteVmForm f) throws BaseException, VmException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- delete");
         String result;
         if (f.getDeleteType().equals(VmConstants.DELETE_FORCE)) {
@@ -62,13 +66,16 @@ public class VmOpenAPI {
         } else {
             result = vmService.deleteVM(f.getVmUuid(), false);
         }
+        String responseMsg;
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- delete -- success");
-            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+            responseMsg = JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- delete -- failed");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_DELETE_ERROR));
+            responseMsg = JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_DELETE_ERROR));
         }
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        return responseMsg;
     }
 
     /**
@@ -77,15 +84,19 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.STOP, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String stop(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- stop");
+        String responseMsg;
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.STOP)
                 .equals(ResponseMsgConstants.SUCCESS)){
             log.info("-- end -- stop -- success");
-            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+            responseMsg = JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- stop -- failed");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_STOP_ERROR));
+            responseMsg = JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_STOP_ERROR));
         }
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        return responseMsg;
     }
 
     /**
@@ -94,15 +105,19 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.START, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String start(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- start");
+        String responseMsg;
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.START)
                 .equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- start -- success");
-            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+            responseMsg = JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- start -- failed");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_START_ERROR));
+            responseMsg = JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_START_ERROR));
         }
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        return responseMsg;
     }
 
     /**
@@ -111,15 +126,19 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REBOOT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reboot(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- reboot");
+        String responseMsg;
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.REBOOT)
                 .equals(ResponseMsgConstants.SUCCESS)){
             log.info("-- end -- reboot -- success");
-            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+            responseMsg = JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- reboot -- failed");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
+            responseMsg = JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_REBOOT_ERROR));
         }
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        return responseMsg;
     }
 
     /**
@@ -128,13 +147,16 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SUSPEND, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String suspend(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- suspend");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.SUSPEND)
                 .equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- suspend -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- suspend -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_SUSPEND_ERROR));
         }
     }
@@ -145,13 +167,16 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.RESUME, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String resume(@Valid @RequestBody OperateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- resume");
         if (vmService.operateVm(f.getVmUuid(), VmOperateEnum.RESUME)
                 .equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- resume -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- resume -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_RESUME_ERROR));
         }
     }
@@ -162,13 +187,16 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPDATE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String modify(@Valid @RequestBody ModifyVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- modify");
         if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory(), false)
                 .equals(ResponseMsgConstants.SUCCESS)){
             log.info("-- end -- modify -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- modify -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
@@ -179,13 +207,16 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.REDUCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String reduce(@Valid @RequestBody ModifyVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- reduce");
         if (vmService.modifyVm(f.getVmUuid(), f.getCpus(), f.getMemory(), true)
                 .equals(ResponseMsgConstants.SUCCESS)){
             log.info("-- end -- reduce -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- reduce -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_MODIFY_ERROR));
         }
     }
@@ -272,11 +303,13 @@ public class VmOpenAPI {
     @ResponseBody
     public String vncUrl(
             @RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, uuid);
         log.info("-- start -- vncUrl");
         String url = vmService.getVncUrl(uuid);
         Map<String, String> resMap = new HashMap<>();
         resMap.put(RequestMappingConstants.VNC_URL, url);
         log.info("-- end -- vncUrl -- success");
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -286,9 +319,11 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String edit(@Valid @RequestBody EditVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- edit");
         Vm vm = vmService.editVm(f.getVmUuid(), f.getName(), f.getDescription());
         log.info("-- end -- edit -- success");
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(vm));
     }
 
@@ -298,13 +333,16 @@ public class VmOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.PUBLISH_IMAGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String publishImage(@Valid @RequestBody PublishImageForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- publishImage");
         if (vmService.publishImage(f.getVmUuid(), f.getName(), f.getDescription(), f.getVdSize())
                 .equals(ResponseMsgConstants.SUCCESS)) {
             log.info("-- end -- publishImage -- success");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
             log.warn("-- end -- publishImage -- failed");
+            MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.PUBLISH_IMAGE_ERROR));
         }
     }
@@ -341,9 +379,11 @@ public class VmOpenAPI {
     @ResponseBody
     public String setPasswd(
             @Valid @RequestBody SetPasswdForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- setPasswd");
         vmService.setPasswd(f.getVmUuid(), f.getUser(), f.getPasswd());
         log.info("-- end -- setPasswd -- success");
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 

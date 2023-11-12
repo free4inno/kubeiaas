@@ -2,6 +2,7 @@ package kubeiaas.iaascore.exception.handler;
 
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
@@ -11,6 +12,7 @@ import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -33,6 +35,10 @@ public class OpenAPIExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public BaseResponse handle(Exception e) {
+        // ----- clear MDC -----
+        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+
+        // ----- handle -----
         if (e instanceof BaseException) {
             // ----- base ------
             BaseException baseE = (BaseException) e;
@@ -62,13 +68,11 @@ public class OpenAPIExceptionHandler {
                 e instanceof MissingServletRequestParameterException) {
             // ----- args error -----
             log.error(ResponseEnum.ARGS_ERROR.getMsg());
-            e.printStackTrace();
             return BaseResponse.error(ResponseEnum.ARGS_ERROR, ResponseEnum.ARGS_ERROR.getMsg());
 
         } else {
             // ----- else -----
             log.error(ResponseEnum.INTERNAL_ERROR.getMsg());
-            e.printStackTrace();
             return BaseResponse.error(ResponseEnum.INTERNAL_ERROR);
         }
     }

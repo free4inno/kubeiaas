@@ -1,6 +1,7 @@
 package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.constants.bean.VmConstants;
@@ -16,9 +17,9 @@ import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.scheduler.DeviceScheduler;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -71,6 +72,8 @@ public class VmService {
          */
         log.info("STEP 1: pre create VM");
         Vm newVm = vmProcess.preCreateVm(name, cpus, memory, imageUuid, diskSize, description, hostUUid);
+
+        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, newVm.getUuid());
 
         /* ---- 2. Resource Operator ----
         Use Resource Operator to allocate Host and check Resource available
@@ -173,7 +176,6 @@ public class VmService {
             throw new VmException(vm,
                     String.format("err: delete failed (uuid: %s)! %s", vmUuid, log), ResponseEnum.VM_DELETE_ERROR);
         }
-
         return ResponseMsgConstants.SUCCESS;
     }
 
