@@ -174,7 +174,7 @@ spec:
       initContainers:
         - name: iaas-prepare
           # [ATTENTION] -------------------------------------------- CHECK VERSION! (if updated)
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.0-RELEASE
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.1.0-SNAPSHOT
           # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: Always
           securityContext:

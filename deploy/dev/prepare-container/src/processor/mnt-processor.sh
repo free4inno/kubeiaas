@@ -67,53 +67,8 @@ check_mount_status() {
 }
 
 function main(){
-
-    SERVICE_NFS=nfs
-
-    # 1. check NFS installation =============
-    echo "[1] check NFS installation"
-    res=$(is_service_install $SERVICE_NFS)
-    if [ $res == "1" ]; then
-        # --- nfs founded ---
-        echo "[-] nfs is founded."
-    else
-        # --- nfs not found ---
-        echo "[-] nfs could not be found!"
-
-        echo ">>> failed"
-        log mnt failed
-        echo ""
-        exit
-    fi
-
-    # 2. check NFS active ============
-    echo "[2] check NFS status"
-    res=$(is_service_active $SERVICE_NFS)
-    if [ $res == "1" ]; then
-        echo "[-] nfs is already active."
-    else
-        echo "[-] nfs have not started!"
-        echo "[+] try to start nfs..."
-
-        # start
-        service nfs start
-
-        # recheck
-        res=$(is_service_active $SERVICE_NFS)
-        if [ $res == "1" ]; then
-            echo "[-] nfs is active now."
-        else
-            echo "[-] nfs still have not started!"
-            echo "[+] please check manually..."
-            echo ">>> failed"
-            log mnt failed
-            echo ""
-            exit
-        fi
-    fi
-
-    # 3. check `/etc/fstab` ==================
-    echo "[3] check '/etc/fstab' config"
+    # 1. check `/etc/fstab` ==================
+    echo "[1] check '/etc/fstab' config"
     res=$(cat /etc/fstab)
     if [[ $res =~ $KUBEIAAS_MNT_IMG && $res =~ $KUBEIAAS_MNT_DATAVOL ]]; then
         echo "[-] fstab config is OK."
@@ -134,8 +89,8 @@ $KUBEIAAS_MNT_DATAVOL $KUBEIAAS_PATH_DATA_VOLUMES  nfs    rw,soft,timeo=30,retry
 
     fi
 
-    # 4. check mount status ====================
-    echo "[4] check mount status"
+    # 2. check mount status ====================
+    echo "[2] check mount status"
     # res=$(df -h)
     if [[ $(check_mount_status "$KUBEIAAS_PATH_IMAGES") == 0 && $(check_mount_status "$KUBEIAAS_PATH_DATA_VOLUMES") == 0 ]]; then
         echo "[-] mount is OK."
