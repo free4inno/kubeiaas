@@ -468,11 +468,18 @@ public class VmService {
 
         // 2. status
         Set<VmStatusEnum> statusEnumSet = new HashSet<>();
+        // Major ----- BUILDING, ACTIVE, STOPPED, SUSPENDED, ERROR
         statusEnumSet.add(VmStatusEnum.BUILDING);
         statusEnumSet.add(VmStatusEnum.ACTIVE);
         statusEnumSet.add(VmStatusEnum.STOPPED);
         statusEnumSet.add(VmStatusEnum.SUSPENDED);
         statusEnumSet.add(VmStatusEnum.ERROR);
+        // Other ----- STARTING, SUSPENDING, STOPPING, REBOOTING, DELETING
+        /**
+         * TODO
+         * 后端：仿照Major状态的获取方式，增加以上五种状态的数量统计信息
+         * 前端：在饼图中增加“其他”，在前端对这几种状态的数量求和显示
+         */
 
         for (VmStatusEnum status : statusEnumSet) {
             resMap.put(status.toString(), (int) vmList.stream()
