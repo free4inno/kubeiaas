@@ -16,6 +16,7 @@ import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.scheduler.DeviceScheduler;
+import kubeiaas.iaascore.utils.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
@@ -73,7 +74,9 @@ public class VmService {
         log.info("STEP 1: pre create VM");
         Vm newVm = vmProcess.preCreateVm(name, cpus, memory, imageUuid, diskSize, description, hostUUid);
 
-        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, newVm.getUuid());
+        MDC.put(LogInjectionConstants.UUID_INJECTION,
+                LogUtils.appendUuidInjection(MDC.get(LogInjectionConstants.UUID_INJECTION), newVm.getUuid()));
+
 
         /* ---- 2. Resource Operator ----
         Use Resource Operator to allocate Host and check Resource available
