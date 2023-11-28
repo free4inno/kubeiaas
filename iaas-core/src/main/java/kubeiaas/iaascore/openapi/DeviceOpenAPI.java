@@ -92,7 +92,7 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String attach(
             @Valid @RequestBody AttachDeviceForm f) throws BaseException {
-        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
+        MDC.put(LogInjectionConstants.UUID_INJECTION, f.getVmUuid());
         log.info("-- start -- attach");
 
         // 1.1. get vm and check
@@ -141,7 +141,7 @@ public class DeviceOpenAPI {
         log.info("-- end -- attach -- success");
 
         // ----- clear MDC -----
-        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
@@ -149,7 +149,7 @@ public class DeviceOpenAPI {
     @ResponseBody
     public String detach(
             @Valid @RequestBody DetachDeviceForm f) throws BaseException {
-        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, f.getVmUuid());
+        MDC.put(LogInjectionConstants.UUID_INJECTION, f.getVmUuid());
 
         log.info("-- start -- detach");
 
@@ -202,7 +202,7 @@ public class DeviceOpenAPI {
         log.info("-- end -- detach -- success");
 
         // ----- clear MDC -----
-        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 }

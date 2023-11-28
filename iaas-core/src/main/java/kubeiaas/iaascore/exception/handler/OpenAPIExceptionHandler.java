@@ -36,7 +36,7 @@ public class OpenAPIExceptionHandler {
     @ResponseBody
     public BaseResponse handle(Exception e) {
         // ----- clear MDC -----
-        MDC.remove(LogInjectionConstants.VM_UUID_INJECTION);
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
 
         // ----- handle -----
         if (e instanceof BaseException) {

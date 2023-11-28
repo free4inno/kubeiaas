@@ -2,6 +2,7 @@ package kubeiaas.iaascore.service;
 
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
@@ -13,6 +14,7 @@ import kubeiaas.iaascore.process.ResourceProcess;
 import kubeiaas.iaascore.process.VolumeProcess;
 import kubeiaas.iaascore.response.PageResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -45,6 +47,7 @@ public class VolumeService {
         // 数据库预处理：设置基础参数，保存云硬盘信息
         log.info("STEP 1: create volume in DB");
         Volume newVolume= volumeProcess.preCreateVolume(name, description, hostUuid, diskSize);
+        MDC.put(LogInjectionConstants.UUID_INJECTION, newVolume.getUuid());
 
         // ---- 2. check host ----
         // Use Resource Operator to allocate Host

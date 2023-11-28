@@ -16,6 +16,7 @@ import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.scheduler.DeviceScheduler;
+import kubeiaas.iaascore.utils.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
@@ -73,7 +74,9 @@ public class VmService {
         log.info("STEP 1: pre create VM");
         Vm newVm = vmProcess.preCreateVm(name, cpus, memory, imageUuid, diskSize, description, hostUUid);
 
-        MDC.put(LogInjectionConstants.VM_UUID_INJECTION, newVm.getUuid());
+        MDC.put(LogInjectionConstants.UUID_INJECTION,
+                LogUtils.appendUuidInjection(MDC.get(LogInjectionConstants.UUID_INJECTION), newVm.getUuid()));
+
 
         /* ---- 2. Resource Operator ----
         Use Resource Operator to allocate Host and check Resource available
@@ -470,11 +473,18 @@ public class VmService {
 
         // 2. status
         Set<VmStatusEnum> statusEnumSet = new HashSet<>();
+        // Major ----- BUILDING, ACTIVE, STOPPED, SUSPENDED, ERROR
         statusEnumSet.add(VmStatusEnum.BUILDING);
         statusEnumSet.add(VmStatusEnum.ACTIVE);
         statusEnumSet.add(VmStatusEnum.STOPPED);
         statusEnumSet.add(VmStatusEnum.SUSPENDED);
         statusEnumSet.add(VmStatusEnum.ERROR);
+        // Other ----- STARTING, SUSPENDING, STOPPING, REBOOTING, DELETING
+        /**
+         * TODO
+         * 后端：仿照Major状态的获取方式，增加以上五种状态的数量统计信息
+         * 前端：在饼图中增加“其他”，在前端对这几种状态的数量求和显示
+         */
 
         for (VmStatusEnum status : statusEnumSet) {
             resMap.put(status.toString(), (int) vmList.stream()
