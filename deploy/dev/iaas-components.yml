@@ -51,6 +51,20 @@ spec:
                   name: iaas-config
                   key: nodes.nfs
             # ----------------------------------
+          volumeMounts:
+            - name: host-image
+              mountPath: /usr/local/kubeiaas/data/images
+            - name: host-data-volume
+              mountPath: /usr/local/kubeiaas/data/data-volumes
+      volumes:
+        - name: host-image
+          nfs:
+            path: /usr/local/kubeiaas/data/images
+            server: 192.168.33.7
+        - name: host-data-volume
+          nfs:
+            path: /usr/local/kubeiaas/data/data-volumes
+            server: 192.168.33.7
 ---
 apiVersion: v1
 kind: Service
