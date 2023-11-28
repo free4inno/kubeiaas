@@ -1,6 +1,7 @@
 package kubeiaas.iaasagent.service;
 
 import kubeiaas.common.bean.IpSegment;
+import kubeiaas.common.utils.FileUtils;
 import kubeiaas.common.utils.IpUtils;
 import kubeiaas.common.utils.MacUtils;
 import kubeiaas.common.utils.ShellUtils;
