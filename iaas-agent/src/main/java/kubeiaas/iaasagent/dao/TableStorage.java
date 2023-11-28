@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -217,6 +218,19 @@ public class TableStorage {
         String isoObjectStr = JSON.toJSONString(iso);
         isoObjectStr = dbProxy.isoSave(isoObjectStr);
         return JSON.parseObject(isoObjectStr, Iso.class);
+    }
+
+    public Optional<Iso> isoQueryByUuid(String uuid) {
+        String jsonString = dbProxy.isoQueryByUuid(uuid);
+        if (jsonString == null || jsonString.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(JSON.parseObject(jsonString, Iso.class));
+        }
+    }
+
+    public void deleteIsoByUuid(String uuid) {
+        dbProxy.deleteIsoByUuid(uuid);
     }
 
     public Integer mountDeleteById(Integer id) {

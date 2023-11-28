@@ -4,12 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Optional;
 import java.util.Properties;
 
 @Slf4j
 public class FileUtils {
 
     private static final String FILE_SEPARATOR = "/";
+    private static final String tmpFilePrefix = "fetch";
+    private static final String tmpFileSuffix = ".tmp";
 
     public static boolean exists(String path) {
         File file = new File(path);
@@ -202,5 +207,49 @@ public class FileUtils {
             return properties;
         }
         return properties;
+    }
+
+    public static boolean isIsoFile(String filePath) {
+        if (filePath == null || "".equals(filePath)) {
+            return false;
+        }
+        String suffix = filePath.substring(filePath.lastIndexOf(".") + 1);
+        return "iso".equalsIgnoreCase(suffix);
+    }
+
+    public static Optional<File> fetchFile(URL url, String dirPath, String fileName) throws IOException {
+        File dir = new File(dirPath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            return Optional.empty();
+        }
+        File targetFile = new File(dir.getAbsolutePath() + File.separator + fileName);
+        if (targetFile.exists()) {
+            throw new IOException("file already exists");
+        }
+        File tmpFile = File.createTempFile(tmpFilePrefix, tmpFileSuffix, dir);
+//        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//        try (InputStream in = connection.getInputStream();
+//             FileOutputStream out = new FileOutputStream(tmpFile)) {
+//            byte[] buffer = new byte[1024];
+//            int bytesRead;
+//            while ((bytesRead = in.read(buffer)) != -1) {
+//                out.write(buffer, 0, bytesRead);
+//            }
+//        }
+        try {
+            org.apache.commons.io.FileUtils.copyURLToFile(url, tmpFile);
+        } catch (IOException e) {
+            if (!tmpFile.delete()) {
+                log.error("ERROR: delete tmp file failed, tmpFile: {}", tmpFile.getAbsolutePath());
+            }
+            throw e;
+        }
+
+        boolean success = tmpFile.renameTo(targetFile);
+        if (!success) {
+            return Optional.empty();
+        } else {
+            return Optional.of(targetFile);
+        }
     }
 }

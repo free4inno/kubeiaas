@@ -29,6 +29,7 @@ public enum ResponseEnum {
     ISO_NOT_FOUND(202.22f,"ISO未找到"),
     ISO_FILE_NOT_FOUND(202.23f,"ISO文件未找到"),
     ISO_UPLOAD_ERROR(202.24f,"ISO上传失败"),
+    ISO_DELETE_ERROR(202.25f,"ISO删除失败"),
     MOUNT_POINT_NOT_ENOUGH(202.22f,"挂载点不足"),
     ISO_DETACH_ERROR(202.25f,"ISO卸载失败"),
     IMAGE_SAVE_ERROR(203.01f,"云镜像保存失败"),

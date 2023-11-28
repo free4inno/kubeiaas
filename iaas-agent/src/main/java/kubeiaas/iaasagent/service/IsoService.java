@@ -5,12 +5,16 @@ import kubeiaas.common.bean.Mount;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.commands.CommonCommands;
 import kubeiaas.common.commands.response.CommandResponse;
+import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.ShellUtils;
+import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
+import kubeiaas.iaasagent.utils.FetchUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.LibvirtException;
@@ -18,6 +22,12 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.management.monitor.StringMonitor;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Optional;
 
 @Slf4j
@@ -98,38 +108,60 @@ public class IsoService {
         return true;
     }
 
-    public Boolean uploadIso(Iso iso) {
-        log.info(String.format("uploadIso info -- iso: %s", iso));
+    public Boolean uploadIso(String name, String fileUrl) {
+        log.info(String.format("uploadIso info -- name: %s, fileUrl: %s", name, fileUrl));
+        try {
+            InetAddress zhiAddress = InetAddress.getByName("zhi.free4inno.com");
+            log.info(String.format("zhiAddress: %s", zhiAddress));
+        } catch (UnknownHostException e) {
+            log.error("ERROR: get zhiAddress failed", e);
+        }
+        // 1. Download iso file
+        URL url;
+        fileUrl = fileUrl.trim();
+        try {
+            url = new URL(fileUrl);
+        } catch (MalformedURLException e) {
+            log.error("ERROR: file url is invalid", e);
+            return false;
+        }
+
+        File targetFile;
+        try {
+            Optional<File> fileOpt = FetchUtils.fetchFile(url, VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.ISO_PATH, name);
+            if (!fileOpt.isPresent()) {
+                log.error("ERROR: fetch file failed");
+                return false;
+            }
+            targetFile = fileOpt.get();
+        } catch (IOException e) {
+            log.error("ERROR: fetch file stream failed", e);
+            return false;
+        }
+
+        // 2. Save iso info to DB
+        Iso iso = new Iso();
+        iso.setName(name);
+        iso.setUuid(UuidUtils.getRandomUuid());
+        iso.setRelativePath(name);
+        iso.setSize(targetFile.length());
+        iso.setCreateTime(new java.sql.Timestamp(System.currentTimeMillis()));
         log.info(String.format("-> invoke DB -- isoSave. iso: %s", iso));
-        Iso savedIso = tableStorage.isoSave(iso);
-        log.info(String.format("<- invoke DB -- done. savedIso: %s", savedIso));
+        tableStorage.isoSave(iso);
+        log.info("<- invoke DB -- done");
+
         return true;
     }
 
-    public boolean isIsoExistsInServer(String isoPath) {
-        log.info(String.format("isIsoExistsInServer info -- isoPath: %s", isoPath));
-        String cmd = String.format(CommonCommands.SHELL_IS_FILE_EXIST, isoPath);
-        String result = ShellUtils.getCmd(cmd);
-        if (result.equals(CommandResponse.TRUE)) {
-            return true;
-        } else if (result.equals(CommandResponse.FALSE)) {
-            return false;
-        } else {
-            log.error(String.format("ERROR: get iso exist failed, isoPath: %s", isoPath));
+    public boolean deleteIso(String uuid) {
+        Iso iso = tableStorage.isoQueryByUuid(uuid).orElseThrow(() -> new RuntimeException("iso not found"));
+        File isoFile = new File(iso.getAbsolutePath());
+        if (isoFile.exists() && !isoFile.delete()) {
+            log.error(String.format("ERROR: delete tmp file failed, tmpFile: %s", isoFile.getAbsolutePath()));
             return false;
         }
-    }
 
-    public Optional<Long> getIsoSizeInBytes(String isoPath) {
-        log.info(String.format("getIsoSizeInBytes info -- isoPath: %s", isoPath));
-        String cmd = String.format(CommonCommands.SHELL_GET_FILE_SIZE_IN_BYTES, isoPath);
-        String result = ShellUtils.getCmd(cmd);
-        // if result is not number, return empty optional else return size
-        try {
-            return Optional.of(Long.parseLong(result));
-        } catch (NumberFormatException e) {
-            log.error(String.format("ERROR: get iso size failed, isoPath: %s", isoPath), e);
-            return Optional.empty();
-        }
+        tableStorage.deleteIsoByUuid(uuid);
+        return true;
     }
 }

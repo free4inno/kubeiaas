@@ -83,97 +83,6 @@ public class MountProcess {
         }
     }
 
-    private static Set<Character> findMissingElements(List<String> list, char start, char end) {
-        Set<Character> thirdChars = new HashSet<>();
-        for (String s : list) {
-            if (s.length() >= 3) {
-                thirdChars.add(s.charAt(2));
-            }
-        }
-
-        Set<Character> rangeSet = IntStream.rangeClosed(start, end).mapToObj(i -> (char) i).collect(Collectors.toSet());
-
-        rangeSet.removeAll(thirdChars);
-        return rangeSet;
-    }
-
-    public List<String> getAllocatedMountPoints(Vm vm) {
-        List<String> usedMountPoints = new ArrayList<>();
-
-        // 1. Get all volumes of this vm
-        List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
-        for (Volume volume : volumeList) {
-            if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)
-                    && volume.getMountPoint() != null
-                    && !volume.getMountPoint().isEmpty()) {
-                usedMountPoints.add(volume.getMountPoint());
-            }
-        }
-        // 2. Get all iso mount points of this vm
-        usedMountPoints.addAll(tableStorage.queryAllMountPointsByVmUuid(vm.getUuid()));
-
-        return usedMountPoints;
-    }
-
-    public String getMountPointPrefix(ImageOSTypeEnum osType, String device) {
-        if (osType.equals(ImageOSTypeEnum.WINDOWS)) {
-            return VolumeConstants.WIN_PREFIX;
-        } else {
-            if (device.equals(VolumeConstants.VOLUME_DEVICE_DISK)) {
-                return VolumeConstants.DEV_PREFIX;
-            } else if (device.equals(VolumeConstants.VOLUME_DEVICE_CDROM)) {
-                return VolumeConstants.ISO_PREFIX;
-            } else {
-                // default
-                return VolumeConstants.DEV_PREFIX;
-            }
-        }
-    }
-
-    public Optional<String> getScsiFirstAvailableMountPoint(Vm vm) {
-        List<String> allocatedMountPoints = tableStorage.queryAllMountPointsByVmUuid(vm.getUuid());
-        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
-        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_CDROM);
-        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, '0', '1');
-        if (availableMountPoints.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(prefix + availableMountPoints.iterator().next());
-        }
-    }
-
-    public Optional<String> getVirtioFirstAvailableMountPoint(Vm vm) {
-        List<String> allocatedMountPoints = getAllocatedMountPoints(vm);
-        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
-        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_DISK);
-        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, 'a', 'z');
-        if (availableMountPoints.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(prefix + availableMountPoints.iterator().next());
-        }
-    }
-
-    public Optional<String> getVirtioFirstAvailableMountPoint(String vmUuid) {
-        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
-        if (vm == null) {
-            return Optional.empty();
-        }
-        return getVirtioFirstAvailableMountPoint(vm);
-    }
-
-    public List<String> getVirtioAlLAvailableMountPoints(Vm vm) {
-        List<String> allocatedMountPoints = getAllocatedMountPoints(vm);
-        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
-        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_DISK);
-        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, 'a', 'z');
-        if (availableMountPoints.isEmpty()) {
-            return new ArrayList<>();
-        } else {
-            return availableMountPoints.stream().map(c -> prefix + c).collect(Collectors.toList());
-        }
-    }
-
     public Optional<Mount> processMountForVirtio(Vm vm, Iso iso, Boolean readonly) {
         Mount mount = new Mount();
         mount.setVmUuid(vm.getUuid());
@@ -182,11 +91,11 @@ public class MountProcess {
         mount.setDevice(VolumeConstants.VOLUME_DEVICE_DISK);
         mount.setDriverType(VolumeConstants.VOLUME_DRIVER_TYPE_RAW);
         mount.setSource(iso.getAbsolutePath());
-        Optional<String> optMountPoint = getVirtioFirstAvailableMountPoint(vm);
+        Optional<String> optMountPoint = getFirstAvailableMountPoint(vm);
         if (optMountPoint.isPresent()) {
             mount.setMountPoint(optMountPoint.get());
         } else {
-            log.error("processMountForVirtio: get mount point failed, vmUuid: {}, isoUuid: {}", vm.getUuid(), iso.getUuid());
+            log.error(String.format("ERROR: get mount point failed, vmUuid: %s, isoUuid: %s", vm.getUuid(), iso.getUuid()));
             return Optional.empty();
         }
         mount.setBus(VolumeConstants.VOLUME_BUS_VIRTIO);
@@ -204,16 +113,88 @@ public class MountProcess {
         mount.setDriverType(VolumeConstants.VOLUME_DRIVER_TYPE_RAW);
         mount.setSource(iso.getAbsolutePath());
         // TODO: 2023/9/25 临时解决方案，分配最后一个挂载点，然后libvirt自动分配。不影响virtio方式挂载，待修改
-        List<String> mountPoints = getVirtioAlLAvailableMountPoints(vm);
+        List<String> mountPoints = getAlLAvailableMountPoints(vm);
         if (!mountPoints.isEmpty()) {
             mount.setMountPoint(mountPoints.get(mountPoints.size() - 1));
         } else {
-            log.error("processMountForScsi: get mount point failed, vmUuid: {}, isoUuid: {}", vm.getUuid(), iso.getUuid());
+            log.error(String.format("ERROR: get mount point failed, vmUuid: %s, isoUuid: %s", vm.getUuid(), iso.getUuid()));
             return Optional.empty();
         }
         mount.setBus(VolumeConstants.VOLUME_BUS_IDE);
         mount.setReadonly(readonly);
 
         return Optional.of(mount);
+    }
+
+    // private methods
+    private static Set<Character> findMissingElements(List<String> list, char start, char end) {
+        Set<Character> thirdChars = new HashSet<>();
+        for (String s : list) {
+            if (s.length() >= 3) {
+                thirdChars.add(s.charAt(2));
+            }
+        }
+
+        Set<Character> rangeSet = IntStream.rangeClosed(start, end).mapToObj(i -> (char) i).collect(Collectors.toSet());
+
+        rangeSet.removeAll(thirdChars);
+        return rangeSet;
+    }
+
+    private List<String> getAllocatedMountPoints(Vm vm) {
+        List<String> usedMountPoints = new ArrayList<>();
+
+        // 1. Get all volumes of this vm
+        List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
+        for (Volume volume : volumeList) {
+            if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)
+                    && volume.getMountPoint() != null
+                    && !volume.getMountPoint().isEmpty()) {
+                usedMountPoints.add(volume.getMountPoint());
+            }
+        }
+        // 2. Get all iso mount points of this vm
+        usedMountPoints.addAll(tableStorage.queryAllMountPointsByVmUuid(vm.getUuid()));
+
+        return usedMountPoints;
+    }
+
+    private String getMountPointPrefix(ImageOSTypeEnum osType, String device) {
+        if (osType.equals(ImageOSTypeEnum.WINDOWS)) {
+            return VolumeConstants.WIN_PREFIX;
+        } else {
+            if (device.equals(VolumeConstants.VOLUME_DEVICE_DISK)) {
+                return VolumeConstants.DEV_PREFIX;
+            } else if (device.equals(VolumeConstants.VOLUME_DEVICE_CDROM)) {
+                return VolumeConstants.ISO_PREFIX;
+            } else {
+                // default
+                return VolumeConstants.DEV_PREFIX;
+            }
+        }
+    }
+
+    private Optional<String> getFirstAvailableMountPoint(Vm vm) {
+        List<String> allocatedMountPoints = getAllocatedMountPoints(vm);
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_DISK);
+        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, 'a', 'z');
+        if (availableMountPoints.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(prefix + availableMountPoints.iterator().next());
+        }
+    }
+
+    private List<String> getAlLAvailableMountPoints(Vm vm) {
+        List<String> allocatedMountPoints = getAllocatedMountPoints(vm);
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_DISK);
+        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, 'a', 'z');
+        if (availableMountPoints.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return availableMountPoints.stream().map(c -> prefix + c).collect(Collectors.toList());
+        }
     }
 }

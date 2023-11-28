@@ -34,6 +34,15 @@ public class IsoController {
         return JSON.toJSONString(iso);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    public String isoQueryAll() {
+        log.info("isoQueryAll ==== start ====");
+        Iterable<IsoTable> isoTableIterable = isoDao.findAll();
+        log.info("isoQueryAll ==== end ====");
+        return JSON.toJSONString(isoTableIterable);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE)
     @ResponseBody
     public String isoSave(
@@ -48,8 +57,14 @@ public class IsoController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE)
     @ResponseBody
-    public String deleteIsoTable() {
+    public void deleteIsoTable() {
         isoDao.deleteAll();
-        return "";
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_BY_UUID)
+    @ResponseBody
+    public void deleteIsoByUuid(
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid) {
+        isoDao.deleteByUuid(isoUuid);
     }
 }

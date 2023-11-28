@@ -169,6 +169,10 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String isoQueryAll();
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.SAVE)
     @ResponseBody
     String isoSave(

@@ -61,20 +61,28 @@ public class IsoController {
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.UPLOAD_ISO)
     @ResponseBody
-    String uploadIso(
-            @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr) {
+    public String uploadIso(
+            @RequestParam(value = RequestParamConstants.NAME) String name,
+            @RequestParam(value = RequestParamConstants.FILE_URL) String fileUrl) {
         log.info("uploadIso -- start");
-        Iso iso = JSON.parseObject(isoObjectStr, Iso.class);
-        if (!isoService.isIsoExistsInServer(iso.getAbsolutePath())) {
-            log.error(String.format("ERROR: iso %s not exists.", iso.getAbsolutePath()));
-            return ResponseMsgConstants.FAILED;
-        }
-        iso.setSize(isoService.getIsoSizeInBytes(iso.getAbsolutePath()).orElse(0L));
-        if (isoService.uploadIso(iso)) {
-            log.info("-- end -- uploadIso -- success");
+        if (isoService.uploadIso(name, fileUrl)) {
+            log.info("uploadIso -- end -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
-            log.error("-- end -- uploadIso -- failed");
+            log.error("uploadIso -- end -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_ISO)
+    @ResponseBody
+    public String deleteIso(@RequestParam(value = RequestParamConstants.UUID) String uuid) {
+        log.info("deleteIso -- start");
+        if (isoService.deleteIso(uuid)) {
+            log.info("deleteIso -- end -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("deleteIso -- end -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }

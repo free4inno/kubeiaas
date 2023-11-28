@@ -274,6 +274,11 @@ public class TableStorage {
         return Optional.ofNullable(iso);
     }
 
+    public List<Iso> isoQueryAll() {
+        String jsonString = dbProxy.isoQueryAll();
+        return JSON.parseArray(jsonString, Iso.class);
+    }
+
     public Iso isoSave(Iso iso) {
         String isoObjectStr = JSON.toJSONString(iso);
         isoObjectStr = dbProxy.isoSave(isoObjectStr);

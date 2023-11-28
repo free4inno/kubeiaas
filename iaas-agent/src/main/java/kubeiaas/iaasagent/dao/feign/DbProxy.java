@@ -121,6 +121,18 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.QUERY_BY_UUID)
+    @ResponseBody
+    String isoQueryByUuid(
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.DELETE_BY_UUID)
+    @ResponseBody
+    String deleteIsoByUuid(
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid
+    );
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.DELETE_BY_ID)
     @ResponseBody
     String mountDeleteById(

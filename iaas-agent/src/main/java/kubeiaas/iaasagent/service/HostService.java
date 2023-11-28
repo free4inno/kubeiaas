@@ -5,7 +5,6 @@ import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.enums.host.HostStatusEnum;
-import kubeiaas.common.utils.FileUtils;
 import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;

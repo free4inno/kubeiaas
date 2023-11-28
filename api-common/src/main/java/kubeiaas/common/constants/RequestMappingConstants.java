@@ -36,6 +36,7 @@ public class RequestMappingConstants {
     public static final String DELETE = "delete";
     public static final String ATTACH = "attach";
     public static final String DETACH = "detach";
+    public static final String UPLOAD = "upload";
     public static final String DELETE_BY_ID = "delete_by_id";
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
@@ -121,6 +122,7 @@ public class RequestMappingConstants {
     public static final String ATTACH_ISO = "attach_iso";
     public static final String DETACH_ISO = "detach_iso";
     public static final String UPLOAD_ISO = "upload_iso";
+    public static final String DELETE_ISO = "delete_iso";
 
     // >>> Vm Controller <<<
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";

@@ -66,6 +66,8 @@ public class RequestParamConstants {
     public static final String ISO_OBJECT = "iso_object";
     public static final String MOUNT_OBJECT = "mount_object";
 
+    public static final String FILE_URL = "file_url";
+
     /* ===== HOST ===== */
     public static final String HOST_OBJECT = "host_object";
 

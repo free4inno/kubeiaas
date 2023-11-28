@@ -33,6 +33,14 @@ public interface IsoController {
     @ResponseBody
     String uploadIso(
             URI uri,
-            @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr
+            @RequestParam(value = RequestParamConstants.NAME) String name,
+            @RequestParam(value = RequestParamConstants.FILE_URL) String fileUrl
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO_C + "/" + RequestMappingConstants.DELETE_ISO)
+    @ResponseBody
+    String deleteIso(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.UUID) String uuid
     );
 }
