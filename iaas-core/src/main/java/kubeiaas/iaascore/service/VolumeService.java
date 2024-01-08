@@ -7,6 +7,7 @@ import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VolumeException;
@@ -88,6 +89,12 @@ public class VolumeService {
         */
         log.info("STEP 3: delete volume");
         volumeProcess.deleteDataVolume(volumeUuid);
+
+        /* -----4. clear selected host ----
+        Clear the selected host
+         */
+        log.info("STEP 4: clear selected host");
+        AgentConfig.clearSelectedHost(volumeUuid);
 
         return ResponseMsgConstants.SUCCESS;
     }

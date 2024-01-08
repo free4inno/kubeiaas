@@ -199,13 +199,15 @@ public class ResourceProcess {
      * SelectHost by VolumeUuid
      */
     public void selectHostByVolumeUuid(String volumeUuid) throws BaseException {
-
         // get Volume By volumeUuid
         log.info("-> invoke DB -- volumeQueryByUuid");
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         log.info("<- invoke DB -- done");
 
-        // SelectHost
+        selectHostByVolume(volume);
+    }
+
+    public void selectHostByVolume(Volume volume) throws BaseException {
         Host selectedHost;
         String hostUUid = volume.getHostUuid();
         if (hostUUid != null && !hostUUid.isEmpty()) {

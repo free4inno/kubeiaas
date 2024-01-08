@@ -38,6 +38,9 @@ public class VolumeProcess {
 
     @Resource VncProcess vncProcess;
 
+    @Resource
+    ResourceProcess resourceProcess;
+
 
     /**
      * Create VM.
@@ -146,6 +149,8 @@ public class VolumeProcess {
     public void deleteSystemVolume(String vmUuid) throws BaseException {
         List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
         for (Volume volume : volumes) {
+            // Set host to execute delete operation
+            resourceProcess.selectHostByVolume(volume);
             VolumeUsageEnum usage = volume.getUsageType();
             switch (usage) {
                 case SYSTEM:
@@ -170,6 +175,8 @@ public class VolumeProcess {
                     log.warn("WARN: unknown volume type");
                     break;
             }
+            // clear selected host
+            AgentConfig.clearSelectedHost(volume.getUuid());
         }
     }
 
