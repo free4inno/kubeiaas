@@ -212,11 +212,11 @@ public class ImageService {
 
     public boolean imageDelete(String uuid) {
         // 1. check (uuid, which is just yaml file name)
-        if (!getYamlList().contains(uuid)) {
+        String yamlPath = baseDir + uuid;
+        if (!getYamlList().contains(yamlPath)) {
             log.error("ERROR: image not found. uuid: {}", uuid);
             return false;
         }
-        String yamlPath = baseDir + uuid;
         Image image = ImageUtils.getImageFromYaml(yamlPath, 0);
         // 2. delete file
         String filePath = baseDir + ImageUtils.getFileNameFromPath(image.getDirectory(), true);
