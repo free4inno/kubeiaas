@@ -10,6 +10,7 @@ import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.request.image.DeleteImageForm;
 import kubeiaas.iaascore.request.image.SaveImageForm;
+import kubeiaas.iaascore.request.image.UploadImageForm;
 import kubeiaas.iaascore.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -113,6 +114,23 @@ public class ImageOpenAPI {
             log.warn("-- end -- save -- failed");
             MDC.remove(LogInjectionConstants.UUID_INJECTION);
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.IMAGE_SAVE_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPLOAD, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String upload(@Valid @RequestBody UploadImageForm f) {
+        log.info("-- start -- upload");
+        log.info(String.format("-> invoke DB -- imageUpload. id: %s", f.getId()));
+        boolean status = tableStorage.imageUpload(f.getId());
+        log.info("<- invoke DB -- done");
+
+        if (status) {
+            log.info("-- end -- upload -- success");
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.warn("-- end -- upload -- failed");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.IMAGE_UPLOAD_ERROR));
         }
     }
 

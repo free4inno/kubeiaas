@@ -246,10 +246,10 @@ public class FileUtils {
         }
 
         boolean success = tmpFile.renameTo(targetFile);
-        if (!success) {
-            return Optional.empty();
-        } else {
+        if (success) {
             return Optional.of(targetFile);
+        } else {
+            return Optional.empty();
         }
     }
 }

@@ -34,6 +34,7 @@ public enum ResponseEnum {
     ISO_DETACH_ERROR(202.25f,"ISO卸载失败"),
     IMAGE_SAVE_ERROR(203.01f,"云镜像保存失败"),
     IMAGE_DELETE_ERROR(203.02f,"云镜像删除失败"),
+    IMAGE_UPLOAD_ERROR(203.03f,"云镜像上传失败"),
     DEVICE_ATTACH_ERROR(204.01f,"设备挂载失败"),
     DEVICE_DETACH_ERROR(204.02f,"设备卸载失败"),
     HOST_URI_NOT_FOUND(205.01f,"主机URI未找到"),

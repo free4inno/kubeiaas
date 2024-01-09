@@ -104,6 +104,21 @@ public class ImageController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPLOAD, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String imageUpload(
+            @RequestParam(value = RequestParamConstants.ID) int id) {
+        log.info("-- start -- imageUpload");
+        boolean res = imageService.imageUpload(id);
+        if (res) {
+            log.info("-- end -- imageUpload -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.info("-- end -- imageUpload -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String imageDelete(

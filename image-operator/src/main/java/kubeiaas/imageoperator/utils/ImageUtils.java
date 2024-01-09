@@ -38,6 +38,32 @@ public class ImageUtils {
         return content.toString();
     }
 
+    public static boolean processIsoImage(String sourceYaml, String destYaml, String fileName, String uuid) {
+        Yaml yaml = new Yaml();
+        try {
+            // 读取原始YAML文件
+            FileInputStream inputStream = new FileInputStream(sourceYaml);
+            Map<String, Object> data = yaml.load(inputStream);
+
+            // 修改YAML内容
+            Map<String, Object> imageData = (Map<String, Object>) data.get("image");
+            imageData.put("filename", fileName);
+            imageData.put("uuid", uuid);
+
+            // 将修改后的内容写入到新的YAML文件
+            DumperOptions options = new DumperOptions();
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            Yaml newYaml = new Yaml(options);
+            FileWriter writer = new FileWriter(destYaml);
+            newYaml.dump(data, writer);
+            writer.close();
+            return true;
+        } catch (IOException e) {
+            log.error("ERROR: processIsoImage -- file not exist!", e);
+            return false;
+        }
+    }
+
     public static Image getImageFromYaml(String filePath, Integer id) {
         Map<String, Object> objectMap;
         // - Version 1: use uuid as an attr in yaml (不能控制去重，并且不利于索引) =====

@@ -122,6 +122,10 @@ public class TableStorage {
         return imageOperator.imageSaveYaml(f).equals(ResponseMsgConstants.SUCCESS);
     }
 
+    public boolean imageUpload(int id) {
+        return imageOperator.imageUpload(id).equals(ResponseMsgConstants.SUCCESS);
+    }
+
     public boolean imageDelete(String uuid) {
         return imageOperator.imageDelete(uuid).equals(ResponseMsgConstants.SUCCESS);
     }
