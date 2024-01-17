@@ -15,7 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -111,6 +113,20 @@ public class TableStorage {
     public PageResponse<Image> imageFuzzyQuery(String keywords, Integer pageNum, Integer pageSize) {
         String jsonString = imageOperator.imageFuzzyQuery(keywords, pageNum, pageSize);
         return JSON.parseObject(jsonString, new TypeReference<PageResponse<Image>>(){});
+    }
+
+    public Map<String, Integer> imageQueryUseCounts() {
+        Map<String, Integer> useCounts = new HashMap<>();
+        List<Vm> vmList = vmQueryAll();
+        for (Vm vm : vmList) {
+            String imageUuid = vm.getImageUuid();
+            if (useCounts.containsKey(imageUuid)) {
+                useCounts.put(imageUuid, useCounts.get(imageUuid) + 1);
+            } else {
+                useCounts.put(imageUuid, 1);
+            }
+        }
+        return useCounts;
     }
 
     public String imageGetRaw(String uuid) {

@@ -111,7 +111,7 @@ public class ImageUtils {
             fr.close();
 
             Image image = new Image(id + 1, uuid, name, description, directory, format, null, vdSize,
-                    ImageStatusEnum.AVAILABLE, null, null, osType, osArch, osMode, null, childImageList);
+                    ImageStatusEnum.AVAILABLE, 0, null, null, osType, osArch, osMode, null, childImageList);
 
             log.info("build imageObject success -- imageObject: {}", JSON.toJSONString(image));
             return image;

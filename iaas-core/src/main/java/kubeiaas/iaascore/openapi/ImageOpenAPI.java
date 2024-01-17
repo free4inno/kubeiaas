@@ -76,6 +76,11 @@ public class ImageOpenAPI {
         PageResponse<Image> res = tableStorage.imageFuzzyQuery(keywords, pageNum, pageSize);
         log.info("<- invoke DB -- done");
 
+        Map<String, Integer> useCounts = tableStorage.imageQueryUseCounts();
+        for (Image image : res.getContent()) {
+            image.setUseCount(useCounts.getOrDefault(image.getUuid(), 0));
+        }
+
         log.info("-- end -- fuzzyQuery -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
