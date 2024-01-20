@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.HufuServiceConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.image.ImageUploadingStatusEnum;
 import kubeiaas.common.utils.FileUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.common.utils.ZhiUtils;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -168,7 +168,7 @@ public class ImageService {
         // 3. download iso and yaml file
         try {
             URL url = new URL(yamlUrl);
-            Optional<File> tmpYamlFileOpt = FileUtils.fetchFile(url, baseDir, uuid + ".yaml.tmp");
+            Optional<File> tmpYamlFileOpt = FileUtils.fetchFile(url, ImageConfig.DESCRIPTION_DOWNLOADING_PATH, uuid + ".yaml.tmp");
             if (!tmpYamlFileOpt.isPresent()) {
                 log.error("ERROR: download yaml file failed");
                 return false;
@@ -197,9 +197,16 @@ public class ImageService {
 
         try {
             URL url = new URL(isoUrl);
-            Optional<File> isoFileOpt = FileUtils.fetchFile(url, baseDir, uuid + ".iso");
-            if (!isoFileOpt.isPresent()) {
+            Optional<File> tmpIsoFileOpt = FileUtils.fetchFile(url, ImageConfig.IMAGE_DOWNLOADING_PATH, uuid + ".iso");
+            if (!tmpIsoFileOpt.isPresent()) {
                 log.error("ERROR: download iso file failed");
+                return false;
+            }
+            File tmpIsoFile = tmpIsoFileOpt.get();
+            File isoFile = new File(baseDir + uuid + ".iso");
+            FileUtils.move(tmpIsoFile, isoFile);
+            if (!isoFile.exists()) {
+                log.error("ERROR: move iso file failed");
                 return false;
             }
         } catch (IOException e) {
@@ -220,7 +227,8 @@ public class ImageService {
         Image image = ImageUtils.getImageFromYaml(yamlPath, 0);
         // 2. delete file
         String filePath = baseDir + ImageUtils.getFileNameFromPath(image.getDirectory(), true);
-        if (!ImageUtils.deleteFile(filePath)) {
+        File imageFile = new File(filePath);
+        if (imageFile.exists() && !ImageUtils.deleteFile(filePath)) {
             log.error("ERROR: <image file> delete error! file: {}", filePath);
             return false;
         }
@@ -240,6 +248,18 @@ public class ImageService {
         }
         log.info("success -- imageDelete");
         return true;
+    }
+
+    public Optional<ImageUploadingStatusEnum> queryUploadStatus(String uuid) {
+        uuid = uuid.replaceAll("\\.yaml$", "")
+                   .replaceAll("\\.yml$", "");
+        File yamlFile = new File(baseDir + uuid + ".yaml");
+        if (!yamlFile.exists()) {
+            log.error("ERROR: yaml file not exist. uuid: {}", uuid);
+            return Optional.empty();
+        }
+        Image image = ImageUtils.getImageFromYaml(yamlFile.getAbsolutePath(), 0);
+        return Optional.of(image.getUploadingStatus());
     }
 
     public Integer getTotalNum() {

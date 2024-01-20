@@ -26,6 +26,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Validated
@@ -80,7 +81,6 @@ public class ImageOpenAPI {
         for (Image image : res.getContent()) {
             image.setUseCount(useCounts.getOrDefault(image.getUuid(), 0));
         }
-
         log.info("-- end -- fuzzyQuery -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
@@ -100,6 +100,29 @@ public class ImageOpenAPI {
         log.info("-- end -- queryRaw -- success");
         MDC.remove(LogInjectionConstants.UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(res));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_IMAGE_UPLOAD_STATUS, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryImageUploadStatus(
+            @RequestParam(value = RequestParamConstants.UUID) @NotNull @NotEmpty String uuid) {
+        MDC.put(LogInjectionConstants.UUID_INJECTION, uuid);
+        log.info("-- start -- queryImageUploadStatus");
+
+        log.info(String.format("-> invoke DB -- imageGetUploadStatus. uuid: %s", uuid));
+        Optional<String> statusOpt = tableStorage.imageGetUploadStatus(uuid);
+        log.info("<- invoke DB -- done");
+        if (!statusOpt.isPresent()) {
+            log.warn("-- end -- queryImageUploadStatus -- failed");
+            MDC.remove(LogInjectionConstants.UUID_INJECTION);
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.IMAGE_NOT_FOUND_ERROR));
+        }
+        String status = statusOpt.get();
+        Map<String, String> resMap = new HashMap<>();
+        resMap.put(ImageConstants.IMAGE_UPLOAD_STATUS, status);
+        log.info("-- end -- queryImageUploadStatus -- success");
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
+        return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)

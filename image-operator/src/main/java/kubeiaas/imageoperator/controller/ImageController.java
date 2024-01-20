@@ -5,6 +5,7 @@ import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.common.enums.image.ImageUploadingStatusEnum;
 import kubeiaas.imageoperator.request.SaveImageForm;
 import kubeiaas.imageoperator.response.PageResponse;
 import kubeiaas.imageoperator.service.ImageService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -100,6 +102,21 @@ public class ImageController {
             return ResponseMsgConstants.SUCCESS;
         } else {
             log.info("-- end -- imageSaveYaml -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_IMAGE_UPLOAD_STATUS)
+    @ResponseBody
+    String imageQueryUploadStatus(
+            @RequestParam(value = RequestParamConstants.UUID) String uuid) {
+        log.info("-- start -- imageQueryUploadStatus");
+        Optional<ImageUploadingStatusEnum> statusOpt = imageService.queryUploadStatus(uuid);
+        if (statusOpt.isPresent()) {
+            log.info("-- end -- imageQueryUploadStatus -- success");
+            return statusOpt.get().name();
+        } else {
+            log.info("-- end -- imageQueryUploadStatus -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }

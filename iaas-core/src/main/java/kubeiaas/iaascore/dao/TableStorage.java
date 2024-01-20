@@ -133,6 +133,15 @@ public class TableStorage {
         return imageOperator.imageQueryRawByUuid(uuid);
     }
 
+    public Optional<String> imageGetUploadStatus(String uuid) {
+        String status = imageOperator.imageQueryUploadStatus(uuid);
+        if (status.equals(ResponseMsgConstants.FAILED)) {
+            return Optional.empty();
+        } else {
+            return Optional.of(status);
+        }
+    }
+
     public boolean imageSave(String uuid, String content) {
         SaveImageForm f = new SaveImageForm(uuid, content);
         return imageOperator.imageSaveYaml(f).equals(ResponseMsgConstants.SUCCESS);

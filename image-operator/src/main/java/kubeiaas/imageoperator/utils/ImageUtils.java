@@ -79,7 +79,16 @@ public class ImageUtils {
             Map<String, Object> imageMap = (Map<String, Object>) objectMap.get("image");
             String name = (String) imageMap.get("name");
             String description = (String) imageMap.get("description");
-            String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + imageMap.get("filename");
+            String fileName = (String) imageMap.get("filename");
+            String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + fileName;
+            ImageUploadingStatusEnum downloadingStatus;
+            if (new File(ImageConfig.CONTAINER_STORAGE_PATH + fileName).exists()) {
+                downloadingStatus = ImageUploadingStatusEnum.UPLOADED;
+            } else if (new File(ImageConfig.IMAGE_DOWNLOADING_PATH + fileName).exists()) {
+                downloadingStatus = ImageUploadingStatusEnum.UPLOADING;
+            } else {
+                downloadingStatus = ImageUploadingStatusEnum.ERROR;
+            }
 
             Map<String, Object> spec = (Map<String, Object>) imageMap.get("spec");
             // Float size = ((Double) spec.get("size")).floatValue();
@@ -111,7 +120,7 @@ public class ImageUtils {
             fr.close();
 
             Image image = new Image(id + 1, uuid, name, description, directory, format, null, vdSize,
-                    ImageStatusEnum.AVAILABLE, 0, null, null, osType, osArch, osMode, null, childImageList);
+                    ImageStatusEnum.AVAILABLE, downloadingStatus, 0, null, null, osType, osArch, osMode, null, childImageList);
 
             log.info("build imageObject success -- imageObject: {}", JSON.toJSONString(image));
             return image;
