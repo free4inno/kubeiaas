@@ -219,37 +219,27 @@ public class FileUtils {
 
     public static Optional<File> fetchFile(URL url, String dirPath, String fileName) throws IOException {
         File dir = new File(dirPath);
-        if (!dir.exists() || !dir.isDirectory()) {
-            return Optional.empty();
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("mkdir failed");
+            }
+        }
+        if (!dir.isDirectory()) {
+            throw new IOException("dirPath is not a directory");
         }
         File targetFile = new File(dir.getAbsolutePath() + File.separator + fileName);
         if (targetFile.exists()) {
             throw new IOException("file already exists");
         }
-        File tmpFile = File.createTempFile(tmpFilePrefix, tmpFileSuffix, dir);
-//        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//        try (InputStream in = connection.getInputStream();
-//             FileOutputStream out = new FileOutputStream(tmpFile)) {
-//            byte[] buffer = new byte[1024];
-//            int bytesRead;
-//            while ((bytesRead = in.read(buffer)) != -1) {
-//                out.write(buffer, 0, bytesRead);
-//            }
-//        }
         try {
-            org.apache.commons.io.FileUtils.copyURLToFile(url, tmpFile);
+            org.apache.commons.io.FileUtils.copyURLToFile(url, targetFile);
         } catch (IOException e) {
-            if (!tmpFile.delete()) {
-                log.error("ERROR: delete tmp file failed, tmpFile: {}", tmpFile.getAbsolutePath());
+            if (!targetFile.delete()) {
+                log.error("ERROR: delete tmp file failed, target file: {}", targetFile.getAbsolutePath());
             }
             throw e;
         }
 
-        boolean success = tmpFile.renameTo(targetFile);
-        if (success) {
-            return Optional.of(targetFile);
-        } else {
-            return Optional.empty();
-        }
+        return Optional.of(targetFile);
     }
 }
