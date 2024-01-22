@@ -12,11 +12,14 @@ import kubeiaas.common.utils.FileUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.common.utils.ZhiUtils;
 import kubeiaas.imageoperator.config.ImageConfig;
+import kubeiaas.imageoperator.process.ImageProcess;
 import kubeiaas.imageoperator.response.PageResponse;
 import kubeiaas.imageoperator.utils.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -41,6 +44,13 @@ public class ImageService {
      *   filesWalkPath: ImageConfig.CONTAINER_STORAGE_PATH
      */
     private static final String baseDir = ImageConfig.CONTAINER_STORAGE_PATH;
+
+    @Resource
+    private final ImageProcess imageProcess;
+
+    public ImageService(ImageProcess imageProcess) {
+        this.imageProcess = imageProcess;
+    }
 
     public Image queryByUuid(String uuid) {
         log.info("image queryByUuid -- uuid: {}", uuid);
@@ -166,6 +176,7 @@ public class ImageService {
         }
 
         // 3. download iso and yaml file
+        // 3.1 download yaml file
         try {
             URL url = new URL(yamlUrl);
             Optional<File> tmpYamlFileOpt = FileUtils.fetchFile(url, ImageConfig.DESCRIPTION_DOWNLOADING_PATH, uuid + ".yaml.tmp");
@@ -195,22 +206,30 @@ public class ImageService {
             return false;
         }
 
+        // 3.2 download iso file
+//        try {
+//            URL url = new URL(isoUrl);
+//            Optional<File> tmpIsoFileOpt = FileUtils.fetchFile(url, ImageConfig.IMAGE_DOWNLOADING_PATH, uuid + ".iso");
+//            if (!tmpIsoFileOpt.isPresent()) {
+//                log.error("ERROR: download iso file failed");
+//                return false;
+//            }
+//            File tmpIsoFile = tmpIsoFileOpt.get();
+//            File isoFile = new File(baseDir + uuid + ".iso");
+//            FileUtils.move(tmpIsoFile, isoFile);
+//            if (!isoFile.exists()) {
+//                log.error("ERROR: move iso file failed");
+//                return false;
+//            }
+//        } catch (IOException e) {
+//            log.error("ERROR: imageUpload failed -- IOException", e);
+//            return false;
+//        }
         try {
             URL url = new URL(isoUrl);
-            Optional<File> tmpIsoFileOpt = FileUtils.fetchFile(url, ImageConfig.IMAGE_DOWNLOADING_PATH, uuid + ".iso");
-            if (!tmpIsoFileOpt.isPresent()) {
-                log.error("ERROR: download iso file failed");
-                return false;
-            }
-            File tmpIsoFile = tmpIsoFileOpt.get();
-            File isoFile = new File(baseDir + uuid + ".iso");
-            FileUtils.move(tmpIsoFile, isoFile);
-            if (!isoFile.exists()) {
-                log.error("ERROR: move iso file failed");
-                return false;
-            }
-        } catch (IOException e) {
-            log.error("ERROR: imageUpload failed -- IOException", e);
+            imageProcess.asyncDownloadImage(url, ImageConfig.IMAGE_DOWNLOADING_PATH, uuid + ".iso");
+        } catch (Exception e) {
+            log.error("ERROR: error image url format");
             return false;
         }
 
