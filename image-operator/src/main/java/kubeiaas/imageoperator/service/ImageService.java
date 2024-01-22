@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.HufuServiceConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.image.ImageUploadFormatEnum;
 import kubeiaas.common.enums.image.ImageUploadingStatusEnum;
 import kubeiaas.common.utils.FileUtils;
 import kubeiaas.common.utils.UuidUtils;
@@ -16,6 +17,7 @@ import kubeiaas.imageoperator.process.ImageProcess;
 import kubeiaas.imageoperator.response.PageResponse;
 import kubeiaas.imageoperator.utils.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -142,30 +144,39 @@ public class ImageService {
     }
 
     public boolean imageUpload(int id) {
-        // 1. get attached iso and yaml file url
+        // 1. get attached image and yaml file url
         Optional<JSONArray> attachmentsOpt = ZhiUtils.getAttachments(id);
         if (!attachmentsOpt.isPresent()) {
             log.error(String.format("ERROR: get attachments failed. id: %d", id));
             return false;
         }
         JSONArray attachments = attachmentsOpt.get();
-        String isoUrl = null, yamlUrl = null;
+        String imageUrl = null, yamlUrl = null;
+        ImageUploadFormatEnum imageFormat = null;
         for (int i = 0; i < attachments.size(); i++) {
             JSONObject attachment = attachments.getJSONObject(i);
             String name = attachment.getString("name");
             String url = String.format("%s%s&name=%s", HufuServiceConstants.TEMPLATE_CENTER_URL, attachment.getString("url"), name);
-            if (name.endsWith(".iso")) {
-                isoUrl = url;
-            } else if (name.endsWith(".yaml") || name.endsWith(".yml")) {
+            String extension = FilenameUtils.getExtension(name);
+            Optional<ImageUploadFormatEnum> imageUploadFormatEnumOpt = ImageUploadFormatEnum.fromString(extension);
+            if (imageUploadFormatEnumOpt.isPresent()) {
+                imageUrl = url;
+                if (imageFormat == null) {
+                    imageFormat = imageUploadFormatEnumOpt.get();
+                } else {
+                    log.error("ERROR: multiple image file found");
+                    return false;
+                }
+            } else if (extension.equals("yaml") || extension.equals("yml")) {
                 yamlUrl = url;
             }
         }
-        if (isoUrl == null) {
-            log.error("ERROR: lack of iso file");
+        if (imageUrl == null) {
+            log.error("ERROR: lack of image file");
             return false;
         }
         if (yamlUrl == null) {
-            log.error("ERROR: lack of yaml file");
+            log.error("ERROR: lack of description file(in yaml format)");
             return false;
         }
 
@@ -185,8 +196,11 @@ public class ImageService {
                 return false;
             }
             File tmpYamlFile = tmpYamlFileOpt.get();
-            String yamlPath = baseDir + uuid + ".yaml";
-            if (!ImageUtils.processIsoImage(tmpYamlFile.getAbsolutePath(), yamlPath, uuid + ".iso", uuid)) {
+            String yamlPath = String.format("%s%s.yaml", baseDir, uuid);
+
+            // check if format in yaml capable with image format
+            // add uuid and fileName to yaml
+            if (!ImageUtils.processIsoImage(tmpYamlFile.getAbsolutePath(), yamlPath, uuid, imageFormat)) {
                 File yamlFile = new File(yamlPath);
                 if (yamlFile.delete()) {
                     log.info("delete yaml file success");
@@ -225,9 +239,10 @@ public class ImageService {
 //            log.error("ERROR: imageUpload failed -- IOException", e);
 //            return false;
 //        }
+        String imageFileName = String.format("%s.%s", uuid, imageFormat.getFormat());
         try {
-            URL url = new URL(isoUrl);
-            imageProcess.asyncDownloadImage(url, ImageConfig.IMAGE_DOWNLOADING_PATH, uuid + ".iso");
+            URL url = new URL(imageUrl);
+            imageProcess.asyncDownloadImage(url, ImageConfig.IMAGE_DOWNLOADING_PATH, imageFileName);
         } catch (Exception e) {
             log.error("ERROR: error image url format");
             return false;

@@ -38,7 +38,8 @@ public class ImageUtils {
         return content.toString();
     }
 
-    public static boolean processIsoImage(String sourceYaml, String destYaml, String fileName, String uuid) {
+    public static boolean processIsoImage(String sourceYaml, String destYaml, String uuid, ImageUploadFormatEnum formatEnum) {
+        String fileName = String.format("%s.%s", uuid, formatEnum.getFormat());
         Yaml yaml = new Yaml();
         try {
             // 读取原始YAML文件
@@ -49,6 +50,18 @@ public class ImageUtils {
             Map<String, Object> imageData = (Map<String, Object>) data.get("image");
             imageData.put("filename", fileName);
             imageData.put("uuid", uuid);
+
+            // 检查镜像文件格式
+            Map<String, Object> spec = (Map<String, Object>) imageData.get("spec");
+            if (spec == null) {
+                log.error("ERROR: processIsoImage -- spec is null!");
+                return false;
+            }
+            ImageFormatEnum format = EnumUtils.getEnumFromString(ImageFormatEnum.class, (String) spec.get("format"));
+            if (!ImageUploadFormatEnum.isEqual(formatEnum, format)) {
+                log.error("ERROR: processIsoImage -- format not match!");
+                return false;
+            }
 
             // 将修改后的内容写入到新的YAML文件
             DumperOptions options = new DumperOptions();
