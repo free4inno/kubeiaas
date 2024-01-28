@@ -79,31 +79,31 @@ Cloud Image List: Unified management of cloud image resources within the system,
 
 The main functions provided by KubeIaaS to users are shown in the following table,
 
-| **Type**         | **Function**         | **Details**                                                                                       |
-|------------------|----------------------|---------------------------------------------------------------------------------------------------|
-| Cloud VM         | Create               | Support Linux and Windows                                                                         |
-|                  | Configuration        | Basic: name, description                                                                          |
-|                  |                      | Compute: CPU, memory (support hot addition)                                                       |
-|                  |                      | Storage: mount cloud disk (support hot plug and play)                                             |
-|                  |                      | *Storage: system disk expansion and contraction                                                   |
-|                  |                      | Network: automatic IP allocation (support dual NIC)                                               |
-|                  |                      | *Network: IP binding                                                                              |
-|                  | Control              | Support start and stop, suspend                                                                   |
-|                  | Access               | Support Web VNC remote connection                                                                 |
-|                  | *Migration           | *Offline migration                                                                                |
-| Cloud Disk       | Create               | Custom capacity                                                                                   |
-|                  | Configuration        | Mounted to the Cloud VM (support hot plug)                                                        |
-|                  |                      | *Expansion and contraction                                                                        |
-| Cloud Image      | Image release	       | One-click release of cloud VM as cloud image                                                      |
-|                  | Image center         | Manual import: download the pre-installed image and upload it to the system for direct use        |
-|                  |                      | *Automatic import: one-click import of pre-installed image through the image center               |
-|                  | Custom image         | Support custom image based on KubeIaaS image specification                                        |
-| System operation | Resource control     | System service component status monitoring                                                        |
-|                  |                      | Automatic configuration and addition of host                                                      |
-|                  |                      | *Metrics monitoring of host and cloud VM                                                          |
+| **Type**         | **Function**         | **Details**                                                                                   |
+|------------------|----------------------|-----------------------------------------------------------------------------------------------|
+| Cloud VM         | Create               | Support Linux and Windows                                                                     |
+|                  | Configuration        | Basic: name, description                                                                      |
+|                  |                      | Compute: CPU, memory (support hot addition)                                                   |
+|                  |                      | Storage: mount cloud disk (support hot plug and play)                                         |
+|                  |                      | Storage: system disk expansion and contraction                                                |
+|                  |                      | Network: automatic IP allocation (support dual NIC)                                           |
+|                  |                      | *Network: IP binding                                                                          |
+|                  | Control              | Support start and stop, suspend                                                               |
+|                  | Access               | Support Web VNC remote connection                                                             |
+|                  | *Migration           | *Offline migration                                                                            |
+| Cloud Disk       | Create               | Custom capacity                                                                               |
+|                  | Configuration        | Mounted to the Cloud VM (support hot plug)                                                    |
+|                  |                      | Expansion and contraction                                                                     |
+| Cloud Image      | Image release	       | One-click release of cloud VM as cloud image                                                  |
+|                  | Image center         | Manual import: download the pre-installed image and upload it to the system for direct use    |
+|                  |                      | Automatic import: one-click import of pre-installed image through the image center            |
+|                  | Custom image         | Support custom image based on KubeIaaS image specification                                    |
+| System operation | Resource control     | System service component status monitoring                                                    |
+|                  |                      | Automatic configuration and addition of host                                                  |
+|                  |                      | Metrics monitoring of host and cloud VM                                                       |
 |                  | System configuration | Resource configuration (CPU and memory overcommitment, storage limit, network segment management) |
-|                  |                      | System configuration (optional host specifications, Web VNC domain name, etc.)                    |
-|                  | User management      | Users and user groups                                                                             |
+|                  |                      | System configuration (optional host specifications, Web VNC domain name, etc.)                |
+|                  | User management      | Users and user groups                                                                         |
 
 (Functions marked with * indicate that they will be implemented in the upcoming new version.)
 

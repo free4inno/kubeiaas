@@ -155,25 +155,25 @@ showmount -e
 
 ### 3.1 下载安装包
 
-下载并解压 [kubeiaas-1.0-release.tar.gz](/deploy/kubeiaas-1.0-release.tar.gz) 包，
+下载并解压 [kubeiaas-2.0-release.tar.gz](/deploy/kubeiaas-2.0-release.tar.gz) 包，
 
 ```
-sudo tar -xzvf kubeiaas-1.0-release.tar.gz
+sudo tar -xzvf kubeiaas-2.0-release.tar.gz
 ```
 
 解压后能够得到如下内容，
 
 ```
-├─ kubeiaas-1.0-release
+├─ kubeiaas-2.0-release
 │  ├─ iaas-config.yml
 │  ├─ iaas-components.yml
 │  ├─ iaas-front.yml
 ```
 
-进入 kubeiaas-v1.0-release 目录，
+进入 kubeiaas-v2.0-release 目录，
 
 ```
-cd ./kubeiaas-1.0-release
+cd ./kubeiaas-2.0-release
 ```
 
 ### 3.2 填写配置清单
@@ -195,9 +195,11 @@ metadata:
   # kubectl create namespace kubeiaas
   namespace: kubeiaas
 data:
+  # -------- 工作节点 --------
   nodes.dhcp: "hf-master-01"
   nodes.nfs: "192.168.33.7"
 
+  # -------- NFS服务目录 --------
   nfs.dir.img: "/usr/local/kubeiaas/data/images"
   nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 
