@@ -1,0 +1,473 @@
+---
+# *************************** IAAS-CORE ***************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-core
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iaas-core
+  template:
+    metadata:
+      labels:
+        app: iaas-core
+    spec:
+      containers:
+        - name: iaas-core
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/iaas-core.jar
+          # [ATTENTION] --------------------------------------------- CHECK VERSION!
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:2.0-RELEASE
+          # [ATTENTION] -- change to `IfNotPresent` when prod
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9080
+              protocol: TCP
+          env:
+            # -------- BASIC ENV --------
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            # -------- SERVICE CONFIG --------
+            - name: DHCP_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
+            - name: NFS_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
+            # ----------------------------------
+          volumeMounts:
+            - name: host-image
+              mountPath: /usr/local/kubeiaas/data/images
+            - name: host-data-volume
+              mountPath: /usr/local/kubeiaas/data/data-volumes
+      volumes:
+        - name: host-image
+          nfs:
+            path: /usr/local/kubeiaas/data/images
+            server: 192.168.33.7
+        - name: host-data-volume
+          nfs:
+            path: /usr/local/kubeiaas/data/data-volumes
+            server: 192.168.33.7
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-core
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-core
+  type: NodePort
+  ports:
+    - port: 9080
+      targetPort: 9080
+      nodePort: 32210
+      protocol: TCP
+---
+# *************************** DB-PROXY ***************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-proxy
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-proxy
+  template:
+    metadata:
+      labels:
+        app: db-proxy
+    spec:
+      containers:
+        - name: db-proxy
+          # [ATTENTION] -------------------------------------------- CHECK VERSION!
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:2.0-RELEASE-sqlite
+          # [ATTENTION] -- change to `IfNotPresent` when prod
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /db
+      volumes:
+        - name: sqlite-data
+          nfs:
+            path: /usr/local/kubeiaas/sqlite
+            server: 192.168.33.7
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-proxy
+  namespace: kubeiaas
+spec:
+  selector:
+    app: db-proxy
+  type: ClusterIP
+  ports:
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
+---
+# *************************** sqlite-tunnel ***************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlite-tunnel
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlite-tunnel
+  template:
+    metadata:
+      labels:
+        app: sqlite-tunnel
+    spec:
+      containers:
+        - name: sqlite-tunnel
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/sqlite-tunnel:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8011
+              # [ATTENTION] -- comment when prod
+              hostPort: 8011
+              protocol: TCP
+          volumeMounts:
+            - name: sqlite-db
+              mountPath: /db
+      volumes:
+        - name: sqlite-db
+          nfs:
+            server: 192.168.33.7
+            path: /usr/local/kubeiaas/sqlite
+---
+# *************************** IAAS-AGENT ***************************
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: iaas-agent
+  namespace: kubeiaas
+spec:
+  selector:
+    matchLabels:
+      app: iaas-agent
+  template:
+    metadata:
+      labels:
+        app: iaas-agent
+    spec:
+      hostPID: true
+      hostIPC: true
+      initContainers:
+        - name: iaas-prepare
+          # [ATTENTION] -------------------------------------------- CHECK VERSION! (if updated)
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:2.0-RELEASE
+          # [ATTENTION] -- change to `IfNotPresent` when prod
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          env:
+            # -------- BASIC ENV --------
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            # -------- SERVICE CONFIG --------
+            - name: DHCP_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
+            - name: NFS_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
+            - name: NFS_DIR_IMG
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nfs.dir.img
+            - name: NFS_DIR_ISO
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nfs.dir.iso
+            - name: NFS_DIR_DV
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nfs.dir.dv
+            # ----------------------------------
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: checker
+              mountPath: /checker
+      containers:
+        - name: iaas-agent
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              /bin/bash /kubeiaas/RUN.sh
+          # [ATTENTION] ---------------------------------------------- CHECK VERSION!
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:1.1.0-SNAPSHOT
+          # [ATTENTION] -- change to `IfNotPresent` when prod
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 9090
+              hostPort: 32201
+              protocol: TCP
+            - containerPort: 9089
+              protocol: TCP
+          env:
+            # -------- BASIC ENV --------
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            # -------- SERVICE CONFIG --------
+            - name: DHCP_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.dhcp
+            - name: NFS_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: nodes.nfs
+            # -------- NETWORK CONFIG --------
+            - name: NETWORK_BRIDGE_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: iaas-config
+                  key: network.bridge.type
+            # ----------------------------------
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: workdir
+              mountPath: /workdir
+      volumes:
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: checker
+          hostPath:
+            path: /usr/local/kubeiaas/workdir/checker
+        - name: workdir
+          hostPath:
+            path: /usr/local/kubeiaas/workdir
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-agent
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-agent
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+---
+# *************************** NOVNC ***************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-novnc
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iaas-novnc
+  template:
+    metadata:
+      labels:
+        app: iaas-novnc
+    spec:
+      containers:
+        - name: iaas-novnc
+          command: [ "sh" ]
+          args:
+            - "-c"
+            - |
+              python3 /usr/local/vnc/websockify-0.10.0/websockify --web=/usr/local/vnc/noVNC-1.3.0/ 8787 --target-config=/usr/local/vnc/token/token.conf
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/novnc:1.3.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8787
+          volumeMounts:
+            - name: novnc-token
+              mountPath: /usr/local/vnc/token
+      volumes:
+        - name: novnc-token
+          nfs:
+            path: /usr/local/kubeiaas/vnc/token
+            server: 192.168.33.7
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-novnc
+  namespace: kubeiaas
+spec:
+  selector:
+    app: iaas-novnc
+  type: NodePort
+  ports:
+    - port: 8787
+      nodePort: 32202
+      targetPort: 8787
+      protocol: TCP
+---
+# *************************** IMAGE_OPERATOR ***************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-operator
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-operator
+  template:
+    metadata:
+      labels:
+        app: image-operator
+    spec:
+      containers:
+        - name: image-operator
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/image-operator.jar
+          # [ATTENTION] -------------------------------------------------- CHECK VERSION!
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/image-operator:2.0-RELEASE
+          # [ATTENTION] -- change to `IfNotPresent` when prod
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9093
+              protocol: TCP
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: host-image
+              mountPath: /host-images
+      volumes:
+        - name: host-image
+          nfs:
+            path: /usr/local/kubeiaas/data/images
+            server: 192.168.33.7
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-operator
+  namespace: kubeiaas
+spec:
+  selector:
+    app: image-operator
+  type: ClusterIP
+  ports:
+    - port: 9093
+      targetPort: 9093
+      protocol: TCP
+---
+# *************************** RESOURCE_OPERATOR ***************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-operator
+  namespace: kubeiaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resource-operator
+  template:
+    metadata:
+      labels:
+        app: resource-operator
+    spec:
+      containers:
+        - name: resource-operator
+          command: ["sh"]
+          args:
+            - "-c"
+            - |
+              java -jar /root/resource-operator.jar
+          # [ATTENTION] --------------------------------------------------- CHECK VERSION!
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/resource-operator:1.0-RELEASE
+          # [ATTENTION] -- change to `IfNotPresent` when prod
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9092
+              protocol: TCP
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resource-operator
+  namespace: kubeiaas
+spec:
+  selector:
+    app: resource-operator
+  type: ClusterIP
+  ports:
+    - port: 9092
+      targetPort: 9092
+      protocol: TCP
+---
