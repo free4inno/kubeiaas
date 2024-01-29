@@ -144,7 +144,7 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
 ```json
 {
   "iaas": {
-    "iaas_server_url":"http://192.168.33.1:32210",
+    "iaas_server_url":"http://<node-ip>:32210",
     "image_center_url": "http://zhi.free4inno.com"
   }
 }
@@ -379,7 +379,7 @@ helm install --name <release-name> <path-to-chart> --namespace <namespace>
 ```json
 {
   "iaas": {
-    "iaas_server_url":"http://192.168.33.1:32210",
+    "iaas_server_url":"http://<node-ip>:32210",
     "image_center_url": "http://zhi.free4inno.com"
   },
   "ops": {
