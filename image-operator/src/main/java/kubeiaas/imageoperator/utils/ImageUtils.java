@@ -58,7 +58,7 @@ public class ImageUtils {
                 return false;
             }
             ImageFormatEnum format = EnumUtils.getEnumFromString(ImageFormatEnum.class, (String) spec.get("format"));
-            if (!ImageUploadFormatEnum.isEqual(formatEnum, format)) {
+            if (!ImageUploadFormatEnum.isMatch(formatEnum, format)) {
                 log.error("ERROR: processIsoImage -- format not match!");
                 return false;
             }
