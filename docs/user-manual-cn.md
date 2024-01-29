@@ -124,18 +124,22 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
 
 以下是 KubeIaaS 所提供的预制镜像，
 
-| 镜像名称                               | 说明                                                                                                 | 下载地址                                                              |
-|------------------------------------|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
-| centos-7.5-cli                     | 采用 Ubuntu18.04 LTS Desktop 的云主机依赖的云镜像，包含图形化桌面并附加了SSH远程连接工具。                                        | 链接：https://pan.baidu.com/s/1Zqi2_mKAJ0UhOTW3oAqzCg <br/> 提取码：yt2j |
-| ubuntu-18.04-lts-gui               | 采用 Ubuntu18.04 LTS Desktop 的云主机依赖的云镜像，包含图形化桌面并附加了SSH远程连接工具。                                        | 链接：https://pan.baidu.com/s/1ILvcUy896AOHU6OpUxVa9g <br/> 提取码：66w0 |
-| kafka-2.12-standalone-on-centos7   | 基于云主机部署单节点的 Kafka 2.12。                                                                            | 链接：https://pan.baidu.com/s/1WskCpGhy-t4wJAKE2Y_HKQ <br/> 提取码：s55t |
-| flink-1.15.4-standalone-on-centos7 | 基于云主机部署单节点的 Flink 1.15.4。Flink（官网）是一款开源流式数据处理框架。基于本模板部署的Flink配置了4个Slot，因此建议在创建云主机的时候CPU配置为4核。      | 链接：https://pan.baidu.com/s/12Lbh47HPBQsdNmrf_vN20Q <br/> 提取码：yyg3 |
-| windows-server-2019-gui            | 采用 Windows Server 2019 的云主机依赖的云镜像（包含图形化桌面）。在云镜像挂载的 virtio.iso 中可以查找到系统所必须的驱动程序（网络驱动、PCI驱动、USB驱动等）。 | 链接：https://pan.baidu.com/s/1ofJvsonjuRExxZosYmVRHg <br/> 提取码：f00r |
+| 镜像名称                               | 说明                                                                                               | 下载地址                                                              |
+|------------------------------------|--------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
+| Centos-7.5-cli                     | 采用CentOS-7.5的提供命令行交互界面云主机依赖的云镜像，包含命令行界面并附加了SSH远程连接工具。                                            | 链接：https://pan.baidu.com/s/1Zqi2_mKAJ0UhOTW3oAqzCg <br/> 提取码：yt2j |
+| CentOS-7.5-CLI-QGA                 | 采用 CentOS-7.5 的云主机镜像。使用命令行交互界面，支持 SSH 连接。安装了 QEMU-Guest-Agent (v6.2.0)      | 链接：https://pan.baidu.com/s/1TejcvIhiheagXgkkNwzg1A 提取码：cdu4       |
+| Ubuntu-18.04-lts-gui               | 采用 Ubuntu18.04 LTS Desktop 的云主机依赖的云镜像，包含图形化桌面并附加了SSH远程连接工具。                                      | 链接：https://pan.baidu.com/s/1ILvcUy896AOHU6OpUxVa9g <br/> 提取码：66w0 |
+| Ubuntu-22.04-CLI-GPU-QGA           | 采用 Ubuntu 22.04 LTS 的云主机镜像。使用命令行（tty1）交互界面，支持 SSH 连接。包含了 NVIDIA RTX 4090 GPU的驱动程序，安装了 QEMU-Guest-Agent。 | 链接：https://pan.baidu.com/s/1QJi_CU3YPSxf5NTHE1pYEw 提取码：a7dc       |
+| Ubuntu-22.04-CLI-GPU-QGA           | 采用 Ubuntu 22.04 LTS 的云主机镜像。使用命令行（tty1）交互界面，支持 SSH 连接。包含了 NVIDIA RTX 4090 GPU的驱动程序，安装了 QEMU-Guest-Agent。 | 链接：https://pan.baidu.com/s/1QJi_CU3YPSxf5NTHE1pYEw 提取码：a7dc       |
+| kafka-2.12-standalone-on-centos7   | 基于云主机部署单节点的 Kafka 2.12。                                                                          | 链接：https://pan.baidu.com/s/1WskCpGhy-t4wJAKE2Y_HKQ <br/> 提取码：s55t |
+| flink-1.15.4-standalone-on-centos7 | 基于云主机部署单节点的 Flink 1.15.4。Flink（官网）是一款开源流式数据处理框架。基于本模板部署的Flink配置了4个Slot，因此建议在创建云主机的时候CPU配置为4核。    | 链接：https://pan.baidu.com/s/12Lbh47HPBQsdNmrf_vN20Q <br/> 提取码：yyg3 |
+| Windows-server-2019-gui            | 采用 Windows Server 2019 的云主机依赖的云镜像（包含图形化桌面）。在云镜像挂载的 virtio.iso 中可以查找到系统所必须的驱动程序（网络驱动、PCI驱动、USB驱动等）。 | 链接：https://pan.baidu.com/s/1ofJvsonjuRExxZosYmVRHg <br/> 提取码：f00r |
+| Windows-10-GUI-GPU-QGA             | 采用 Windows10 的云镜像。已经完成各项所需基本IO驱动安装，包含了 NVIDIA RTX 4090 GPU 的驱动程序，包含了 QEMU-Guest-Agent (7.2.0)。 | 链接：https://pan.baidu.com/s/1BEz5qs6ZdmG6nZ621Xs6uQ 提取码：mbkt       |
 
 #### 1.2 自动导入
 
 自动导入需要在 ”**用户管理-用户组**“ 页面中，点击详情页展开用户组的配置，在`iaas`字段
-添加`image_center_url`字段，填写镜像中心的地址，例如：
+添加`image_center_url`字段，填写镜像中心的地址（目前仅支持由自由之翼开发的[知了http://zhi.free4inno.com](http://zhi.free4inno.com)，例如：
 
 ```json
 {
@@ -145,7 +149,7 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
   }
 }
 ```
-目前镜像中心为自由之翼团队提供的[知了](http://zhi.free4inno.com)平台，还提供了[镜像中心](http://tcenter.free4inno.com)
+镜像中心为自由之翼团队提供的[知了](http://zhi.free4inno.com)平台，还提供了[镜像中心](http://tcenter.free4inno.com)
 便于检索镜像。由于存储空间有限，目前仅提供了一些常用的镜像，后续会逐步增加，也欢迎大家贡献自己制作的镜像。
 
 完成配置后，在 ”**服务管理-云镜像**“ 中可以看到该页面增加了一个 ”**导入**“ 按钮，点击导入按钮，复制镜像中心的镜像ID，即可完成导入。
@@ -237,7 +241,45 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
 
 在 “**用户管理-用户组**” 页面中，可创建不同的用户组可以区分用户间管理权限。
 
-用户组的配置是一段 JSON 用于控制用户权限。目前仅包含一项配置，无需更改。
+用户组的配置是一段 JSON 用于控制用户权限。
+- 如果用户只需要**使用基础的云主机功能**，只需要在`iaas`字段中配置`iaas_server_url`即可，例如：
+    ```json
+    {
+      "iaas": {
+        "iaas_server_url": "http://<node-ip>:32210"
+      }
+    }
+    ```
+    `iaas_server_url`为KubeIaaS的服务地址，如果按照文档进行部署KubeIaaS时，`iaas_server_url`为`http://<node-ip>:32210`,
+    其中`<node-ip>`为集群内任意节点的IP地址，32210是KubeIaaS的默认NodePort端口。
+
+- 如果用户需要**使用云镜像的导入功能**，则需要在`iaas`字段中额外配置`image_center_url`，例如：
+  ```json
+    {
+      "iaas": {
+        "iaas_server_url": "http://<node-ip>:32210",
+        "image_center_url": "http://zhi.free4inno.com"
+      }
+    }
+    ```
+  http://zhi.free4inno.com 是自由之翼团队提供的镜像中心，用户可以在其中查找并导入镜像。
+
+- 如果用户需要使用**指标监控功能**，则参见[系统监控](/docs/user-manual-cn.md#7-%E7%B3%BB%E7%BB%9F%E7%9B%91%E6%8E%A7%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89)
+  中需要在`ops`字段中额外配置`prometheus_prefix`，`grafana_url`和`alertmanager_url`，例如：
+  ```json
+    {
+      "iaas": {
+        "iaas_server_url": "http://<node-ip>:32210",
+        "image_center_url": "http://zhi.free4inno.com"
+      },
+      "ops": {
+        "prometheus_prefix": "http://<node-ip>:30092/api/v1/query?query=",
+        "grafana_url": "http://<node-ip>:30922",
+        "alertmanager_url": "http://<node-ip>:30903"
+      }
+    }
+    ```
+    其中，`<node-ip>`为集群内任意节点的IP地址，30092、30922和30903是集群指标监控组件的NodePort端口。
 
 用户组组长可以对其他组内成员进行管理操作，而超级管理员则可以管理系统内所有成员。
 
@@ -397,23 +439,23 @@ spec:
 
 您可以参照[虎符运维组件-集群指标监控](http://tcenter.free4inno.com/resource?id=18390)中的介绍：
 > 修改本模板中 values.yaml 中 “虚拟机监控服务” 相关配置（位于 2561 行）
-> ```json
-> additionalScrapeConfigs:
-> - job_name: 'kubeiaas-libvirt-expoter'
->   scrape_interval: 15s
->   scrape_timeout: 10s
->   metrics_path: /metrics
->   scheme: http
->   static_configs:
->   - targets:
->   # 此部分内容请按该格式填写 <Node_IP>:<Libvirt_Exporter_Port>
->   # 其中 <NodeIP> 是 KubeIaaS 工作节点的 IP，<Libvirt_Exporter_Port> 是 Libvirt_Exporter 服务暴露的端口号，默认 9177；
->   # 将所有的节点，以 YAML 数组格式列出，以下是一段示例：
->     - 192.168.33.1:9177
->     - 192.168.33.3:9177
->     - 192.168.33.6:9177
->     - 192.168.33.7:9177
-> ```
+```yaml
+additionalScrapeConfigs:
+- job_name: 'kubeiaas-libvirt-expoter'
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+  # 此部分内容请按该格式填写 <Node_IP>:<Libvirt_Exporter_Port>
+  # 其中 <NodeIP> 是 KubeIaaS 工作节点的 IP，<Libvirt_Exporter_Port> 是 Libvirt_Exporter 服务暴露的端口号，默认 9177；
+  # 将所有的节点，以 YAML 数组格式列出，以下是一段示例：
+    - 192.168.33.1:9177
+    - 192.168.33.3:9177
+    - 192.168.33.6:9177
+    - 192.168.33.7:9177
+```
 
 也可以创建一个yaml文件exporter.yaml，使用 -f 参数将新的配置项传递给 helm upgrade 命令：
 ```bash
