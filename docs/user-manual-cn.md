@@ -264,7 +264,7 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
     ```
   http://zhi.free4inno.com 是自由之翼团队提供的镜像中心，用户可以在其中查找并导入镜像。
 
-- 如果用户需要使用**指标监控功能**，则参见[系统监控](/docs/user-manual-cn.md#7-%E7%B3%BB%E7%BB%9F%E7%9B%91%E6%8E%A7%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89)
+- 如果用户需要使用**指标监控功能**，则参见[系统监控](/docs/user-manual-cn.md#%E7%B3%BB%E7%BB%9F%E7%9B%91%E6%8E%A7%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89)
   中需要在`ops`字段中额外配置`prometheus_prefix`，`grafana_url`和`alertmanager_url`，例如：
   ```json
     {
