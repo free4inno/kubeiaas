@@ -30,7 +30,7 @@ public interface VolumeController {
             URI uri,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
-            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize);
+            @RequestParam(value = RequestParamConstants.VOLUME_SIZE) int volumeSize);
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.RESIZE_SYSTEM_VOLUME)
     @ResponseBody

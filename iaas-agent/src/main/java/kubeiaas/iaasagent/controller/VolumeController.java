@@ -48,9 +48,9 @@ public class VolumeController {
     public String createDataVolume(
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
-            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize) {
+            @RequestParam(value = RequestParamConstants.VOLUME_SIZE) int volumeSize) {
         log.info("-- start -- createDataVolume");
-        if (volumeService.createDataVolume(volumePath, volumeUuid, extraSize)) {
+        if (volumeService.createDataVolume(volumePath, volumeUuid, volumeSize)) {
             log.info("-- end -- createDataVolume -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {

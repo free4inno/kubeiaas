@@ -80,9 +80,9 @@ public class VolumeService {
         return true;
     }
 
-    public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
+    public boolean createDataVolume(String volumePath, String volumeUuid, int volumeSize){
         log.info(String.format("createDataVolume info -- volumePath: %s, volumeUuid: %s, extraSize: %d",
-                volumePath, volumeUuid, extraSize));
+                volumePath, volumeUuid, volumeSize));
 
         log.info("STEP 1: get volume and check file path");
         log.info("-> invoke DB -- volumeQueryByUuid");
@@ -111,9 +111,9 @@ public class VolumeService {
             return false;
         }
 
-        if (extraSize <= 0) {
-            log.warn(String.format("WARN: extraSize is %d, set to default size %d", extraSize, VmConstants.DEFAULT_DISK_SIZE));
-            extraSize = VmConstants.DEFAULT_DISK_SIZE;
+        if (volumeSize <= 0) {
+            log.warn(String.format("WARN: extraSize is %d, set to default size %d", volumeSize, VmConstants.DEFAULT_DISK_SIZE));
+            volumeSize = VmConstants.DEFAULT_DISK_SIZE;
         }
 
         log.info("STEP 2: create data volume");
@@ -123,7 +123,7 @@ public class VolumeService {
         String command = String.format(format,
                 VolumeConstants.DEFAULT_DISK_TYPE,
                 volumeFullPath,
-                extraSize);
+                volumeSize);
         String res = ShellUtils.getCmd(command);
         setVolumeStatus(volumeUuid, VolumeStatusEnum.AVAILABLE);
         return true;

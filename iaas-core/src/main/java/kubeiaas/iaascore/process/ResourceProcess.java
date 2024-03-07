@@ -39,11 +39,14 @@ public class ResourceProcess {
      * @throws VmException VmException
      */
     public Vm createVmOperate(Vm newVm, int privateIpSegId, boolean needPublicIp, int publicIpSegId) throws VmException {
-        log.debug("createVm -- 2. Resource Operator");
+        log.info(String.format("createVmOperate -- vm: %s, privateIpSegId: %d, needPublicIp: %b, publicIpSegId: %d",
+                newVm.getUuid(), privateIpSegId, needPublicIp, publicIpSegId));
 
         // 2.1. check image
         // available
+        log.info(String.format("-> invoke DB -- imageQueryByUuid: %s", newVm.getImageUuid()));
         Image image = tableStorage.imageQueryByUuid(newVm.getImageUuid());
+        log.info(String.format("<- invoke DB -- done -- image: %s", Objects.toString(image)));
         if (image == null || image.getStatus() != ImageStatusEnum.AVAILABLE) {
             log.error("ERROR: image not available!");
             throw new VmException(newVm,"ERROR: image not available!");

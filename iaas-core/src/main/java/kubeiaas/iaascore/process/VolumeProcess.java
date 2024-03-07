@@ -120,9 +120,9 @@ public class VolumeProcess {
             log.error("ERROR: create Data volume failed! error in preCreate");
             throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in preCreate");
         }
-        int diskSize = newVolume.getSize();
+        int volumeSize = newVolume.getSize();
         log.info(String.format("-> invoke iaas-agent -- createDataVolume, volumeUuid: %s", volumeUuid));
-        if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, diskSize)){
+        if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, volumeSize)){
             log.error(String.format("ERROR: create Data volume failed! error in agent -- volumeUuid: %s", volumeUuid));
             throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in agent");
         }

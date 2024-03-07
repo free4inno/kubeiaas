@@ -147,9 +147,9 @@ public class VolumeScheduler {
         log.info("<- invoke DB -- done");
     }
 
-    public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
+    public boolean createDataVolume(String volumePath, String volumeUuid, int volumeSize){
         return volumeController.createDataVolume(getSelectedUri(volumeUuid), volumePath,
-                volumeUuid, extraSize).equals(ResponseMsgConstants.SUCCESS);
+                volumeUuid, volumeSize).equals(ResponseMsgConstants.SUCCESS);
     }
 
     public boolean resizeSystemVolume(String volumePath, String volumeUuid, int diskSize){
