@@ -26,6 +26,12 @@ public class VolumeConstants {
     public static final String DEFAULT_NFS_SRV_PATH = "/usr/local/kubeiaas/data/";
     public static final String VOLUME_PATH = "sys-volumes/";
     public static final String DATA_VOLUME_PATH = "data-volumes/";
+    /*
+    * 2024-03-08
+    * 1. 为了使系统盘采用共享存储的方式，将系统盘的路径改为共享存储路径（/usr/local/kubeiaas/data/volumes）
+    * 2. 使用新常量 SHARED_VOLUME_PATH 代替 VOLUME_PATH
+     */
+    public static final String SHARED_VOLUME_PATH = "volumes/";
     public static final String ISO_PATH = "images/iso/";
     public static final String IMAGE_PATH = ImageConstants.IMAGE_PATH;
     // suffix

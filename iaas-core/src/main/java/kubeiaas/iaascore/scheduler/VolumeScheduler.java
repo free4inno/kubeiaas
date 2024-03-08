@@ -91,7 +91,7 @@ public class VolumeScheduler {
         newVolume.setHostUuid(vm.getHostUuid());
         newVolume.setImageUuid(vm.getImageUuid());
         newVolume.setSize(vm.getDiskSize());
-        newVolume.setProviderLocation(PathUtils.genVolumeDirectoryByUuid(volumeUuid, image));
+        newVolume.setProviderLocation(PathUtils.genSharedVolumeDirectoryByUuid(volumeUuid, image));
 
         newVolume.setUsageType(VolumeUsageEnum.SYSTEM);
         newVolume.setFormatType(VolumeFormatEnum.QCOW2);

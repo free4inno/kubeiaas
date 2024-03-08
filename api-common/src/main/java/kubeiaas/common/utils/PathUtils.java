@@ -40,6 +40,22 @@ public class PathUtils {
      * 根据uuid生成directory.
      *
      * @param uuid 常规的uuid
+     * @param image 镜像
+     * @return volumes/a/z/uuid.img
+     */
+    public static String genSharedVolumeDirectoryByUuid(String uuid, Image image) {
+        String destImgDir = getImgDir(uuid);
+        if (image != null && image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+            return VolumeConstants.SHARED_VOLUME_PATH + destImgDir + uuid + VolumeConstants.WIN_VOLUME_SUFFIX;
+        } else {
+            return VolumeConstants.SHARED_VOLUME_PATH + destImgDir + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;
+        }
+    }
+
+    /**
+     * 根据uuid生成directory.
+     *
+     * @param uuid 常规的uuid
      * @return volumes/a/z/uuid.img
      */
     public static String genDataVolumeDirectoryByUuid(String uuid, Image image) {
