@@ -221,6 +221,23 @@ public class VmOpenAPI {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.COLD_MIGRATE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String coldMigrate(@Valid @RequestBody ColdMigrateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.UUID_INJECTION, f.getVmUuid());
+        log.info("-- start -- coldMigrate");
+        if (vmService.coldMigrateVm(f.getVmUuid(), f.getTargetHostUuid(), f.getTargetPrivateIpSegmentId(), f.getTargetPublicIpSegmentId())
+                .equals(ResponseMsgConstants.SUCCESS)){
+            log.info("-- end -- coldMigrate -- success");
+            MDC.remove(LogInjectionConstants.UUID_INJECTION);
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.warn("-- end -- coldMigrate -- failed");
+            MDC.remove(LogInjectionConstants.UUID_INJECTION);
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_COLD_MIGRATE_ERROR));
+        }
+    }
+
     /**
      * 获取 vm 列表
      */

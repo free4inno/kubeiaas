@@ -15,6 +15,7 @@ public class RequestParamConstants {
     public static final String HOST_NAME = "host_name";
     public static final String VM_UUID = "vm_uuid";
     public static final String VOLUME_UUID = "volume_uuid";
+    public static final String INSTANCE_UUID = "instance_uuid";
 
     public static final String KEY_1 = "key_1";
     public static final String VALUE_1 = "value_1";
@@ -31,6 +32,7 @@ public class RequestParamConstants {
     public static final String PAGE_SIZE = "page_size";
 
     /* ===== VM ===== */
+    public static final String XML_DESC = "xml_desc";
     public static final String VM_OBJECT = "vm_object";
 
     public static final String CPUS = "cpus";

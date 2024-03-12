@@ -36,6 +36,21 @@ public class VmController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.CREATE_VM_INSTANCE_BY_XML, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String createVmInstanceByXml(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.XML_DESC) String xmlDesc) {
+        log.info("-- start -- createVmFromXml");
+        if (vmService.createVmByXml(vmUuid, xmlDesc)) {
+            log.info("-- end -- createVmFromXml -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("-- end -- createVmFromXml -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteVm(
@@ -134,6 +149,14 @@ public class VmController {
             log.info("-- end -- modifyVm -- failed");
             return ResponseMsgConstants.FAILED;
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_XML_DESC, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String getXmlDesc(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
+        log.info("-- end -- getXmlDesc -- success");
+        return vmService.getXmlDesc(vmUuid);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATUS, produces = RequestMappingConstants.APP_JSON)

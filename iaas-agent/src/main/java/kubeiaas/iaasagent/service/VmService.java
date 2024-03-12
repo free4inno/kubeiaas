@@ -136,6 +136,40 @@ public class VmService {
         return true;
     }
 
+    public boolean createVmByXml(String vmUuid, String xmlDesc) {
+        log.info("createVmFromXml ---- start ----");
+        Connect virtCon = LibvirtConfig.getVirtCon();
+        // check if domain is already exist
+        try {
+            Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
+            if (domain.isPersistent() > 0) {
+                // domain is already exist
+                return false;
+            }
+        } catch (Exception e) {
+            log.info("createVmFromXml -- 1. start creating Domain");
+        }
+        // create domain
+        try {
+            // Only define the domain, not start it
+            virtCon.domainDefineXML(xmlDesc);
+        } catch (Exception e) {
+            log.error("ERROR: create vm from xml error: ", e);
+            return false;
+        }
+
+        // Update vm' vnc port and password
+        log.info("createVmFromXml -- 2. update vnc port and password");
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        vm.setStatus(VmStatusEnum.STOPPED);
+        String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + vmUuid).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");          //获取新建虚拟机的VncPort
+        vm.setVncPort(vncPort);
+        String vncPasswd = VmCUtils.getVNCPasswd(vm.getId(), vmUuid);
+        vm.setVncPassword(vncPasswd);
+        tableStorage.vmSave(vm);
+        return true;
+    }
+
     public boolean deleteVm(String vmUuid){
         log.info(String.format("deleteVm info -- vmUuid: %s", vmUuid));
         Domain domain = null;
@@ -416,6 +450,17 @@ public class VmService {
             return false;
         }
         return true;
+    }
+
+    public String getXmlDesc(String vmUuid) {
+        log.info(String.format("getXmlDesc info -- vmUuid: %s", vmUuid));
+        try {
+            Domain domain = getDomainByUuid(vmUuid);
+            return domain.getXMLDesc(0);
+        } catch (Exception e) {
+            log.error("ERROR: getXmlDesc failed!", e);
+            return null;
+        }
     }
 
     /**

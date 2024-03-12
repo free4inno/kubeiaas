@@ -11,6 +11,7 @@ import lombok.Getter;
 public enum ResponseEnum {
     SUCCESS(200f, "业务处理成功"),
     WORK_ERROR(202f, "业务处理失败"),
+    VM_NOT_FOUND(202.00f,"虚拟机未找到"),
     VM_DELETE_ERROR(202.01f,"虚拟机删除失败"),
     VM_MODIFY_ERROR(202.02F,"虚拟机修改CPU/内存失败"),
     VM_START_ERROR(202.03F,"虚拟机启动失败"),
@@ -18,6 +19,10 @@ public enum ResponseEnum {
     VM_REBOOT_ERROR(202.05F,"虚拟机重启失败"),
     VM_SUSPEND_ERROR(202.06F,"虚拟机暂停失败"),
     VM_RESUME_ERROR(202.07F,"虚拟机恢复失败"),
+    VM_COLD_MIGRATE_ERROR(202.08F,"虚拟机冷迁移失败"),
+    VM_COLD_MIGRATE_NOT_SUPPORT(202.09F,"虚拟机冷迁移失败，请确认主机是否已关机"),
+    VM_XML_DESCRIPTION_NOT_FOUND(202.10F,"虚拟机XML描述未找到"),
+    VM_LACK_OF_MAC(202.11F,"虚拟机MAC地址不足"),
     PUBLISH_IMAGE_ERROR(202.08F,"云镜像发布失败"),
     VOLUME_DELETE_ERROR(202.11f,"云硬盘删除失败"),
     VOLUME_ATTACH_ERROR(202.12f,"云硬盘挂载失败"),

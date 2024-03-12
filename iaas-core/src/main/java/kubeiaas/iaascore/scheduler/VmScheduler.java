@@ -53,6 +53,10 @@ public class VmScheduler {
         }
     }
 
+    public boolean createVmInstanceByXml(String vmUuid, String xmlDesc) {
+        return vmController.createVmInstanceByXml(getSelectedUri(vmUuid), vmUuid, xmlDesc).equals(ResponseMsgConstants.SUCCESS);
+    }
+
     public boolean deleteVmInstance(String vmUuid){
         try {
             return vmController.deleteVmInstance(getSelectedUri(vmUuid), vmUuid).equals(ResponseMsgConstants.SUCCESS);
@@ -130,6 +134,15 @@ public class VmScheduler {
         } catch (Exception e) {
             log.error("ERROR: volumePublishImage. ", e);
             return false;
+        }
+    }
+
+    public String getXmlDesc(Vm vm) throws BaseException {
+        try {
+            return vmController.getXmlDesc(getSelectedUri(vm.getUuid()), vm.getUuid());
+        } catch (Exception e) {
+            log.error("ERROR: getXmlDesc. ", e);
+            throw new BaseException("err: failed to connect with agent.");
         }
     }
 

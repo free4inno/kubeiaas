@@ -49,6 +49,9 @@ public class RequestMappingConstants {
     public static final String REBOOT = "reboot";
     public static final String SUSPEND = "suspend";
     public static final String RESUME = "resume";
+    public static final String COLD_MIGRATE = "cold_migrate";
+    public static final String GET_XML_DESC = "get_xml_desc";
+    public static final String LIVE_MIGRATE = "live_migrate";
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
@@ -65,6 +68,7 @@ public class RequestMappingConstants {
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String QUERY_ALL_BY_DOUBLE_KEY = "query_all_by_double_key";
     public static final String QUERY_ALL_BY_TYPE = "query_all_by_type";
+    public static final String QUERY_ALL_BY_INSTANCE_UUID = "query_all_by_instance_uuid";
     public static final String QUERY_ALL_BY_HOST_AND_TYPE = "query_all_by_host_and_type";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
@@ -134,6 +138,7 @@ public class RequestMappingConstants {
     public static final String SUSPEND_VM_INSTANCE = "suspend_vm_instance";
     public static final String RESUME_VM_INSTANCE = "resume_vm_instance";
     public static final String MODIFY_VM_INSTANCE = "modify_vm_instance";
+    public static final String CREATE_VM_INSTANCE_BY_XML = "create_vm_instance_by_xml";
 
     // >>> Vnc Controller <<<
     public static final String ADD_VNC_TOKEN = "add_vnc_token";

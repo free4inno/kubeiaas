@@ -65,6 +65,19 @@ public interface VmController {
             @RequestParam(value = RequestParamConstants.CPUS) Integer cpus,
             @RequestParam(value = RequestParamConstants.MEMORY) Integer memory);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.GET_XML_DESC)
+    @ResponseBody
+    String getXmlDesc(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.CREATE_VM_INSTANCE_BY_XML)
+    @ResponseBody
+    String createVmInstanceByXml(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.XML_DESC) String xmlDesc);
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.STATUS)
     @ResponseBody
     String status(

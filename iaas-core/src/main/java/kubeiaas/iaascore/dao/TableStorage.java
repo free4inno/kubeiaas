@@ -261,6 +261,7 @@ public class TableStorage {
         return JSON.parseArray(jsonString, IpUsed.class);
     }
 
+
     public List<IpUsed> ipUsedQueryAllByIpSegmentId(int ipSegmentId) {
         String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.IP_SEGMENT_ID, Integer.toString(ipSegmentId));
         return JSON.parseArray(jsonString, IpUsed.class);

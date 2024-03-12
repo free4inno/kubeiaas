@@ -36,6 +36,17 @@ public class IpUsedController {
         return JSON.toJSONString(ipUsedTableList);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_INSTANCE_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAllByInstanceUuid(
+            @RequestParam(value = RequestParamConstants.INSTANCE_UUID) String instanceUuid) {
+        log.info("-- start -- queryAllByInstanceUuid -- instanceUuid: {}", instanceUuid);
+        List<IpUsedTable> ipUsedTableList = ipUsedDao.findAllByInstanceUuid(instanceUuid);
+        log.info("-- end -- queryAllByInstanceUuid");
+        return JSON.toJSONString(ipUsedTableList);
+    }
+
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public synchronized String save(

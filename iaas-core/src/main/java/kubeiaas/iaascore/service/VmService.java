@@ -6,6 +6,7 @@ import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.config.SpecTypeEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
@@ -94,15 +95,7 @@ public class VmService {
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
         log.info("STEP 3: Get mac-info ip-info and bind in DHCP-Controller");
-        List<IpUsed> newIpUsedList = new ArrayList<>();
-        // -- 3.1. PRIVATE --------
-        IpUsed newPrivateIpUsed = networkProcess.createVmNetwork(newVm, ipSegmentId);
-        newIpUsedList.add(newPrivateIpUsed);
-        // -- 3.2. PUBLIC ---------
-        if (!(publicIpSegId == null || publicIpSegId <= 0)) {
-            IpUsed newPublicIpUsed = networkProcess.createVmNetwork(newVm, publicIpSegId);
-            newIpUsedList.add(newPublicIpUsed);
-        }
+        List<IpUsed> newIpUsedList = allocateIPs(newVm, ipSegmentId, publicIpSegId);
         newVm.setIps(newIpUsedList);
 
         /* ---- 4. Volume ----
@@ -203,6 +196,120 @@ public class VmService {
         } else {
             vmProcess.modifyVM(vmUuid, cpus, memory);
         }
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String coldMigrateVm(String vmUuid, String targetHostUuid, Integer targetPrivateIpSegmentId, Integer targetPublicIpSegmentId) throws BaseException {
+        log.info(String.format("coldMigrateVm info -- vmUuid: %s, hostUuid: %s, targetPrivateIpSegmentId: %d, targetPublicIpSegmentId: %d", vmUuid, targetHostUuid, targetPrivateIpSegmentId, targetPublicIpSegmentId));
+        /* -----1. 检查虚拟机状态 ----
+         */
+        log.info("STEP 1: 检查虚拟机状态");
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, vmUuid: %s", vmUuid));
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
+        if (vm == null) {
+            log.error(String.format("ERROR: vm not found! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")", ResponseEnum.VM_NOT_FOUND);
+        }
+        if (!vm.getStatus().equals(VmStatusEnum.STOPPED)) {
+            log.error(String.format("ERROR: vm is active! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: vm is active! (uuid: " + vmUuid + ")", ResponseEnum.VM_COLD_MIGRATE_NOT_SUPPORT);
+        }
+
+        /* -----2. 在源主机上加载虚拟机配置 ----
+         */
+        log.info("STEP 2: 在源主机上加载虚拟机配置");
+        String sourceHostUuid = vm.getHostUuid();
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, hostUuid: %s", sourceHostUuid));
+        Host sourceHost = tableStorage.hostQueryByUuid(sourceHostUuid);
+        Host targetHost = tableStorage.hostQueryByUuid(targetHostUuid);
+        if (targetHost == null) {
+            log.error(String.format("ERROR: target host not found! (uuid: %s)", targetHostUuid));
+            throw new BaseException("ERR: target host not found! (uuid: " + targetHostUuid + ")", ResponseEnum.HOST_NOT_AVAILABLE);
+        }
+        // 检查目标主机和源主机是否相同
+        if (sourceHostUuid.equals(targetHostUuid)) {
+            log.error(String.format("ERROR: source host and target host are the same! (uuid: %s)", sourceHostUuid));
+            throw new BaseException("ERR: source host and target host are the same! (uuid: " + sourceHostUuid + ")", ResponseEnum.HOST_NOT_AVAILABLE);
+        }
+        log.info("<- invoke DB -- done");
+        if (sourceHost == null) {
+            log.error(String.format("ERROR: source host not found! (uuid: %s)", sourceHostUuid));
+            throw new BaseException("ERR: source host not found! (uuid: " + sourceHostUuid + ")", ResponseEnum.HOST_NOT_AVAILABLE);
+        }
+        String xmlDesc = vmProcess.getXmlDesc(vm);
+        if (StringUtils.isEmpty(xmlDesc)) {
+            log.error(String.format("ERROR: failed to get vm xml desc! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: failed to get vm xml desc! (uuid: " + vmUuid + ")", ResponseEnum.VM_XML_DESCRIPTION_NOT_FOUND);
+        }
+
+        /* -----3. 更新IP地址 ----
+         */
+        log.info("STEP 3: 更新IP地址");
+        List<IpUsed> newIpUsedList = new ArrayList<>();
+        String oldPrivateMac = null, oldPublicMac = null;
+        List<IpUsed> oldIpUsedList = tableStorage.ipUsedQueryAllByInstanceUuid(vm.getUuid());
+        if (CollectionUtils.isEmpty(oldIpUsedList)) {
+            log.error(String.format("ERROR: lack of ip address! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: lack of ip address! (uuid: " + vmUuid + ")", ResponseEnum.VM_LACK_OF_MAC);
+        }
+        // 获取原有的 mac 地址
+        for (IpUsed ipUsed : oldIpUsedList) {
+            if (ipUsed.getType().equals(IpTypeEnum.PRIVATE) && oldPrivateMac == null) {
+                oldPrivateMac = ipUsed.getMac();
+            } else if (ipUsed.getType().equals(IpTypeEnum.PUBLIC) && oldPublicMac == null) {
+                oldPublicMac = ipUsed.getMac();
+            }
+        }
+        // 解绑原有的 ip 地址
+        networkProcess.deleteIps(vmUuid);
+        log.info("IP address unbind successfully");
+        if (targetPrivateIpSegmentId != null && targetPrivateIpSegmentId > 0) {
+            IpUsed newPrivateIp = networkProcess.bindVmNetwork(vm.getUuid(), oldPrivateMac, targetPrivateIpSegmentId);
+            newIpUsedList.add(newPrivateIp);
+        }
+        if (targetPublicIpSegmentId != null && targetPublicIpSegmentId > 0) {
+            if (oldPublicMac != null) {
+                IpUsed newPublicIp = networkProcess.bindVmNetwork(vm.getUuid(), oldPublicMac, targetPublicIpSegmentId);
+                newIpUsedList.add(newPublicIp);
+            } else {
+                log.error(String.format("ERROR: lack of public mac address! (uuid: %s)", vmUuid));
+                throw new BaseException("ERR: lack of public mac address! (uuid: " + vmUuid + ")", ResponseEnum.VM_LACK_OF_MAC);
+            }
+        }
+        if (CollectionUtils.isEmpty(newIpUsedList)) {
+            log.error(String.format("ERROR: failed to allocate IPs! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: failed to allocate IPs! (uuid: " + vmUuid + ")", ResponseEnum.WORK_ERROR);
+        }
+        vm.setIps(newIpUsedList);
+
+        /* -----4. 在目标主机新建虚拟机 ----
+         */
+        log.info("STEP 4: 在目标主机新建虚拟机");
+        if (!vmProcess.createVmByXmlOn(targetHost, vmUuid, xmlDesc)) {
+            log.error(String.format("ERROR: failed to create vm on target host! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: failed to create vm on target host! (uuid: " + vmUuid + ")", ResponseEnum.WORK_ERROR);
+        }
+
+        /* -----5. 更新虚拟机Host ----
+         */
+        log.info("STEP 5: 更新虚拟机Host");
+        vm.setHostUuid(targetHostUuid);
+        // 虚拟机成功迁移之后，更新虚拟机的主机信息
+        log.info("-> invoke DB -- vmSave, vm: " + vm);
+        tableStorage.vmSave(vm);
+        log.info("<- invoke DB -- done");
+
+        /* -----6. 更新VNC服务 ----
+         */
+        log.info("STEP 6: 更新VNC服务");
+        vncProcess.flushVncToken(vmUuid);
+
+        /* -----7. 删除源虚拟机 ----
+         */
+        log.info("STEP 7: 删除源虚拟机");
+        vmProcess.deleteVmOn(sourceHost, vmUuid);
 
         return ResponseMsgConstants.SUCCESS;
     }
@@ -554,5 +661,18 @@ public class VmService {
 
         // 2. process
         vmProcess.setPasswd(vm, user, passwd);
+    }
+
+    private List<IpUsed> allocateIPs(Vm vm, Integer privateIpSegmentId, Integer publicIpSegmentId) throws VmException {
+        List<IpUsed> ipUsedList = new ArrayList<>();
+        // -- 3.1. PRIVATE --------
+        IpUsed privateIpUsed = networkProcess.createVmNetwork(vm, privateIpSegmentId);
+        ipUsedList.add(privateIpUsed);
+        // -- 3.2. PUBLIC ---------
+        if (!(publicIpSegmentId == null || publicIpSegmentId <= 0)) {
+            IpUsed publicIpUsed = networkProcess.createVmNetwork(vm, publicIpSegmentId);
+            ipUsedList.add(publicIpUsed);
+        }
+        return ipUsedList;
     }
 }

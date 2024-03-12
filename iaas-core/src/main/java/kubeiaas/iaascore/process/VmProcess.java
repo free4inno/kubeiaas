@@ -106,6 +106,13 @@ public class VmProcess {
         log.debug("createVm -- 5. VM create success!");
     }
 
+    public boolean createVmByXmlOn(Host host, String vmUuid, String xmlDesc) {
+        AgentConfig.setSelectedHost(vmUuid, host);
+        boolean isSuccess = vmScheduler.createVmInstanceByXml(vmUuid, xmlDesc);
+        AgentConfig.clearSelectedHost(vmUuid);
+        return isSuccess;
+    }
+
 
     /**
      * Delete VM
@@ -118,6 +125,12 @@ public class VmProcess {
             throw new BaseException("ERROR: delete vm instance failed!");
         }
         log.debug("deleteVm success!");
+    }
+
+    public void deleteVmOn(Host host, String vmUuid) throws BaseException {
+        AgentConfig.setSelectedHost(vmUuid, host);
+        deleteVM(vmUuid);
+        AgentConfig.clearSelectedHost(vmUuid);
     }
 
     public void stopVM(String vmUuid) throws BaseException {
@@ -408,6 +421,19 @@ public class VmProcess {
             vm.setVncPort(null);
         }
         return vmList;
+    }
+
+    /**
+     * 获取虚拟机的xml描述
+     */
+    public String getXmlDesc(Vm vm) throws BaseException {
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        AgentConfig.setSelectedHost(vm.getUuid(), host);
+        log.info("-> invoke vmScheduler -- getXmlDesc");
+        String xmlDesc = vmScheduler.getXmlDesc(vm);
+        log.info("<- invoke vmScheduler -- done");
+        AgentConfig.clearSelectedHost(vm.getUuid());
+        return xmlDesc;
     }
 
     /**

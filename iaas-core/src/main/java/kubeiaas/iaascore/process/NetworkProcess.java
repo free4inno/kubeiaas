@@ -73,6 +73,38 @@ public class NetworkProcess {
         return newIpUsed;
     }
 
+    public synchronized IpUsed bindVmNetwork(String vmUuid, String mac, int ipSegmentId) throws BaseException {
+        log.debug("bindVmNetwork -- 3. Network");
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        IpUsed newIpUsed = getNewIp(ipSegment);
+        if (newIpUsed == null) {
+            log.error("ERROR: bindVmNetwork -- ip allocated failed");
+            throw new BaseException("ERROR: ip allocated failed!");
+        }
+        // already set: ip, ip_segment_id, type.
+        newIpUsed.setMac(mac);
+        newIpUsed.setInstanceUuid(vmUuid);
+        newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        newIpUsed.setStatus(IpAttachEnum.ATTACHED);
+        newIpUsed.setType(ipSegment.getType());
+        newIpUsed.setBridge(ipSegment.getBridge());
+
+        log.info(String.format("bindVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
+
+        // save into DB
+        log.info("-> invoke DB -- ipUsedSave");
+        newIpUsed = tableStorage.ipUsedSave(newIpUsed);
+        log.info("<- invoke DB -- done");
+
+        // bind in DHCP-Controller
+        if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
+            log.error("ERROR: bindVmNetwork -- dhcp bind mac & ip failed!");
+            throw new BaseException("ERROR: dhcp bind mac & ip failed!");
+        }
+        log.debug("bindVmNetwork -- 3. network success!");
+        return newIpUsed;
+    }
+
     /**
      * save IpSegment
      */
@@ -112,14 +144,15 @@ public class NetworkProcess {
      * Delete IP
      */
     public void deleteIps(String vmUuid) throws BaseException {
-
         // DHCP中解绑
+        log.info("deleteIps -- 1. Unbind in DHCP");
         if (!dhcpScheduler.unbindMacAndIp(vmUuid)){
             log.error("ERROR: dhcp unbind failed!");
             throw new BaseException("ERROR: dhcp unbind failed!");
         }
 
         // 数据库中删除
+        log.info("deleteIps -- 2. Delete in DB");
         log.info("-> invoke DB -- ipUsedDeleteByVmUuid");
         tableStorage.ipUsedDeleteByVmUuid(vmUuid);
         log.info("<- invoke DB -- done");
@@ -194,6 +227,11 @@ public class NetworkProcess {
             return null;
         }
         return IpUtils.getIpAddress(getAllUsedIp(ipSegment.getId()), ipSegment);
+    }
+
+    public IpUsed getNewIp(Integer ipSegmentId) {
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        return getNewIp(ipSegment);
     }
 
     // 已经使用的ip地址，通过Map方式存放，key是Ip
