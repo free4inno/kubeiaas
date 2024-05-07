@@ -12,7 +12,6 @@ data:
   nodes.nfs: "192.168.33.7"
 
   nfs.dir.img: "/usr/local/kubeiaas/data/images"
-  nfs.dir.iso: "/usr/local/kubeiaas/data/iso"
   nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 
   # -------- 网络配置 --------

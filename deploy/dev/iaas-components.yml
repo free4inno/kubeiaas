@@ -219,11 +219,6 @@ spec:
                 configMapKeyRef:
                   name: iaas-config
                   key: nfs.dir.img
-            - name: NFS_DIR_ISO
-              valueFrom:
-                configMapKeyRef:
-                  name: iaas-config
-                  key: nfs.dir.iso
             - name: NFS_DIR_DV
               valueFrom:
                 configMapKeyRef:
