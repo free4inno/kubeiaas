@@ -19,44 +19,20 @@ public class PCIUtils {
         InputStream is = null;
         BufferedReader br = null;
         try {
-            String[] cmd = {"/bin/sh", "-c", "lspci -nn -D | grep 'VGA\\|Audio' | grep NVIDIA"};
+            // lspci -nn -D | grep 'VGA\|Audio\|NVIDIA'
+            // get PCI devices, including VGA, Audio, NVIDIA
+            String[] cmd = {"/bin/sh", "-c", "lspci -nn -D | grep 'VGA\\|Audio\\|NVIDIA'"};
             Process proc = Runtime.getRuntime().exec(cmd);
             is = proc.getInputStream();
             br = new BufferedReader(new InputStreamReader(is));
             // fill msg
             String lineStr;
             while ((lineStr = br.readLine()) != null) {
-                Device pciDevice = new Device(DeviceTypeEnum.PCI);
-                // example: 0000:01:00.0 VGA compatible controller [0300]: NVIDIA Corporation Device [10de:2684] (rev a1)
-                String[] devInfo = lineStr.split(" ");
-                String[] signs = devInfo[0].split(":");
-
-                // - DOMAIN
-                String domain = signs[0];
-                pciDevice.setDomain(numberStrToInteger(domain));
-
-                // - BUS
-                String bus = signs[1];
-                pciDevice.setBus(numberStrToInteger(bus));
-
-                // - SLOT
-                String slot = signs[2].split("\\.")[0];
-                pciDevice.setSlot(numberStrToInteger(slot));
-
-                // - Function
-                String func = signs[2].split("\\.")[1];
-                pciDevice.setFunction(numberStrToInteger(func));
-
-                // - Name
-                StringBuilder sb = new StringBuilder();
-                for (int i = 1; i < devInfo.length; i++) {
-                    sb.append(devInfo[i]).append(" ");
-                }
-                pciDevice.setName(sb.toString());
-
+                Device pciDevice = parseDeviceFromCommandOutput(lineStr);
                 deviceList.add(pciDevice);
             }
             proc.destroy();
+
         } catch (Exception ex) {
             log.error("ERROR: getHostDevices failed");
             ex.printStackTrace();
@@ -80,6 +56,38 @@ public class PCIUtils {
             }
         }
         return deviceList;
+    }
+
+    public static Device parseDeviceFromCommandOutput(String lineStr) {
+        Device pciDevice = new Device(DeviceTypeEnum.PCI);
+        // example: 0000:01:00.0 VGA compatible controller [0300]: NVIDIA Corporation Device [10de:2684] (rev a1)
+        String[] devInfo = lineStr.split(" ");
+        String[] signs = devInfo[0].split(":");
+
+        // - DOMAIN
+        String domain = signs[0];
+        pciDevice.setDomain(numberStrToInteger(domain));
+
+        // - BUS
+        String bus = signs[1];
+        pciDevice.setBus(numberStrToInteger(bus));
+
+        // - SLOT
+        String slot = signs[2].split("\\.")[0];
+        pciDevice.setSlot(numberStrToInteger(slot));
+
+        // - Function
+        String func = signs[2].split("\\.")[1];
+        pciDevice.setFunction(numberStrToInteger(func));
+
+        // - Name
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < devInfo.length; i++) {
+            sb.append(devInfo[i]).append(" ");
+        }
+        pciDevice.setName(sb.toString());
+
+        return pciDevice;
     }
 
     private static Integer numberStrToInteger(String num) {

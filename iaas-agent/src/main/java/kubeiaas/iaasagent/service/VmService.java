@@ -598,12 +598,17 @@ public class VmService {
         }
 
         Connect virtCon = LibvirtConfig.getVirtCon();
-        Domain d = virtCon.domainLookupByUUIDString(vmUuid);
-        if (d == null) {
-            log.error(String.format("ERROR: no domain with uuid: %s", vmUuid));
-            throw new Exception("no domain with uuid: " + vmUuid);
+        try {
+            Domain d = virtCon.domainLookupByUUIDString(vmUuid);
+            if (d == null) {
+                log.error(String.format("ERROR: no domain with uuid: %s", vmUuid));
+                throw new Exception("no domain with uuid: " + vmUuid);
+            }
+            return d;
+        } catch (LibvirtException e) {
+            log.error("ERROR: get domain by uuid failed!", e);
+            throw new Exception("get domain by uuid failed!");
         }
-        return d;
     }
 
     private void setVmStatus(String vmUuid, VmStatusEnum status){
