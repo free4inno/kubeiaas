@@ -35,9 +35,9 @@
 
         <!-- ====== DockerHost ====== -->
         <docker.host>${env.KUBEIAAS_DOCKER_HOST}</docker.host>
+        <docker.repo.address>${env.KUBEIAAS_DOCKER_REPO_ADDRESS}</docker.repo.address>
         <docker.repo.username>${env.KUBEIAAS_DOCKER_REPO_USERNAME}</docker.repo.username>
         <docker.repo.password>${env.KUBEIAAS_DOCKER_REPO_PASSWORD}</docker.repo.password>
-        <docker.repo.address>${env.KUBEIAAS_DOCKER_REPO_ADDRESS}</docker.repo.address>
     </properties>
 
     <dependencies>
