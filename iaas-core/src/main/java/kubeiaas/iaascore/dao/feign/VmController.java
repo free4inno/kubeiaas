@@ -92,4 +92,10 @@ public interface VmController {
             @RequestParam(value = RequestParamConstants.USER) String user,
             @RequestParam(value = RequestParamConstants.PASSWD) String passwd);
 
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.SET_VM_BOOT_ORDER)
+    @ResponseBody
+    String setVmBootOrder(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.BOOT_ORDER) String bootOrder);
 }

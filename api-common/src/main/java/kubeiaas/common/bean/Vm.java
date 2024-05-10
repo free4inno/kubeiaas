@@ -1,5 +1,6 @@
 package kubeiaas.common.bean;
 
+import kubeiaas.common.enums.vm.VmInstallationMethodEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,6 +32,7 @@ public class Vm {
     /* related */
     private String hostUuid;
     private String imageUuid;
+    private VmInstallationMethodEnum installationMethod;
 
     /* timestamp */
     private Timestamp createTime;

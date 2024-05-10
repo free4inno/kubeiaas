@@ -10,6 +10,8 @@ import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
 import kubeiaas.iaasagent.dao.TableStorage;
 import lombok.extern.slf4j.Slf4j;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
 import org.libvirt.DomainInfo;
@@ -17,8 +19,12 @@ import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.StringReader;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.input.SAXBuilder;
 
 @Slf4j
 @Service
@@ -74,21 +80,21 @@ public class VmService {
             Connect virtCon = LibvirtConfig.getVirtCon();
             Domain d = virtCon.domainDefineXML(xml);    //define and start vm
             domain = virtCon.domainLookupByUUIDString(instance.getUuid());
-            Thread.sleep(500);
-            if (domain.isActive() == 0) {
-                int rs = d.create();
-                Thread.sleep(500);
-                if (rs == 0) {
-                    log.debug("create domain successful!");
-                } else {
-                    log.warn("create domain failed and set status to ERROR!");
-                    instance.setStatus(VmStatusEnum.ERROR);
-                    log.info("-> invoke DB -- vmSave");
-                    tableStorage.vmSave(instance);
-                    log.info("<- invoke DB -- done");
-                    return false;
-                }
-            }
+//            Thread.sleep(500);
+//            if (domain.isActive() == 0) {
+//                int rs = d.create();
+//                Thread.sleep(500);
+//                if (rs == 0) {
+//                    log.debug("create domain successful!");
+//                } else {
+//                    log.warn("create domain failed and set status to ERROR!");
+//                    instance.setStatus(VmStatusEnum.ERROR);
+//                    log.info("-> invoke DB -- vmSave");
+//                    tableStorage.vmSave(instance);
+//                    log.info("<- invoke DB -- done");
+//                    return false;
+//                }
+//            }
             // Step 3：配置vnc服务 ---------------------------------------------
             log.info("STEP 3: config vnc service");
             String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + domain.getUUIDString()).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");          //获取新建虚拟机的VncPort；这个字符串操作是拿到了上面xml里配置的domain的uuid
@@ -97,28 +103,28 @@ public class VmService {
             instance.setVncPassword(vncPasswd);
 
             // Step 3：改Linux虚拟机密码（选）-------------------------------------
-            log.info("STEP 4: change vm password(only for linux)");
-            String newPassword = instance.getPassword();
-            String oldPassword = VmConstants.DEFAULT_PASSWORD;
-            if (!oldPassword.equals(newPassword) && image.getOsType() == ImageOSTypeEnum.LINUX && newPassword != null && !newPassword.isEmpty()){
-                TimeUnit.SECONDS.sleep(45);
-
-                String privateIp = "";
-                for (IpUsed ip : ips) {
-                    if (ip.getType().equals(IpTypeEnum.PRIVATE)) {
-                        privateIp = ip.getIp();
-                    }
-                }
-                log.debug(String.format("VM Passwd Modification: get privateIp = %s", privateIp));
-
-                // TODO: 执行脚本ssh连接改密码
-                // String ret1 = ShellUtils.getNohupCmd("expect /root/iaas-deploy/change_vm_pwd.sh" + " " + privIp + " " + oldPassword + " " + newPassword);
-
-                TimeUnit.SECONDS.sleep(10);
-            } else {
-                log.debug("createVm -- 3. default vm password");
-            }
-            instance.setStatus(VmStatusEnum.ACTIVE);
+//            log.info("STEP 4: change vm password(only for linux)");
+//            String newPassword = instance.getPassword();
+//            String oldPassword = VmConstants.DEFAULT_PASSWORD;
+//            if (!oldPassword.equals(newPassword) && image.getOsType() == ImageOSTypeEnum.LINUX && newPassword != null && !newPassword.isEmpty()){
+//                TimeUnit.SECONDS.sleep(45);
+//
+//                String privateIp = "";
+//                for (IpUsed ip : ips) {
+//                    if (ip.getType().equals(IpTypeEnum.PRIVATE)) {
+//                        privateIp = ip.getIp();
+//                    }
+//                }
+//                log.debug(String.format("VM Passwd Modification: get privateIp = %s", privateIp));
+//
+//                // TODO: 执行脚本ssh连接改密码
+//                // String ret1 = ShellUtils.getNohupCmd("expect /root/iaas-deploy/change_vm_pwd.sh" + " " + privIp + " " + oldPassword + " " + newPassword);
+//
+//                TimeUnit.SECONDS.sleep(10);
+//            } else {
+//                log.debug("createVm -- 3. default vm password");
+//            }
+            instance.setStatus(VmStatusEnum.STOPPED);
         } catch (Exception e) {
             log.error("ERROR: create vm error: ", e);
             instance.setStatus(VmStatusEnum.ERROR);
@@ -167,6 +173,30 @@ public class VmService {
         String vncPasswd = VmCUtils.getVNCPasswd(vm.getId(), vmUuid);
         vm.setVncPassword(vncPasswd);
         tableStorage.vmSave(vm);
+        return true;
+    }
+
+    public boolean setVmBootOrder(String vmUuid, String bootOrder) {
+        log.info(String.format("setBootOrder info -- vmUuid: %s, bootOrder: %s", vmUuid, bootOrder));
+        try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
+            Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
+            String xmlDesc = domain.getXMLDesc(0);
+
+            SAXBuilder saxBuilder = new SAXBuilder();
+            Document document = saxBuilder.build(new StringReader(xmlDesc));
+            Element rootElement = document.getRootElement();
+            Element osElement = rootElement.getChild("os");
+            Element bootElement = osElement.getChild("boot");
+            bootElement.getAttribute("dev").setValue(bootOrder);
+            XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+            String updatedXml = xmlOutputter.outputString(document);
+
+            virtCon.domainDefineXML(updatedXml);
+        } catch (Exception e) {
+            log.error("ERROR: setBootOrder failed!", e);
+            return false;
+        }
         return true;
     }
 

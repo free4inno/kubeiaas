@@ -126,6 +126,16 @@ public class MountProcess {
         return Optional.of(mount);
     }
 
+    public Optional<String> getMountPointForIso(Vm vm) {
+        List<String> mountPoints = getAlLAvailableMountPoints(vm);
+        if (!mountPoints.isEmpty()) {
+            return Optional.of(mountPoints.get(mountPoints.size() - 1));
+        } else {
+            log.error(String.format("ERROR: get mount point failed, vmUuid: %s", vm.getUuid()));
+            return Optional.empty();
+        }
+    }
+
     // private methods
     private static Set<Character> findMissingElements(List<String> list, char start, char end) {
         Set<Character> thirdChars = new HashSet<>();

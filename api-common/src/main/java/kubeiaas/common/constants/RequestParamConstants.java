@@ -16,6 +16,7 @@ public class RequestParamConstants {
     public static final String VM_UUID = "vm_uuid";
     public static final String VOLUME_UUID = "volume_uuid";
     public static final String INSTANCE_UUID = "instance_uuid";
+    public static final String BOOT_ORDER = "boot_order";
 
     public static final String KEY_1 = "key_1";
     public static final String VALUE_1 = "value_1";

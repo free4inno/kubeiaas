@@ -1,5 +1,6 @@
 package kubeiaas.iaasagent.service;
 
+import kubeiaas.common.bean.Mount;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VmConstants;
@@ -77,6 +78,31 @@ public class VolumeService {
                 log.info("<- invoke DB -- done");
             }
         }).start();
+        return true;
+    }
+
+    public boolean createEmptySystemVolume(String volumePath, String volumeUuid) {
+        Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
+        String volumeFullPath = PathUtils.genFullPath(volumePath);
+
+        if (!FileUtils.createDirIfNotExist(volumeFullPath)) {
+            log.error("ERROR: Create new image file path Error!");
+            volume.setStatus(VolumeStatusEnum.ERROR_PREPARE);
+            log.info(String.format("-> invoke DB -- volumeSave. volumeUuid: %s", volumeUuid));
+            tableStorage.volumeSave(volume);
+            log.info("<- invoke DB -- done");
+            return false;
+        }
+
+        String format = VolumeConfig.CREATE_VOLUME_DISK_CMD;
+        String command = String.format(format,
+                volume.getFormatType().toString(),
+                volumeFullPath,
+                volume.getSize());
+        log.info(String.format("-> invoke ShellUtils -- getCmd. command: %s", command));
+        String res = ShellUtils.getCmd(command);
+        log.info(String.format("<- invoke ShellUtils -- done. res: %s", res));
+        setVolumeStatus(volumeUuid, VolumeStatusEnum.AVAILABLE);
         return true;
     }
 
@@ -280,6 +306,40 @@ public class VolumeService {
             return false;
         }
         setVolumeStatus(volumeUuid, VolumeStatusEnum.AVAILABLE);
+        return true;
+    }
+
+    public Boolean attachIso(Mount mount) {
+        log.info(String.format("attachIso info -- mount: %s", mount.toString()));
+        String isoMountXml = xmlConfig.getMountXml(mount);
+        String vmUuid = mount.getVmUuid();
+
+        // 2. Call libvirt to attach iso
+        try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
+            Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
+            try {
+                /*
+                 * Attach a virtual device to a domain, using the flags parameter to control how the device is attached.
+                 * - 0000: VIR_DOMAIN_AFFECT_CURRENT specifies that the device allocation is made based on current domain state.
+                 * - 0001: VIR_DOMAIN_AFFECT_LIVE specifies that the device shall be allocated to the active domain instance only and is not added to the persisted domain configuration.
+                 * - 0010: VIR_DOMAIN_AFFECT_CONFIG specifies that the device shall be allocated to the persisted domain configuration only. Note that the target hypervisor must return an error if unable to satisfy flags.
+                 * - 0100: FORCE
+                 * Use | to combine those configs, we got 3 as (VIR_DOMAIN_AFFECT_LIVE | VIR_DOMAIN_AFFECT_CONFIG)
+                 */
+                int virtFlag = 0b0010;
+                domain.attachDeviceFlags(isoMountXml, virtFlag);
+            } catch (Exception e) {
+                log.error("ERROR: attachIso: attach iso failed", e);
+                return false;
+            }
+        } catch (LibvirtException e) {
+            log.error("ERROR: attachIso: get virtCon failed", e);
+            return false;
+        }
+        log.info(String.format("-> invoke DB -- mountSave. mount: %s", mount));
+        tableStorage.mountSave(mount);
+        log.info("<- invoke DB -- done");
         return true;
     }
 

@@ -3,6 +3,8 @@ package kubeiaas.iaascore.process;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.enums.image.ImageOSTypeEnum;
+import kubeiaas.common.enums.vm.VmBootEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaascore.config.AgentConfig;
@@ -16,10 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -113,6 +112,21 @@ public class VmProcess {
         return isSuccess;
     }
 
+    public void setVmBootOrder(String vmUuid, VmBootEnum bootOrder) throws BaseException {
+        String order;
+        if (Objects.requireNonNull(bootOrder) == VmBootEnum.CDROM) {
+            order = "cdrom";
+        } else {
+            order = "hd";
+        }
+        log.info(String.format("-> invoke vmScheduler -- setVmBootOrder, vmUuid: %s, order: %s", vmUuid, order));
+        if (!vmScheduler.setVmBootOrder(vmUuid, order)) {
+            log.error("ERROR: set vm boot order failed!");
+            throw new BaseException("ERROR: set vm boot order failed!");
+        }
+        log.info("<- invoke vmScheduler -- done");
+        AgentConfig.clearSelectedHost(vmUuid);
+    }
 
     /**
      * Delete VM

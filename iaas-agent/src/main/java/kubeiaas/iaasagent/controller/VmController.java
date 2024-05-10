@@ -51,6 +51,21 @@ public class VmController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.SET_VM_BOOT_ORDER, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String setVmBootOrder(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.BOOT_ORDER) String bootOrder) {
+        log.info("-- start -- setVmBootOrder");
+        if (vmService.setVmBootOrder(vmUuid, bootOrder)) {
+            log.info("-- end -- setVmBootOrder -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("-- end -- setVmBootOrder -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_VM_INSTANCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteVm(

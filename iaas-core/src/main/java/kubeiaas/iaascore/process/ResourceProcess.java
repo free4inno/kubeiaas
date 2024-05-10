@@ -2,8 +2,10 @@ package kubeiaas.iaascore.process;
 
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.HostSelectStrategyConstants;
+import kubeiaas.common.enums.image.ImageFormatEnum;
 import kubeiaas.common.enums.image.ImageStatusEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
+import kubeiaas.common.enums.vm.VmInstallationMethodEnum;
 import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
@@ -27,7 +29,6 @@ public class ResourceProcess {
     @Resource
     private ResourceScheduler resourceScheduler;
 
-
     /**
      * Create VM.
      * 2. Resource Operator
@@ -42,30 +43,7 @@ public class ResourceProcess {
         log.info(String.format("createVmOperate -- vm: %s, privateIpSegId: %d, needPublicIp: %b, publicIpSegId: %d",
                 newVm.getUuid(), privateIpSegId, needPublicIp, publicIpSegId));
 
-        // 2.1. check image
-        // available
-        log.info(String.format("-> invoke DB -- imageQueryByUuid: %s", newVm.getImageUuid()));
-        Image image = tableStorage.imageQueryByUuid(newVm.getImageUuid());
-        log.info(String.format("<- invoke DB -- done -- image: %s", Objects.toString(image)));
-        if (image == null || image.getStatus() != ImageStatusEnum.AVAILABLE) {
-            log.error("ERROR: image not available!");
-            throw new VmException(newVm,"ERROR: image not available!");
-        }
-        // mem
-        /*
-        if (newVm.getMemory() < image.getMinMem()) {
-            throw new VmException(newVm,"ERROR: memory too low for image!");
-        }
-         */
-        // size
-        int imageMinDisk = image.getVdSize();
-        int newVmDiskSize = newVm.getDiskSize();
-        if (newVmDiskSize < imageMinDisk) {
-            // 强制修改 diskSize，不终止
-            newVm.setDiskSize(imageMinDisk);
-        }
-
-        // 2.2. select host
+        // 2.1. select host
         Host selectedHost;
         String hostUUid = newVm.getHostUuid();
 
@@ -167,6 +145,37 @@ public class ResourceProcess {
         log.info("<- invoke DB -- done");
 
         return newVolume;
+    }
+
+    public Vm updateVmImage(Vm vm) throws VmException {
+        log.info(String.format("-> invoke DB -- imageQueryByUuid: %s", vm.getImageUuid()));
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+        if (image == null) {
+            log.error("ERROR: image not found!");
+            throw new VmException(vm, "ERROR: image not found!");
+        }
+        if (image.getFormat() == ImageFormatEnum.ISO) {
+            log.info("ISO image, set installation method to ISO");
+            vm.setInstallationMethod(VmInstallationMethodEnum.ISO);
+        } else {
+            log.info("Snapshot image, set installation method to SNAPSHOT");
+            vm.setInstallationMethod(VmInstallationMethodEnum.SNAPSHOT);
+            log.info(String.format("<- invoke DB -- done -- image: %s", image.toString()));
+            if (image.getStatus() != ImageStatusEnum.AVAILABLE) {
+                log.error("ERROR: image not available!");
+                throw new VmException(vm, "ERROR: image not available!");
+            }
+
+            // size
+            int imageMinDisk = image.getVdSize();
+            int newVmDiskSize = vm.getDiskSize();
+            if (newVmDiskSize < imageMinDisk) {
+                // 强制修改 diskSize，不终止
+                vm.setDiskSize(imageMinDisk);
+            }
+
+        }
+        return vm;
     }
 
     /**

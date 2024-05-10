@@ -7,6 +7,7 @@ import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
+import kubeiaas.common.enums.vm.VmInstallationMethodEnum;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.config.AgentConfig;
@@ -72,37 +73,42 @@ public class VmService {
         Generate and Set basic info of vm.
         （预处理：设置基础参数，保存虚拟机信息）
          */
-        log.info("STEP 1: pre create VM");
+        log.info("STEP 1: create VM in database");
         Vm newVm = vmProcess.preCreateVm(name, cpus, memory, imageUuid, diskSize, description, hostUUid);
 
         MDC.put(LogInjectionConstants.UUID_INJECTION,
                 LogUtils.appendUuidInjection(MDC.get(LogInjectionConstants.UUID_INJECTION), newVm.getUuid()));
 
+        /* ---- 2. Image Check ----
+        Check image available and set diskSize
+         */
+        log.info("STEP 2: Image Check");
+        newVm = resourceProcess.updateVmImage(newVm);
 
-        /* ---- 2. Resource Operator ----
+        /* ---- 3. Resource Operator ----
         Use Resource Operator to allocate Host and check Resource available
         （资源调度：分配宿主机，检查资源合法性）
          */
-        log.info("STEP 2: Resource Operator");
+        log.info("STEP 3: Resource Operator");
         if (publicIpSegId == null || publicIpSegId <= 0) {
             newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, false, -1);
         } else {
             newVm = resourceProcess.createVmOperate(newVm, ipSegmentId, true, publicIpSegId);
         }
 
-        /* ---- 3. Network ----
+        /* ---- 4. Network ----
         Get mac-info ip-info and bind in DHCP-Controller
         （网络信息：分配 mac 与 ip，存储入库，dhcp 绑定）
          */
-        log.info("STEP 3: Get mac-info ip-info and bind in DHCP-Controller");
+        log.info("STEP 4: Get mac-info ip-info and bind in DHCP-Controller");
         List<IpUsed> newIpUsedList = allocateIPs(newVm, ipSegmentId, publicIpSegId);
         newVm.setIps(newIpUsedList);
 
-        /* ---- 4. Volume ----
+        /* ---- 5. Volume ----
         Create system volume.
         （系统盘：使用 image 创建 system volume）
          */
-        log.info("STEP 4: Create system volume");
+        log.info("STEP 5: Create system volume");
         volumeProcess.createVmVolume(newVm);
 
         return newVm;

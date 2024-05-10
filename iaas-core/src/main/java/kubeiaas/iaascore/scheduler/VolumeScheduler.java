@@ -2,10 +2,7 @@ package kubeiaas.iaascore.scheduler;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import kubeiaas.common.bean.Host;
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
@@ -43,8 +40,7 @@ public class VolumeScheduler {
     @Resource
     private MountProcess mountProcess;
 
-    public String createSystemVolume(String vmUuid) {
-        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+    public String createSystemVolume(Vm vm) {
         Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
 
         // 统一创建系统盘
@@ -62,6 +58,16 @@ public class VolumeScheduler {
             }
         }
 
+        return volumeUuid;
+    }
+
+    public String createEmptySystemVolume(Vm vm) {
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+
+        String volumeUuid = this.newEmptySystemVolume(vm, image.getOsType());
+        if (volumeUuid.isEmpty()) {
+            log.error("ERROR: createEmptySystemVolume -- create failed! volumeUuid isEmpty");
+        }
         return volumeUuid;
     }
 
@@ -111,6 +117,42 @@ public class VolumeScheduler {
 
         // call Volume Controller
         String res = volumeController.createSystemVolume(getSelectedUri(vm.getUuid()), image.getDirectory(), newVolume.getProviderLocation(), volumeUuid, extraSize);
+        if (res.equals(ResponseMsgConstants.FAILED)) {
+            return "";
+        }
+
+        return volumeUuid;
+    }
+
+    private String newEmptySystemVolume(Vm vm, ImageOSTypeEnum osType) {
+        // 创建 Volume 实例
+        String volumeUuid = UuidUtils.getRandomUuid();
+        Volume newVolume = new Volume();
+
+        newVolume.setUuid(volumeUuid);
+        newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        if (vm.getName() == null || vm.getName().isEmpty()) {
+            newVolume.setName(volumeUuid);
+        } else {
+            newVolume.setName(vm.getName());
+        }
+        newVolume.setDescription(vm.getDescription());
+        newVolume.setInstanceUuid(vm.getUuid());
+        newVolume.setHostUuid(vm.getHostUuid());
+        newVolume.setImageUuid(vm.getImageUuid());
+        newVolume.setSize(vm.getDiskSize());
+        newVolume.setProviderLocation(PathUtils.genSharedVolumeDirectoryByUuid(volumeUuid, osType));
+        newVolume.setUsageType(VolumeUsageEnum.SYSTEM);
+        newVolume.setFormatType(VolumeFormatEnum.QCOW2);
+        newVolume.setStatus(VolumeStatusEnum.CREATING);
+
+        // save into DB
+        log.info(String.format("-> invoke DB -- newSystemVolume, uuid: %s", newVolume.getUuid()));
+        tableStorage.volumeSave(newVolume);
+        log.info("<- invoke DB -- done");
+
+        // call Volume Controller
+        String res = volumeController.createEmptySystemVolume(getSelectedUri(vm.getUuid()), newVolume.getProviderLocation(), volumeUuid);
         if (res.equals(ResponseMsgConstants.FAILED)) {
             return "";
         }
@@ -241,6 +283,17 @@ public class VolumeScheduler {
             return true;
         } else {
             log.error(String.format("ERROR: detachDataVolume failed in agent, volumeUuid: %s", volumeUuid));
+            return false;
+        }
+    }
+
+    public boolean attachIsoVolume(Mount mount) {
+        String mountObjectStr = JSON.toJSONString(mount);
+        if (volumeController.attachIsoVolume(getSelectedUri(mount.getVmUuid()), mountObjectStr)
+                .equals(ResponseMsgConstants.SUCCESS)){
+            return true;
+        } else {
+            log.error(String.format("ERROR: attachIsoVolume failed in agent, mount: %s", mount));
             return false;
         }
     }

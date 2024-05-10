@@ -112,6 +112,7 @@ public class RequestMappingConstants {
 
     // >>> Volume Controller <<<
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
+    public static final String CREATE_EMPTY_SYSTEM_VOLUME = "create_empty_system_volume";
     public static final String CREATE_DATA_VOLUME = "create_data_volume";
     public static final String RESIZE_SYSTEM_VOLUME = "resize_system_volume";
     public static final String RESIZE_DATA_VOLUME = "resize_data_volume";
@@ -139,6 +140,7 @@ public class RequestMappingConstants {
     public static final String RESUME_VM_INSTANCE = "resume_vm_instance";
     public static final String MODIFY_VM_INSTANCE = "modify_vm_instance";
     public static final String CREATE_VM_INSTANCE_BY_XML = "create_vm_instance_by_xml";
+    public static final String SET_VM_BOOT_ORDER = "set_vm_boot_order";
 
     // >>> Vnc Controller <<<
     public static final String ADD_VNC_TOKEN = "add_vnc_token";

@@ -393,6 +393,12 @@ public class LibvirtConfig {
         if (mount.getReadonly() != null && mount.getReadonly()) {
             disk.addElement("readonly");
         }
+        disk.addElement("address")
+                .addAttribute("type", "drive")
+                .addAttribute("controller", "0")
+                .addAttribute("bus", "1")
+                .addAttribute("target", "0")
+                .addAttribute("unit", "0");
 
         String xml = devices.asXML();
         xml = xml.replaceAll("<root>", "")

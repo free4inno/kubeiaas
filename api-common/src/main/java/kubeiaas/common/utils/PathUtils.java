@@ -44,8 +44,16 @@ public class PathUtils {
      * @return volumes/a/z/uuid.img
      */
     public static String genSharedVolumeDirectoryByUuid(String uuid, Image image) {
+        if (image != null) {
+            return genSharedVolumeDirectoryByUuid(uuid, image.getOsType());
+        } else {
+            return genSharedVolumeDirectoryByUuid(uuid, ImageOSTypeEnum.LINUX);
+        }
+    }
+
+    public static String genSharedVolumeDirectoryByUuid(String uuid, ImageOSTypeEnum osType) {
         String destImgDir = getImgDir(uuid);
-        if (image != null && image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+        if (osType.equals(ImageOSTypeEnum.WINDOWS)){
             return VolumeConstants.SHARED_VOLUME_PATH + destImgDir + uuid + VolumeConstants.WIN_VOLUME_SUFFIX;
         } else {
             return VolumeConstants.SHARED_VOLUME_PATH + destImgDir + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;

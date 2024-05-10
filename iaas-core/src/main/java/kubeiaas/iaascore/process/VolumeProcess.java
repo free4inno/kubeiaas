@@ -1,8 +1,12 @@
 package kubeiaas.iaascore.process;
 
+import kubeiaas.common.bean.Image;
+import kubeiaas.common.bean.Mount;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.vm.VmBootEnum;
+import kubeiaas.common.enums.vm.VmInstallationMethodEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
@@ -41,6 +45,9 @@ public class VolumeProcess {
     @Resource
     ResourceProcess resourceProcess;
 
+    @Resource
+    MountProcess mountProcess;
+
 
     /**
      * Create VM.
@@ -49,13 +56,21 @@ public class VolumeProcess {
     public void createVmVolume(Vm newVm) throws VmException {
         log.debug("createVm -- 4. Volume");
         log.info("-> invoke volumeScheduler -- createSystemVolume");
-        String volumeUuid = volumeScheduler.createSystemVolume(newVm.getUuid());
+        String volumeUuid;
+        if (newVm.getInstallationMethod() == VmInstallationMethodEnum.ISO) {
+            volumeUuid = volumeScheduler.createEmptySystemVolume(newVm);
+        } else if (newVm.getInstallationMethod() == VmInstallationMethodEnum.SNAPSHOT) {
+            volumeUuid = volumeScheduler.createSystemVolume(newVm);
+        } else {
+            volumeUuid = "";
+        }
         log.info("<- invoke volumeScheduler -- done");
         if (volumeUuid.isEmpty()) {
             log.error("ERROR: create system volume failed! (pre error)");
             throw new VmException(newVm,"ERROR: create system volume failed! (pre error)");
         }
         String newVmUuid = newVm.getUuid();
+        String isoUuid = newVm.getImageUuid();
         // Attention: copying image is long-time operation, so start a new Thread to handle this.
         new Thread(() -> {
             Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
@@ -95,6 +110,7 @@ public class VolumeProcess {
             log.debug("createVm -- 4. volume create success!");
 
             // Step 5. Create VM (Generate XML for libvirt & Attach volume)
+            log.info("Step 5. Create VM (Generate XML for libvirt & Attach volume)");
             try {
                 vmProcess.createVM(newVmUuid);
             } catch (BaseException e) {
@@ -105,11 +121,35 @@ public class VolumeProcess {
                 log.info("<- invoke DB -- done");
                 return;
             }
-            AgentConfig.clearSelectedHost(newVmUuid);
 
             //Step 6 . Configuring VNC Service.
             vncProcess.addVncToken(newVm);
 
+            if (newVm.getInstallationMethod() == VmInstallationMethodEnum.ISO) {
+                // Step 7. Attach ISO
+                log.info("Step 7. Attach ISO");
+                Image image = tableStorage.imageQueryByUuid(isoUuid);
+                String source = VolumeConstants.DEFAULT_NFS_SRV_PATH + image.getDirectory();
+                try {
+                    attachIsoVolume(newVm, isoUuid, source);
+                } catch (BaseException e) {
+                    newVm.setStatus(VmStatusEnum.ERROR);
+                    log.error(String.format("ERROR: failed to attach iso -- vmUuid: %s, msg: %s", newVmUuid, e.getMsg()));
+                    return;
+                }
+
+                // Step 8. Change boot order
+                log.info("Step 8. Change boot order");
+                try {
+                    vmProcess.setVmBootOrder(newVm.getUuid(), VmBootEnum.CDROM);
+                } catch (BaseException e) {
+                    newVm.setStatus(VmStatusEnum.ERROR);
+                    log.error(String.format("ERROR: failed to change boot order -- vmUuid: %s, msg: %s", newVmUuid, e.getMsg()));
+                    return;
+                }
+            }
+
+            AgentConfig.clearSelectedHost(newVmUuid);
         }).start();
         log.info("createVm -- newThread begin wait for volume creating...");
     }
@@ -210,6 +250,26 @@ public class VolumeProcess {
         tableStorage.volumeSave(volume);
         log.info("<- invoke DB -- done");
         AgentConfig.clearSelectedHost(volumeUuid);
+    }
+
+    private void attachIsoVolume(Vm vm, String isoUuid, String source) throws BaseException {
+        Mount mount = new Mount();
+        mount.setVmUuid(vm.getUuid());
+        mount.setIsoUuid(isoUuid);
+        mount.setType(VolumeConstants.STORAGE_TYPE);
+        mount.setDevice(VolumeConstants.VOLUME_DEVICE_CDROM);
+        mount.setDriverType(VolumeConstants.VOLUME_DRIVER_TYPE_RAW);
+        mount.setSource(source);
+        String mountPoint = mountProcess.getMountPointForIso(vm).orElseThrow(
+                () -> new BaseException("ERROR: get mount point failed!"));
+        mount.setMountPoint(mountPoint);
+        mount.setBus(VolumeConstants.VOLUME_BUS_IDE);
+        mount.setReadonly(true);
+
+        if (!volumeScheduler.attachIsoVolume(mount)) {
+            log.error(String.format("ERROR: attach iso volume: %s failed!", isoUuid));
+            throw new BaseException("ERROR: attach iso volume:" + isoUuid + " failed!");
+        }
     }
 
     /**

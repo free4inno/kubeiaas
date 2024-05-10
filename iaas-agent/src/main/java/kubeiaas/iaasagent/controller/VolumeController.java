@@ -1,6 +1,7 @@
 package kubeiaas.iaasagent.controller;
 
 import com.alibaba.fastjson.JSON;
+import kubeiaas.common.bean.Mount;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.RequestMappingConstants;
@@ -39,6 +40,21 @@ public class VolumeController {
             return ResponseMsgConstants.SUCCESS;
         } else {
             log.warn("-- end -- createSystemVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_EMPTY_SYSTEM_VOLUME, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String createEmptySystemVolume(
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid) {
+        log.info("-- start -- createEmptySystemVolume");
+        if (volumeService.createEmptySystemVolume(volumePath, volumeUuid)) {
+            log.info("-- end -- createEmptySystemVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.warn("-- end -- createEmptySystemVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -151,6 +167,21 @@ public class VolumeController {
             return ResponseMsgConstants.SUCCESS;
         }else {
             log.warn("-- end -- detachVolume -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.ATTACH_ISO, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String attachIsoVolume(@RequestParam(value = RequestParamConstants.MOUNT_OBJECT) String mountObjectStr) {
+        log.info("-- start -- attachIsoVolume");
+        Mount mount = JSON.parseObject(mountObjectStr, Mount.class);
+
+        if (volumeService.attachIso(mount)) {
+            log.info("-- end -- attachIsoVolume -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.warn("-- end -- attachIsoVolume -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
