@@ -1,6 +1,6 @@
 package kubeiaas.iaascore.scheduler;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Device;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Vm;

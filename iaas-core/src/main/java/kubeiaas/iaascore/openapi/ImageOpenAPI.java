@@ -1,6 +1,6 @@
 package kubeiaas.iaascore.openapi;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.RequestMappingConstants;

@@ -1,6 +1,6 @@
 package kubeiaas.iaasagent.service;
 
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSONArray;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.HostConstants;

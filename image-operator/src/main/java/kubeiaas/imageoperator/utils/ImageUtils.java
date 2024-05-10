@@ -1,6 +1,6 @@
 package kubeiaas.imageoperator.utils;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;

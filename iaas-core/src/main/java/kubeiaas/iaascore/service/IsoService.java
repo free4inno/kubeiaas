@@ -1,8 +1,8 @@
 package kubeiaas.iaascore.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Iso;
 import kubeiaas.common.bean.Mount;
