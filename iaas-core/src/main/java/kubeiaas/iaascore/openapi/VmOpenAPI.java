@@ -404,4 +404,14 @@ public class VmOpenAPI {
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
     }
 
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.SET_VM_BOOT_ORDER, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String setVmBootOrder(@Valid @RequestBody SetVmBootOrderForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.UUID_INJECTION, f.getVmUuid());
+        log.info("-- start -- setVmBootOrder");
+        vmService.setVmBootOrder(f.getVmUuid(), f.getBootOrder());
+        log.info("-- end -- setVmBootOrder -- success");
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
+        return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+    }
 }

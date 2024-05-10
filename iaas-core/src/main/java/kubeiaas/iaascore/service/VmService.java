@@ -7,6 +7,7 @@ import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.constants.bean.VmConstants;
 import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.common.enums.network.IpTypeEnum;
+import kubeiaas.common.enums.vm.VmBootEnum;
 import kubeiaas.common.enums.vm.VmInstallationMethodEnum;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
@@ -651,6 +652,26 @@ public class VmService {
             log.info("<- invoke DB -- done");
         }
         return vm.getStatus();
+    }
+
+    public void setVmBootOrder(String uuid, VmBootEnum bootOrder) throws BaseException {
+        log.info(String.format("setVmBootOrder info -- uuid: %s, bootOrder: %s", uuid, bootOrder));
+        // 1. get vm
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, uuid: %s", uuid));
+        Vm vm = tableStorage.vmQueryByUuid(uuid);
+        log.info("<- invoke DB -- done");
+        if (null == vm) {
+            log.error(String.format("ERROR: vm_uuid not found %s", uuid));
+            throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
+        }
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, hostUuid: %s", vm.getHostUuid()));
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done, host: {}", host);
+
+        // 2. process
+        AgentConfig.setSelectedHost(vm.getUuid(), host);
+        vmProcess.setVmBootOrder(vm.getUuid(), bootOrder);
+        AgentConfig.clearSelectedHost(vm.getUuid());
     }
 
     /**
