@@ -123,6 +123,8 @@ sudo systemctl daemon-reload
 ```
 # 云主机镜像存储目录
 sudo mkdir -p /usr/local/kubeiaas/data/images
+# 云主机系统盘存储目录
+sudo mkdir -p /usr/local/kubeiaas/data/volumes
 # 云主机数据盘存储目录
 sudo mkdir -p /usr/local/kubeiaas/data/data-volumes
 # db-proxy sqlite 数据库存储目录
@@ -139,6 +141,7 @@ sudo su
 # 写入配置文件
 cat << EOF >> /etc/exports
 /usr/local/kubeiaas/data/images *(rw,no_root_squash,no_subtree_check)
+/usr/local/kubeiaas/data/volumes *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/data/data-volumes *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/sqlite *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/vnc/token *(rw,no_root_squash,no_subtree_check)
@@ -196,11 +199,12 @@ metadata:
   namespace: kubeiaas
 data:
   # -------- 工作节点 --------
-  nodes.dhcp: "hf-master-01"
+  nodes.dhcp: "192.168.33.1"
   nodes.nfs: "192.168.33.7"
 
   # -------- NFS服务目录 --------
   nfs.dir.img: "/usr/local/kubeiaas/data/images"
+  nfs.dir.vol: "/usr/local/kubeiaas/data/volumes"
   nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 
   # -------- 网络配置 --------

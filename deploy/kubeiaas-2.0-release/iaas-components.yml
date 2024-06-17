@@ -219,11 +219,11 @@ spec:
                 configMapKeyRef:
                   name: iaas-config
                   key: nfs.dir.img
-            - name: NFS_DIR_ISO
+            - name: NFS_DIR_VOL
               valueFrom:
                 configMapKeyRef:
                   name: iaas-config
-                  key: nfs.dir.iso
+                  key: nfs.dir.vol
             - name: NFS_DIR_DV
               valueFrom:
                 configMapKeyRef:
@@ -243,7 +243,7 @@ spec:
             - |
               /bin/bash /kubeiaas/RUN.sh
           # [ATTENTION] ---------------------------------------------- CHECK VERSION!
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:1.1.0-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:2.0-RELEASE
           # [ATTENTION] -- change to `IfNotPresent` when prod
           imagePullPolicy: IfNotPresent
           securityContext:
