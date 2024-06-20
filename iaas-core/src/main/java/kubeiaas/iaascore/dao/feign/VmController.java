@@ -98,4 +98,10 @@ public interface VmController {
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.BOOT_ORDER) String bootOrder);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.GET_VM_BOOT_ORDER)
+    @ResponseBody
+    String getVmBootOrder(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
 }

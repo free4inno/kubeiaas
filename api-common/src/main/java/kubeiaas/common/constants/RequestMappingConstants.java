@@ -141,6 +141,7 @@ public class RequestMappingConstants {
     public static final String MODIFY_VM_INSTANCE = "modify_vm_instance";
     public static final String CREATE_VM_INSTANCE_BY_XML = "create_vm_instance_by_xml";
     public static final String SET_VM_BOOT_ORDER = "set_vm_boot_order";
+    public static final String GET_VM_BOOT_ORDER = "get_vm_boot_order";
 
     // >>> Vnc Controller <<<
     public static final String ADD_VNC_TOKEN = "add_vnc_token";

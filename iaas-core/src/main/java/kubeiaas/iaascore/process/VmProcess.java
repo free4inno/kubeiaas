@@ -128,6 +128,18 @@ public class VmProcess {
         AgentConfig.clearSelectedHost(vmUuid);
     }
 
+    public Optional<VmBootEnum> getVmBootOrder(String vmUuid) throws BaseException {
+        log.info(String.format("-> invoke vmScheduler -- getVmBootOrder, vmUuid: %s", vmUuid));
+        String order = vmScheduler.getVmBootOrder(vmUuid);
+        log.info("<- invoke vmScheduler -- done");
+        VmBootEnum bootOrder = VmBootEnum.fromString(order);
+        if (bootOrder == null) {
+            log.error("ERROR: get vm boot order failed!");
+            return Optional.empty();
+        }
+        return Optional.of(bootOrder);
+    }
+
     /**
      * Delete VM
      */

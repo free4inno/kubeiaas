@@ -674,6 +674,28 @@ public class VmService {
         AgentConfig.clearSelectedHost(vm.getUuid());
     }
 
+    public VmBootEnum getVmBootOrder(String uuid) throws BaseException {
+        log.info(String.format("getVmBootOrder info -- uuid: %s", uuid));
+        // 1. get vm
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, uuid: %s", uuid));
+        Vm vm = tableStorage.vmQueryByUuid(uuid);
+        log.info("<- invoke DB -- done");
+        if (null == vm) {
+            log.error(String.format("ERROR: vm_uuid not found %s", uuid));
+            throw new BaseException("err: vm_uuid not found " + uuid, ResponseEnum.ARGS_ERROR);
+        }
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, hostUuid: %s", vm.getHostUuid()));
+        Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done, host: {}", host);
+
+        AgentConfig.setSelectedHost(vm.getUuid(), host);
+        VmBootEnum bootOrder = vmProcess.getVmBootOrder(vm.getUuid()).orElseThrow(
+                () -> new BaseException("ERROR: get boot order failed", ResponseEnum.WORK_ERROR)
+        );
+        AgentConfig.clearSelectedHost(vm.getUuid());
+        return bootOrder;
+    }
+
     /**
      * 修改密码
      */

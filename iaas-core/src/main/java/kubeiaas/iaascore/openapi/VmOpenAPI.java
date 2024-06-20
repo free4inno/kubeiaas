@@ -1,12 +1,14 @@
 package kubeiaas.iaascore.openapi;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.enums.vm.VmBootEnum;
 import kubeiaas.common.enums.vm.VmOperateEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaascore.exception.BaseException;
@@ -413,5 +415,16 @@ public class VmOpenAPI {
         log.info("-- end -- setVmBootOrder -- success");
         MDC.remove(LogInjectionConstants.UUID_INJECTION);
         return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_VM_BOOT_ORDER, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String getVmBootOrder(@RequestParam(value = RequestParamConstants.UUID) @NotEmpty @NotNull String uuid) throws BaseException {
+        MDC.put(LogInjectionConstants.UUID_INJECTION, uuid);
+        log.info("-- start -- getVmBootOrder");
+        VmBootEnum bootOrder = vmService.getVmBootOrder(uuid);
+        log.info("-- end -- getVmBootOrder -- success");
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
+        return JSON.toJSONString(BaseResponse.success(bootOrder.toString()));
     }
 }

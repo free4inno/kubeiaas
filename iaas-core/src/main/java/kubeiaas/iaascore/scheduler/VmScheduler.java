@@ -63,6 +63,15 @@ public class VmScheduler {
         }
     }
 
+    public String getVmBootOrder(String vmUuid) {
+        try {
+            return vmController.getVmBootOrder(getSelectedUri(vmUuid), vmUuid);
+        } catch (Exception e) {
+            log.error("ERROR: getVmBootOrder. ", e);
+            return null;
+        }
+    }
+
     public boolean createVmInstanceByXml(String vmUuid, String xmlDesc) {
         return vmController.createVmInstanceByXml(getSelectedUri(vmUuid), vmUuid, xmlDesc).equals(ResponseMsgConstants.SUCCESS);
     }

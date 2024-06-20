@@ -200,6 +200,25 @@ public class VmService {
         return true;
     }
 
+    public String getVmBootOrder(String vmUuid) {
+        log.info(String.format("getBootOrder info -- vmUuid: %s", vmUuid));
+        try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
+            Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
+            String xmlDesc = domain.getXMLDesc(0);
+
+            SAXBuilder saxBuilder = new SAXBuilder();
+            Document document = saxBuilder.build(new StringReader(xmlDesc));
+            Element rootElement = document.getRootElement();
+            Element osElement = rootElement.getChild("os");
+            Element bootElement = osElement.getChild("boot");
+            return bootElement.getAttributeValue("dev");
+        } catch (Exception e) {
+            log.error("ERROR: getBootOrder failed!", e);
+            return null;
+        }
+    }
+
     public boolean deleteVm(String vmUuid){
         log.info(String.format("deleteVm info -- vmUuid: %s", vmUuid));
         Domain domain = null;
