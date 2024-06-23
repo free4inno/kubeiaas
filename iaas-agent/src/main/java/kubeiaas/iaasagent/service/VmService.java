@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.StringReader;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -191,10 +192,20 @@ public class VmService {
             bootElement.getAttribute("dev").setValue(bootOrder);
             XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
             String updatedXml = xmlOutputter.outputString(document);
-
             virtCon.domainDefineXML(updatedXml);
+
+            // check if boot order is set successfully
+            Domain updatedDomain = virtCon.domainLookupByUUIDString(vmUuid);
+            String updatedXmlDesc = updatedDomain.getXMLDesc(0);
+            Optional<String> updatedBootOrderOpt = XmlDescUtils.getDomainOsBootDevice(updatedXmlDesc);
+            if (updatedBootOrderOpt.isPresent() && updatedBootOrderOpt.get().equals(bootOrder)) {
+                log.info("setBootOrder ---- end ---- bootOrder: {}", bootOrder);
+            } else {
+                log.error("ERROR: setBootOrder failed! BootOrder is not set successfully.");
+                return false;
+            }
         } catch (Exception e) {
-            log.error("ERROR: setBootOrder failed!", e);
+            log.error("ERROR: setBootOrder failed! Unexpected error: {}", e.getMessage());
             return false;
         }
         return true;
@@ -207,12 +218,14 @@ public class VmService {
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
             String xmlDesc = domain.getXMLDesc(0);
 
-            SAXBuilder saxBuilder = new SAXBuilder();
-            Document document = saxBuilder.build(new StringReader(xmlDesc));
-            Element rootElement = document.getRootElement();
-            Element osElement = rootElement.getChild("os");
-            Element bootElement = osElement.getChild("boot");
-            return bootElement.getAttributeValue("dev");
+            Optional<String> bootOrder = XmlDescUtils.getDomainOsBootDevice(xmlDesc);
+            if (bootOrder.isPresent()) {
+                log.info("getBootOrder ---- end ---- bootOrder: {}", bootOrder.get());
+                return bootOrder.get();
+            } else {
+                log.error(String.format("ERROR: getBootOrder return null, vmUuid: %s", vmUuid));
+                return null;
+            }
         } catch (Exception e) {
             log.error("ERROR: getBootOrder failed!", e);
             return null;
