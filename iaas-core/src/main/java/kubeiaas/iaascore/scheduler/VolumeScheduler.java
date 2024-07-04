@@ -143,6 +143,7 @@ public class VolumeScheduler {
         newVolume.setSize(vm.getDiskSize());
         newVolume.setProviderLocation(PathUtils.genSharedVolumeDirectoryByUuid(volumeUuid, osType));
         newVolume.setUsageType(VolumeUsageEnum.SYSTEM);
+        // 设置默认从ISO中创建的系统盘格式为QCOW2
         newVolume.setFormatType(VolumeFormatEnum.QCOW2);
         newVolume.setStatus(VolumeStatusEnum.CREATING);
 

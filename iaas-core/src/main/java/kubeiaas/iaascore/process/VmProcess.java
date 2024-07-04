@@ -3,6 +3,7 @@ package kubeiaas.iaascore.process;
 import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.common.constants.bean.VmConstants;
+import kubeiaas.common.enums.image.ImageFormatEnum;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
 import kubeiaas.common.enums.vm.VmBootEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
@@ -350,7 +351,14 @@ public class VmProcess {
         newImage.setName(name);
         newImage.setDescription(description);
 
-        newImage.setFormat(parentImage.getFormat());
+        ImageFormatEnum parentFormat = parentImage.getFormat();
+        if (parentFormat == ImageFormatEnum.ISO) {
+            // 因为ISO创建的虚拟机系统盘是默认设置为qcow2格式，所以发布镜像时，需要设置为qcow2格式
+            // 参见kubeiaas.iaascore.scheduler.VolumeScheduler.newEmptySystemVolume
+            newImage.setFormat(ImageFormatEnum.QCOW2);
+        } else {
+            newImage.setFormat(parentFormat);
+        }
         newImage.setOsArch(parentImage.getOsArch());
         newImage.setOsType(parentImage.getOsType());
         newImage.setOsMode(parentImage.getOsMode());
