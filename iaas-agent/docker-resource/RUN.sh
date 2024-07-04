@@ -17,6 +17,7 @@ echo "[1/4] prepare files to /workdir "
 
 #echo " - cp iaas-agent jar"
 #cp /kubeiaas/iaas-agent.jar /workdir/src/
+rm -r /workdir/src/iaas-agent
 cp -r /kubeiaas /workdir/src/iaas-agent
 
 # 2. wait for DB-proxy ---------------------
