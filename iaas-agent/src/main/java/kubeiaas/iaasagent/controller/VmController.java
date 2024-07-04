@@ -66,6 +66,21 @@ public class VmController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.LIVE_MIGRATE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String liveMigrateVm(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.HOST_URI) String targetHostUri) {
+        log.info("-- start -- liveMigrateVm, vmUuid: {}, targetHostUri: {}", vmUuid, targetHostUri);
+        if (vmService.liveMigrateVm(vmUuid, targetHostUri)) {
+            log.info("-- end -- liveMigrateVm -- success");
+            return ResponseMsgConstants.SUCCESS;
+        } else {
+            log.error("-- end -- liveMigrateVm -- failed");
+            return ResponseMsgConstants.FAILED;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_VM_BOOT_ORDER, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String getVmBootOrder(

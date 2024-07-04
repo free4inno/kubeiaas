@@ -53,4 +53,10 @@ public class VncService {
         deleteVncToken(uuid);
         addVncToken(uuid, address);
     }
+
+    public Integer getVncPort(String uuid) {
+        log.info(String.format("getVncPort info -- uuid: %s", uuid));
+        String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + uuid).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");
+        return Integer.parseInt(vncPort);
+    }
 }

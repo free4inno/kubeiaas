@@ -19,9 +19,11 @@ import kubeiaas.iaascore.process.*;
 import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.scheduler.DeviceScheduler;
+import kubeiaas.iaascore.scheduler.VncScheduler;
 import kubeiaas.iaascore.utils.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -53,6 +55,8 @@ public class VmService {
 
     @Resource
     private DeviceScheduler deviceScheduler;
+    @Autowired
+    private VncScheduler vncScheduler;
 
     /**
      * 创建虚拟机
@@ -317,6 +321,74 @@ public class VmService {
          */
         log.info("STEP 7: 删除源虚拟机");
         vmProcess.deleteVmOn(sourceHost, vmUuid);
+
+        return ResponseMsgConstants.SUCCESS;
+    }
+
+    public String liveMigrateVm(String vmUuid, String targetHostUuid) throws BaseException {
+        log.info(String.format("liveMigrateVm info -- vmUuid: %s, hostUuid: %s", vmUuid, targetHostUuid));
+        /* -----1. 检查虚拟机状态 ----
+         */
+        log.info("STEP 1: 检查虚拟机状态");
+        log.info(String.format("-> invoke DB -- vmQueryByUuid, vmUuid: %s", vmUuid));
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        log.info("<- invoke DB -- done");
+        if (vm == null) {
+            log.error(String.format("ERROR: vm not found! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")", ResponseEnum.VM_NOT_FOUND);
+        }
+        if (!vm.getStatus().equals(VmStatusEnum.ACTIVE)) {
+            log.error(String.format("ERROR: vm is not active! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: vm is not active! (uuid: " + vmUuid + ")", ResponseEnum.VM_LIVE_MIGRATE_NOT_SUPPORT);
+        }
+
+        /* -----2. 加载宿主机配置 ----
+         */
+        log.info("STEP 2: 加载宿主机配置");
+        String sourceHostUuid = vm.getHostUuid();
+        // 检查目标主机和源主机是否相同
+        if (sourceHostUuid.equals(targetHostUuid)) {
+            log.error(String.format("ERROR: source host and target host are the same! (uuid: %s)", sourceHostUuid));
+            throw new BaseException("ERR: source host and target host are the same! (uuid: " + sourceHostUuid + ")", ResponseEnum.HOST_NOT_AVAILABLE);
+        }
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, sourceHostUuid: %s", sourceHostUuid));
+        Host sourceHost = tableStorage.hostQueryByUuid(sourceHostUuid);
+        log.info("Source Host: {}", sourceHost);
+        log.info("<- invoke DB -- done");
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, targetHostUuid: %s", targetHostUuid));
+        Host targetHost = tableStorage.hostQueryByUuid(targetHostUuid);
+        log.info("Target Host: {}", targetHost);
+        log.info("<- invoke DB -- done");
+        if (targetHost == null) {
+            log.error(String.format("ERROR: target host not found! (uuid: %s)", targetHostUuid));
+            throw new BaseException("ERR: target host not found! (uuid: " + targetHostUuid + ")", ResponseEnum.HOST_NOT_AVAILABLE);
+        }
+
+        /* -----3. 迁移虚拟机 ----
+         */
+        log.info("STEP 3: 迁移虚拟机");
+        if (!vmProcess.liveMigrateVm(vmUuid, sourceHost, targetHost)) {
+            log.error(String.format("ERROR: failed to live migrate vm! (uuid: %s)", vmUuid));
+            throw new BaseException("ERR: failed to live migrate vm! (uuid: " + vmUuid + ")", ResponseEnum.VM_LIVE_MIGRATE_ERROR);
+        }
+
+        /* -----4. 更新虚拟机Host ----
+         */
+        log.info("STEP 4: 更新虚拟机Host");
+//        vm.setHost(targetHost);
+        vm.setHostUuid(targetHostUuid);
+
+        /* -----5. 更新VNC服务 ----
+         */
+        log.info("STEP 5: 更新VNC服务");
+        Integer vncPort = vncProcess.getVncPort(vmUuid, targetHost);
+        log.info("vncPort: {}", vncPort);
+        vm.setVncPort(String.valueOf(vncPort));
+        // 虚拟机成功迁移之后，更新虚拟机的主机信息
+        log.info("-> invoke DB -- vmSave, vm: " + vm);
+        tableStorage.vmSave(vm);
+        log.info("<- invoke DB -- done");
+        vncProcess.flushVncToken(vmUuid);
 
         return ResponseMsgConstants.SUCCESS;
     }

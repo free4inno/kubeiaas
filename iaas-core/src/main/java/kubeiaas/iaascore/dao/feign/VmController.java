@@ -104,4 +104,11 @@ public interface VmController {
     String getVmBootOrder(
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.LIVE_MIGRATE)
+    @ResponseBody
+    String liveMigrateVm(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.HOST_URI) String targetHostUri);
 }

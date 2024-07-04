@@ -50,8 +50,8 @@ public class RequestMappingConstants {
     public static final String SUSPEND = "suspend";
     public static final String RESUME = "resume";
     public static final String COLD_MIGRATE = "cold_migrate";
-    public static final String GET_XML_DESC = "get_xml_desc";
     public static final String LIVE_MIGRATE = "live_migrate";
+    public static final String GET_XML_DESC = "get_xml_desc";
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
@@ -147,6 +147,7 @@ public class RequestMappingConstants {
     public static final String ADD_VNC_TOKEN = "add_vnc_token";
     public static final String FLUSH_VNC_TOKEN = "flush_vnc_token";
     public static final String DELETE_VNC_TOKEN = "delete_vnc_token";
+    public static final String GET_VNC_PORT = "get_vnc_port";
 
     // >>> host Controller <<<
     public static final String CHECK_ENV = "check_env";

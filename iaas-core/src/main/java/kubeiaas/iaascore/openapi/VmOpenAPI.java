@@ -240,6 +240,23 @@ public class VmOpenAPI {
         }
     }
 
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.LIVE_MIGRATE, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String liveMigrate(@Valid @RequestBody LiveMigrateVmForm f) throws BaseException {
+        MDC.put(LogInjectionConstants.UUID_INJECTION, f.getVmUuid());
+        log.info("-- start -- liveMigrate");
+        if (vmService.liveMigrateVm(f.getVmUuid(), f.getTargetHostUuid())
+                .equals(ResponseMsgConstants.SUCCESS)){
+            log.info("-- end -- liveMigrate -- success");
+            MDC.remove(LogInjectionConstants.UUID_INJECTION);
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.warn("-- end -- liveMigrate -- failed");
+            MDC.remove(LogInjectionConstants.UUID_INJECTION);
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.VM_LIVE_MIGRATE_ERROR));
+        }
+    }
+
     /**
      * 获取 vm 列表
      */

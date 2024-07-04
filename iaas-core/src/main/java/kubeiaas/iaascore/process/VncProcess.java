@@ -2,6 +2,7 @@ package kubeiaas.iaascore.process;
 
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.scheduler.VncScheduler;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +70,13 @@ public class VncProcess {
         return vm;
     }
 
-
+    public Integer getVncPort(String vmUuid, Host host){
+        log.info("-> invoke vncScheduler -- getVncPort");
+        AgentConfig.setSelectedHost(vmUuid, host);
+        Integer vncPort = vncScheduler.getVncPort(vmUuid);
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("<- invoke vncScheduler -- done");
+        return vncPort;
+    }
 }
 

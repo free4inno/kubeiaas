@@ -55,6 +55,7 @@ public class RequestParamConstants {
     public static final String IP_USED_OBJECT = "ip_used_object";
     public static final String MAC = "mac";
     public static final String IP = "ip";
+    public static final String HOST_URI = "host_uri";
 
     /* ===== VOLUME ===== */
     public static final String VOLUME_ID = "volume_id";

@@ -53,6 +53,17 @@ public class VmScheduler {
         }
     }
 
+    public boolean liveMigrateVm(String vmUuid, String targetHostUri) {
+        try {
+            log.info("Host Uri: {}", getSelectedUri(vmUuid));
+            return vmController.liveMigrateVm(getSelectedUri(vmUuid), vmUuid, targetHostUri)
+                    .equals(ResponseMsgConstants.SUCCESS);
+        } catch (Exception e) {
+            log.error("ERROR: liveMigrateVm. ", e);
+            return false;
+        }
+    }
+
     public boolean setVmBootOrder(String vmUuid, String bootOrder) {
         try {
             return vmController.setVmBootOrder(getSelectedUri(vmUuid), vmUuid, bootOrder)

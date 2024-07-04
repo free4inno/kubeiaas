@@ -49,4 +49,14 @@ public class VncController {
         vncService.flushVncToken(uuid, address);
         log.info("-- end -- flushVncToken -- success");
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_VNC_PORT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public Integer getVncPort(
+            @RequestParam(RequestParamConstants.VM_UUID) String uuid) {
+        log.info("-- start -- getVncPort");
+        Integer vncPort = vncService.getVncPort(uuid);
+        log.info("-- end -- getVncPort -- success");
+        return vncPort;
+    }
 }

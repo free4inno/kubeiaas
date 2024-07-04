@@ -232,6 +232,35 @@ public class VmService {
         }
     }
 
+    public boolean liveMigrateVm(String vmUuid, String targetHostUri) {
+        log.info(String.format("liveMigrateVm info -- vmUuid: %s, targetHostUri: %s", vmUuid, targetHostUri));
+        String libvirtUri = "qemu+ssh://" + targetHostUri + "/system";
+        /* https://libvirt.org/html/libvirt-libvirt-domain.html#virDomainMigrateFlags
+            check the flags in the link above
+            VIR_MIGRATE_LIVE = 1 (0x1; 1 << 0)
+            VIR_MIGRATE_PEER2PEER = 2 (0x2; 1 << 1)
+            VIR_MIGRATE_TUNNELLED = 4 (0x4; 1 << 2)
+            VIR_MIGRATE_PERSIST_DEST = 8 (0x8; 1 << 3)
+            VIR_MIGRATE_UNDEFINE_SOURCE = 16 (0x10; 1 << 4)
+         */
+        long flags = 0x1 | 0x2 | 0x4 | 0x8 | 0x16;
+        try {
+            Connect virtCon = LibvirtConfig.getVirtCon();
+            Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
+            int ret = domain.migrateToURI(libvirtUri, flags, null, 0);
+            if (ret == 0) {
+                log.info("liveMigrateVm ---- end ---- Live Migrate Successfully.");
+                return true;
+            } else {
+                log.error("ERROR: liveMigrateVm failed! ret: {}", ret);
+                return false;
+            }
+        } catch (LibvirtException e) {
+            log.error("ERROR: liveMigrateVm failed!", e);
+            return false;
+        }
+    }
+
     public boolean deleteVm(String vmUuid){
         log.info(String.format("deleteVm info -- vmUuid: %s", vmUuid));
         Domain domain = null;

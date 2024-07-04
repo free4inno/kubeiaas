@@ -33,10 +33,23 @@ public class VncScheduler {
         vncController.flushVncToken(getVncUri(), vmUuid, address);
     }
 
+    public Integer getVncPort(String uuid){
+        return vncController.getVncPort(getSelectedUri(uuid), uuid);
+    }
+
     private URI getVncUri() {
         try {
             return new URI(agentConfig.getVncUri());
         } catch (URISyntaxException | BaseException e) {
+            log.error("ERROR: build URI failed! %s", e);
+            return null;
+        }
+    }
+
+    private URI getSelectedUri(String vmUuid) {
+        try {
+            return new URI(AgentConfig.getSelectedUri(vmUuid));
+        } catch (URISyntaxException e) {
             log.error("ERROR: build URI failed! %s", e);
             return null;
         }

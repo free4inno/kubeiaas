@@ -390,6 +390,15 @@ public class VmProcess {
 
     }
 
+    public boolean liveMigrateVm(String vmUuid, Host sourceHost, Host targetHost) {
+        log.info(String.format("-> invoke vmScheduler -- liveMigrateVm, vmUuid: %s, targetHostUuid: %s", vmUuid, targetHost.getUuid()));
+        AgentConfig.setSelectedHost(vmUuid, sourceHost);
+        boolean isSuccess = vmScheduler.liveMigrateVm(vmUuid, targetHost.getIp());
+        log.info("<- invoke vmScheduler -- done");
+        AgentConfig.clearSelectedHost(vmUuid);
+        return isSuccess;
+    }
+
     /**
      * Set VM Status in DB
      */
