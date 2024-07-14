@@ -223,7 +223,7 @@ public class VmService {
             log.error(String.format("ERROR: vm not found! (uuid: %s)", vmUuid));
             throw new BaseException("ERR: vm not found! (uuid: " + vmUuid + ")", ResponseEnum.VM_NOT_FOUND);
         }
-        if (!vm.getStatus().equals(VmStatusEnum.STOPPED)) {
+        if (!vm.getStatus().equals(VmStatusEnum.STOPPED) && !vm.getStatus().equals(VmStatusEnum.SUSPENDED)) {
             log.error(String.format("ERROR: vm is active! (uuid: %s)", vmUuid));
             throw new BaseException("ERR: vm is active! (uuid: " + vmUuid + ")", ResponseEnum.VM_COLD_MIGRATE_NOT_SUPPORT);
         }
