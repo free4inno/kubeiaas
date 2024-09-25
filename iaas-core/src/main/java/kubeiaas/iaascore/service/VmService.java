@@ -377,6 +377,10 @@ public class VmService {
         log.info("STEP 4: 更新虚拟机Host");
 //        vm.setHost(targetHost);
         vm.setHostUuid(targetHostUuid);
+        // 更新虚拟机的主机信息
+        log.info("-> invoke DB -- vmSave, vm: " + vm);
+        tableStorage.vmSave(vm);
+        log.info("<- invoke DB -- done");
 
         /* -----5. 更新VNC服务 ----
          */

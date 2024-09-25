@@ -34,6 +34,7 @@ public class VncScheduler {
     }
 
     public Integer getVncPort(String uuid){
+        log.info("target uri: {}", getSelectedUri(uuid));
         return vncController.getVncPort(getSelectedUri(uuid), uuid);
     }
 

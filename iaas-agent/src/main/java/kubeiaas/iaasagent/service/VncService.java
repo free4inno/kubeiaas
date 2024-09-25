@@ -57,6 +57,12 @@ public class VncService {
     public Integer getVncPort(String uuid) {
         log.info(String.format("getVncPort info -- uuid: %s", uuid));
         String vncPort = ShellUtils.getCmd(LibvirtConfig.getVncPort + " " + uuid).replaceAll("\\r\\n|\\r|\\n|\\n\\r|:", "");
-        return Integer.parseInt(vncPort);
+        log.info(String.format("getVncPort -- vncPort: %s", vncPort));
+        try {
+            return Integer.parseInt(vncPort);
+        } catch (NumberFormatException e) {
+            log.error(String.format("getVncPort -- error: %s", e));
+            return null;
+        }
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -59,6 +60,12 @@ public class AgentConfig {
         if (agent.isEmpty()) {
             selected_host_ip.remove(uuid);
             selected_host_ip.put(uuid, new Agent(host.getIp(), 1));
+        } else if (!Objects.equals(agent.getIp(), host.getIp())) {
+            log.info(String.format("change selected host -- uuid: %s, host: %s", uuid, host.getIp()));
+            agent.setIp(host.getIp());
+            agent.setCnt(agent.getCnt() + 1);
+//            agent.cnt = 1;
+            selected_host_ip.put(uuid, agent);
         } else {
             agent.add();
             selected_host_ip.put(uuid, agent);
