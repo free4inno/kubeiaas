@@ -243,7 +243,7 @@ public class VmService {
             VIR_MIGRATE_PERSIST_DEST = 8 (0x8; 1 << 3)
             VIR_MIGRATE_UNDEFINE_SOURCE = 16 (0x10; 1 << 4)
          */
-        long flags = 0x1 | 0x2 | 0x4 | 0x8 | 0x16;
+        long flags = 0x1 | 0x2 | 0x4 | 0x8 | 0x10;
         try {
             Connect virtCon = LibvirtConfig.getVirtCon();
             Domain domain = virtCon.domainLookupByUUIDString(vmUuid);
