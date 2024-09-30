@@ -69,7 +69,7 @@
                 <configuration>
                     <username>${docker.repo.username}</username>
                     <username>${docker.repo.password}</username>
-                    <repository>${docker.host}/${docker.repo.address}/${docker.repo.name}</repository>
+                    <repository>${docker.repo.address}/${docker.repo.name}</repository>
                     <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
                     <tag>${project.version}</tag>
                     <buildArgs>
