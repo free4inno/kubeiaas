@@ -101,14 +101,26 @@ public class HostService {
 
             AgentConfig.setSelectedHost(RequestMappingConstants.DATA_VOLUME_STORAGE, node);
             Map<String, String> dataVolStorageMap = volumeScheduler.getDataVolStorageInfo();
-            totalDataStorage = Integer.parseInt(dataVolStorageMap.get(VolumeConstants.TOTAL));
-            usedDataStorage = Integer.parseInt(dataVolStorageMap.get(VolumeConstants.USED));
+            String totalDataStorageStr = dataVolStorageMap.get(VolumeConstants.TOTAL);
+            String usedDataStorageStr = dataVolStorageMap.get(VolumeConstants.USED);
+            if (null != totalDataStorageStr && !totalDataStorageStr.isEmpty()) {
+                totalDataStorage = Integer.parseInt(totalDataStorageStr);
+            }
+            if (null != usedDataStorageStr && !usedDataStorageStr.isEmpty()) {
+                usedDataStorage = Integer.parseInt(usedDataStorageStr);
+            }
             AgentConfig.clearSelectedHost(RequestMappingConstants.DATA_VOLUME_STORAGE);
 
             AgentConfig.setSelectedHost(RequestMappingConstants.IMG_VOLUME_STORAGE, node);
             Map<String, String> imgVolStorageMap = volumeScheduler.getImgVolStorageInfo();
-            totalImgStorage = Integer.parseInt(imgVolStorageMap.get(VolumeConstants.TOTAL));
-            usedImgStorage = Integer.parseInt(imgVolStorageMap.get(VolumeConstants.USED));
+            String totalImgStorageStr = imgVolStorageMap.get(VolumeConstants.TOTAL);
+            String usedImgStorageStr = imgVolStorageMap.get(VolumeConstants.USED);
+            if (null != totalImgStorageStr && !totalImgStorageStr.isEmpty()) {
+                totalImgStorage = Integer.parseInt(totalImgStorageStr);
+            }
+            if (null != usedImgStorageStr && !usedImgStorageStr.isEmpty()) {
+                usedImgStorage = Integer.parseInt(usedImgStorageStr);
+            }
             AgentConfig.clearSelectedHost(RequestMappingConstants.IMG_VOLUME_STORAGE);
         }
 
