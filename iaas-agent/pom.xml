@@ -84,9 +84,9 @@
                 </executions>
                 <configuration>
                     <username>${docker.repo.username}</username>
-                    <username>${docker.repo.password}</username>
+                    <password>${docker.repo.password}</password>
                     <repository>${docker.repo.address}/${docker.repo.name}</repository>
-                    <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+<!--                    <useMavenSettingsForAuth>true</useMavenSettingsForAuth>-->
                     <tag>${project.version}</tag>
                     <buildArgs>
                         <!-- specify any build args here -->
