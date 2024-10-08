@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -74,11 +75,27 @@ public class ResourceProcess {
         } else {
             // check private host
             privateIpSeg = tableStorage.ipSegmentQueryById(privateIpSegId);
-            if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
-                    || !privateIpSeg.getType().equals(IpTypeEnum.PRIVATE)) {
+
+            // 查询与 privateIpSeg 相关的所有 HostBridge
+            List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(privateIpSegId));
+
+            // 检查是否有匹配的 hostBridge
+            boolean isHostBridgeValid = hostBridgeList.stream()
+                    .anyMatch(hostBridge -> hostBridge.getHostUuid().equals(selectedHost.getUuid()));
+
+            // 检查 IP 类型是否为私有
+            boolean isPrivateIpType = privateIpSeg.getType().equals(IpTypeEnum.PRIVATE);
+
+            if (!isHostBridgeValid || !isPrivateIpType) {
                 log.error("ERROR: not available privateIpSeg.");
                 throw new VmException(newVm, "ERROR: not available privateIpSeg.");
             }
+
+//            if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
+//                    || !privateIpSeg.getType().equals(IpTypeEnum.PRIVATE)) {
+//                log.error("ERROR: not available privateIpSeg.");
+//                throw new VmException(newVm, "ERROR: not available privateIpSeg.");
+//            }
         }
 
         IpSegment publicIpSeg;
@@ -94,11 +111,27 @@ public class ResourceProcess {
         } else {
             // check public host
             publicIpSeg = tableStorage.ipSegmentQueryById(publicIpSegId);
-            if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
-                    || !publicIpSeg.getType().equals(IpTypeEnum.PUBLIC)) {
+
+            // 查询与 publicIpSeg 相关的所有 HostBridge
+            List<HostBridge> publicHostBridgeList = tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(privateIpSegId));
+
+            // 检查是否有匹配的 hostBridge
+            boolean isPublicHostBridgeValid = publicHostBridgeList.stream()
+                    .anyMatch(hostBridge -> hostBridge.getHostUuid().equals(selectedHost.getUuid()));
+
+            // 检查 IP 类型是否为公共
+            boolean isPublicIpType = publicIpSeg.getType().equals(IpTypeEnum.PUBLIC);
+
+            if (!isPublicHostBridgeValid || !isPublicIpType) {
                 log.error("ERROR: not available publicIpSeg.");
                 throw new VmException(newVm, "ERROR: not available publicIpSeg.");
             }
+
+//            if (!privateIpSeg.getHostUuid().equals(selectedHost.getUuid())
+//                    || !publicIpSeg.getType().equals(IpTypeEnum.PUBLIC)) {
+//                log.error("ERROR: not available publicIpSeg.");
+//                throw new VmException(newVm, "ERROR: not available publicIpSeg.");
+//            }
         }
 
         // set scheduler of iaas-agent

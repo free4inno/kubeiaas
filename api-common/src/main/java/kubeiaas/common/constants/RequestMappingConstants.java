@@ -163,6 +163,9 @@ public class RequestMappingConstants {
     public static final String DELETE_IP_SEGMENT = "delete_ip_segment";
     public static final String EDIT_IP_SEGMENT = "edit_ip_segment";
 
+    // >>> hostBridge Controller <<<
+    public static final String HOST_BRIDGE = "host_bridge";
+
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";
     public static final String APP_XML = "application/xml";

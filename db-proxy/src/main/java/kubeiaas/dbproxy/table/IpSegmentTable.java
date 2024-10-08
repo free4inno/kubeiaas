@@ -4,6 +4,7 @@ import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.enums.network.IpTypeEnum;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "ip_segment")
@@ -87,21 +88,14 @@ public class IpSegmentTable extends IpSegment {
         super.setIpRangeEnd(endIp);
     }
 
-    @Column(name = "host_uuid")
-    public String getHostUuid() {
-        return super.getHostUuid();
+    @OneToMany(mappedBy = "ipSegment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<HostBridgeTable> hostBridges;
+
+    public List<HostBridgeTable> getHostBridges() {
+        return hostBridges;
     }
 
-    public void setHostUuid(String hostUuid) {
-        super.setHostUuid(hostUuid);
-    }
-
-    @Column(name = "bridge")
-    public String getBridge() {
-        return super.getBridge();
-    }
-
-    public void setBridge(String bridge) {
-        super.setBridge(bridge);
+    public void setHostBridges(List<HostBridgeTable> hostBridges) {
+        this.hostBridges = hostBridges;
     }
 }

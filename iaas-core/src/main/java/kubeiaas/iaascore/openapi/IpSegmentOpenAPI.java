@@ -107,8 +107,10 @@ public class IpSegmentOpenAPI {
     @ResponseBody
     public String createIpSegment(@Valid @RequestBody CreateIpSegmentForm f) throws BaseException {
         log.info("-- start -- createIpSegment");
+//        IpSegment newIpSegment = networkService.updateIpSegment(0,
+//                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
         IpSegment newIpSegment = networkService.updateIpSegment(0,
-                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
+                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), true);
         log.info("-- end -- createIpSegment -- success");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
@@ -137,8 +139,11 @@ public class IpSegmentOpenAPI {
     @ResponseBody
     public String editIpSegment(@Valid @RequestBody EditIpSegmentForm f) throws BaseException {
         log.info("-- start -- editIpSegment");
+//        IpSegment newIpSegment = networkService.updateIpSegment(f.getIpSegmentId(),
+//                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
         IpSegment newIpSegment = networkService.updateIpSegment(f.getIpSegmentId(),
-                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
+                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), false);
+
         log.info("-- end -- editIpSegment -- success");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }

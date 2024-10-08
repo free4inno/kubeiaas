@@ -141,6 +141,25 @@ public interface DbProxy {
     );
 
 
+    // ========================= host bridge =========================
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String hostBridgeQueryAll();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
+    @ResponseBody
+    String hostBridgeQueryAllBySingleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String hostBridgeSave(
+            @RequestParam(value = RequestParamConstants.HOST_BRIDGE_OBJECT) String hostBridgeObjectStr
+    );
+
+
     // ========================= ip used =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)

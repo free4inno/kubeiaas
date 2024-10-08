@@ -272,8 +272,8 @@ public class LibvirtConfig {
                 netInterface.addElement("mac")
                         .addAttribute("address", ip.getMac());
                 // 设置所用网桥
-                netInterface.addElement("source")
-                        .addAttribute("bridge", ip.getBridge());
+//                netInterface.addElement("source")
+//                        .addAttribute("bridge", ip.getBridge());
                 // set target
                 netInterface.addElement("target").
                         addAttribute("dev", getTap(ip.getMac()));
@@ -288,8 +288,8 @@ public class LibvirtConfig {
                 netInterface.addElement("mac")
                         .addAttribute("address", ip.getMac());
                 // 设置所用网桥
-                netInterface.addElement("source")
-                        .addAttribute("bridge", ip.getBridge());
+//                netInterface.addElement("source")
+//                        .addAttribute("bridge", ip.getBridge());
                 // set virtualport
                 netInterface.addElement("virtualport").
                         addAttribute("type", "openvswitch");
@@ -305,8 +305,8 @@ public class LibvirtConfig {
                 netInterface.addElement("mac")
                         .addAttribute("address", ip.getMac());
                 // 设置直连设备
-                netInterface.addElement("source")
-                        .addAttribute("dev", ip.getBridge()).addAttribute("mode", "bridge");
+//                netInterface.addElement("source")
+//                        .addAttribute("dev", ip.getBridge()).addAttribute("mode", "bridge");
                 // set target
                 netInterface.addElement("target").
                         addAttribute("dev", getTap(ip.getMac()));

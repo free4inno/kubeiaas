@@ -58,7 +58,20 @@ public class IpSegmentController {
             @RequestParam(value = RequestParamConstants.VALUE_2) String value2) {
         log.info("-- start -- queryAllByDoubleKey -- key1: {}, value1: {}, key2: {}, value2: {}", key1, value1, key2, value2);
         Specification<IpSegmentTable> specification;
-        if (key2.equals(IpSegmentConstants.TYPE)) {
+
+        if (key1.equals(IpSegmentConstants.HOST_UUID) && key2.equals(IpSegmentConstants.TYPE)) {
+            IpTypeEnum type = EnumUtils.getEnumFromString(IpTypeEnum.class, value2);
+            specification = (root, cq, cb) -> {
+                // 连接 HostBridge 表
+                root.join("bridges"); // IpSegmentTable 中 List<BridgeTable> bridges 属性
+                // 添加查询条件
+                return cb.and(
+                        cb.equal(root.get(key1), value1),
+                        cb.equal(root.get(key2), type)
+                );
+            };
+        }
+        else if (key2.equals(IpSegmentConstants.TYPE)) {
             IpTypeEnum type = EnumUtils.getEnumFromString(IpTypeEnum.class, value2);
             specification = (root, cq, cb) ->
                     cb.and(cb.equal(root.get(key1), value1), cb.equal(root.get(key2), type));

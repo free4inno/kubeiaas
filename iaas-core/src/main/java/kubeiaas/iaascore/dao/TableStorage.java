@@ -3,6 +3,7 @@ package kubeiaas.iaascore.dao;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.HostBridgeConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
@@ -252,6 +253,24 @@ public class TableStorage {
         dbProxy.ipSegmentDeleteById(ipSegmentId);
     }
 
+
+    // ========================= host bridge =========================
+    public List<HostBridge> hostBridgeQueryAll() {
+        String jsonString = dbProxy.hostBridgeQueryAll();
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public List<HostBridge> hostBridgeQueryAllByIpSegmentId(String ipSegmentId) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(
+                HostBridgeConstants.IP_SEGMENT_ID, ipSegmentId);
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public HostBridge hostBridgeSave(HostBridge hostBridge) {
+        String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
+        hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
+        return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
+    }
 
 
     // ========================= ip used =========================

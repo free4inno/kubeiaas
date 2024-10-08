@@ -55,7 +55,7 @@ public class NetworkProcess {
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
         newIpUsed.setType(ipSegment.getType());
-        newIpUsed.setBridge(ipSegment.getBridge());
+//        newIpUsed.setBridge(ipSegment.getBridge());
 
         log.info(String.format("createVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
@@ -87,7 +87,7 @@ public class NetworkProcess {
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.ATTACHED);
         newIpUsed.setType(ipSegment.getType());
-        newIpUsed.setBridge(ipSegment.getBridge());
+//        newIpUsed.setBridge(ipSegment.getBridge());
 
         log.info(String.format("bindVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
@@ -111,17 +111,17 @@ public class NetworkProcess {
     public IpSegment saveIpSegment(
             IpSegment ipSegment,
             String name,
-            String hostUuid,
+//            String hostUuid,
             String type,
-            String bridge,
+//            String bridge,
             String ipRangeStart,
             String ipRangeEnd,
             String gateway,
             String netmask) {
         // 1. update DB
         ipSegment.setName(name);
-        ipSegment.setHostUuid(hostUuid);
-        ipSegment.setBridge(bridge);
+//        ipSegment.setHostUuid(hostUuid);
+//        ipSegment.setBridge(bridge);
         ipSegment.setDns("");
         ipSegment.setIpRangeStart(ipRangeStart);
         ipSegment.setIpRangeEnd(ipRangeEnd);
