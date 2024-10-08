@@ -21,7 +21,7 @@ public class IpUsed {
 
     /* related */
     private Integer ipSegmentId;
-//    private String bridge;          // 所用网桥
+    private String bridge;          // 所用网桥
 
     /* for attach */
     private String instanceUuid;    // attach of: IP & VM

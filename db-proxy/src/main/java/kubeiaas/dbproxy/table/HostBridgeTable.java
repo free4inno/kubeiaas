@@ -50,15 +50,13 @@ public class HostBridgeTable extends HostBridge {
         super.setHostName(hostName);
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(targetEntity = IpSegmentTable.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "ip_segment_id", referencedColumnName = "id", nullable = false)
-    private IpSegmentTable ipSegment;
-
-    public IpSegmentTable getIpSegment() {
-        return ipSegment;
+    public int getIpSegment() {
+        return super.getIpSegmentId();
     }
 
-    public void setIpSegment(IpSegmentTable ipSegment) {
-        this.ipSegment = ipSegment;
+    public void setIpSegment(int ipSegment) {
+        super.setIpSegmentId(ipSegment);
     }
 }

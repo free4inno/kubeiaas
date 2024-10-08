@@ -28,6 +28,7 @@ public class IpSegment {
 //    private String bridge;          // 所用网桥
 
     /* !NOT_IN_DB */
-    private String hostName;
+//    private String hostName;
     private List<IpUsed> ips;
+    private List<HostBridge> hostBridges;
 }
