@@ -63,7 +63,7 @@ public class IpSegmentController {
             IpTypeEnum type = EnumUtils.getEnumFromString(IpTypeEnum.class, value2);
             specification = (root, cq, cb) -> {
                 // 连接 HostBridge 表
-                root.join("bridges"); // IpSegmentTable 中 List<BridgeTable> bridges 属性
+                root.join("host_bridges"); // IpSegmentTable 中 List<HostBridge> hostBridges; 属性
                 // 添加查询条件
                 return cb.and(
                         cb.equal(root.get(key1), value1),

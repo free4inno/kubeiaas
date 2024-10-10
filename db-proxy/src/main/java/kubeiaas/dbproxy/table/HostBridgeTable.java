@@ -41,7 +41,8 @@ public class HostBridgeTable extends HostBridge {
     }
 
     // !NOT_IN_DB, 用于展示的主机名称，不存储在数据库中
-    @Transient
+//    @Transient
+    @Column(name = "host_name")
     public String getHostName() {
         return super.getHostName();
     }
@@ -52,11 +53,11 @@ public class HostBridgeTable extends HostBridge {
 
     @ManyToOne(targetEntity = IpSegmentTable.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "ip_segment_id", referencedColumnName = "id", nullable = false)
-    public int getIpSegment() {
+    public Integer getIpSegmentId() {
         return super.getIpSegmentId();
     }
 
-    public void setIpSegment(int ipSegment) {
-        super.setIpSegmentId(ipSegment);
+    public void setIpSegmentId(Integer ipSegmentId) {
+        super.setIpSegmentId(ipSegmentId);
     }
 }

@@ -55,6 +55,13 @@ public class NetworkService {
         return ipSegmentList;
     }
 
+    public List<HostBridge> queryAllHostBridge() {
+        log.info("-> invoke DB -- hostBridgeQueryAll");
+        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
+        log.info("<- invoke DB -- done");
+        return hostBridgeList;
+    }
+
     /**
      * statistics
      */
@@ -144,20 +151,6 @@ public class NetworkService {
      * 网段基本详情
      */
     public IpSegment queryById(Integer ipSegmentId) {
-        // 获取与 IpSegment 相关的 HostBridge 列表
-        log.info(String.format("-> invoke DB -- hostBridgeQueryAllByIpSegmentId, ipSegmentId: %d", ipSegmentId));
-        List<HostBridge> hostBridges = tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(ipSegmentId));
-        log.info("<- invoke DB -- done");
-
-        // 更新HostName
-        for (HostBridge hostBridge : hostBridges){
-            String hostUuid = hostBridge.getHostUuid();
-            log.info(String.format("-> invoke DB -- hostQueryByUuid, hostUuid: %s", hostUuid));
-            hostBridge.setHostName(tableStorage.hostQueryByUuid(hostUuid).getName());
-            log.info("<- invoke DB -- done");
-            tableStorage.hostBridgeSave(hostBridge);
-        }
-
         log.info(String.format("queryById info -- ipSegmentId: %d", ipSegmentId));
         log.info(String.format("-> invoke DB -- ipSegmentQueryById, ipSegmentId: %d", ipSegmentId));
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);

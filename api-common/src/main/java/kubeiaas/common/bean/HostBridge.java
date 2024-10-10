@@ -15,6 +15,5 @@ public class HostBridge {
 
     private Integer ipSegmentId;     // 外键，关联到IpSegmentTable
 
-    /* !NOT_IN_DB */
     private String hostName;
 }

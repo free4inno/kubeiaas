@@ -1,0 +1,64 @@
+package kubeiaas.iaascore.openapi;
+
+import com.alibaba.fastjson2.JSON;
+import kubeiaas.common.bean.HostBridge;
+import kubeiaas.common.bean.IpSegment;
+import kubeiaas.common.bean.IpUsed;
+import kubeiaas.common.constants.RequestMappingConstants;
+import kubeiaas.common.constants.RequestParamConstants;
+import kubeiaas.common.constants.ResponseMsgConstants;
+import kubeiaas.iaascore.dao.TableStorage;
+import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.request.ipSegment.CreateIpSegmentForm;
+import kubeiaas.iaascore.request.ipSegment.DeleteIpSegmentForm;
+import kubeiaas.iaascore.request.ipSegment.EditIpSegmentForm;
+import kubeiaas.iaascore.response.BaseResponse;
+import kubeiaas.iaascore.response.PageResponse;
+import kubeiaas.iaascore.response.ResponseEnum;
+import kubeiaas.iaascore.response.SingleMsgResponse;
+import kubeiaas.iaascore.service.NetworkService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@Validated
+@Controller
+@RequestMapping(value = RequestMappingConstants.HOST_BRIDGE)
+public class HostBridgeOpenAPI {
+
+    @Resource
+    private TableStorage tableStorage;
+
+    @Resource
+    private NetworkService networkService;
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAll() {
+        log.info("-- start -- queryAll");
+        List<HostBridge> hostBridgeList = networkService.queryAllHostBridge();
+        log.info("-- end -- queryAll -- success");
+        return JSON.toJSONString(BaseResponse.success(hostBridgeList));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public void migrateFromOldIpSegment() {
+
+        log.info("-- start -- migrateFromOldIpSegment");
+
+//        List<HostBridge> hostBridgeList = networkService.queryAllHostBridge();
+//        log.info("-- end -- queryAll -- success");
+//        return JSON.toJSONString(BaseResponse.success(hostBridgeList));
+    }
+}
