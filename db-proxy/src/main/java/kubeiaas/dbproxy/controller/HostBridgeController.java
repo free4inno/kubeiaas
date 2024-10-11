@@ -79,4 +79,12 @@ public class HostBridgeController {
         hostBridgeDao.deleteById(hostBridgeId);
         log.info("-- end -- deleteById");
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public synchronized void migrateFromIpSegment() {
+        log.info("-- start -- migrateFromOldIpSegment");
+        hostBridgeDao.migrateFromIpSegment();
+        log.info("-- end -- migrateFromOldIpSegment");
+    }
 }

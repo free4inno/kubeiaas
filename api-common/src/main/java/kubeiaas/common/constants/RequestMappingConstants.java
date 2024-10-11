@@ -10,6 +10,7 @@ public class RequestMappingConstants {
     public static final String HOST = "host";
     public static final String VOLUME = "volume";
     public static final String IP_SEGMENT = "ip_segment";
+    public static final String HOST_BRIDGE = "host_bridge";
     public static final String IP_USED = "ip_used";
     public static final String SPEC_CONFIG = "spec_config";
     public static final String SERVICE = "service";
@@ -164,7 +165,6 @@ public class RequestMappingConstants {
     public static final String EDIT_IP_SEGMENT = "edit_ip_segment";
 
     // >>> hostBridge Controller <<<
-    public static final String HOST_BRIDGE = "host_bridge";
     public static final String MIGRATE_FROM_IP_SEGMENT = "migrate_from_ip_segment";
 
 

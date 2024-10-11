@@ -55,12 +55,12 @@ public class NetworkService {
         return ipSegmentList;
     }
 
-    public List<HostBridge> queryAllHostBridge() {
-        log.info("-> invoke DB -- hostBridgeQueryAll");
-        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
-        log.info("<- invoke DB -- done");
-        return hostBridgeList;
-    }
+//    public List<HostBridge> queryAllHostBridge() {
+//        log.info("-> invoke DB -- hostBridgeQueryAll");
+//        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
+//        log.info("<- invoke DB -- done");
+//        return hostBridgeList;
+//    }
 
     /**
      * statistics
@@ -142,7 +142,7 @@ public class NetworkService {
     public String deleteIpSegment(Integer ipSegmentId){
         log.info(String.format("deleteIpSegment info -- ipSegmentId: %d", ipSegmentId));
         log.info(String.format("-> invoke DB -- ipSegmentDelete, ipSegmentId: %d", ipSegmentId));
-        tableStorage.ipSegmentDelete(ipSegmentId);
+        tableStorage.ipSegmentDelete(ipSegmentId);  //todo 是否需要级联删除？
         log.info("<- invoke DB -- done");
         return ResponseMsgConstants.SUCCESS;
     }

@@ -159,6 +159,9 @@ public interface DbProxy {
             @RequestParam(value = RequestParamConstants.HOST_BRIDGE_OBJECT) String hostBridgeObjectStr
     );
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT)
+    void hostBridgeMigrateFromIpSegment();
+
 
     // ========================= ip used =========================
 

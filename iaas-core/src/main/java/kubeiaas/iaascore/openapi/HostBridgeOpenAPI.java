@@ -16,6 +16,7 @@ import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.PageResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import kubeiaas.iaascore.response.SingleMsgResponse;
+import kubeiaas.iaascore.service.HostBridgeService;
 import kubeiaas.iaascore.service.NetworkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -40,25 +41,30 @@ public class HostBridgeOpenAPI {
     private TableStorage tableStorage;
 
     @Resource
-    private NetworkService networkService;
+    private HostBridgeService hostBridgeService;
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
         log.info("-- start -- queryAll");
-        List<HostBridge> hostBridgeList = networkService.queryAllHostBridge();
+        List<HostBridge> hostBridgeList = hostBridgeService.queryAllHostBridge();
         log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(hostBridgeList));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public void migrateFromOldIpSegment() {
-
+    public String migrateFromIpSegment() {
         log.info("-- start -- migrateFromOldIpSegment");
-
-//        List<HostBridge> hostBridgeList = networkService.queryAllHostBridge();
-//        log.info("-- end -- queryAll -- success");
-//        return JSON.toJSONString(BaseResponse.success(hostBridgeList));
+        String result  = hostBridgeService.migrateFromIpSegment();
+        if (result.equals(ResponseMsgConstants.SUCCESS)) {
+            log.info("-- end -- migrateFromOldIpSegment -- success");
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.warn("-- end -- migrateFromOldIpSegment -- failed");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.WORK_ERROR));
+        }
     }
+
+
 }

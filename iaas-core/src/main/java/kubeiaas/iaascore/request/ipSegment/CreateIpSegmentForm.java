@@ -12,14 +12,14 @@ public class CreateIpSegmentForm {
     @NotNull @NotEmpty
     private String name;
 
-    @NotNull @NotEmpty
-    private String hostUuid;
+//    @NotNull @NotEmpty
+//    private String hostUuid;
 
     @NotNull @NotEmpty
     private String type;
 
-    @NotNull @NotEmpty
-    private String bridge;
+//    @NotNull @NotEmpty
+//    private String bridge;
 
     @NotNull @NotEmpty
     private String ipRangeStart;
