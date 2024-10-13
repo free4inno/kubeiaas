@@ -166,6 +166,9 @@ public class RequestMappingConstants {
 
     // >>> hostBridge Controller <<<
     public static final String MIGRATE_FROM_IP_SEGMENT = "migrate_from_ip_segment";
+    public static final String CREATE_HOST_BRIDGE = "create_host_bridge";
+    public static final String DELETE_HOST_BRIDGE = "delete_host_bridge";
+    public static final String EDIT_HOST_BRIDGE = "edit_host_bridge";
 
 
     /* =============== produce =============== */

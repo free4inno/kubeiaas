@@ -9,6 +9,7 @@ import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.request.hostBridge.CreateHostBridgeForm;
 import kubeiaas.iaascore.request.ipSegment.CreateIpSegmentForm;
 import kubeiaas.iaascore.request.ipSegment.DeleteIpSegmentForm;
 import kubeiaas.iaascore.request.ipSegment.EditIpSegmentForm;
@@ -52,18 +53,28 @@ public class HostBridgeOpenAPI {
         return JSON.toJSONString(BaseResponse.success(hostBridgeList));
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
+//    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
+//    @ResponseBody
+//    public String migrateFromIpSegment() {
+//        log.info("-- start -- migrateFromOldIpSegment");
+//        String result  = hostBridgeService.migrateFromIpSegment();
+//        if (result.equals(ResponseMsgConstants.SUCCESS)) {
+//            log.info("-- end -- migrateFromOldIpSegment -- success");
+//            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+//        } else {
+//            log.warn("-- end -- migrateFromOldIpSegment -- failed");
+//            return JSON.toJSONString(BaseResponse.error(ResponseEnum.WORK_ERROR));
+//        }
+//    }
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_HOST_BRIDGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String migrateFromIpSegment() {
-        log.info("-- start -- migrateFromOldIpSegment");
-        String result  = hostBridgeService.migrateFromIpSegment();
-        if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("-- end -- migrateFromOldIpSegment -- success");
-            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
-        } else {
-            log.warn("-- end -- migrateFromOldIpSegment -- failed");
-            return JSON.toJSONString(BaseResponse.error(ResponseEnum.WORK_ERROR));
-        }
+    public String createHostBridge(@Valid @RequestBody CreateHostBridgeForm f) throws BaseException {
+        log.info("-- start -- createHostBridge");
+        HostBridge newHostBridge = hostBridgeService.updateHostBridge(0,
+                f.getBridgeName(), Integer.parseInt(f.getIpSegmentId()), f.getHostName(), true);
+        log.info("-- end -- createHostBridge -- success");
+        return JSON.toJSONString(BaseResponse.success(newHostBridge));
     }
 
 

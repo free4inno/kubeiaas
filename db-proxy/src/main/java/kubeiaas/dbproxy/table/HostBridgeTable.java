@@ -51,8 +51,7 @@ public class HostBridgeTable extends HostBridge {
         super.setHostName(hostName);
     }
 
-    @ManyToOne(targetEntity = IpSegmentTable.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "ip_segment_id", referencedColumnName = "id", nullable = false)
+    @Column(name = "ip_segment_id")
     public Integer getIpSegmentId() {
         return super.getIpSegmentId();
     }

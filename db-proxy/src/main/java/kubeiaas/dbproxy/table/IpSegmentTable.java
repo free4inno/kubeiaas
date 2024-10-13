@@ -89,8 +89,8 @@ public class IpSegmentTable extends IpSegment {
         super.setIpRangeEnd(endIp);
     }
 
-    @OneToMany(targetEntity = HostBridgeTable.class, mappedBy = "ipSegmentId", fetch = FetchType.EAGER)
-    private List<HostBridge> hostBridges;
+//    @OneToMany(targetEntity = HostBridgeTable.class, mappedBy = "ipSegment", fetch = FetchType.EAGER)
+//    private List<HostBridge> hostBridges;
 //    public List<HostBridge> getHostBridges() {
 //        return super.getHostBridges();
 //    }

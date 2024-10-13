@@ -266,12 +266,28 @@ public class TableStorage {
         return JSON.parseArray(jsonString, HostBridge.class);
     }
 
-    public HostBridge hostBridgeSave(HostBridge hostBridge) {
+    public HostBridge hostBridgeQueryById(int id) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.ID, Integer.toString(id));
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        if (hostBridgeList != null && !hostBridgeList.isEmpty()) {
+            return hostBridgeList.get(0);
+        } else {
+            return null;
+        }
+    }
 
+//    public HostBridge hostBridgeSave(HostBridge hostBridge) {
+//
+//        String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
+//        log.info("-> hostBridgeSave -- save -- tablestorage " + hostBridgeObjectStr);
+//        hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
+//        log.info("-- hostBridgeSave -- save -- tablestorage -- end");
+//        return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
+//    }
+
+    public HostBridge hostBridgeSave(HostBridge hostBridge) {
         String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
-        log.info("-> migrateIpSegment -- save -- tablestorage " + hostBridgeObjectStr);
         hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
-        log.info("-- migrateIpSegment -- save -- tablestorage -- end");
         return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
     }
 

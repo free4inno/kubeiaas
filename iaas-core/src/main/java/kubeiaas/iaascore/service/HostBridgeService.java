@@ -9,6 +9,7 @@ import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.utils.IpUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
+import kubeiaas.iaascore.process.HostBridgeProcess;
 import kubeiaas.iaascore.process.NetworkProcess;
 import kubeiaas.iaascore.request.ipSegment.CreateIpSegmentForm;
 import kubeiaas.iaascore.response.BaseResponse;
@@ -33,6 +34,9 @@ public class HostBridgeService {
     @Resource
     private TableStorage tableStorage;
 
+    @Resource
+    private HostBridgeProcess hostBridgeProcess;
+
     /**
      * 拆分ipSegment表后迁移数据
      */
@@ -55,6 +59,27 @@ public class HostBridgeService {
         List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
         log.info("<- invoke DB -- done");
         return hostBridgeList;
+    }
+
+    public HostBridge updateHostBridge(
+            Integer hostBridgeId,
+//            String hostUuid,
+            String bridgeName,
+            Integer ipSegmentId,
+            String hostName,
+            boolean isNew) throws BaseException {
+
+        HostBridge hostBridge;
+        if (isNew) {
+            hostBridge = new HostBridge();
+        } else {
+            log.info(String.format("-> invoke DB -- hostBridgeQueryById, hostBridgeId: %d", hostBridgeId));
+            hostBridge = tableStorage.hostBridgeQueryById(hostBridgeId);
+            log.info("<- invoke DB -- done");
+        }
+
+//        return networkProcess.saveIpSegment(ipSegment, name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
+        return hostBridgeProcess.saveHostBridge(hostBridge, bridgeName, ipSegmentId, hostName);
     }
 
 
