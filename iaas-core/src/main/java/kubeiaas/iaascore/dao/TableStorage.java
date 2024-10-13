@@ -276,19 +276,14 @@ public class TableStorage {
         }
     }
 
-//    public HostBridge hostBridgeSave(HostBridge hostBridge) {
-//
-//        String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
-//        log.info("-> hostBridgeSave -- save -- tablestorage " + hostBridgeObjectStr);
-//        hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
-//        log.info("-- hostBridgeSave -- save -- tablestorage -- end");
-//        return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
-//    }
-
     public HostBridge hostBridgeSave(HostBridge hostBridge) {
         String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
         hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
         return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
+    }
+
+    public void hostBridgeDeleteById(Integer hostBridgeId){
+        dbProxy.hostBridgeDeleteById(hostBridgeId);
     }
 
     public void hostBridgeMigrateFromIpSegment(){

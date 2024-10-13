@@ -54,6 +54,13 @@ public class HostBridgeService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    public List<HostBridge> queryAllHostBridge() {
+        log.info("-> invoke DB -- hostBridgeQueryAll");
+        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
+        log.info("<- invoke DB -- done");
+        return hostBridgeList;
+    }
+
     public List<HostBridge> queryAllByIpSegmentId(Integer ipSegmentId) {
         log.info("-> invoke DB -- hostBridgeQueryByIpSegmentId");
         List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(ipSegmentId));
@@ -62,16 +69,8 @@ public class HostBridgeService {
     }
 
 
-    public List<HostBridge> queryAllHostBridge() {
-        log.info("-> invoke DB -- hostBridgeQueryAll");
-        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
-        log.info("<- invoke DB -- done");
-        return hostBridgeList;
-    }
-
     public HostBridge updateHostBridge(
             Integer hostBridgeId,
-//            String hostUuid,
             String bridgeName,
             Integer ipSegmentId,
             String hostName,
@@ -86,9 +85,18 @@ public class HostBridgeService {
             log.info("<- invoke DB -- done");
         }
 
-//        return networkProcess.saveIpSegment(ipSegment, name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
         return hostBridgeProcess.saveHostBridge(hostBridge, bridgeName, ipSegmentId, hostName);
     }
 
+    /**
+     * 删除
+     */
+    public String deleteHostBridgeById(Integer hostBridgeId) {
+        log.info(String.format("deleteHostBridge info -- hostBridgeId: %d", hostBridgeId));
+        log.info(String.format("-> invoke DB -- deleteHostBridge, hostBridgeId: %d", hostBridgeId));
+        tableStorage.hostBridgeDeleteById(hostBridgeId);
+        log.info("<- invoke DB -- done");
+        return ResponseMsgConstants.SUCCESS;
+    }
 
 }

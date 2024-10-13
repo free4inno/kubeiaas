@@ -53,6 +53,17 @@ public class HostBridgeOpenAPI {
         return JSON.toJSONString(BaseResponse.success(hostBridgeList));
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_IP_SEGMENT_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAllByIpSegmentId(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId) {
+        log.info("-- start -- queryByIpSegmentId");
+        List<HostBridge> hostBridgeList = hostBridgeService.queryAllByIpSegmentId(ipSegmentId);
+        log.info("-- end -- queryByIpSegmentId -- success");
+        return JSON.toJSONString(BaseResponse.success(hostBridgeList));
+    }
+
 //    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
 //    @ResponseBody
 //    public String migrateFromIpSegment() {
@@ -67,6 +78,9 @@ public class HostBridgeOpenAPI {
 //        }
 //    }
 
+    /**
+     * 新建HostBridge
+     */
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_HOST_BRIDGE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createHostBridge(@Valid @RequestBody CreateHostBridgeForm f) throws BaseException {
@@ -77,14 +91,22 @@ public class HostBridgeOpenAPI {
         return JSON.toJSONString(BaseResponse.success(newHostBridge));
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_IP_SEGMENT_ID, produces = RequestMappingConstants.APP_JSON)
+    /**
+     * 删除HostBridge
+     */
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_HOST_BRIDGE_BY_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
-    public String queryAllByIpSegmentId(
-            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId) {
-        log.info("-- start -- queryByIpSegmentId");
-        List<HostBridge> hostBridgeList = hostBridgeService.queryAllByIpSegmentId(ipSegmentId);
-        log.info("-- end -- queryByIpSegmentId -- success");
-        return JSON.toJSONString(BaseResponse.success(hostBridgeList));
+    public String deleteHostBridgeById(
+            @RequestParam(value = RequestParamConstants.HOST_BRIDGE_ID) @NotNull Integer hostBridgeId) {
+        log.info("-- start -- deleteHostBridge");
+        String result  = hostBridgeService.deleteHostBridgeById(hostBridgeId);
+        if (result.equals(ResponseMsgConstants.SUCCESS)) {
+            log.info("-- end -- deleteHostBridge -- success");
+            return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
+        } else {
+            log.warn("-- end -- deleteHostBridge -- failed");
+            return JSON.toJSONString(BaseResponse.error(ResponseEnum.WORK_ERROR));
+        }
     }
 
 }
