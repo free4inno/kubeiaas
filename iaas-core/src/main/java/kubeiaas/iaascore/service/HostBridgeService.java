@@ -54,6 +54,14 @@ public class HostBridgeService {
         return ResponseMsgConstants.SUCCESS;
     }
 
+    public List<HostBridge> queryAllByIpSegmentId(Integer ipSegmentId) {
+        log.info("-> invoke DB -- hostBridgeQueryByIpSegmentId");
+        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(ipSegmentId));
+        log.info("<- invoke DB -- done");
+        return hostBridgeList;
+    }
+
+
     public List<HostBridge> queryAllHostBridge() {
         log.info("-> invoke DB -- hostBridgeQueryAll");
         List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();

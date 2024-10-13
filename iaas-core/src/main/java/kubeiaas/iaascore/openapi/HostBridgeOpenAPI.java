@@ -77,5 +77,14 @@ public class HostBridgeOpenAPI {
         return JSON.toJSONString(BaseResponse.success(newHostBridge));
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_IP_SEGMENT_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAllByIpSegmentId(
+            @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId) {
+        log.info("-- start -- queryByIpSegmentId");
+        List<HostBridge> hostBridgeList = hostBridgeService.queryAllByIpSegmentId(ipSegmentId);
+        log.info("-- end -- queryByIpSegmentId -- success");
+        return JSON.toJSONString(BaseResponse.success(hostBridgeList));
+    }
 
 }

@@ -169,6 +169,7 @@ public class RequestMappingConstants {
     public static final String CREATE_HOST_BRIDGE = "create_host_bridge";
     public static final String DELETE_HOST_BRIDGE = "delete_host_bridge";
     public static final String EDIT_HOST_BRIDGE = "edit_host_bridge";
+    public static final String QUERY_ALL_BY_IP_SEGMENT_ID = "query_all_by_ip_segment_id";
 
 
     /* =============== produce =============== */
