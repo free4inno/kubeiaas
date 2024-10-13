@@ -7,7 +7,9 @@ import kubeiaas.common.constants.HostBridgeConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
+import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.request.image.SaveImageForm;
@@ -222,10 +224,28 @@ public class TableStorage {
 
     // ========================= ip segment =========================
 
+//    public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
+//        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
+//                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
+//        return JSON.parseArray(jsonString, IpSegment.class);
+//    }
+
     public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
-        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
-                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
-        return JSON.parseArray(jsonString, IpSegment.class);
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.HOST_UUID, hostUuid);
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        HostBridge hostBridge = hostBridgeList.get(0);
+
+        String jsonString2 = dbProxy.ipSegmentQueryAllBySingleKey(IpSegmentConstants.ID,
+                Integer.toString(hostBridge.getIpSegmentId()));
+        List<IpSegment> ipSegmentList = JSON.parseArray(jsonString2, IpSegment.class);
+        IpSegment ipSegment = ipSegmentList.get(0);
+
+        if (ipSegment.getType() == EnumUtils.getEnumFromString(IpTypeEnum.class, type)){
+            return ipSegmentList;
+        }
+        else {
+            return null;
+        }
     }
 
     public IpSegment ipSegmentQueryById(int id) {
