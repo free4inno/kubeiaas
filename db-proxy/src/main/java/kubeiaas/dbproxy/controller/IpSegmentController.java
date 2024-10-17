@@ -49,6 +49,7 @@ public class IpSegmentController {
         return JSON.toJSONString(ipSegmentTableList);
     }
 
+    // todo 需更改
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_DOUBLE_KEY, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAllByDoubleKey(

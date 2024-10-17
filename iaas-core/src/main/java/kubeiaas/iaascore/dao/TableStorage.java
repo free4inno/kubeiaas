@@ -296,6 +296,16 @@ public class TableStorage {
         }
     }
 
+    public HostBridge hostBridgeQueryByHostUuid(String hostUuid) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.HOST_UUID, hostUuid);
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        if (hostBridgeList != null && !hostBridgeList.isEmpty()) {
+            return hostBridgeList.get(0);
+        } else {
+            return null;
+        }
+    }
+
     public HostBridge hostBridgeSave(HostBridge hostBridge) {
         String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
         hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);

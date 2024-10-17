@@ -90,6 +90,7 @@ public class RequestMappingConstants {
     // -- query by
     public static final String QUERY_BY_ID = "query_by_id";
     public static final String QUERY_BY_UUID = "query_by_uuid";
+    public static final String QUERY_BY_HOST_UUID = "query_by_host_uuid";
 
     // >>> Resource Operator <<<
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";

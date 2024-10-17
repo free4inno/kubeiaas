@@ -68,6 +68,22 @@ public class HostBridgeService {
         return hostBridgeList;
     }
 
+    public HostBridge queryById(Integer id) {
+        log.info(String.format("queryById info -- hostBridgeId: %d", id));
+        log.info(String.format("-> invoke DB -- hostBridgeQueryById, hostBridgeId: %d", id));
+        HostBridge hostBridge = tableStorage.hostBridgeQueryById(id);
+        log.info("<- invoke DB -- done");
+        return hostBridge;
+    }
+
+    public HostBridge queryByHostUuid(String hostUuid) {
+        log.info("queryById info -- hostUuid: "+ hostUuid);
+        log.info("-> invoke DB -- hostBridgeQueryByHostUuid, hostUuid: "+ hostUuid);
+        HostBridge hostBridge = tableStorage.hostBridgeQueryByHostUuid(hostUuid);
+        log.info("<- invoke DB -- done");
+        return hostBridge;
+    }
+
 
     public HostBridge updateHostBridge(
             Integer hostBridgeId,

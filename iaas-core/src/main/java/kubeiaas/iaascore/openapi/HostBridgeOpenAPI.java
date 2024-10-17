@@ -10,6 +10,7 @@ import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.request.hostBridge.CreateHostBridgeForm;
+import kubeiaas.iaascore.request.hostBridge.EditHostBridgeForm;
 import kubeiaas.iaascore.request.ipSegment.CreateIpSegmentForm;
 import kubeiaas.iaascore.request.ipSegment.DeleteIpSegmentForm;
 import kubeiaas.iaascore.request.ipSegment.EditIpSegmentForm;
@@ -54,6 +55,27 @@ public class HostBridgeOpenAPI {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_ID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryById(
+            @RequestParam(value = RequestParamConstants.ID) @NotNull Integer id) {
+        log.info("-- start -- queryById");
+        HostBridge hostBridge = hostBridgeService.queryById(id);
+        log.info("-- end -- queryById -- success");
+        return JSON.toJSONString(BaseResponse.success(hostBridge));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_BY_HOST_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryByHostUuid(
+            @RequestParam(value = RequestParamConstants.HOST_UUID) @NotNull String host_uuid) {
+        log.info("-- start -- queryByHostUuid");
+        HostBridge hostBridge = hostBridgeService.queryByHostUuid(host_uuid);
+        log.info("-- end -- queryByHostUuid -- success");
+        return JSON.toJSONString(BaseResponse.success(hostBridge));
+    }
+
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_IP_SEGMENT_ID, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAllByIpSegmentId(
@@ -90,6 +112,20 @@ public class HostBridgeOpenAPI {
         log.info("-- end -- createHostBridge -- success");
         return JSON.toJSONString(BaseResponse.success(newHostBridge));
     }
+
+    /**
+     * 编辑HostBridge
+     */
+//    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT_HOST_BRIDGE, produces = RequestMappingConstants.APP_JSON)
+//    @ResponseBody
+//    public String editHostBridge(@Valid @RequestBody EditHostBridgeForm f) throws BaseException {
+//        log.info("-- start -- editHostBridge");
+//        HostBridge newHostBridge = hostBridgeService.updateHostBridge(f.getHostBridgeId(),
+//                f.getBridgeName(), f.getIpSegmentId(), f.getBridgeName(), false);
+//
+//        log.info("-- end -- editHostBridge -- success");
+//        return JSON.toJSONString(BaseResponse.success(newHostBridge));
+//    }
 
     /**
      * 删除HostBridge

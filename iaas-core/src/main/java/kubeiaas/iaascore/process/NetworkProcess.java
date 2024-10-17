@@ -1,5 +1,6 @@
 package kubeiaas.iaascore.process;
 
+import kubeiaas.common.bean.HostBridge;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
@@ -48,6 +49,8 @@ public class NetworkProcess {
             log.error("ERROR: createVmNetwork -- ip allocated failed");
             throw new VmException(newVm, "ERROR: ip allocated failed!");
         }
+
+//        newVm.getHostUuid()
 
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
