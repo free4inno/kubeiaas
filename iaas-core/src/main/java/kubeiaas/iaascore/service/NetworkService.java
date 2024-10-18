@@ -33,21 +33,21 @@ public class NetworkService {
      */
     public List<IpSegment> queryAllIpSeg() {
         // 建立 uuid -> name 的索引
-        Map<String, String> hostUuidNameMap = new HashMap<>();
-        log.info("-> invoke DB -- hostQueryAll");
-        List<Host> hostList = tableStorage.hostQueryAll();
-        log.info("<- invoke DB -- done");
-        for (Host host : hostList) {
-            hostUuidNameMap.put(host.getUuid(), host.getName());
-        }
+//        Map<String, String> hostUuidNameMap = new HashMap<>();
+//        log.info("-> invoke DB -- hostQueryAll");
+//        List<Host> hostList = tableStorage.hostQueryAll();
+//        log.info("<- invoke DB -- done");
+//        for (Host host : hostList) {
+//            hostUuidNameMap.put(host.getUuid(), host.getName());
+//        }
 
-        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
-        //set hostBridge hostName
-        for (HostBridge hostBridge : hostBridgeList) {
-            String hostName = hostUuidNameMap.get(hostBridge.getHostUuid());
-            hostBridge.setHostName(hostName);
-            tableStorage.hostBridgeSave(hostBridge);
-        }
+//        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
+//        //set hostBridge hostName
+//        for (HostBridge hostBridge : hostBridgeList) {
+//            String hostName = hostUuidNameMap.get(hostBridge.getHostUuid());
+//            hostBridge.setHostName(hostName);
+//            tableStorage.hostBridgeSave(hostBridge);
+//        }
 
         log.info("-> invoke DB -- ipSegmentQueryAll");
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();

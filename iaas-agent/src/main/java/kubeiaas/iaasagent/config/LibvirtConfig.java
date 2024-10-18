@@ -261,6 +261,7 @@ public class LibvirtConfig {
      */
     private void ipToNetworkXml(IpUsed ip, Element devices) {
         Element netInterface = devices.addElement("interface");
+        log.info("start: "+netInterface.toString());
 
         switch (networkType) {
             case NETWORK_TYPE_LINUX:
@@ -272,8 +273,8 @@ public class LibvirtConfig {
                 netInterface.addElement("mac")
                         .addAttribute("address", ip.getMac());
                 // 设置所用网桥
-//                netInterface.addElement("source")
-//                        .addAttribute("bridge", ip.getBridge());
+                netInterface.addElement("source")
+                        .addAttribute("bridge", ip.getBridge());
                 // set target
                 netInterface.addElement("target").
                         addAttribute("dev", getTap(ip.getMac()));
@@ -288,8 +289,8 @@ public class LibvirtConfig {
                 netInterface.addElement("mac")
                         .addAttribute("address", ip.getMac());
                 // 设置所用网桥
-//                netInterface.addElement("source")
-//                        .addAttribute("bridge", ip.getBridge());
+                netInterface.addElement("source")
+                        .addAttribute("bridge", ip.getBridge());
                 // set virtualport
                 netInterface.addElement("virtualport").
                         addAttribute("type", "openvswitch");
@@ -305,8 +306,8 @@ public class LibvirtConfig {
                 netInterface.addElement("mac")
                         .addAttribute("address", ip.getMac());
                 // 设置直连设备
-//                netInterface.addElement("source")
-//                        .addAttribute("dev", ip.getBridge()).addAttribute("mode", "bridge");
+                netInterface.addElement("source")
+                        .addAttribute("dev", ip.getBridge()).addAttribute("mode", "bridge");
                 // set target
                 netInterface.addElement("target").
                         addAttribute("dev", getTap(ip.getMac()));
@@ -316,6 +317,9 @@ public class LibvirtConfig {
         // 设置网卡模式类型为 Virtio
         netInterface.addElement("model").
                 addAttribute("type", "virtio");
+
+        log.info("end: "+netInterface.toString());
+        log.info("bridge: "+ip.getBridge());
 
     }
 

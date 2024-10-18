@@ -50,7 +50,7 @@ public class NetworkProcess {
             throw new VmException(newVm, "ERROR: ip allocated failed!");
         }
 
-//        newVm.getHostUuid()
+        String bridge = tableStorage.hostBridgeQueryByHostUuid(newVm.getHostUuid()).getBridgeName();
 
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
@@ -58,7 +58,7 @@ public class NetworkProcess {
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
         newIpUsed.setType(ipSegment.getType());
-//        newIpUsed.setBridge(ipSegment.getBridge());
+        newIpUsed.setBridge(bridge);
 
         log.info(String.format("createVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
@@ -84,13 +84,17 @@ public class NetworkProcess {
             log.error("ERROR: bindVmNetwork -- ip allocated failed");
             throw new BaseException("ERROR: ip allocated failed!");
         }
+
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        String bridge = tableStorage.hostBridgeQueryByHostUuid(vm.getHostUuid()).getBridgeName();
+
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(mac);
         newIpUsed.setInstanceUuid(vmUuid);
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.ATTACHED);
         newIpUsed.setType(ipSegment.getType());
-//        newIpUsed.setBridge(ipSegment.getBridge());
+        newIpUsed.setBridge(bridge);
 
         log.info(String.format("bindVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
@@ -136,9 +140,9 @@ public class NetworkProcess {
         log.info("<- invoke DB -- done");
 
         // 2. update DHCP config
-        log.info("-> invoke dhcpScheduler -- updateIpSeg");
-        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
-        log.info("<- invoke dhcpScheduler -- done");
+//        log.info("-> invoke dhcpScheduler -- updateIpSeg");
+//        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
+//        log.info("<- invoke dhcpScheduler -- done");
 
         return ipSegment;
     }
