@@ -45,7 +45,7 @@ iaasAgent:
 dbProxy:
   enabled: true
   replicas: 1
-  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:2.0-RELEASE"
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:1.1.0-SNAPSHOT"
   service:
     type: ClusterIP
     port: 9091
