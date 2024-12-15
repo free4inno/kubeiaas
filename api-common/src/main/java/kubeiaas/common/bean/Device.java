@@ -21,6 +21,8 @@ public class Device {
     private Integer vendor;
     private Integer product;
 
+//    private String uuid;
+
     /**
      * Libvirt USB device:
      *
@@ -35,6 +37,21 @@ public class Device {
      *   <source>
      *     <address domain='' bus='' slot='' function=''/>
      *   </source>
+     *
+     * Libvirt MDEV device:
+     *  hypervisor with mdev VFIO framework:
+     *   <hostdev mode='subsystem' type='mdev' managed='yes'>
+     *       <source>
+     *           <address uuid='0a2b52d7-587f-4acd-9e7c-faf1d6751630'/>
+     *       </source>
+     *   </hostdev>
+     *
+     *  hypervisor with vendor-specific VFIO framework:
+     *   <hostdev mode='subsystem' type='pci' managed='no'>
+     *       <source>
+     *           <address domain='domain' bus='bus' slot='vf-slot' function='v-function'/>
+     *       </source>
+     *   </hostdev>
      *
      */
 
@@ -81,6 +98,12 @@ public class Device {
                 this.setSlot(signs[2]);
                 this.setFunction(signs[3]);
                 break;
+            case MDEV:
+                this.setDomain(signs[0]);
+                this.setBus(signs[1]);
+                this.setSlot(signs[2]);
+                this.setFunction(signs[3]);
+                break;
         }
     }
 
@@ -109,18 +132,22 @@ public class Device {
      */
     public String encodeSign() {
         StringBuilder sb = new StringBuilder();
+//        if (type == null) {
+//            type = DeviceTypeEnum.MDEV;
+//        }
         switch (type) {
             case USB:
-                sb.append(bus)
-                        .append(":").append(dev)
-                        .append(":").append(vendor)
-                        .append(":").append(product);
+                sb.append(Integer.toHexString(bus))
+                        .append(":").append(Integer.toHexString(dev))
+                        .append(":").append(Integer.toHexString(vendor))
+                        .append(":").append(Integer.toHexString(product));
                 break;
             case PCI:
-                sb.append(domain)
-                        .append(":").append(bus)
-                        .append(":").append(slot)
-                        .append(":").append(function);
+            case MDEV:
+                sb.append(Integer.toHexString(domain))
+                        .append(":").append(Integer.toHexString(bus))
+                        .append(":").append(Integer.toHexString(slot))
+                        .append(":").append(Integer.toHexString(function));
                 break;
         }
         return sb.toString();
@@ -133,11 +160,12 @@ public class Device {
         }
         Integer[] intSigns = new Integer[4];
         for (int i = 0; i < 4; i++) {
-            if (signs[i].contains("0x")) {
-                intSigns[i] = Integer.decode(signs[i]);
-            } else {
-                intSigns[i] = Integer.parseInt(signs[i]);
-            }
+//            if (signs[i].contains("0x")) {
+//                intSigns[i] = Integer.decode(signs[i]);
+//            } else {
+//                intSigns[i] = Integer.parseInt(signs[i]);
+//            }
+            intSigns[i] = Integer.parseInt(signs[i], 16);
         }
         return intSigns;
     }
