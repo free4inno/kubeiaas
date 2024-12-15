@@ -54,11 +54,11 @@ public class USBUtils {
                 usbDevice.setDev(Integer.parseInt(devStr));
 
                 // - Vendor
-                String vendorStr = "0x" + devInfo[5].split(":")[0];
-                usbDevice.setVendor(Integer.decode(vendorStr));
+                String vendorStr = devInfo[5].split(":")[0];
+                usbDevice.setVendor(Integer.parseInt(vendorStr, 16));
                 // - Product
-                String productStr = "0x" + devInfo[5].split(":")[1];
-                usbDevice.setProduct(Integer.decode(productStr));
+                String productStr = devInfo[5].split(":")[1];
+                usbDevice.setProduct(Integer.parseInt(productStr, 16));
 
                 // - Name
                 sb.setLength(0);
