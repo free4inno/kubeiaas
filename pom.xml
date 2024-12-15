@@ -34,10 +34,10 @@
         <!-- mvn versions:set -DnewVersion=1.1.0-SNAPSHOT -DgenerateBackupPoms=false -->
 
         <!-- ====== DockerHost ====== -->
-        <docker.host>${env.KUBEIAAS_DOCKER_HOST}</docker.host>
-        <docker.repo.address>${env.KUBEIAAS_DOCKER_REPO_ADDRESS}</docker.repo.address>
-        <docker.repo.username>${env.KUBEIAAS_DOCKER_REPO_USERNAME}</docker.repo.username>
-        <docker.repo.password>${env.KUBEIAAS_DOCKER_REPO_PASSWORD}</docker.repo.password>
+        <docker.host>tcp://0.0.0.0:2375</docker.host>
+        <docker.repo.address>registry.cn-beijing.aliyuncs.com/kubeiaas</docker.repo.address>
+        <docker.repo.username>zhaoht2022</docker.repo.username>
+        <docker.repo.password>free4zht</docker.repo.password>
     </properties>
 
     <dependencies>

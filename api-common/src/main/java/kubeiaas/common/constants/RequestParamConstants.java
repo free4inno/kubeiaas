@@ -57,6 +57,10 @@ public class RequestParamConstants {
     public static final String IP = "ip";
     public static final String HOST_URI = "host_uri";
 
+    /* ===== HOST BRIDGE ===== */
+    public static final String HOST_BRIDGE_OBJECT = "host_bridge_object";
+    public static final String HOST_BRIDGE_ID = "host_bridge_id";
+
     /* ===== VOLUME ===== */
     public static final String VOLUME_ID = "volume_id";
     public static final String VOLUME_OBJECT = "volume_object";

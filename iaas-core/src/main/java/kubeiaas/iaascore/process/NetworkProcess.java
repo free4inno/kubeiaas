@@ -1,5 +1,6 @@
 package kubeiaas.iaascore.process;
 
+import kubeiaas.common.bean.HostBridge;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
@@ -49,13 +50,15 @@ public class NetworkProcess {
             throw new VmException(newVm, "ERROR: ip allocated failed!");
         }
 
+        String bridge = tableStorage.hostBridgeQueryByHostUuid(newVm.getHostUuid()).getBridgeName();
+
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
         newIpUsed.setInstanceUuid(newVm.getUuid());
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
         newIpUsed.setType(ipSegment.getType());
-        newIpUsed.setBridge(ipSegment.getBridge());
+        newIpUsed.setBridge(bridge);
 
         log.info(String.format("createVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
@@ -81,13 +84,17 @@ public class NetworkProcess {
             log.error("ERROR: bindVmNetwork -- ip allocated failed");
             throw new BaseException("ERROR: ip allocated failed!");
         }
+
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        String bridge = tableStorage.hostBridgeQueryByHostUuid(vm.getHostUuid()).getBridgeName();
+
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(mac);
         newIpUsed.setInstanceUuid(vmUuid);
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.ATTACHED);
         newIpUsed.setType(ipSegment.getType());
-        newIpUsed.setBridge(ipSegment.getBridge());
+        newIpUsed.setBridge(bridge);
 
         log.info(String.format("bindVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
@@ -111,17 +118,17 @@ public class NetworkProcess {
     public IpSegment saveIpSegment(
             IpSegment ipSegment,
             String name,
-            String hostUuid,
+//            String hostUuid,
             String type,
-            String bridge,
+//            String bridge,
             String ipRangeStart,
             String ipRangeEnd,
             String gateway,
             String netmask) {
         // 1. update DB
         ipSegment.setName(name);
-        ipSegment.setHostUuid(hostUuid);
-        ipSegment.setBridge(bridge);
+//        ipSegment.setHostUuid(hostUuid);
+//        ipSegment.setBridge(bridge);
         ipSegment.setDns("");
         ipSegment.setIpRangeStart(ipRangeStart);
         ipSegment.setIpRangeEnd(ipRangeEnd);
@@ -133,9 +140,9 @@ public class NetworkProcess {
         log.info("<- invoke DB -- done");
 
         // 2. update DHCP config
-        log.info("-> invoke dhcpScheduler -- updateIpSeg");
-        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
-        log.info("<- invoke dhcpScheduler -- done");
+//        log.info("-> invoke dhcpScheduler -- updateIpSeg");
+//        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
+//        log.info("<- invoke dhcpScheduler -- done");
 
         return ipSegment;
     }

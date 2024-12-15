@@ -261,6 +261,7 @@ public class LibvirtConfig {
      */
     private void ipToNetworkXml(IpUsed ip, Element devices) {
         Element netInterface = devices.addElement("interface");
+        log.info("start: "+netInterface.toString());
 
         switch (networkType) {
             case NETWORK_TYPE_LINUX:
@@ -316,6 +317,9 @@ public class LibvirtConfig {
         // 设置网卡模式类型为 Virtio
         netInterface.addElement("model").
                 addAttribute("type", "virtio");
+
+        log.info("end: "+netInterface.toString());
+        log.info("bridge: "+ip.getBridge());
 
     }
 

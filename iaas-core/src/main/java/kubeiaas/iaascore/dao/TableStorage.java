@@ -3,10 +3,13 @@ package kubeiaas.iaascore.dao;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.HostBridgeConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
+import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.request.image.SaveImageForm;
@@ -221,10 +224,28 @@ public class TableStorage {
 
     // ========================= ip segment =========================
 
+//    public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
+//        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
+//                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
+//        return JSON.parseArray(jsonString, IpSegment.class);
+//    }
+
     public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
-        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
-                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
-        return JSON.parseArray(jsonString, IpSegment.class);
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.HOST_UUID, hostUuid);
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        HostBridge hostBridge = hostBridgeList.get(0);
+
+        String jsonString2 = dbProxy.ipSegmentQueryAllBySingleKey(IpSegmentConstants.ID,
+                Integer.toString(hostBridge.getIpSegmentId()));
+        List<IpSegment> ipSegmentList = JSON.parseArray(jsonString2, IpSegment.class);
+        IpSegment ipSegment = ipSegmentList.get(0);
+
+        if (ipSegment.getType() == EnumUtils.getEnumFromString(IpTypeEnum.class, type)){
+            return ipSegmentList;
+        }
+        else {
+            return null;
+        }
     }
 
     public IpSegment ipSegmentQueryById(int id) {
@@ -252,6 +273,52 @@ public class TableStorage {
         dbProxy.ipSegmentDeleteById(ipSegmentId);
     }
 
+
+    // ========================= host bridge =========================
+    public List<HostBridge> hostBridgeQueryAll() {
+        String jsonString = dbProxy.hostBridgeQueryAll();
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public List<HostBridge> hostBridgeQueryAllByIpSegmentId(String ipSegmentId) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(
+                HostBridgeConstants.IP_SEGMENT_ID, ipSegmentId);
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public HostBridge hostBridgeQueryById(int id) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.ID, Integer.toString(id));
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        if (hostBridgeList != null && !hostBridgeList.isEmpty()) {
+            return hostBridgeList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public HostBridge hostBridgeQueryByHostUuid(String hostUuid) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.HOST_UUID, hostUuid);
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        if (hostBridgeList != null && !hostBridgeList.isEmpty()) {
+            return hostBridgeList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public HostBridge hostBridgeSave(HostBridge hostBridge) {
+        String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
+        hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
+        return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
+    }
+
+    public void hostBridgeDeleteById(Integer hostBridgeId){
+        dbProxy.hostBridgeDeleteById(hostBridgeId);
+    }
+
+    public void hostBridgeMigrateFromIpSegment(){
+        dbProxy.hostBridgeMigrateFromIpSegment();
+    }
 
 
     // ========================= ip used =========================

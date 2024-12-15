@@ -1,5 +1,6 @@
 package kubeiaas.iaasagent.service;
 
+import kubeiaas.common.bean.HostBridge;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.utils.FileUtils;
 import kubeiaas.common.utils.IpUtils;
@@ -39,17 +40,35 @@ public class DhcpService {
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegId);
         log.info("<- invoke DB -- done");
 
-        if (!ipSegment.getHostUuid().equals(HostConfig.thisHost.getUuid())) {
+        // 检查当前主机是否在 IpSegment 的 HostBridge 中
+        boolean isHostBridgeValid = tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(ipSegId)).stream()
+                .anyMatch(hostBridge -> hostBridge.getHostUuid().equals(HostConfig.thisHost.getUuid()));
+
+        if (!isHostBridgeValid) {
             log.warn(String.format("updateIpSeg -- ipSegId %d not belong to this host", ipSegId));
             return true;
         }
+//        if (!ipSegment.getHostUuid().equals(HostConfig.thisHost.getUuid())) {
+//            log.warn(String.format("updateIpSeg -- ipSegId %d not belong to this host", ipSegId));
+//            return true;
+//        }
 
         // -------- 2. 构造配置串 --------
         log.info("STEP 2: construct dhcp config line");
-        String segName = "IP_SEG_" + ipSegment.getBridge();
-        String subnetIP = IpUtils.getSubnet(ipSegment.getIpRangeStart(), ipSegment.getNetmask());
-        String confLine = String.format(DhcpConfig.BIND_IP_SEG_TEMPLATE,
-                segName, ipSegment.getBridge(), subnetIP, ipSegment.getNetmask(), ipSegment.getGateway());
+//        String segName = "IP_SEG_" + ipSegment.getBridge();
+//        String subnetIP = IpUtils.getSubnet(ipSegment.getIpRangeStart(), ipSegment.getNetmask());
+//        String confLine = String.format(DhcpConfig.BIND_IP_SEG_TEMPLATE,
+//                segName, ipSegment.getBridge(), subnetIP, ipSegment.getNetmask(), ipSegment.getGateway());
+
+        // 遍历所有的 HostBridge，并为每个构造相应的 DHCP 配置
+        StringBuilder dhcpConfigLines = new StringBuilder();
+        for (HostBridge hostBridge : tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(ipSegId))) {
+            String segName = "IP_SEG_" + hostBridge.getBridgeName();
+            String subnetIP = IpUtils.getSubnet(ipSegment.getIpRangeStart(), ipSegment.getNetmask());
+            String confLine = String.format(DhcpConfig.BIND_IP_SEG_TEMPLATE,
+                    segName, hostBridge.getBridgeName(), subnetIP, ipSegment.getNetmask(), ipSegment.getGateway());
+            dhcpConfigLines.append(DhcpConfig.ESCAPE_NEWLINE).append(confLine);
+        }
 
         // -------- 3. 更新 dhcp conf --------
         log.info("STEP 3: update dhcp config file");
@@ -61,18 +80,42 @@ public class DhcpService {
             String cmdDefault = "sed -i '/" + "default" + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
             ShellUtils.getCmd(cmdDefault);
 
-            String cmd = "sed -i '/" + segName + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
-            ShellUtils.getCmd(cmd);
+            for (HostBridge hostBridge : tableStorage.hostBridgeQueryAllByIpSegmentId(Integer.toString(ipSegId))) {
+                String segName = "IP_SEG_" + hostBridge.getBridgeName();
+                String cmd = "sed -i '/" + segName + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
+                ShellUtils.getCmd(cmd);
+            }
 
             // 再追加新内容
             FileWriter writer = new FileWriter(DhcpConfig.DHCP_CONF_FILE_PATH, true);
-            writer.write(DhcpConfig.ESCAPE_NEWLINE + confLine);
+            writer.write(dhcpConfigLines.toString());
             writer.close();
 
         } catch (Exception e) {
             log.error("ERROR: IO dhcp config files failed!");
             return false;
         }
+
+//        try {
+//            // 先拷贝旧文件
+//            FileUtils.copy(DhcpConfig.DHCP_CONF_FILE_PATH, DhcpConfig.DHCP_CONF_FILE_TEMP_PATH);
+//
+//            // 删除旧有（sed帮助判定）
+//            String cmdDefault = "sed -i '/" + "default" + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
+//            ShellUtils.getCmd(cmdDefault);
+//
+//            String cmd = "sed -i '/" + segName + "/d' " + DhcpConfig.DHCP_CONF_FILE_PATH;
+//            ShellUtils.getCmd(cmd);
+//
+//            // 再追加新内容
+//            FileWriter writer = new FileWriter(DhcpConfig.DHCP_CONF_FILE_PATH, true);
+//            writer.write(DhcpConfig.ESCAPE_NEWLINE + confLine);
+//            writer.close();
+//
+//        } catch (Exception e) {
+//            log.error("ERROR: IO dhcp config files failed!");
+//            return false;
+//        }
 
         // -------- 4. 重启 dhcp server --------
         log.info("STEP 4: restart dhcp server");
