@@ -24,7 +24,7 @@ public class VolumeConstants {
     public static final String VOLUME_BUS_VIRTIO = "virtio";
     // path
     public static final String DEFAULT_NFS_SRV_PATH = "/usr/local/kubeiaas/data/";
-    public static final String VOLUME_PATH = "sys-volumes/";
+//    public static final String VOLUME_PATH = "sys-volumes/";
     public static final String DATA_VOLUME_PATH = "data-volumes/";
     /*
     * 2024-03-08

@@ -17,9 +17,9 @@ public class PathUtils {
      * @param uuid       常规的uuid
      * @return volumes/a/z/uuid.img
      */
-    public static String genVolumeFilePath(String destImgDir, String uuid) {
-        return VolumeConstants.VOLUME_PATH + destImgDir + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;
-    }
+//    public static String genVolumeFilePath(String destImgDir, String uuid) {
+//        return VolumeConstants.VOLUME_PATH + destImgDir + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;
+//    }
 
     /**
      * 根据uuid生成directory.
@@ -27,14 +27,14 @@ public class PathUtils {
      * @param uuid 常规的uuid
      * @return volumes/a/z/uuid.img
      */
-    public static String genVolumeDirectoryByUuid(String uuid, Image image) {
-        String destImgDir = getImgDir(uuid);
-        if (image != null && image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
-            return VolumeConstants.VOLUME_PATH + destImgDir + uuid + VolumeConstants.WIN_VOLUME_SUFFIX;
-        } else {
-            return VolumeConstants.VOLUME_PATH + destImgDir + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;
-        }
-    }
+//    public static String genVolumeDirectoryByUuid(String uuid, Image image) {
+//        String destImgDir = getImgDir(uuid);
+//        if (image != null && image.getOsType().equals(ImageOSTypeEnum.WINDOWS)){
+//            return VolumeConstants.VOLUME_PATH + destImgDir + uuid + VolumeConstants.WIN_VOLUME_SUFFIX;
+//        } else {
+//            return VolumeConstants.VOLUME_PATH + destImgDir + uuid + VolumeConstants.IMG_VOLUME_SUFFIX;
+//        }
+//    }
 
     /**
      * 根据uuid生成directory.
