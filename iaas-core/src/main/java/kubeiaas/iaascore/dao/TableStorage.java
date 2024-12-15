@@ -497,6 +497,7 @@ public class TableStorage {
 
     public Device deviceSave(Device device) {
         String deviceObjectStr = JSON.toJSONString(device);
+        log.info(String.format("device to save: %s", deviceObjectStr));
         deviceObjectStr = dbProxy.deviceSave(deviceObjectStr);
         return JSON.parseObject(deviceObjectStr, Device.class);
     }

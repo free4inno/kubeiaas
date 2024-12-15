@@ -9,6 +9,7 @@ import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaasagent.dao.TableStorage;
 import kubeiaas.iaasagent.service.HostService;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,15 +28,9 @@ public class HostConfig {
 
     public static Host thisHost;
 
+    @Getter
     private final String hostIp = System.getenv("HOST_IP");
     private final String hostName = System.getenv("HOST_NAME");
-
-    public String getHostIp() {
-        return hostIp;
-    }
-    public String getHostName() {
-        return hostName;
-    }
 
     private final Map<String ,String> roleNodes = new HashMap<>();
     HostConfig() {
@@ -104,8 +99,9 @@ public class HostConfig {
 
         // - set roles
         List<String> roleList = new ArrayList<>();
-        for (String role : roleNodes.keySet()) {
-            String node = roleNodes.get(role);
+        for (Map.Entry<String, String> entry : roleNodes.entrySet()) {
+            String role = entry.getKey();
+            String node = entry.getValue();
             if (node.equals(hostIp) || node.equals(hostName)) {
                 roleList.add(role);
             }

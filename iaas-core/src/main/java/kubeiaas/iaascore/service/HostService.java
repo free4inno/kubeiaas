@@ -169,7 +169,7 @@ public class HostService {
             nodeMap.put(HostConstants.USED_MEM, usedMEM);
             nodeMap.put(HostConstants.USED_SYS_STORAGE, usedSTO);
 
-            nodeMap.put(HostConstants.STO_DIR, VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.VOLUME_PATH);
+//            nodeMap.put(HostConstants.STO_DIR, VolumeConstants.DEFAULT_NFS_SRV_PATH + VolumeConstants.VOLUME_PATH);
             resMap.put(host.getName(), nodeMap);
         }
         return resMap;

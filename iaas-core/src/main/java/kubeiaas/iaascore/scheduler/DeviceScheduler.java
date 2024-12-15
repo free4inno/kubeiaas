@@ -34,7 +34,9 @@ public class DeviceScheduler {
         // 1. Devices from host RAW
         List<Device> rawDevices;
         try {
-            String jsonObjectString = deviceController.queryAll(getUri(host));
+            URI uri = getUri(host);
+            log.info(String.format("URI: %s", uri));
+            String jsonObjectString = deviceController.queryAll(uri);
             rawDevices = JSON.parseArray(jsonObjectString, Device.class);
         } catch (Exception e) {
             log.error(String.format("ERROR: device query all failed, host name is %s.", host.getName()), e);
@@ -75,43 +77,56 @@ public class DeviceScheduler {
 
     public List<Device> queryByVm(Vm vm) throws BaseException {
         // 1. Devices from DB
+        log.info(String.format("-> invoke DB -- deviceQueryByVmUuid, vm uuid: %s", vm.getUuid()));
         List<Device> dbDevices = tableStorage.deviceQueryByVmUuid(vm.getUuid());
+        log.info("<- invoke DB -- done");
+
+        log.info(String.format("dbDevices: %s", dbDevices));
         if (CollectionUtils.isEmpty(dbDevices)) {
             return new ArrayList<>();
         }
 
         // 2. Devices form host RAW
+        log.info(String.format("-> invoke DB -- hostQueryByUuid, host uuid: %s", vm.getHostUuid()));
         Host host = tableStorage.hostQueryByUuid(vm.getHostUuid());
+        log.info("<- invoke DB -- done");
+
         List<Device> rawDevices;
         try {
+            log.info(String.format("-> invoke AGENT -- queryAll, host name: %s", host.getName()));
             String jsonObjectString = deviceController.queryAll(getUri(host));
             rawDevices = JSON.parseArray(jsonObjectString, Device.class);
+            log.info("<- invoke AGENT -- done");
         } catch (Exception e) {
             log.error(String.format("ERROR: device query all failed, host name is %s. Exception: %s", host.getName(), e));
             throw new BaseException("err: device query all failed, host name is " + host.getName());
         }
 
         // 3. build total (device amount will not too large, this method O(n^2) is ok)
+        log.info("check device status");
         List<Device> deviceList = new ArrayList<>();
         for (Device dbDev : dbDevices) {
             boolean findFlag = false;
             for (Device rawDev : rawDevices) {
                 if (rawDev.equals(dbDev)) {
+                    log.info("Get device: %s", dbDev);
                     deviceList.add(dbDev);
                     findFlag = true;
                     break;
                 }
             }
             if (!findFlag) {
+                log.info("Device not found");
                 dbDev.setStatus(DeviceStatusEnum.UNREACHABLE);
                 deviceList.add(dbDev);
             }
         }
-
+        log.info("Device status checked!");
         // 3.1. set SIGN
         for (Device device : deviceList) {
             device.setSign(device.encodeSign());
         }
+
 
         return deviceList;
     }
@@ -123,6 +138,7 @@ public class DeviceScheduler {
                     "err: device operate unavailable on VM (not support VM status)!", ResponseEnum.DEVICE_ATTACH_ERROR);
         }
         List<Device> deviceList = this.queryAll(host);
+        log.info(String.format("device to attach: %s", attachDevice));
         for (Device device : deviceList) {
             if (device.equals(attachDevice) && device.getStatus().equals(DeviceStatusEnum.AVAILABLE)) {
                 // attach device
@@ -152,8 +168,11 @@ public class DeviceScheduler {
                     "err: device operate unavailable on VM (not support VM status)!", ResponseEnum.DEVICE_ATTACH_ERROR);
         }
         List<Device> deviceList = tableStorage.deviceQueryByVmUuid(vm.getUuid());
+        log.info(String.format("Get device list: %s", deviceList));
+        log.info(String.format("Device to detach: %s", detachDevice));
         for (Device device : deviceList) {
             // from DB only has ATTACHED, no UNREACHABLE
+//            device.setType(DeviceTypeEnum.MDEV);
             if (device.equals(detachDevice) && device.getStatus().equals(DeviceStatusEnum.ATTACHED)) {
                 // detach device
                 if (!deviceController.detach(JSON.toJSONString(device), JSON.toJSONString(vm), getUri(host))
@@ -195,6 +214,7 @@ public class DeviceScheduler {
             case USB:
                 return true;
             case PCI:
+            case MDEV:
                 return vm.getStatus().equals(VmStatusEnum.STOPPED);
         }
         return false;

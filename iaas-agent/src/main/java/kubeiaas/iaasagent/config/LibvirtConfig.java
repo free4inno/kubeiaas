@@ -483,4 +483,27 @@ public class LibvirtConfig {
                 .addAttribute("name", "vfio");
 
     }
+
+    // ===== MDEV DEVICE ====================================================================================================
+    public String mdevToDevice(Device device) {
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        mdevToDeviceXml(device, devices);
+        String res = devices.asXML();
+        res = res.replaceAll("<root>", "");
+        res = res.replaceAll("</root>", "");
+        return res.trim();
+    }
+
+    private void mdevToDeviceXml(Device device, Element devices) {
+        Element hostdev = devices.addElement("hostdev")
+                .addAttribute("mode", "subsystem")
+                .addAttribute("type", "mdev")
+                .addAttribute("model", "vfio-pci");
+
+        Element source = hostdev.addElement("source");
+        source.addElement("address")
+                .addAttribute("uuid", device.getName());
+
+    }
 }

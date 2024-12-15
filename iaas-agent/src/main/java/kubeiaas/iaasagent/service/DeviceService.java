@@ -7,6 +7,7 @@ import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
+import kubeiaas.iaasagent.utils.MdevUtils;
 import kubeiaas.iaasagent.utils.PCIUtils;
 import kubeiaas.iaasagent.utils.USBUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,13 @@ public class DeviceService {
         log.info("query all devices");
         List<Device> devList = new ArrayList<>();
         devList.addAll(USBUtils.getHostDevices());
-        devList.addAll(PCIUtils.getHostDevices());
+        List<Device> pciDevices = PCIUtils.getHostDevices();
+        List<Device> mdevDevices = MdevUtils.getHostDevices();
+        if (!mdevDevices.isEmpty()) {
+            devList.addAll(mdevDevices);
+        } else {
+            devList.addAll(pciDevices);
+        }
         devList.forEach(
             d -> {
                 d.setStatus(DeviceStatusEnum.AVAILABLE);
@@ -67,6 +74,10 @@ public class DeviceService {
             case PCI:
                 log.debug("-- PCI Device");
                 deviceXml = xmlConfig.getPciDevice(device);
+                break;
+            case MDEV:
+                log.debug("-- MDEV Device");
+                deviceXml = xmlConfig.getMdevDevice(device);
                 break;
         }
         if (deviceXml.isEmpty()) {

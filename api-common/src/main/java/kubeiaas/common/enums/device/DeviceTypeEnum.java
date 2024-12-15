@@ -1,7 +1,7 @@
 package kubeiaas.common.enums.device;
 
 public enum DeviceTypeEnum {
-    USB, PCI;
+    USB, PCI, MDEV;
 
     public String toString() {
         switch (this) {
@@ -9,6 +9,8 @@ public enum DeviceTypeEnum {
                 return "USB";
             case PCI:
                 return "PCI";
+            case MDEV:
+                return "MDEV";
         }
         return super.toString();
     }

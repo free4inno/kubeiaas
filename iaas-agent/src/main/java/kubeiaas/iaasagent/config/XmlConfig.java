@@ -53,6 +53,10 @@ public class XmlConfig {
         return libvirtConfig.pciToDevice(device);
     }
 
+    public String getMdevDevice(Device device) {
+        return libvirtConfig.mdevToDevice(device);
+    }
+
     public String getIpDevice(IpUsed ip) {
         return libvirtConfig.ipToNetwork(ip);
     }

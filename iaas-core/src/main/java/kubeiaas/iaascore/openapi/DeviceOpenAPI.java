@@ -132,6 +132,7 @@ public class DeviceOpenAPI {
                     String.format("attach -- error: device sign %s parse failed.", f.getSign()),
                     ResponseEnum.ARGS_ERROR);
         }
+        log.info(String.format("tempDevice: %s", tempDevice));
 
         log.info(String.format("-> invoke deviceScheduler -- attachDevice. hostUuid: %s, vmUuid: %s", host.getUuid(), vm.getUuid()));
         deviceScheduler.attachDevice(tempDevice, host, vm);
