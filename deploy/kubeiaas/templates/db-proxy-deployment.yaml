@@ -1,0 +1,36 @@
+{{- if .Values.dbProxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-proxy
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.dbProxy.replicas }}
+  selector:
+    matchLabels:
+      app: db-proxy
+  template:
+    metadata:
+      labels:
+        app: db-proxy
+    spec:
+      containers:
+        - name: db-proxy
+          image: {{ .Values.dbProxy.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.dbProxy.service.port }}
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: sqlite-data
+              mountPath: /db
+      volumes:
+        - name: sqlite-data
+          nfs:
+            path: {{ .Values.nfs.paths.sqlite }}
+            server: {{ .Values.nfs.server }}
+{{- end }}

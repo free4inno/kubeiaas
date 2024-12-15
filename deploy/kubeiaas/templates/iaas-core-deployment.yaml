@@ -1,0 +1,56 @@
+{{- if .Values.iaasCore.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iaas-core
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.iaasCore.replicas }}
+  selector:
+    matchLabels:
+      app: iaas-core
+  template:
+    metadata:
+      labels:
+        app: iaas-core
+    spec:
+      containers:
+        - name: iaas-core
+          image: {{ .Values.iaasCore.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: 9080
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DHCP_NODE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nodes.dhcp
+            - name: NFS_IP
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nodes.nfs
+          volumeMounts:
+            - name: host-image
+              mountPath: /usr/local/kubeiaas/data/images
+            - name: host-data-volume
+              mountPath: /usr/local/kubeiaas/data/data-volumes
+      volumes:
+        - name: host-image
+          nfs:
+            path: {{ .Values.nfs.paths.images }}
+            server: {{ .Values.nfs.server }}
+        - name: host-data-volume
+          nfs:
+            path: {{ .Values.nfs.paths.dataVolumes }}
+            server: {{ .Values.nfs.server }}
+{{- end }}

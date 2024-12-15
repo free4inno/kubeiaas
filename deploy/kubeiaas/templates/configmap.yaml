@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMapName }}
+  namespace: {{ .Values.namespace }}
+data:
+  nodes.dhcp: {{ .Values.dhcp.server | quote }}
+  nodes.nfs: {{ .Values.nfs.server | quote }}
+
+  nfs.dir.img: {{ .Values.nfs.paths.images | quote }}
+  nfs.dir.vol: {{ .Values.nfs.paths.volumes | quote }}
+  nfs.dir.dv: {{ .Values.nfs.paths.dataVolumes | quote }}
+
+  network.bridge.type: {{ .Values.network.bridge.type | quote }}

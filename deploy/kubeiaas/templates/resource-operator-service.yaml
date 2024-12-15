@@ -1,0 +1,15 @@
+{{- if .Values.resourceOperator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: resource-operator
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: resource-operator
+  type: {{ .Values.resourceOperator.service.type }}
+  ports:
+    - port: {{ .Values.resourceOperator.service.port }}
+      targetPort: {{ .Values.resourceOperator.service.port }}
+      protocol: TCP
+{{- end }}

@@ -1,0 +1,38 @@
+{{- if .Values.imageOperator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-operator
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.imageOperator.replicas }}
+  selector:
+    matchLabels:
+      app: image-operator
+  template:
+    metadata:
+      labels:
+        app: image-operator
+    spec:
+      containers:
+        - name: image-operator
+          command: ["sh"]
+          args: ["-c", "java -jar /root/image-operator.jar"]
+          image: {{ .Values.imageOperator.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.imageOperator.service.port }}
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: host-image
+              mountPath: /host-images
+      volumes:
+        - name: host-image
+          nfs:
+            path: {{ .Values.nfs.paths.images }}
+            server: {{ .Values.nfs.server }}
+{{- end }}

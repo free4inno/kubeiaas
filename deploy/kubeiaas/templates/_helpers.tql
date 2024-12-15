@@ -1,0 +1,11 @@
+{{- define "kubeiaas.fullname" -}}
+{{ include "kubeiaas.name" . }}-{{ .Chart.Name }}
+{{- end }}
+
+{{- define "kubeiaas.name" -}}
+{{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "kubeiaas.labels" -}}
+app: {{ include "kubeiaas.name" . }}
+{{- end }}
