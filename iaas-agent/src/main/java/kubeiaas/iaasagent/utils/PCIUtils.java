@@ -66,19 +66,19 @@ public class PCIUtils {
 
         // - DOMAIN
         String domain = signs[0];
-        pciDevice.setDomain(numberStrToInteger(domain));
+        pciDevice.setDomain(Integer.parseInt(domain, 16));
 
         // - BUS
         String bus = signs[1];
-        pciDevice.setBus(numberStrToInteger(bus));
+        pciDevice.setBus(Integer.parseInt(bus, 16));
 
         // - SLOT
         String slot = signs[2].split("\\.")[0];
-        pciDevice.setSlot(numberStrToInteger(slot));
+        pciDevice.setSlot(Integer.parseInt(slot, 16));
 
         // - Function
         String func = signs[2].split("\\.")[1];
-        pciDevice.setFunction(numberStrToInteger(func));
+        pciDevice.setFunction(Integer.parseInt(func, 16));
 
         // - Name
         StringBuilder sb = new StringBuilder();
