@@ -123,8 +123,6 @@ sudo systemctl daemon-reload
 ```
 # 云主机镜像存储目录
 sudo mkdir -p /usr/local/kubeiaas/data/images
-# 云主机系统盘存储目录
-sudo mkdir -p /usr/local/kubeiaas/data/volumes
 # 云主机数据盘存储目录
 sudo mkdir -p /usr/local/kubeiaas/data/data-volumes
 # db-proxy sqlite 数据库存储目录
@@ -141,7 +139,6 @@ sudo su
 # 写入配置文件
 cat << EOF >> /etc/exports
 /usr/local/kubeiaas/data/images *(rw,no_root_squash,no_subtree_check)
-/usr/local/kubeiaas/data/volumes *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/data/data-volumes *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/sqlite *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/vnc/token *(rw,no_root_squash,no_subtree_check)
@@ -158,25 +155,25 @@ showmount -e
 
 ### 3.1 下载安装包
 
-下载并解压 [kubeiaas-2.0-release.tar.gz](/deploy/kubeiaas-2.0-release.tar.gz) 包，
+下载并解压 [kubeiaas-1.0-release.tar.gz](/deploy/kubeiaas-1.0-release.tar.gz) 包，
 
 ```
-sudo tar -xzvf kubeiaas-2.0-release.tar.gz
+sudo tar -xzvf kubeiaas-1.0-release.tar.gz
 ```
 
 解压后能够得到如下内容，
 
 ```
-├─ kubeiaas-2.0-release
+├─ kubeiaas-1.0-release
 │  ├─ iaas-config.yml
 │  ├─ iaas-components.yml
 │  ├─ iaas-front.yml
 ```
 
-进入 kubeiaas-v2.0-release 目录，
+进入 kubeiaas-v1.0-release 目录，
 
 ```
-cd ./kubeiaas-2.0-release
+cd ./kubeiaas-1.0-release
 ```
 
 ### 3.2 填写配置清单
@@ -202,9 +199,7 @@ data:
   nodes.dhcp: "192.168.33.1"
   nodes.nfs: "192.168.33.7"
 
-  # -------- NFS服务目录 --------
   nfs.dir.img: "/usr/local/kubeiaas/data/images"
-  nfs.dir.vol: "/usr/local/kubeiaas/data/volumes"
   nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 
   # -------- 网络配置 --------
