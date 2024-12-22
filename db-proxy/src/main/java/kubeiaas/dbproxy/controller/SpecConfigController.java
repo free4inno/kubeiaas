@@ -1,6 +1,6 @@
 package kubeiaas.dbproxy.controller;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.common.constants.bean.SpecConfigConstants;
@@ -31,19 +31,20 @@ public class SpecConfigController {
     @ResponseBody
     public String queryAllByType(
             @RequestParam(value = RequestParamConstants.TYPE) SpecTypeEnum type) {
-        log.info("queryAllByType ==== start ====");
+        log.info("-- start -- queryAllByType -- type: {}", type);
         Specification<SpecConfigTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(SpecConfigConstants.TYPE), type));
         List<SpecConfigTable> specConfigTableList = specConfigDao.findAll(specification);
-        log.info("queryAllByType ==== end ====");
+        log.info("-- end -- queryAllByType");
         return JSON.toJSONString(specConfigTableList);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll == ");
+        log.info("-- start -- queryAll");
         Sort s = Sort.by(Sort.Direction.ASC, SpecConfigConstants.TYPE);
+        log.info("-- end -- queryAll");
         return JSON.toJSONString(specConfigDao.findAll(s));
     }
 
@@ -51,9 +52,10 @@ public class SpecConfigController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.OBJECT) String objectStr) {
-        log.info("save == ");
+        log.info("-- start -- save -- objectStr: {}", objectStr);
         SpecConfigTable table = JSON.parseObject(objectStr, SpecConfigTable.class);
         specConfigDao.saveAndFlush(table);
+        log.info("-- end -- save");
         return JSON.toJSONString(table);
     }
 
@@ -61,8 +63,9 @@ public class SpecConfigController {
     @ResponseBody
     public synchronized void deleteById(
             @RequestParam(value = RequestParamConstants.ID) Integer id) {
-        log.info("delete == id: " + id);
+        log.info("-- start -- deleteById -- id: {}", id);
         specConfigDao.deleteById(id);
+        log.info("-- end -- deleteById");
     }
 
 }

@@ -1,8 +1,6 @@
 package kubeiaas.iaascore.process;
 
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
@@ -14,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -26,13 +26,13 @@ public class MountProcess {
     @Resource
     private MountPointUtils mountPointUtils;
 
+    // 此处逻辑挂载新硬盘时已经不再使用，由于创建vm流程尚不理解，暂时保留作为创建vm时使用。
     public boolean attachVolumes(List<Volume> volumeList, Vm vm) {
-        log.info("attaching volumes -- start");
         // 为各个 volume 分配盘符
         allocDevMountPoint(volumeList, vm);
         for (Volume volume : volumeList) {
             if (volume.getMountPoint().isEmpty()) {
-                log.error("attaching volumes -- mount point alloc error!");
+                log.error("ERROR: attachVolume failed -- mount point alloc error!");
                 return false;
             }
             if (volume.getFormatType().equals(VolumeFormatEnum.ISO)) {
@@ -43,9 +43,11 @@ public class MountProcess {
             volume.setInstanceUuid(vm.getUuid());
             volume.setStatus(VolumeStatusEnum.ATTACHED);
             // save into DB
+            log.info(String.format("-> invoke DB -- attach volume save, volumeUuid: %s, vmUuid: %s, set status: %s",
+                    volume.getUuid(), volume.getInstanceUuid(), volume.getStatus()));
             tableStorage.volumeSave(volume);
+            log.info("<- invoke DB -- done");
         }
-        log.info("attaching volumes -- end");
         return true;
     }
 
@@ -66,6 +68,7 @@ public class MountProcess {
                     }
                 } else {
                     // 2. 挂载数据盘
+                    // 获取第一个未挂载的挂载点
                     mountPoint = mountPointUtils.getMountPoint(volumeList);
                     // （在 attachVolumes 中处理返回 empty）
                     if (systemImage.getOsType().equals(ImageOSTypeEnum.WINDOWS)) {
@@ -76,7 +79,132 @@ public class MountProcess {
                 }
                 volume.setMountPoint(mountPoint);
             }
-            log.info("volume: " + volume.getUuid() + "'s mount point: " + volume.getMountPoint());
+            log.info(String.format("allocMountPoint -- volume: " + volume.getUuid() + "'s mount point: " + volume.getMountPoint()));
+        }
+    }
+
+    public Optional<Mount> processMountForVirtio(Vm vm, Iso iso, Boolean readonly) {
+        Mount mount = new Mount();
+        mount.setVmUuid(vm.getUuid());
+        mount.setIsoUuid(iso.getUuid());
+        mount.setType(VolumeConstants.STORAGE_TYPE);
+        mount.setDevice(VolumeConstants.VOLUME_DEVICE_DISK);
+        mount.setDriverType(VolumeConstants.VOLUME_DRIVER_TYPE_RAW);
+        mount.setSource(iso.getAbsolutePath());
+        Optional<String> optMountPoint = getFirstAvailableMountPoint(vm);
+        if (optMountPoint.isPresent()) {
+            mount.setMountPoint(optMountPoint.get());
+        } else {
+            log.error(String.format("ERROR: get mount point failed, vmUuid: %s, isoUuid: %s", vm.getUuid(), iso.getUuid()));
+            return Optional.empty();
+        }
+        mount.setBus(VolumeConstants.VOLUME_BUS_VIRTIO);
+        mount.setReadonly(readonly);
+
+        return Optional.of(mount);
+    }
+
+    public Optional<Mount> processMountForScsi(Vm vm, Iso iso, Boolean readonly) {
+        Mount mount = new Mount();
+        mount.setVmUuid(vm.getUuid());
+        mount.setIsoUuid(iso.getUuid());
+        mount.setType(VolumeConstants.STORAGE_TYPE);
+        mount.setDevice(VolumeConstants.VOLUME_DEVICE_CDROM);
+        mount.setDriverType(VolumeConstants.VOLUME_DRIVER_TYPE_RAW);
+        mount.setSource(iso.getAbsolutePath());
+        // TODO: 2023/9/25 临时解决方案，分配最后一个挂载点，然后libvirt自动分配。不影响virtio方式挂载，待修改
+        List<String> mountPoints = getAlLAvailableMountPoints(vm);
+        if (!mountPoints.isEmpty()) {
+            mount.setMountPoint(mountPoints.get(mountPoints.size() - 1));
+        } else {
+            log.error(String.format("ERROR: get mount point failed, vmUuid: %s, isoUuid: %s", vm.getUuid(), iso.getUuid()));
+            return Optional.empty();
+        }
+        mount.setBus(VolumeConstants.VOLUME_BUS_IDE);
+        mount.setReadonly(readonly);
+
+        return Optional.of(mount);
+    }
+
+    public Optional<String> getMountPointForIso(Vm vm) {
+        List<String> mountPoints = getAlLAvailableMountPoints(vm);
+        if (!mountPoints.isEmpty()) {
+            return Optional.of(mountPoints.get(mountPoints.size() - 1));
+        } else {
+            log.error(String.format("ERROR: get mount point failed, vmUuid: %s", vm.getUuid()));
+            return Optional.empty();
+        }
+    }
+
+    // private methods
+    private static Set<Character> findMissingElements(List<String> list, char start, char end) {
+        Set<Character> thirdChars = new HashSet<>();
+        for (String s : list) {
+            if (s.length() >= 3) {
+                thirdChars.add(s.charAt(2));
+            }
+        }
+
+        Set<Character> rangeSet = IntStream.rangeClosed(start, end).mapToObj(i -> (char) i).collect(Collectors.toSet());
+
+        rangeSet.removeAll(thirdChars);
+        return rangeSet;
+    }
+
+    private List<String> getAllocatedMountPoints(Vm vm) {
+        List<String> usedMountPoints = new ArrayList<>();
+
+        // 1. Get all volumes of this vm
+        List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vm.getUuid());
+        for (Volume volume : volumeList) {
+            if (volume.getStatus().equals(VolumeStatusEnum.ATTACHED)
+                    && volume.getMountPoint() != null
+                    && !volume.getMountPoint().isEmpty()) {
+                usedMountPoints.add(volume.getMountPoint());
+            }
+        }
+        // 2. Get all iso mount points of this vm
+        usedMountPoints.addAll(tableStorage.queryAllMountPointsByVmUuid(vm.getUuid()));
+
+        return usedMountPoints;
+    }
+
+    private String getMountPointPrefix(ImageOSTypeEnum osType, String device) {
+        if (osType.equals(ImageOSTypeEnum.WINDOWS)) {
+            return VolumeConstants.WIN_PREFIX;
+        } else {
+            if (device.equals(VolumeConstants.VOLUME_DEVICE_DISK)) {
+                return VolumeConstants.DEV_PREFIX;
+            } else if (device.equals(VolumeConstants.VOLUME_DEVICE_CDROM)) {
+                return VolumeConstants.ISO_PREFIX;
+            } else {
+                // default
+                return VolumeConstants.DEV_PREFIX;
+            }
+        }
+    }
+
+    private Optional<String> getFirstAvailableMountPoint(Vm vm) {
+        List<String> allocatedMountPoints = getAllocatedMountPoints(vm);
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_DISK);
+        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, 'a', 'z');
+        if (availableMountPoints.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(prefix + availableMountPoints.iterator().next());
+        }
+    }
+
+    private List<String> getAlLAvailableMountPoints(Vm vm) {
+        List<String> allocatedMountPoints = getAllocatedMountPoints(vm);
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+        String prefix = getMountPointPrefix(image.getOsType(), VolumeConstants.VOLUME_DEVICE_DISK);
+        Set<Character> availableMountPoints = findMissingElements(allocatedMountPoints, 'a', 'z');
+        if (availableMountPoints.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            return availableMountPoints.stream().map(c -> prefix + c).collect(Collectors.toList());
         }
     }
 }

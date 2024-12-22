@@ -1,0 +1,15 @@
+{{- if .Values.dbProxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-proxy
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: db-proxy
+  type: {{ .Values.dbProxy.service.type }}
+  ports:
+    - port: {{ .Values.dbProxy.service.port }}
+      targetPort: {{ .Values.dbProxy.service.port }}
+      protocol: TCP
+{{- end }}

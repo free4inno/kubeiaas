@@ -1,6 +1,6 @@
 package kubeiaas.iaascore.openapi;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.iaascore.dao.TableStorage;
@@ -36,9 +36,13 @@ public class HostOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
+
+        log.info("-> invoke DB -- hostQueryAll");
         List<Host> hostList = tableStorage.hostQueryAll();
-        log.info("queryAll ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(hostList));
     }
 
@@ -48,27 +52,27 @@ public class HostOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
-        log.info("statistics ==== start ====");
+        log.info("-- start -- statistics");
         Map<String, Integer> resMap = hostService.getStatistics();
-        log.info("statistics ==== end ====");
+        log.info("-- end -- statistics -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.NODE_RESOURCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String nodeResource() {
-        log.info("nodeResource ==== start ====");
+        log.info("-- start -- nodeResource");
         Map<String, Object> resMap = hostService.getNodeResource();
-        log.info("nodeResource ==== end ====");
+        log.info("-- end -- nodeResource -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.NET_STO_RESOURCE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String netStoResource() {
-        log.info("netStorageResource ==== start ====");
+        log.info("-- start -- netStoResource");
         Map<String, Object> resMap = hostService.getNetStoResource();
-        log.info("netStorageResource ==== end ====");
+        log.info("-- end -- netStoResource -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -76,9 +80,9 @@ public class HostOpenAPI {
     @ResponseBody
     public String setNodeResource(
             @Valid @RequestBody SetHostResourceForm f) throws BaseException {
-        log.info("setNodeResource ==== start ====");
+        log.info("-- start -- setNodeResource");
         Host host = hostService.setResource(f.getHostUuid(), f.getVcpu(), f.getMem(), f.getStorage());
-        log.info("setNodeResource ==== end ====");
+        log.info("-- end -- setNodeResource -- success");
         return JSON.toJSONString(BaseResponse.success(host));
     }
 }

@@ -1,0 +1,87 @@
+namespace: kubeiaas
+
+imagePullPolicy: Always
+
+nfs:
+  server: "192.168.31.6"
+  paths:
+    images: "/usr/local/kubeiaas/data/images"
+    dataVolumes: "/usr/local/kubeiaas/data/data-volumes"
+    volumes: "/usr/local/kubeiaas/data/volumes"
+    sqlite: "/usr/local/kubeiaas/sqlite"
+    vncToken: "/usr/local/kubeiaas/vnc/token"
+
+dhcp:
+  server: "192.168.31.6"
+
+network:
+  bridge:
+    type: "MACV"
+
+configMapName: "iaas-config"
+
+# iaas-core
+iaasCore:
+  enabled: true
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-core:1.1.0-SNAPSHOT"
+  service:
+    type: NodePort
+    port: 9080
+    nodePort: 32210
+
+# iaas-agent (DaemonSet)
+iaasAgent:
+  enabled: true
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-agent:1.1.0-SNAPSHOT"
+  prepareImage: "registry.cn-beijing.aliyuncs.com/kubeiaas/iaas-prepare:1.0-RELEASE"
+  service:
+    type: ClusterIP
+    port: 9090
+  # 是否使用Always拉取prepare镜像(生产环境可改为IfNotPresent)
+  prepareImagePullPolicy: IfNotPresent
+
+# db-proxy
+dbProxy:
+  enabled: true
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/db-proxy:1.1.0-SNAPSHOT"
+  service:
+    type: ClusterIP
+    port: 9091
+
+# sqlite-tunnel
+sqliteTunnel:
+  enabled: true
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/sqlite-tunnel:1.0"
+  containerPort: 8011
+  hostPortEnabled: false # 设置为true时启用hostPort（prod环境请设置为false）
+
+# iaas-novnc
+iaasNovnc:
+  enabled: true
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/novnc:1.3.0"
+  service:
+    type: NodePort
+    port: 8787
+    nodePort: 32202
+
+# image-operator
+imageOperator:
+  enabled: true
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/image-operator:2.0-RELEASE"
+  service:
+    type: ClusterIP
+    port: 9093
+
+# resource-operator
+resourceOperator:
+  enabled: true
+  replicas: 1
+  image: "registry.cn-beijing.aliyuncs.com/kubeiaas/resource-operator:1.0-RELEASE"
+  service:
+    type: ClusterIP
+    port: 9092

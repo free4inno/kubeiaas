@@ -59,7 +59,7 @@ spec:
         kubeiaas/ctl: "true"
       containers:
         - name: front-web-jarpackage
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.0-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT
           command: ['sh']
           args:
             - "-c"
@@ -69,7 +69,7 @@ spec:
           ports:
             - containerPort: 8080
         - name: nginx
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-nginx:1.0-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-nginx:1.1.0-SNAPSHOT
           command: [ "/bin/sh", "-c", "--" ]
           args: [ "tar -xvf /workdir/iaas-vue.tar.gz -C /tmp; cp -rf /tmp/dist/* /usr/share/nginx/html/; nginx -g \"daemon off;\"" ]
           imagePullPolicy: IfNotPresent

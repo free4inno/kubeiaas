@@ -1,6 +1,6 @@
 package kubeiaas.imageoperator.utils;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.bean.ImageConstants;
 import kubeiaas.common.constants.bean.VolumeConstants;
@@ -31,13 +31,50 @@ public class ImageUtils {
             }
             fileReader.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            log.error("getRawFromYaml -- file not exist!");
+            log.error("ERROR: getRawFromYaml -- file not exist!", e);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("getRawFromYaml -- read file failed!");
+            log.error("ERROR: getRawFromYaml -- read file failed!", e);
         }
         return content.toString();
+    }
+
+    public static boolean processIsoImage(String sourceYaml, String destYaml, String uuid, ImageUploadFormatEnum formatEnum) {
+        String fileName = String.format("%s.%s", uuid, formatEnum.getFormat());
+        Yaml yaml = new Yaml();
+        try {
+            // 读取原始YAML文件
+            FileInputStream inputStream = new FileInputStream(sourceYaml);
+            Map<String, Object> data = yaml.load(inputStream);
+
+            // 修改YAML内容
+            Map<String, Object> imageData = (Map<String, Object>) data.get("image");
+            imageData.put("filename", fileName);
+            imageData.put("uuid", uuid);
+
+            // 检查镜像文件格式
+            Map<String, Object> spec = (Map<String, Object>) imageData.get("spec");
+            if (spec == null) {
+                log.error("ERROR: processIsoImage -- spec is null!");
+                return false;
+            }
+            ImageFormatEnum format = EnumUtils.getEnumFromString(ImageFormatEnum.class, (String) spec.get("format"));
+            if (!ImageUploadFormatEnum.isMatch(formatEnum, format)) {
+                log.error("ERROR: processIsoImage -- format not match!");
+                return false;
+            }
+
+            // 将修改后的内容写入到新的YAML文件
+            DumperOptions options = new DumperOptions();
+            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            Yaml newYaml = new Yaml(options);
+            FileWriter writer = new FileWriter(destYaml);
+            newYaml.dump(data, writer);
+            writer.close();
+            return true;
+        } catch (IOException e) {
+            log.error("ERROR: processIsoImage -- file not exist!", e);
+            return false;
+        }
     }
 
     public static Image getImageFromYaml(String filePath, Integer id) {
@@ -50,12 +87,21 @@ public class ImageUtils {
             BufferedReader br = new BufferedReader(fr);
             Yaml yaml = new Yaml();
             objectMap = yaml.load(br);
-            log.info("yamlContent: " + JSON.toJSONString(objectMap));
+            log.info("getImageFromYaml -- yamlContent: {}", JSON.toJSONString(objectMap));
 
             Map<String, Object> imageMap = (Map<String, Object>) objectMap.get("image");
             String name = (String) imageMap.get("name");
             String description = (String) imageMap.get("description");
-            String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + imageMap.get("filename");
+            String fileName = (String) imageMap.get("filename");
+            String directory = ImageConfig.HOST_STORAGE_IMAGE_PATH + fileName;
+            ImageUploadingStatusEnum downloadingStatus;
+            if (new File(ImageConfig.CONTAINER_STORAGE_PATH + fileName).exists()) {
+                downloadingStatus = ImageUploadingStatusEnum.UPLOADED;
+            } else if (new File(ImageConfig.IMAGE_DOWNLOADING_PATH + fileName).exists()) {
+                downloadingStatus = ImageUploadingStatusEnum.UPLOADING;
+            } else {
+                downloadingStatus = ImageUploadingStatusEnum.ERROR;
+            }
 
             Map<String, Object> spec = (Map<String, Object>) imageMap.get("spec");
             // Float size = ((Double) spec.get("size")).floatValue();
@@ -87,12 +133,12 @@ public class ImageUtils {
             fr.close();
 
             Image image = new Image(id + 1, uuid, name, description, directory, format, null, vdSize,
-                    ImageStatusEnum.AVAILABLE, null, null, osType, osArch, osMode, null, childImageList);
+                    ImageStatusEnum.AVAILABLE, downloadingStatus, 0, null, null, osType, osArch, osMode, null, childImageList);
 
-            log.info("image: " + JSON.toJSONString(image));
+            log.info("build imageObject success -- imageObject: {}", JSON.toJSONString(image));
             return image;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: getImageFromYaml -- FILE PARSE ERROR!", e);
             Image image = new Image();
             image.setUuid(uuid);
             image.setName("NA");
@@ -109,7 +155,7 @@ public class ImageUtils {
         // 创建FileWriter
         String uuid = image.getUuid();
         String filepath = ImageConfig.CONTAINER_STORAGE_PATH + uuid + ImageConstants.IMAGE_YAML_SUFFIX;
-        log.info("createImageYaml -- filePath: " + filepath);
+        log.info("createImageYaml -- filePath: {}", filepath);
 
         // new file writer
         FileWriter fileWriter = new FileWriter(filepath);
@@ -154,6 +200,8 @@ public class ImageUtils {
         // 构建最顶层yaml
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("image", imageData);
+
+        log.info("write yaml file -- yamlContent: {}", JSON.toJSONString(dataMap));
         yaml.dump(dataMap, fileWriter);
 
         fileWriter.close();
@@ -169,12 +217,15 @@ public class ImageUtils {
     public static boolean deleteFile(String filePath) {
         try {
             File file = new File(filePath);
+            log.info("deleteFile -- path: {}", filePath);
             return file.delete();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: delete file failed! filePath: {}", filePath, e);
             return false;
         }
     }
+
+    // PRIVATE ------------------------
 
     private static String getImageFileName(String imageUuid, ImageFormatEnum formatEnum){
         switch (formatEnum){

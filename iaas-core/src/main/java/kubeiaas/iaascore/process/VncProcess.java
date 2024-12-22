@@ -2,6 +2,7 @@ package kubeiaas.iaascore.process;
 
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.bean.Vm;
+import kubeiaas.iaascore.config.AgentConfig;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.scheduler.VncScheduler;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,6 @@ public class VncProcess {
     private VncScheduler vncScheduler;
 
     public void addVncToken(Vm newVm){
-        log.info("createVm -- setting VNC start");
         // 1. GET VM UUID
         String vmUuid = newVm.getUuid();
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
@@ -29,7 +29,6 @@ public class VncProcess {
         // 2. GET VNC PORT
         String vncPort = vm.getVncPort();
         if (vncPort == null || vncPort.isEmpty()) {
-            log.info("createVm -- no port available, setting VNC end");
             return;
         }
 
@@ -39,18 +38,18 @@ public class VncProcess {
 
         // 4. BUILD ADDRESS AND ADD
         String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
+        log.info("-> invoke vncScheduler -- addVncToken");
         vncScheduler.addVncToken(vmUuid, address);
-        log.info("createVm -- success, setting VNC end");
+        log.info("<- invoke vncScheduler -- done");
     }
 
     public void deleteVncToken(String vmUuid){
-        log.info("deleteVm --  delete VNC start");
+        log.info("-> invoke vncScheduler -- deleteVncToken");
         vncScheduler.deleteVncToken(vmUuid);
-        log.info("deleteVm --  delete VNC end");
+        log.info("<- invoke vncScheduler -- done");
     }
 
     public Vm flushVncToken(String vmUuid){
-        log.info("flush VNC start");
 
         // 异步执行 vmCreate 需要重新查库获取 vnc port & password
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
@@ -64,12 +63,20 @@ public class VncProcess {
 
         // 4. BUILD ADDRESS AND ADD
         String address = vncIp + ":" + (Integer.parseInt(vncPort) + 5900);
+        log.info("-> invoke vncScheduler -- flushVncToken");
         vncScheduler.flushVncToken(vmUuid, address);
+        log.info("<- invoke DB -- done");
 
-        log.info("flush VNC end");
         return vm;
     }
 
-
+    public Integer getVncPort(String vmUuid, Host host){
+        log.info("-> invoke vncScheduler -- getVncPort");
+        AgentConfig.setSelectedHost(vmUuid, host);
+        Integer vncPort = vncScheduler.getVncPort(vmUuid);
+        AgentConfig.clearSelectedHost(vmUuid);
+        log.info("<- invoke vncScheduler -- done");
+        return vncPort;
+    }
 }
 

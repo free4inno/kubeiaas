@@ -37,26 +37,44 @@ public class DeviceTable extends Device {
 
     @Override
     @Column(name = "bus")
-    public String getBus() {
+    public Integer getBus() {
         return super.getBus();
     }
 
     @Override
     @Column(name = "dev")
-    public String getDev() {
+    public Integer getDev() {
         return super.getDev();
     }
 
     @Override
     @Column(name = "vendor")
-    public String getVendor() {
+    public Integer getVendor() {
         return super.getVendor();
     }
 
     @Override
     @Column(name = "product")
-    public String getProduct() {
+    public Integer getProduct() {
         return super.getProduct();
+    }
+
+    @Override
+    @Column(name = "domain")
+    public Integer getDomain() {
+        return super.getDomain();
+    }
+
+    @Override
+    @Column(name = "slot")
+    public Integer getSlot() {
+        return super.getSlot();
+    }
+
+    @Override
+    @Column(name = "function")
+    public Integer getFunction() {
+        return super.getFunction();
     }
 
     @Override

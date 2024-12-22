@@ -13,7 +13,7 @@ public class HeartbeatController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HEARTBEAT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String heartbeat() {
-        log.info("heartbeat...");
+        log.info("-- heartbeat");
         return "heartbeat";
     }
 }

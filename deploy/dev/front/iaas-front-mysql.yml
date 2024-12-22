@@ -18,7 +18,7 @@ spec:
         kubeiaas/ctl: "true"
       containers:
         - name: front-mysql
-          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-mysql:1.0-SNAPSHOT
+          image: registry.cn-beijing.aliyuncs.com/kubeiaas/front-mysql:1.1.0-SNAPSHOT
           # -------- change to IfNotPresent when prod
           imagePullPolicy: Always
           ports:

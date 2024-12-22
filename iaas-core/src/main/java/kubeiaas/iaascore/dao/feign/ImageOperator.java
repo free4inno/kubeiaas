@@ -46,6 +46,16 @@ public interface ImageOperator {
     @ResponseBody
     String imageSaveYaml(@RequestBody SaveImageForm f);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_IMAGE_UPLOAD_STATUS)
+    @ResponseBody
+    String imageQueryUploadStatus(
+            @RequestParam(value = RequestParamConstants.UUID) String uuid);
+
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.UPLOAD)
+    @ResponseBody
+    String imageUpload(
+            @RequestParam(value = RequestParamConstants.ID) int id);
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE)
     @ResponseBody
     String imageDelete(

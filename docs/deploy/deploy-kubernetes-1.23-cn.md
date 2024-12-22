@@ -187,7 +187,7 @@ kubectl create -f kube-flannel.yml
 kubectl get pods --all-namespaces
 ```
 
-至此，已成功在 Ubuntu 上安装了 Kubernetes 1.35。现在可以按照 [KubeIaaS 部署文档](/docs/deploy/deploy-kubeiaas-1.0-ubuntu-cn.md) 开始在集群上部署 KubeIaaS 了。
+至此，已成功在 Ubuntu 上安装了 Kubernetes 1.35。现在可以按照 [KubeIaaS 部署文档](/docs/deploy/deploy-kubeiaas-2.0-ubuntu-cn) 开始在集群上部署 KubeIaaS 了。
 
 ## 常见问题
 

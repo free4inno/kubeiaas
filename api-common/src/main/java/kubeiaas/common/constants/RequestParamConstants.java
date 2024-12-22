@@ -15,6 +15,8 @@ public class RequestParamConstants {
     public static final String HOST_NAME = "host_name";
     public static final String VM_UUID = "vm_uuid";
     public static final String VOLUME_UUID = "volume_uuid";
+    public static final String INSTANCE_UUID = "instance_uuid";
+    public static final String BOOT_ORDER = "boot_order";
 
     public static final String KEY_1 = "key_1";
     public static final String VALUE_1 = "value_1";
@@ -31,11 +33,15 @@ public class RequestParamConstants {
     public static final String PAGE_SIZE = "page_size";
 
     /* ===== VM ===== */
+    public static final String XML_DESC = "xml_desc";
     public static final String VM_OBJECT = "vm_object";
 
     public static final String CPUS = "cpus";
     public static final String MEMORY = "memory";
     public static final String DISK_SIZE = "disk_size";
+
+    public static final String USER = "user";
+    public static final String PASSWD = "passwd";
 
     /* ===== IMAGE ===== */
     public static final String IMAGE_OBJECT = "image_object";
@@ -49,13 +55,27 @@ public class RequestParamConstants {
     public static final String IP_USED_OBJECT = "ip_used_object";
     public static final String MAC = "mac";
     public static final String IP = "ip";
+    public static final String HOST_URI = "host_uri";
+
+    /* ===== HOST BRIDGE ===== */
+    public static final String HOST_BRIDGE_OBJECT = "host_bridge_object";
+    public static final String HOST_BRIDGE_ID = "host_bridge_id";
 
     /* ===== VOLUME ===== */
     public static final String VOLUME_ID = "volume_id";
     public static final String VOLUME_OBJECT = "volume_object";
     public static final String EXTRA_SIZE = "extra_size";
+    public static final String VOLUME_SIZE = "volume_size";
     public static final String IMAGE_PATH = "image_path";
     public static final String VOLUME_PATH = "volume_path";
+    public static final String VOLUME_TYPE = "volume_type";
+
+    /* ===== ISO ===== */
+    public static final String ISO_UUID = "iso_uuid";
+    public static final String ISO_OBJECT = "iso_object";
+    public static final String MOUNT_OBJECT = "mount_object";
+
+    public static final String FILE_URL = "file_url";
 
     /* ===== HOST ===== */
     public static final String HOST_OBJECT = "host_object";

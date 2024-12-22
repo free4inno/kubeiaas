@@ -1,6 +1,6 @@
 package kubeiaas.dbproxy.controller;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.dbproxy.dao.IpUsedDao;
@@ -28,22 +28,33 @@ public class IpUsedController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<IpUsedTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<IpUsedTable> ipUsedTableList = ipUsedDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(ipUsedTableList);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL_BY_INSTANCE_UUID, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public String queryAllByInstanceUuid(
+            @RequestParam(value = RequestParamConstants.INSTANCE_UUID) String instanceUuid) {
+        log.info("-- start -- queryAllByInstanceUuid -- instanceUuid: {}", instanceUuid);
+        List<IpUsedTable> ipUsedTableList = ipUsedDao.findAllByInstanceUuid(instanceUuid);
+        log.info("-- end -- queryAllByInstanceUuid");
+        return JSON.toJSONString(ipUsedTableList);
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.SAVE, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.IP_USED_OBJECT) String ipUsedObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- ipUsedObjectStr: {}", ipUsedObjectStr);
         IpUsedTable ipUsedTable = JSON.parseObject(ipUsedObjectStr, IpUsedTable.class);
         ipUsedDao.saveAndFlush(ipUsedTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(ipUsedTable);
     }
 
@@ -51,9 +62,9 @@ public class IpUsedController {
     @ResponseBody
     public synchronized void deleteByVmUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid) {
-        log.info("deleteUsedIpsByInstanceUuid ==== start ==== vmUuid:" + vmUuid);
+        log.info("-- start -- deleteByVmUuid -- vmUuid: {}", vmUuid);
         ipUsedDao.deleteAllByInstanceUuid(vmUuid);
-        log.info("deleteUsedIpsByInstanceUuid ==== end ==== ");
+        log.info("-- end -- deleteByVmUuid");
     }
 
 }

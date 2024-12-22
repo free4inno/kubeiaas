@@ -1,0 +1,16 @@
+{{- if .Values.iaasNovnc.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-novnc
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: iaas-novnc
+  type: {{ .Values.iaasNovnc.service.type }}
+  ports:
+    - port: {{ .Values.iaasNovnc.service.port }}
+      nodePort: {{ .Values.iaasNovnc.service.nodePort }}
+      targetPort: {{ .Values.iaasNovnc.service.port }}
+      protocol: TCP
+{{- end }}

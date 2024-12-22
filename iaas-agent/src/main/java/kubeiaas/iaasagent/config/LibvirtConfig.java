@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.eclipse.aether.util.ConfigUtils;
 import org.libvirt.Connect;
 import org.libvirt.LibvirtException;
 import org.springframework.context.annotation.Configuration;
@@ -35,15 +34,22 @@ public class LibvirtConfig {
     private static Integer MAX_MEMORY = 16;
     private static Integer MAX_CPU = 16;
 
+    // ------ qemu conf ------
     private static String emulatorName = "/usr/bin/qemu-system-x86_64";    //the location of kvm simulation
     private static final String virConStr = "qemu:///system";
 
+    // ------ network ------
     public static String networkType = System.getenv("NETWORK_BRIDGE_TYPE");
     public static final String NETWORK_TYPE_LINUX = "Linux";
     public static final String NETWORK_TYPE_OVS = "OVS";
     public static final String NETWORK_TYPE_MACV = "MACVLAN";
 
+    // ------ command template ------
     public static String getVncPort = "virsh vncdisplay ";
+
+    public static final String SET_PASSWD = "virsh set-user-password %s --user '%s' --password '%s' 2>&1";
+    public static final String ERROR_FLAG = "error";
+    // ------------------------------
 
     public LibvirtConfig() {
         emulatorName = getEmulatorLocation();
@@ -55,8 +61,7 @@ public class LibvirtConfig {
         try {
             connect = new Connect(conStr);
         } catch (LibvirtException e) {
-            log.error("get virt connection error");
-            log.error(e.getMessage());
+            log.error("ERROR: get libvirt connection error", e);
         }
         return connect;
     }
@@ -64,15 +69,13 @@ public class LibvirtConfig {
     /**
      * 获取 xml 中 emulator 的位置，目前 CentOS 是 /usr/local/bin/qemu-system-x86_64, Ubuntu 是 /usr/bin/qemu-system-x86_64
      * 为了防止之后 emulator 路径会改变，或者运维时设置错误，目前使用三种方式可以更改：
-     *
      * 1、使用 whereis 命令，查找全部 emulator 的路径，找到中间含有 usr & bin 的路径，然后返回这个值;
      * 2、默认使用查找到的首个位置
      * 3、加载 static 中的 emulatorName 的默认值。
-     *
      * 三个方法有先后顺序，一个生效之后，则不执行剩下的步骤，所以更改时，一定注意先后顺序。
      */
     private static String getEmulatorLocation() {
-        log.info("execute \"whereis qemu-system-x86_64\" cmd ");
+        log.debug("execute \"whereis qemu-system-x86_64\" cmd ");
         String tempLocation = ShellUtils.getCmd("whereis qemu-system-x86_64");
         /* CentOS:
          *      qemu-system-x86_64: /usr/local/bin/qemu-system-x86_64
@@ -94,7 +97,6 @@ public class LibvirtConfig {
 
     /**
      * 刷新用户计算资源上限配置
-     *
      * 从配置表中读取配置，并按照配置设置最大值，期间需要防止用户的 空配置 / 错误配置
      * 在每次生产新的 XML 前刷新
      */
@@ -114,7 +116,7 @@ public class LibvirtConfig {
                     tempMaxCpu = Math.max(nowCpu, tempMaxCpu);
                     tempMaxMem = Math.max(nowMem, tempMaxMem);
                 } catch (Exception e) {
-                    log.warn("bad config value '{}'. {}", conf.getValue(), e.getMessage());
+                    log.warn(String.format("WARN: bad config value -- '{%s}'. {%s}", conf.getValue(), e.getMessage()));
                 }
             }
         }
@@ -133,7 +135,6 @@ public class LibvirtConfig {
             List<IpUsed> ips,
             int cpu,
             int memory) {
-        log.info("generateDesXML ---- start ----");
 
         // refresh MAX setting
         this.refreshMaxCompute();
@@ -211,6 +212,21 @@ public class LibvirtConfig {
         devices.addElement("input").addAttribute("type", "tablet")
                 .addAttribute("bus", "usb");
 
+        // QGA (Qemu-Guest-Agent)
+        Element channel = devices.addElement("channel")
+                .addAttribute("type", "unix");
+        channel.addElement("source")
+                .addAttribute("mode", "bind")
+                .addAttribute("path", "/var/lib/libvirt/qemu/org.qemu.guest_agent.0");
+        channel.addElement("target")
+                .addAttribute("type", "virtio")
+                .addAttribute("name", "org.qemu.guest_agent.0");
+
+        Element memballoon = devices.addElement("memballoon")
+                .addAttribute("model", "virtio");
+        memballoon.addElement("stats")
+                .addAttribute("period", "10");
+
         // VNC设置
         Element graphicsVNC = devices.addElement("graphics")
                 .addAttribute("type", "vnc")
@@ -222,7 +238,6 @@ public class LibvirtConfig {
                 .addAttribute("type", "address")
                 .addAttribute("address", "0.0.0.0");
 
-        log.info("generateDesXML ---- end ----");
         return document.asXML();
     }
 
@@ -232,14 +247,12 @@ public class LibvirtConfig {
      * TYPE 1: 截取部分，供外部类调用
      */
     public String ipToNetwork(IpUsed ip) {
-        log.info("ipToNetwork ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         ipToNetworkXml(ip, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("ipToNetwork ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -247,13 +260,13 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void ipToNetworkXml(IpUsed ip, Element devices) {
-        log.info("ipToNetworkXml ---- start ----");
         Element netInterface = devices.addElement("interface");
+        log.info("start: "+netInterface.toString());
 
         switch (networkType) {
             case NETWORK_TYPE_LINUX:
                 // == Linux: target & device
-                log.info("---- NETWORK_TYPE: Linux (tap={})", getTap(ip.getMac()));
+                log.debug("---- NETWORK_TYPE: Linux (tap={})", getTap(ip.getMac()));
 
                 netInterface.addAttribute("type", "bridge");
                 // 设置基本网卡信息
@@ -269,7 +282,7 @@ public class LibvirtConfig {
 
             case NETWORK_TYPE_OVS:
                 // == OVS: virtualPort & type(OpenVSwitch)
-                log.info("---- NETWORK_TYPE: OVS");
+                log.debug("---- NETWORK_TYPE: OVS");
 
                 netInterface.addAttribute("type", "bridge");
                 // 设置基本网卡信息
@@ -286,7 +299,7 @@ public class LibvirtConfig {
             case NETWORK_TYPE_MACV:
             default:
                 // == MACV: macvlan & macvtap
-                log.info("---- NETWORK_TYPE: MACV");
+                log.debug("---- NETWORK_TYPE: MACV");
 
                 netInterface.addAttribute("type", "direct");
                 // 设置基本网卡信息
@@ -305,7 +318,9 @@ public class LibvirtConfig {
         netInterface.addElement("model").
                 addAttribute("type", "virtio");
 
-        log.info("ipToNetworkXml ---- end ----");
+        log.info("end: "+netInterface.toString());
+        log.info("bridge: "+ip.getBridge());
+
     }
 
     private String getTap(String str) {
@@ -319,14 +334,12 @@ public class LibvirtConfig {
      * TYPE 1: 截取部分，供外部类调用
      */
     public String volumeToDisk(Volume volume) {
-        log.info("volumeToDisk ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         volumeToDiskXml(volume, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("volumeToDisk ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -334,7 +347,6 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void volumeToDiskXml(Volume volume, Element devices) {
-        log.info("volumeToDiskXml ---- start ----");
         String volumeType = getVolumeDiskDevice(volume.getFormatType());
 
         Element disk = devices.addElement("disk")
@@ -356,7 +368,6 @@ public class LibvirtConfig {
                 .addAttribute("dev", volume.getMountPoint())
                 .addAttribute("bus", volume.getBus());
 
-        log.info("volumeToDiskXml ---- end ----");
     }
 
     private String getVolumeDiskDevice(VolumeFormatEnum volumeType) {
@@ -366,20 +377,53 @@ public class LibvirtConfig {
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 
-    // ===== DEVICE ====================================================================================================
+    // ===== ISO ====================================================================================================
+    public String convertMountToLibvirtXML(Mount mount) {
+        log.info("isoAsScsiXml ---- start ----");
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        // Configure device
+        Element disk = devices.addElement("disk")
+                .addAttribute("type", mount.getType())
+                .addAttribute("device", mount.getDevice());
+        disk.addElement("driver")
+                .addAttribute("name", "qemu")
+                .addAttribute("type", mount.getDriverType());
+        disk.addElement("source")
+                .addAttribute("file", mount.getSource());
+        disk.addElement("target")
+            .addAttribute("dev", mount.getMountPoint())
+            .addAttribute("bus", mount.getBus());
+        if (mount.getReadonly() != null && mount.getReadonly()) {
+            disk.addElement("readonly");
+        }
+        disk.addElement("address")
+                .addAttribute("type", "drive")
+                .addAttribute("controller", "0")
+                .addAttribute("bus", "1")
+                .addAttribute("target", "0")
+                .addAttribute("unit", "0");
+
+        String xml = devices.asXML();
+        xml = xml.replaceAll("<root>", "")
+                .replaceAll("</root>", "")
+                .trim();
+        log.info("isoAsScsiXml ---- end ---- xml: " + xml);
+        return xml;
+    }
+
+    // ===== USB DEVICE ====================================================================================================
 
     /**
      * TYPE 1: 截取部分，供外部类调用
      */
     public String usbToDevice(Device device) {
-        log.info("usbToDevice ---- start ----");
         Document root = DocumentHelper.createDocument();
         Element devices = root.addElement("root");
         usbToDeviceXml(device, devices);
         String res = devices.asXML();
         res = res.replaceAll("<root>", "");
         res = res.replaceAll("</root>", "");
-        log.info("usbToDevice ---- end ---- res: " + res.trim());
         return res.trim();
     }
 
@@ -387,7 +431,6 @@ public class LibvirtConfig {
      * TYPE 2: 树形叠加，供本类内部构造使用
      */
     private void usbToDeviceXml(Device device, Element devices) {
-        log.info("usbToDeviceXml ---- start ----");
 
         Element hostdev = devices.addElement("hostdev")
                 .addAttribute("mode", "subsystem")
@@ -395,13 +438,72 @@ public class LibvirtConfig {
 
         Element source = hostdev.addElement("source");
         source.addElement("vendor")
-                .addAttribute("id", device.getVendor());
+                .addAttribute("id", "0x" + Integer.toHexString(device.getVendor()));
         source.addElement("product")
-                .addAttribute("id", device.getProduct());
+                .addAttribute("id", "0x" + Integer.toHexString(device.getProduct()));
         source.addElement("address")
-                .addAttribute("bus", device.getBus())
-                .addAttribute("device", device.getDev());
+                .addAttribute("bus", "0x" + Integer.toHexString(device.getBus()))
+                .addAttribute("device", "0x" + Integer.toHexString(device.getDev()));
 
-        log.info("usbToDeviceXml ---- end ----");
+    }
+
+    // ===== PCIE DEVICE ====================================================================================================
+
+    /**
+     * TYPE 1: 截取部分，供外部类调用
+     */
+    public String pciToDevice(Device device) {
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        pciToDeviceXml(device, devices);
+        String res = devices.asXML();
+        res = res.replaceAll("<root>", "");
+        res = res.replaceAll("</root>", "");
+        return res.trim();
+    }
+
+    /**
+     * TYPE 2: 树形叠加，供本类内部构造使用
+     */
+    private void pciToDeviceXml(Device device, Element devices) {
+
+        Element hostdev = devices.addElement("hostdev")
+                .addAttribute("mode", "subsystem")
+                .addAttribute("type", "pci")
+                .addAttribute("managed", "yes");
+
+        Element source = hostdev.addElement("source");
+        source.addElement("address")
+                .addAttribute("domain", "0x" + Integer.toHexString(device.getDomain()))
+                .addAttribute("bus", "0x" + Integer.toHexString(device.getBus()))
+                .addAttribute("slot", "0x" + Integer.toHexString(device.getSlot()))
+                .addAttribute("function", "0x" + Integer.toHexString(device.getFunction()));
+
+        Element driver = hostdev.addElement("driver")
+                .addAttribute("name", "vfio");
+
+    }
+
+    // ===== MDEV DEVICE ====================================================================================================
+    public String mdevToDevice(Device device) {
+        Document root = DocumentHelper.createDocument();
+        Element devices = root.addElement("root");
+        mdevToDeviceXml(device, devices);
+        String res = devices.asXML();
+        res = res.replaceAll("<root>", "");
+        res = res.replaceAll("</root>", "");
+        return res.trim();
+    }
+
+    private void mdevToDeviceXml(Device device, Element devices) {
+        Element hostdev = devices.addElement("hostdev")
+                .addAttribute("mode", "subsystem")
+                .addAttribute("type", "mdev")
+                .addAttribute("model", "vfio-pci");
+
+        Element source = hostdev.addElement("source");
+        source.addElement("address")
+                .addAttribute("uuid", device.getName());
+
     }
 }

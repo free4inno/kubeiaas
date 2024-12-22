@@ -1,11 +1,8 @@
 package kubeiaas.iaascore.scheduler;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-import kubeiaas.common.bean.Host;
-import kubeiaas.common.bean.Image;
-import kubeiaas.common.bean.Vm;
-import kubeiaas.common.bean.Volume;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.enums.image.ImageOSTypeEnum;
@@ -43,14 +40,13 @@ public class VolumeScheduler {
     @Resource
     private MountProcess mountProcess;
 
-    public String createSystemVolume(String vmUuid) {
-        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+    public String createSystemVolume(Vm vm) {
         Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
 
         // 统一创建系统盘
         String volumeUuid = this.newSystemVolume(image, vm);
         if (volumeUuid.isEmpty()) {
-            log.error("createSystemVolume -- create failed!");
+            log.error("ERROR: createSystemVolume -- create failed! volumeUuid isEmpty");
             return volumeUuid;
         }
 
@@ -62,7 +58,16 @@ public class VolumeScheduler {
             }
         }
 
-        log.info("createSystemVolume -- done");
+        return volumeUuid;
+    }
+
+    public String createEmptySystemVolume(Vm vm) {
+        Image image = tableStorage.imageQueryByUuid(vm.getImageUuid());
+
+        String volumeUuid = this.newEmptySystemVolume(vm, image.getOsType());
+        if (volumeUuid.isEmpty()) {
+            log.error("ERROR: createEmptySystemVolume -- create failed! volumeUuid isEmpty");
+        }
         return volumeUuid;
     }
 
@@ -72,7 +77,7 @@ public class VolumeScheduler {
     private String newSystemVolume(Image image, Vm vm) {
         // 检查镜像
         if (!image.getStatus().equals(ImageStatusEnum.AVAILABLE)) {
-            log.error("origin image status is" + image.getStatus());
+            log.error(String.format("ERROR: origin image status is %s", image.getStatus()));
             return "";
         }
 
@@ -92,7 +97,7 @@ public class VolumeScheduler {
         newVolume.setHostUuid(vm.getHostUuid());
         newVolume.setImageUuid(vm.getImageUuid());
         newVolume.setSize(vm.getDiskSize());
-        newVolume.setProviderLocation(PathUtils.genVolumeDirectoryByUuid(volumeUuid, image));
+        newVolume.setProviderLocation(PathUtils.genSharedVolumeDirectoryByUuid(volumeUuid, image));
 
         newVolume.setUsageType(VolumeUsageEnum.SYSTEM);
         newVolume.setFormatType(VolumeFormatEnum.QCOW2);
@@ -106,10 +111,49 @@ public class VolumeScheduler {
         }
 
         // save into DB
+        log.info(String.format("-> invoke DB -- newSystemVolume, uuid: %s", newVolume.getUuid()));
         tableStorage.volumeSave(newVolume);
+        log.info("<- invoke DB -- done");
 
         // call Volume Controller
         String res = volumeController.createSystemVolume(getSelectedUri(vm.getUuid()), image.getDirectory(), newVolume.getProviderLocation(), volumeUuid, extraSize);
+        if (res.equals(ResponseMsgConstants.FAILED)) {
+            return "";
+        }
+
+        return volumeUuid;
+    }
+
+    private String newEmptySystemVolume(Vm vm, ImageOSTypeEnum osType) {
+        // 创建 Volume 实例
+        String volumeUuid = UuidUtils.getRandomUuid();
+        Volume newVolume = new Volume();
+
+        newVolume.setUuid(volumeUuid);
+        newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        if (vm.getName() == null || vm.getName().isEmpty()) {
+            newVolume.setName(volumeUuid);
+        } else {
+            newVolume.setName(vm.getName());
+        }
+        newVolume.setDescription(vm.getDescription());
+        newVolume.setInstanceUuid(vm.getUuid());
+        newVolume.setHostUuid(vm.getHostUuid());
+        newVolume.setImageUuid(vm.getImageUuid());
+        newVolume.setSize(vm.getDiskSize());
+        newVolume.setProviderLocation(PathUtils.genSharedVolumeDirectoryByUuid(volumeUuid, osType));
+        newVolume.setUsageType(VolumeUsageEnum.SYSTEM);
+        // 设置默认从ISO中创建的系统盘格式为QCOW2
+        newVolume.setFormatType(VolumeFormatEnum.QCOW2);
+        newVolume.setStatus(VolumeStatusEnum.CREATING);
+
+        // save into DB
+        log.info(String.format("-> invoke DB -- newSystemVolume, uuid: %s", newVolume.getUuid()));
+        tableStorage.volumeSave(newVolume);
+        log.info("<- invoke DB -- done");
+
+        // call Volume Controller
+        String res = volumeController.createEmptySystemVolume(getSelectedUri(vm.getUuid()), newVolume.getProviderLocation(), volumeUuid);
         if (res.equals(ResponseMsgConstants.FAILED)) {
             return "";
         }
@@ -141,62 +185,78 @@ public class VolumeScheduler {
         newVolume.setStatus(VolumeStatusEnum.CREATING);
 
         // save into DB
+        log.info(String.format("-> invoke DB -- newIsoVolume, uuid: %s", newVolume.getUuid()));
         tableStorage.volumeSave(newVolume);
+        log.info("<- invoke DB -- done");
     }
 
-    public boolean createDataVolume(String volumePath, String volumeUuid, int extraSize){
-        log.info("createDataVolume ==== start ====  volumeUuid: " + volumeUuid);
-        if (volumeController.createDataVolume(getSelectedUri(volumeUuid), volumePath,
-                volumeUuid, extraSize).equals(ResponseMsgConstants.SUCCESS)){
-            log.info("createDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+    public boolean createDataVolume(String volumePath, String volumeUuid, int volumeSize){
+        return volumeController.createDataVolume(getSelectedUri(volumeUuid), volumePath,
+                volumeUuid, volumeSize).equals(ResponseMsgConstants.SUCCESS);
+    }
+
+    public boolean resizeSystemVolume(String volumePath, String volumeUuid, int diskSize){
+        if (volumeController.resizeSystemVolume(getSelectedUri(volumeUuid), volumePath,
+                volumeUuid, diskSize).equals(ResponseMsgConstants.SUCCESS)){
             return true;
         }else {
-            log.info("createDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            log.error(String.format("ERROR: resizeSystemVolume failed in agent, volumeUuid: %s", volumeUuid));
+            return false;
+        }
+    }
+
+    public boolean resizeDataVolume(String volumePath, String volumeUuid, int diskSize){
+        if (volumeController.resizeDataVolume(getSelectedUri(volumeUuid), volumePath,
+                volumeUuid, diskSize).equals(ResponseMsgConstants.SUCCESS)){
+            return true;
+        } else {
+            log.error(String.format("ERROR: resizeDataVolume failed in agent, volumeUuid: %s", volumeUuid));
             return false;
         }
     }
 
     public boolean deleteSystemVolume(String vmUuid, String volumeUuid, String volumePath){
-        log.info("deleteSysVolume ==== start ====  volumeUuid: " + volumeUuid);
         //删除Linux主机中的物理硬盘
         if (volumeController.deleteSystemVolume(getSelectedUri(vmUuid), volumeUuid, volumePath)
                 .equals(ResponseMsgConstants.SUCCESS)){
+            log.info(String.format("-> invoke DB -- deleteSystemVolume, vmUuid: %s, volumeUuid: %s", vmUuid, volumeUuid));
             tableStorage.volumeDelete(volumeUuid);
-            log.info("deleteSysVolume ==== end ====  volumeUuid: " + volumeUuid);
+            log.info("<- invoke DB -- done");
             return true;
         } else {
-            log.info("deleteSysVolume ==== error ====  volumeUuid: " + volumeUuid);
+            log.error(String.format("ERROR: deleteSystemVolume failed in agent, vmUuid: %s, volumeUuid: %s", vmUuid, volumeUuid));
             return false;
         }
     }
 
     public boolean deleteIsoVolume(String vmUuid, String volumeUuid){
-        log.info("deleteIsoVolume ==== start ====  volumeUuid: " + volumeUuid);
+        log.info(String.format("-> invoke DB -- deleteIsoVolume, uuid: %s", volumeUuid));
         tableStorage.volumeDelete(volumeUuid);
-        log.info("deleteIsoVolume ==== end ====  volumeUuid: " + volumeUuid);
+        log.info("<- invoke DB -- done");
         return true;
     }
 
-    public boolean deleteDataVolume(String volumeUuid,String volumePath){
-        log.info("deleteDataVolume ==== start ====  volumeUuid: " + volumeUuid);
+    public boolean deleteDataVolume(String volumeUuid, String volumePath){
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         //删除Linux主机中的物理硬盘
         if (volumeController.deleteDataVolume(getSelectedUri(volumeUuid), volumeUuid, volumePath)
                 .equals(ResponseMsgConstants.SUCCESS)){
+            log.info(String.format("-> invoke DB -- deleteDataVolume, uuid: %s", volumeUuid));
             tableStorage.volumeDelete(volumeUuid);
-            log.info("deleteDataVolume ==== end ====  volumeUuid: " + volumeUuid);
+            log.info("<- invoke DB -- done");
             return true;
         } else {
-            log.info("deleteDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            log.error(String.format("ERROR: deleteDataVolume failed in agent, volumeUuid: %s", volumeUuid));
             return false;
         }
     }
 
     public boolean attachDataVolume(String vmUuid, String volumeUuid){
-        log.info("attachVolume ==== start ====  vmUuid: " + vmUuid + " volumeUuid: " + volumeUuid);
         //获取已经挂载的volumes
         List<Volume> volumeList = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
-        log.info("attachVolume ====  volumeList: " + volumeList);
+
+        log.debug("attachVolume ====  volumeList: " + volumeList);
+
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         //设置新volume的盘符等信息
         if (!mountProcess.attachVolumes(volumeList, vm)) {
@@ -207,26 +267,34 @@ public class VolumeScheduler {
         String volumeObjectStr = JSON.toJSONString(volume);
         if (volumeController.attachDataVolume(getSelectedUri(vm.getUuid()), vmObjectStr, volumeObjectStr)
                 .equals(ResponseMsgConstants.SUCCESS)){
-            log.info("attachDataVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
         } else {
-            log.info("attachDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            log.error(String.format("ERROR: attachDataVolume failed in agent, volumeUuid: %s", volumeUuid));
             return false;
         }
     }
 
     public boolean detachDataVolume(String vmUuid, String volumeUuid){
-        log.info("detachDataVolume ==== start ====  vmUuid: " + vmUuid + " volumeUuid: " + volumeUuid);
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         String vmObjectStr = JSON.toJSONString(vm);
         String volumeObjectStr = JSON.toJSONString(volume);
         if (volumeController.detachDataVolume(getSelectedUri(vmUuid), vmObjectStr, volumeObjectStr)
                 .equals(ResponseMsgConstants.SUCCESS)){
-            log.info("detachDataVolume ==== end ====  volumeUuid: " + volumeUuid);
             return true;
         } else {
-            log.info("detachDataVolume ==== error ====  volumeUuid: " + volumeUuid);
+            log.error(String.format("ERROR: detachDataVolume failed in agent, volumeUuid: %s", volumeUuid));
+            return false;
+        }
+    }
+
+    public boolean attachIsoVolume(Mount mount) {
+        String mountObjectStr = JSON.toJSONString(mount);
+        if (volumeController.attachIsoVolume(getSelectedUri(mount.getVmUuid()), mountObjectStr)
+                .equals(ResponseMsgConstants.SUCCESS)){
+            return true;
+        } else {
+            log.error(String.format("ERROR: attachIsoVolume failed in agent, mount: %s", mount));
             return false;
         }
     }
@@ -253,8 +321,7 @@ public class VolumeScheduler {
         try {
             return new URI(AgentConfig.getSelectedUri(vmUuid));
         } catch (URISyntaxException e) {
-            e.printStackTrace();
-            log.error("build URI failed!");
+            log.error("ERROR: build URI failed! %s", e);
             return null;
         }
     }

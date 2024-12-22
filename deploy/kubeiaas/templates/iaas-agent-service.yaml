@@ -1,0 +1,15 @@
+{{- if .Values.iaasAgent.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-agent
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: iaas-agent
+  type: {{ .Values.iaasAgent.service.type }}
+  ports:
+    - port: {{ .Values.iaasAgent.service.port }}
+      targetPort: {{ .Values.iaasAgent.service.port }}
+      protocol: TCP
+{{- end }}

@@ -1,0 +1,16 @@
+{{- if .Values.iaasCore.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: iaas-core
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: iaas-core
+  type: {{ .Values.iaasCore.service.type }}
+  ports:
+    - port: {{ .Values.iaasCore.service.port }}
+      targetPort: {{ .Values.iaasCore.service.port }}
+      nodePort: {{ .Values.iaasCore.service.nodePort }}
+      protocol: TCP
+{{- end }}

@@ -19,7 +19,7 @@ public class DBProxyRegister {
 
     @Scheduled(cron = "0 0/1 * * * ?")
     private void register() {
-        log.info("== REGISTER");
+        log.debug("== REGISTER");
         register.register(svcName, nodeName, System.currentTimeMillis());
     }
 }

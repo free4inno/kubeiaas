@@ -1,0 +1,15 @@
+{{- if .Values.imageOperator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-operator
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: image-operator
+  type: {{ .Values.imageOperator.service.type }}
+  ports:
+    - port: {{ .Values.imageOperator.service.port }}
+      targetPort: {{ .Values.imageOperator.service.port }}
+      protocol: TCP
+{{- end }}

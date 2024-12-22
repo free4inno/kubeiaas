@@ -24,17 +24,17 @@ public class IaasAgentRegister {
     private static final String nodeName = System.getenv("HOST_NAME");
 
     public void agentRegister() {
-        log.info("== AGENT REGISTER");
+        log.debug("== AGENT REGISTER");
         try {
             register.register(svcName, nodeName, System.currentTimeMillis());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("ERROR: agentRegister error. ", e);
         }
     }
 
     @Scheduled(cron = "0 0/1 * * * ?")
     private void register() {
-        log.info("== REGISTER");
+        log.debug("== REGISTER");
         boolean errorFlag = false;
 
         // == 1. Agent =====
@@ -73,10 +73,10 @@ public class IaasAgentRegister {
         return res.contains("active");
     }
 
-    private static final String CMD_CHECK_DHCP = "service dhcpd status";
+    private static final String CMD_CHECK_DHCP = "ps -ef | grep dhcp | awk -F ' ' '$1 == \"dhcpd\" {print}'";
     private boolean checkDHCP() {
         String res = ShellUtils.getCmd(CMD_CHECK_DHCP);
-        return res.contains("active");
+        return res.contains("dhcpd");
     }
 
     private static final String CMD_CHECK_VNC = "ps -ef | grep noVNC";

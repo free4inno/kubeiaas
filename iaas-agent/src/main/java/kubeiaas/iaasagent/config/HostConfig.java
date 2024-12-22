@@ -1,7 +1,7 @@
 package kubeiaas.iaasagent.config;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.bean.HostConstants;
 import kubeiaas.common.enums.host.HostStatusEnum;
@@ -9,6 +9,7 @@ import kubeiaas.common.utils.ShellUtils;
 import kubeiaas.common.utils.UuidUtils;
 import kubeiaas.iaasagent.dao.TableStorage;
 import kubeiaas.iaasagent.service.HostService;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,20 +28,14 @@ public class HostConfig {
 
     public static Host thisHost;
 
+    @Getter
     private final String hostIp = System.getenv("HOST_IP");
     private final String hostName = System.getenv("HOST_NAME");
-
-    public String getHostIp() {
-        return hostIp;
-    }
-    public String getHostName() {
-        return hostName;
-    }
 
     private final Map<String ,String> roleNodes = new HashMap<>();
     HostConfig() {
         roleNodes.put(HostConstants.ROLE_DHCP, System.getenv("DHCP_NODE"));
-        roleNodes.put(HostConstants.ROLE_VNC, System.getenv("VNC_NODE"));
+        roleNodes.put(HostConstants.ROLE_VNC, System.getenv("NFS_NODE"));
         roleNodes.put(HostConstants.ROLE_NFS, System.getenv("NFS_NODE"));
     }
 
@@ -58,13 +53,13 @@ public class HostConfig {
 
     public void hostInitialize() {
         // get host resource config
-        log.info("hostIp:" + hostIp + ", hostName:" + hostName);
+        log.info(String.format("-- start -- hostInitialize -- hostIp: %s, hostName: %s", hostIp, hostName));
 
         // check is this host registered in DB
         Host host = tableStorage.hostQueryByIp(hostIp);
         if (host == null) {
             // do register
-            log.info("this host is not registered! Start to register.");
+            log.info("start to register -- this host is not registered ");
             host = new Host();
             host.setIp(hostIp);
             host.setName(hostName);
@@ -93,17 +88,20 @@ public class HostConfig {
             host.setUuid(UuidUtils.getRandomUuid());
 
             // save into DB
+            log.info("-> invoke DB -- hostSave");
             host = tableStorage.hostSave(host);
-            log.info(JSON.toJSONString(host));
+            log.info("<- invoke DB -- done");
+            log.debug(JSON.toJSONString(host));
 
         } else {
-            log.info("this host is registered.");
+            log.debug("this host is registered.");
         }
 
         // - set roles
         List<String> roleList = new ArrayList<>();
-        for (String role : roleNodes.keySet()) {
-            String node = roleNodes.get(role);
+        for (Map.Entry<String, String> entry : roleNodes.entrySet()) {
+            String role = entry.getKey();
+            String node = entry.getValue();
             if (node.equals(hostIp) || node.equals(hostName)) {
                 roleList.add(role);
             }
@@ -115,15 +113,19 @@ public class HostConfig {
         totalSuccessFlag = hostService.getEnvPrepareRes(roleList);
         if (totalSuccessFlag) {
             host.setStatus(HostStatusEnum.READY);
-            log.info("== host check done, total success. == ");
+            log.info("host check -- success");
         } else {
             host.setStatus(HostStatusEnum.ERROR);
-            log.error("== host check done, total failed! == ");
+            log.error("ERROR: host check -- failed");
         }
 
         // - save
+        log.info("-> invoke DB -- hostSave");
         tableStorage.hostSave(host);
+        log.info("<- invoke DB -- done");
         thisHost = host;
+
+        log.info("-- end -- hostInitialize");
     }
 
     private List<String> splitByComma(String str) {

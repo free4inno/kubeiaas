@@ -52,6 +52,8 @@
 
 需要在您刚刚选定的每个工作节点上准备一些必须的环境，请在您的每个工作节点上都执行如下配置。
 
+### 2.1.1 apt安装依赖
+
 > 需要保证您各个工作节点上的 apt 均配置了可用的源
 
 通过 apt 安装必要的依赖（Java8、Libvirt、NFS、OpenVSwitch），
@@ -60,12 +62,40 @@
 sudo apt -y install openjdk-8-jre-headless libvirt-dev libvirt-daemon-system libvirt-clients virtinst virt-manager qemu-kvm bridge-utils nfs-kernel-server openvswitch-switch ifupdown
 ```
 
+### 2.1.2 设置NFS服务
+
 为 NFS 系统服务创建软连接，
 
 ```
 sudo ln -s /lib/systemd/system/nfs-server.service /lib/systemd/system/nfs.service
 sudo systemctl daemon-reload
 ```
+
+### 2.1.3 解决MacVTap的Host和Guest不通的问题
+为Host 创建 MACVLAN 类型网卡。 此时所有主机（Guest、Host）都使用同一物理网卡
+派生出来的 MACVLAN 类型网卡，Guest和Host就可以互相通信。
+
+DHCP方式：
+```shell
+nmcli connection add \
+connection.type "macvlan" macvlan.mode "bridge" macvlan.parent "enp89s0" \
+connection.interface-name "kvm-guest2host" \
+connection.id "kvm-guest2host" \
+ipv4.method auto \
+ipv4.route-metric 1000
+```
+静态IP方式：
+```shell
+nmcli connection add \
+connection.type "macvlan" macvlan.mode "bridge" macvlan.parent "enp89s0" \
+connection.interface-name "kvm-guest2host" \
+connection.id "kvm-guest2host" \
+ipv4.method static \
+ipv4.addresses 192.168.1.202/24 \
+ipv4.gateway 192.168.1.1 \
+ipv4.route-metric 10
+```
+
 
 ## 2.2 选择一个工作节点负责网络
 
@@ -95,6 +125,10 @@ sudo systemctl daemon-reload
 sudo mkdir -p /usr/local/kubeiaas/data/images
 # 云主机数据盘存储目录
 sudo mkdir -p /usr/local/kubeiaas/data/data-volumes
+# db-proxy sqlite 数据库存储目录
+sudo mkdir -p /usr/local/kubeiaas/sqlite
+# noVNC token 存储目录
+sudo mkdir -p /usr/local/kubeiaas/vnc/token
 ```
 
 开放目录，使其可被其他工作节点挂载，
@@ -106,6 +140,8 @@ sudo su
 cat << EOF >> /etc/exports
 /usr/local/kubeiaas/data/images *(rw,no_root_squash,no_subtree_check)
 /usr/local/kubeiaas/data/data-volumes *(rw,no_root_squash,no_subtree_check)
+/usr/local/kubeiaas/sqlite *(rw,no_root_squash,no_subtree_check)
+/usr/local/kubeiaas/vnc/token *(rw,no_root_squash,no_subtree_check)
 EOF
 
 # 使上述修改生效
@@ -132,7 +168,6 @@ sudo tar -xzvf kubeiaas-1.0-release.tar.gz
 │  ├─ iaas-config.yml
 │  ├─ iaas-components.yml
 │  ├─ iaas-front.yml
-│  ├─ label.sh
 ```
 
 进入 kubeiaas-v1.0-release 目录，
@@ -152,39 +187,51 @@ sudo vi iaas-config.yml
 如下是一份示例配置，各项配置的具体说明可参考：[config-example](/docs/lib/config-example.yml)
 
 ```
-# -------- 工作节点 --------
-nodes.work.list: "node1,node2"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iaas-config
+  # kubectl create namespace kubeiaas
+  namespace: kubeiaas
+data:
+  # -------- 工作节点 --------
+  nodes.dhcp: "192.168.33.1"
+  nodes.nfs: "192.168.33.7"
 
-# -------- 管控组件 --------
-nodes.control: "master"
-nodes.image: "node2"
+  nfs.dir.img: "/usr/local/kubeiaas/data/images"
+  nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
 
-# -------- 基础服务 --------
-nodes.vnc: "node2"
-nodes.dhcp: "node2"
-
-nodes.nfs: "node2"
-nfs.dir.img: "/usr/local/kubeiaas/data/images"
-nfs.dir.dv: "/usr/local/kubeiaas/data/data-volumes"
-
-# -------- 网络配置 --------
-network.bridge.type: "MACV"
+  # -------- 网络配置 --------
+  # MACV / Linux / OVS
+  network.bridge.type: "MACV"
 ```
 
-### 3.3 标记节点
+### 3.3 部署组件
 
-完成上述配置后，您还需要使用 kubectl 创建一个 namespace 并按照配置的内容为各个节点打上标签，
+#### 3.3.1 作为虎符组件部署
+在上述示例iaas-config.yml中，我们使用了 `namespace: kubeiaas`，因此我们需要先创建该命名空间，
+使用如下命令创建命名空间。
 
+`kubectl create namespace kubeiaas`
+
+当然你也可以使用其他命名空间，但需要在后续部署中修改命名空间。
+
+首先，请应用已经完成编辑的 `iaas-config.yml`，
+```shell
+kubectl apply -f iaas-config.yml
 ```
-kubectl create namespace kubeiaas
-
-/bin/bash ./label.sh
-# 复制输出的指令并执行
-
-kubectl get node --show-labels
+然后应用 `iaas-components.yml`，
+```shell
+kubectl apply -f iaas-components.yml
+```
+检查各个 pods 的运行状态，等待所有 pod 状态均变为 `Running`
+```shell
+kubectl get pods -o wide -n kubeiaas
 ```
 
-### 3.4 部署组件
+#### 3.3.2 作为独立应用部署
+请创建相应的命名空间，例如 `kubeiaas`。
 
 首先，请应用已经完成编辑的 `iaas-config.yml`，
 
@@ -205,6 +252,7 @@ kubectl get pods -o wide -n kubeiaas
 ```
 
 ## 4. 成功！
+> 仅3.3.2作为独立应用部署时才会出现下面的页面。
 
 访问 `<IP>:32200` 转到系统登录页面（此处所用 `<IP>` 为集群内任一节点 IP）
 ，后续请参考 [用户使用手册](/docs/user-manual-cn.md)。 

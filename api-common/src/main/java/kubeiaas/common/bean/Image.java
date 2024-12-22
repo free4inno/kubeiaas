@@ -24,6 +24,10 @@ public class Image {
 
     private ImageStatusEnum status;     // 状态
 
+    private ImageUploadingStatusEnum uploadingStatus; // 下载状态
+
+    private Integer useCount;           // 使用次数
+
     private Integer minMem;     // 所需最小内存【废弃】
     private Integer minDisk;    // 所需最小硬盘【废弃】
 

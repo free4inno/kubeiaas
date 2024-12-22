@@ -12,4 +12,7 @@ public class ImageConstants {
 
     // suffix
     public static final String IMAGE_YAML_SUFFIX = ".yaml";
+
+    // image upload status
+    public static final String IMAGE_UPLOAD_STATUS = "status";
 }

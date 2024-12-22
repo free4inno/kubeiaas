@@ -21,33 +21,36 @@ public class ResourceService {
     private HostSelectProcess hostSelectProcess;
 
     public Host selectHostByAppoint(String vmUuid, String hostUuid) {
+        log.info("selectHostByAppoint -- vmUuid: {}, hostUuid: {}", vmUuid, hostUuid);
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
         Host host = tableStorage.hostQueryByUuid(hostUuid);
 
         if (host == null) {
-            log.info("host 不存在");
+            log.error("ERROR: host is null, could not find by this uuid");
             return null;
         }
         if (!hostSelectProcess.checkHostAvailable(host, vm)) {
-            log.info("host 资源不足");
+            log.warn("WARN: host not available, return null");
             return null;
         }
-        log.info("host 可用");
+        log.info("success -- host available");
         return host;
     }
 
     public Host selectHostByHostUuid(String hostUuid) {
+        log.info("selectHostByHostUuid -- hostUuid: {}", hostUuid);
         Host host = tableStorage.hostQueryByUuid(hostUuid);
 
         if (host == null) {
-            log.info("host 不存在");
+            log.error("ERROR: host is null, could not find by this uuid");
             return null;
         }
-        log.info("host 可用");
+        log.info("success -- host available");
         return host;
     }
 
     public Host selectHostByStrategy(String vmUuid, String strategy) {
+        log.info("selectHostByStrategy -- vmUuid: {}, strategy: {}", vmUuid, strategy);
         Vm vm = tableStorage.vmQueryByUuid(vmUuid);
 
         Host resultHost = new Host();
@@ -62,6 +65,7 @@ public class ResourceService {
     }
 
     public Host selectHostByStrategy(String strategy) {
+        log.info("selectHostByStrategy -- strategy: {}", strategy);
         Host resultHost = new Host();
         if (strategy.equals(HostSelectStrategyConstants.ROUND_ROBIN)) {
             // 1. RoundRobin

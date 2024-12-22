@@ -2,6 +2,7 @@ package kubeiaas.iaascore.exception.handler;
 
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
+import kubeiaas.common.constants.LogInjectionConstants;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
 import kubeiaas.iaascore.dao.TableStorage;
@@ -11,6 +12,7 @@ import kubeiaas.iaascore.exception.VolumeException;
 import kubeiaas.iaascore.response.BaseResponse;
 import kubeiaas.iaascore.response.ResponseEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -33,10 +35,14 @@ public class OpenAPIExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public BaseResponse handle(Exception e) {
+        // ----- clear MDC -----
+        MDC.remove(LogInjectionConstants.UUID_INJECTION);
+
+        // ----- handle -----
         if (e instanceof BaseException) {
             // ----- base ------
             BaseException baseE = (BaseException) e;
-            log.error(baseE.getMsg());
+            log.error(String.format("-- end -- error, %s", baseE.getMsg()));
             return BaseResponse.error(baseE.getResEnum(), baseE.getMsg());
 
         } else if (e instanceof VmException){
@@ -45,7 +51,7 @@ public class OpenAPIExceptionHandler {
             Vm vm = (vmE.getVm());
             vm.setStatus(VmStatusEnum.ERROR);
             tableStorage.vmSave(vm);
-            log.error(vmE.getMsg());
+            log.error(String.format("-- end -- error, %s", vmE.getMsg()));
             return BaseResponse.error(vmE.getResEnum(), vmE.getMsg());
 
         } else if (e instanceof VolumeException){
@@ -54,7 +60,7 @@ public class OpenAPIExceptionHandler {
             Volume volume = volE.getVolume();
             volume.setStatus(VolumeStatusEnum.ERROR);
             tableStorage.volumeSave(volume);
-            log.error(volE.getMsg());
+            log.error(String.format("-- end -- error, %s", volE.getMsg()));
             return BaseResponse.error(volE.getResEnum(), volE.getMsg());
 
         } else if (e instanceof ConstraintViolationException ||
@@ -62,13 +68,11 @@ public class OpenAPIExceptionHandler {
                 e instanceof MissingServletRequestParameterException) {
             // ----- args error -----
             log.error(ResponseEnum.ARGS_ERROR.getMsg());
-            e.printStackTrace();
             return BaseResponse.error(ResponseEnum.ARGS_ERROR, ResponseEnum.ARGS_ERROR.getMsg());
 
         } else {
             // ----- else -----
             log.error(ResponseEnum.INTERNAL_ERROR.getMsg());
-            e.printStackTrace();
             return BaseResponse.error(ResponseEnum.INTERNAL_ERROR);
         }
     }

@@ -10,10 +10,15 @@ public class RequestMappingConstants {
     public static final String HOST = "host";
     public static final String VOLUME = "volume";
     public static final String IP_SEGMENT = "ip_segment";
+    public static final String HOST_BRIDGE = "host_bridge";
     public static final String IP_USED = "ip_used";
     public static final String SPEC_CONFIG = "spec_config";
     public static final String SERVICE = "service";
     public static final String DEVICE = "device";
+    public static final String ISO = "iso";
+
+    // ========================= action =========================
+    public static final String MOUNT = "mount";
 
     // -- agent component
     public static final String DHCP_C = "dhcp_c";
@@ -22,14 +27,17 @@ public class RequestMappingConstants {
     public static final String VM_C = "vm_c";
     public static final String VOLUME_C = "volume_c";
     public static final String DEVICE_C = "device_c";
+    public static final String ISO_C = "iso_c";
     public static final String HOST_C = "host_c";
 
     /* =============== action =============== */
     public static final String TEST = "test";
     public static final String CREATE = "create";
+    public static final String RESIZE = "resize";
     public static final String DELETE = "delete";
     public static final String ATTACH = "attach";
     public static final String DETACH = "detach";
+    public static final String UPLOAD = "upload";
     public static final String DELETE_BY_ID = "delete_by_id";
     public static final String DELETE_BY_UUID = "delete_by_uuid";
     public static final String DELETE_ALL_BY_UUID = "delete_all_by_uuid";
@@ -42,6 +50,9 @@ public class RequestMappingConstants {
     public static final String REBOOT = "reboot";
     public static final String SUSPEND = "suspend";
     public static final String RESUME = "resume";
+    public static final String COLD_MIGRATE = "cold_migrate";
+    public static final String LIVE_MIGRATE = "live_migrate";
+    public static final String GET_XML_DESC = "get_xml_desc";
     public static final String HEARTBEAT = "heartbeat";
     public static final String SET_ROLE = "set_role";
     public static final String VNC_URL = "vnc_url";
@@ -52,16 +63,21 @@ public class RequestMappingConstants {
     public static final String STATISTICS_BY_ID = "statistics_by_id";
     public static final String NODE_RESOURCE = "node_resource";
     public static final String NET_STO_RESOURCE = "net_sto_resource";
+    public static final String SET_PASSWD = "set_passwd";
     // -- query all
     public static final String QUERY_ALL = "query_all";
     public static final String QUERY_ALL_BY_SINGLE_KEY = "query_all_by_single_key";
     public static final String QUERY_ALL_BY_DOUBLE_KEY = "query_all_by_double_key";
     public static final String QUERY_ALL_BY_TYPE = "query_all_by_type";
+    public static final String QUERY_ALL_BY_INSTANCE_UUID = "query_all_by_instance_uuid";
     public static final String QUERY_ALL_BY_HOST_AND_TYPE = "query_all_by_host_and_type";
     public static final String QUERY_ALL_LIKE_BY_SINGLE_KEY = "query_all_like_by_single_key";
     public static final String QUERY_ALL_DATA_VOLUME = "query_all_data_volume";
     public static final String QUERY_ALL_BY_HOST_NAME = "query_all_by_host_name";
     public static final String QUERY_ALL_BY_HOST_UUID = "query_all_by_host_uuid";
+    public static final String QUERY_ALL_BY_VM_UUID = "query_all_by_vm_uuid";
+    public static final String QUERY_ALL_MOUNT_POINT_BY_VM_UUID = "query_all_mount_point_by_vm_uuid";
+    public static final String QUERY_MOUNTS_BY_VM_UUID_AND_ISO_UUID = "query_mounts_by_vm_uuid_and_iso_uuid";
     // -- fuzzy query
     public static final String FUZZY_QUERY = "fuzzy_query";
     public static final String FUZZY_QUERY_ATTACH = "fuzzy_query_attach";
@@ -74,6 +90,7 @@ public class RequestMappingConstants {
     // -- query by
     public static final String QUERY_BY_ID = "query_by_id";
     public static final String QUERY_BY_UUID = "query_by_uuid";
+    public static final String QUERY_BY_HOST_UUID = "query_by_host_uuid";
 
     // >>> Resource Operator <<<
     public static final String SELECT_HOST_BY_APPOINT = "select_host_by_appoint";
@@ -88,6 +105,7 @@ public class RequestMappingConstants {
     public static final String PUBLISH_IMAGE = "publish_image";
     public static final String IMAGE_CREATE_YAML = "image_create_yaml";
     public static final String IMAGE_SAVE_YAML = "image_save_yaml";
+    public static final String QUERY_IMAGE_UPLOAD_STATUS = "query_image_upload_status";
 
     // >>> DHCP Controller <<<
     public static final String BIND_MAC_IP = "bind_mac_ip";
@@ -96,7 +114,10 @@ public class RequestMappingConstants {
 
     // >>> Volume Controller <<<
     public static final String CREATE_SYSTEM_VOLUME = "create_system_volume";
+    public static final String CREATE_EMPTY_SYSTEM_VOLUME = "create_empty_system_volume";
     public static final String CREATE_DATA_VOLUME = "create_data_volume";
+    public static final String RESIZE_SYSTEM_VOLUME = "resize_system_volume";
+    public static final String RESIZE_DATA_VOLUME = "resize_data_volume";
     public static final String DELETE_SYSTEM_VOLUME = "delete_system_volume";
     public static final String DELETE_DATA_VOLUME = "delete_data_volume";
     public static final String ATTACH_DATA_VOLUME = "attach_data_volume";
@@ -104,6 +125,12 @@ public class RequestMappingConstants {
     public static final String VOLUME_PUBLISH_IMAGE = "volume_publish_image";
     public static final String DATA_VOLUME_STORAGE = "data_vol_sto";
     public static final String IMG_VOLUME_STORAGE = "img_vol_sto";
+
+    // >>> ISO Controller <<<
+    public static final String ATTACH_ISO = "attach_iso";
+    public static final String DETACH_ISO = "detach_iso";
+    public static final String UPLOAD_ISO = "upload_iso";
+    public static final String DELETE_ISO = "delete_iso";
 
     // >>> Vm Controller <<<
     public static final String CREATE_VM_INSTANCE = "create_vm_instance";
@@ -114,11 +141,15 @@ public class RequestMappingConstants {
     public static final String SUSPEND_VM_INSTANCE = "suspend_vm_instance";
     public static final String RESUME_VM_INSTANCE = "resume_vm_instance";
     public static final String MODIFY_VM_INSTANCE = "modify_vm_instance";
+    public static final String CREATE_VM_INSTANCE_BY_XML = "create_vm_instance_by_xml";
+    public static final String SET_VM_BOOT_ORDER = "set_vm_boot_order";
+    public static final String GET_VM_BOOT_ORDER = "get_vm_boot_order";
 
     // >>> Vnc Controller <<<
     public static final String ADD_VNC_TOKEN = "add_vnc_token";
     public static final String FLUSH_VNC_TOKEN = "flush_vnc_token";
     public static final String DELETE_VNC_TOKEN = "delete_vnc_token";
+    public static final String GET_VNC_PORT = "get_vnc_port";
 
     // >>> host Controller <<<
     public static final String CHECK_ENV = "check_env";
@@ -133,6 +164,14 @@ public class RequestMappingConstants {
     public static final String CREATE_IP_SEGMENT = "create_ip_segment";
     public static final String DELETE_IP_SEGMENT = "delete_ip_segment";
     public static final String EDIT_IP_SEGMENT = "edit_ip_segment";
+
+    // >>> hostBridge Controller <<<
+    public static final String MIGRATE_FROM_IP_SEGMENT = "migrate_from_ip_segment";
+    public static final String CREATE_HOST_BRIDGE = "create_host_bridge";
+    public static final String DELETE_HOST_BRIDGE_BY_ID = "delete_host_bridge_by_id";
+    public static final String EDIT_HOST_BRIDGE = "edit_host_bridge";
+    public static final String QUERY_ALL_BY_IP_SEGMENT_ID = "query_all_by_ip_segment_id";
+
 
     /* =============== produce =============== */
     public static final String APP_JSON = "application/json";

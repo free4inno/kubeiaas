@@ -15,8 +15,10 @@ function host_sh(){
 # 1. prepare files to workdir ---------------------
 echo "[1/4] prepare files to /workdir "
 
-echo " - cp iaas-agent jar"
-cp /kubeiaas/iaas-agent.jar /workdir/src/
+#echo " - cp iaas-agent jar"
+#cp /kubeiaas/iaas-agent.jar /workdir/src/
+rm -r /workdir/src/iaas-agent
+cp -r /kubeiaas /workdir/src/iaas-agent
 
 # 2. wait for DB-proxy ---------------------
 echo "[2/4] loop wait for DB-proxy "
@@ -39,5 +41,6 @@ nohup java -jar /kubeiaas/iaas-agent-proxy.jar > /workdir/log/iaas-agent-proxy.l
 
 # 4. RUN agent on host ----------------------------
 echo "[4/4] RUN agent on host "
-host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
+#host_sh "nohup java -jar /usr/local/kubeiaas/workdir/src/iaas-agent.jar > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
+host_sh "nohup java -cp /usr/local/kubeiaas/workdir/src/iaas-agent org.springframework.boot.loader.JarLauncher > /usr/local/kubeiaas/workdir/log/iaas-agent.log 2>&1 &"
 tail -f /workdir/log/iaas-agent.log

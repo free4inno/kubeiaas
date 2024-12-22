@@ -1,6 +1,6 @@
 package kubeiaas.dbproxy.controller;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
 import kubeiaas.dbproxy.dao.ImageDao;
@@ -26,9 +26,9 @@ public class ImageController {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<ImageTable> imageTableList = imageDao.findAll();
-        log.info("queryAll ==== end ====");
+        log.info("-- end -- queryAll");
         return JSON.toJSONString(imageTableList);
     }
 
@@ -37,11 +37,11 @@ public class ImageController {
     public String queryAllBySingleKey(
             @RequestParam(value = RequestParamConstants.KEY_1) String key1,
             @RequestParam(value = RequestParamConstants.VALUE_1) String value1) {
-        log.info("queryAllBySingleKey ==== start ====");
+        log.info("-- start -- queryAllBySingleKey -- key1: {}, value1: {}", key1, value1);
         Specification<ImageTable> specification = (root, cq, cb) ->
                 cb.and(cb.equal(root.get(key1), value1));
         List<ImageTable> imageTableList = imageDao.findAll(specification);
-        log.info("queryAllBySingleKey ==== end ====");
+        log.info("-- end -- queryAllBySingleKey");
         return JSON.toJSONString(imageTableList);
     }
 
@@ -49,10 +49,10 @@ public class ImageController {
     @ResponseBody
     public synchronized String save(
             @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr) {
-        log.info("save ==== start ====");
+        log.info("-- start -- save -- imageObjectStr: {}", imageObjectStr);
         ImageTable imageTable = JSON.parseObject(imageObjectStr, ImageTable.class);
         imageDao.saveAndFlush(imageTable);
-        log.info("save ==== end ====");
+        log.info("-- end -- save");
         return JSON.toJSONString(imageTable);
     }
 }

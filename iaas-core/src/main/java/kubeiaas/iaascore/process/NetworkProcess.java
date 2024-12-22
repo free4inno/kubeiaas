@@ -1,5 +1,6 @@
 package kubeiaas.iaascore.process;
 
+import kubeiaas.common.bean.HostBridge;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.bean.Vm;
@@ -13,6 +14,7 @@ import kubeiaas.common.utils.MacUtils;
 import kubeiaas.iaascore.dao.TableStorage;
 import kubeiaas.iaascore.exception.BaseException;
 import kubeiaas.iaascore.exception.VmException;
+import kubeiaas.iaascore.request.vm.SetPasswdForm;
 import kubeiaas.iaascore.scheduler.DhcpScheduler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,15 +41,16 @@ public class NetworkProcess {
      * use synchronized to ensure synchronous execution, avoid ip allocation conflicts.
      */
     public synchronized IpUsed createVmNetwork(Vm newVm, int ipSegmentId) throws VmException {
-        log.info("createVm -- 3. Network");
-
+        log.debug("createVm -- 3. Network");
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-
         String newMac = getNewMac(ipSegment);
         IpUsed newIpUsed = getNewIp(ipSegment);
         if (newIpUsed == null) {
+            log.error("ERROR: createVmNetwork -- ip allocated failed");
             throw new VmException(newVm, "ERROR: ip allocated failed!");
         }
+
+        String bridge = tableStorage.hostBridgeQueryByHostUuid(newVm.getHostUuid()).getBridgeName();
 
         // already set: ip, ip_segment_id, type.
         newIpUsed.setMac(newMac);
@@ -55,19 +58,57 @@ public class NetworkProcess {
         newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
         newIpUsed.setStatus(IpAttachEnum.DETACHED);
         newIpUsed.setType(ipSegment.getType());
-        newIpUsed.setBridge(ipSegment.getBridge());
+        newIpUsed.setBridge(bridge);
 
-        log.info("new mac: " + newIpUsed.getMac());
-        log.info("new ip: " + newIpUsed.getIp());
+        log.info(String.format("createVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
 
         // save into DB
+        log.info("-> invoke DB -- ipUsedSave");
         newIpUsed = tableStorage.ipUsedSave(newIpUsed);
+        log.info("<- invoke DB -- done");
 
         // bind in DHCP-Controller
         if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
+            log.error("ERROR: createVmNetwork -- dhcp bind mac & ip failed!");
             throw new VmException(newVm, "ERROR: dhcp bind mac & ip failed!");
         }
-        log.info("createVm -- 3. network success!");
+        log.debug("createVm -- 3. network success!");
+        return newIpUsed;
+    }
+
+    public synchronized IpUsed bindVmNetwork(String vmUuid, String mac, int ipSegmentId) throws BaseException {
+        log.debug("bindVmNetwork -- 3. Network");
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        IpUsed newIpUsed = getNewIp(ipSegment);
+        if (newIpUsed == null) {
+            log.error("ERROR: bindVmNetwork -- ip allocated failed");
+            throw new BaseException("ERROR: ip allocated failed!");
+        }
+
+        Vm vm = tableStorage.vmQueryByUuid(vmUuid);
+        String bridge = tableStorage.hostBridgeQueryByHostUuid(vm.getHostUuid()).getBridgeName();
+
+        // already set: ip, ip_segment_id, type.
+        newIpUsed.setMac(mac);
+        newIpUsed.setInstanceUuid(vmUuid);
+        newIpUsed.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        newIpUsed.setStatus(IpAttachEnum.ATTACHED);
+        newIpUsed.setType(ipSegment.getType());
+        newIpUsed.setBridge(bridge);
+
+        log.info(String.format("bindVmNetwork -- alloc mac: %s, ip: %s", newIpUsed.getMac(), newIpUsed.getIp()));
+
+        // save into DB
+        log.info("-> invoke DB -- ipUsedSave");
+        newIpUsed = tableStorage.ipUsedSave(newIpUsed);
+        log.info("<- invoke DB -- done");
+
+        // bind in DHCP-Controller
+        if (!dhcpScheduler.bindMacAndIp(newIpUsed)) {
+            log.error("ERROR: bindVmNetwork -- dhcp bind mac & ip failed!");
+            throw new BaseException("ERROR: dhcp bind mac & ip failed!");
+        }
+        log.debug("bindVmNetwork -- 3. network success!");
         return newIpUsed;
     }
 
@@ -77,27 +118,31 @@ public class NetworkProcess {
     public IpSegment saveIpSegment(
             IpSegment ipSegment,
             String name,
-            String hostUuid,
+//            String hostUuid,
             String type,
-            String bridge,
+//            String bridge,
             String ipRangeStart,
             String ipRangeEnd,
             String gateway,
             String netmask) {
         // 1. update DB
         ipSegment.setName(name);
-        ipSegment.setHostUuid(hostUuid);
-        ipSegment.setBridge(bridge);
+//        ipSegment.setHostUuid(hostUuid);
+//        ipSegment.setBridge(bridge);
         ipSegment.setDns("");
         ipSegment.setIpRangeStart(ipRangeStart);
         ipSegment.setIpRangeEnd(ipRangeEnd);
         ipSegment.setGateway(gateway);
         ipSegment.setNetmask(netmask);
         ipSegment.setType(EnumUtils.getEnumFromString(IpTypeEnum.class, type));
+        log.info("-> invoke DB -- ipSegmentSave");
         ipSegment = tableStorage.ipSegmentSave(ipSegment);
+        log.info("<- invoke DB -- done");
 
         // 2. update DHCP config
-        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
+//        log.info("-> invoke dhcpScheduler -- updateIpSeg");
+//        dhcpScheduler.updateIpSeg(String.valueOf(ipSegment.getId()));
+//        log.info("<- invoke dhcpScheduler -- done");
 
         return ipSegment;
     }
@@ -106,16 +151,18 @@ public class NetworkProcess {
      * Delete IP
      */
     public void deleteIps(String vmUuid) throws BaseException {
-        log.info("deleteIps ==== start ====  vmUuid: " + vmUuid);
-
         // DHCP中解绑
+        log.info("deleteIps -- 1. Unbind in DHCP");
         if (!dhcpScheduler.unbindMacAndIp(vmUuid)){
+            log.error("ERROR: dhcp unbind failed!");
             throw new BaseException("ERROR: dhcp unbind failed!");
         }
 
         // 数据库中删除
+        log.info("deleteIps -- 2. Delete in DB");
+        log.info("-> invoke DB -- ipUsedDeleteByVmUuid");
         tableStorage.ipUsedDeleteByVmUuid(vmUuid);
-        log.info("deleteIps ==== end ====");
+        log.info("<- invoke DB -- done");
     }
 
     // =================================================================================================================
@@ -154,6 +201,7 @@ public class NetworkProcess {
     public Integer getAllNumBySegId(Integer id) throws BaseException {
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(id);
         if (ipSegment == null) {
+            log.error("ERROR: ipSegmentId illegal");
             throw new BaseException("err: ipSegmentId illegal");
         }
         return IpUtils.getTotalIpNum(ipSegment);
@@ -165,6 +213,7 @@ public class NetworkProcess {
     public Integer getAllUsedNumBySegId(Integer id) throws BaseException {
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(id);
         if (ipSegment == null) {
+            log.error("ERROR: ipSegmentId illegal");
             throw new BaseException("err: ipSegmentId illegal");
         }
         return getAllUsedIp(ipSegment.getId()).size();
@@ -185,6 +234,11 @@ public class NetworkProcess {
             return null;
         }
         return IpUtils.getIpAddress(getAllUsedIp(ipSegment.getId()), ipSegment);
+    }
+
+    public IpUsed getNewIp(Integer ipSegmentId) {
+        IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        return getNewIp(ipSegment);
     }
 
     // 已经使用的ip地址，通过Map方式存放，key是Ip

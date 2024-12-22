@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.free4inno.kubeiaas</groupId>
         <artifactId>kubeiaas</artifactId>
-        <version>1.0-RELEASE</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>image-operator</artifactId>
@@ -14,6 +14,7 @@
     <description>image-operator</description>
 
     <properties>
+        <docker.repo.name>image-operator</docker.repo.name>
     </properties>
 
     <dependencies>
@@ -21,7 +22,7 @@
         <dependency>
             <groupId>com.free4inno.kubeiaas</groupId>
             <artifactId>api-common</artifactId>
-            <version>1.0-RELEASE</version>
+            <version>1.1.0-SNAPSHOT</version>
         </dependency>
         <!-- yaml -->
         <dependency>
@@ -58,42 +59,29 @@
 
             <!-- docker -->
             <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.26.0</version>
-
-                <!-- global -->
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.13</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <!-- =============== docker control =============== -->
-                    <dockerHost>${docker.host}</dockerHost>
-
-                    <!-- =============== registry control =============== -->
-                    <authConfig>
-                        <push>
-                            <username>${docker.repo.username}</username>
-                            <password>${docker.repo.password}</password>
-                        </push>
-                    </authConfig>
-
-                    <!-- =============== image control =============== -->
-                    <images>
-                        <image>
-                            <name>${docker.repo.address}/${project.name}:${project.version}</name>
-                            <build>
-                                <dockerFile>${project.basedir}/Dockerfile</dockerFile>
-                            </build>
-                            <run>
-                            </run>
-                        </image>
-                    </images>
+                    <username>${docker.repo.username}</username>
+                    <password>${docker.repo.password}</password>
+                    <repository>${docker.repo.address}/${docker.repo.name}</repository>
+<!--                    <useMavenSettingsForAuth>true</useMavenSettingsForAuth>-->
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <!-- specify any build args here -->
+                    </buildArgs>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>commons-codec</groupId>
-                        <artifactId>commons-codec</artifactId>
-                        <version>1.11</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

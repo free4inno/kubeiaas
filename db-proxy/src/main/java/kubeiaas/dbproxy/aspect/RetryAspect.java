@@ -23,11 +23,10 @@ public class RetryAspect {
                 result = joinPoint.proceed();
                 break;
             } catch (Exception ex) {
-                log.error("Exception caught: ", ex);
                 if (retryTimes < maxRetryTimes) {
-                    log.error("Exception caught, retrying...", ex);
+                    log.warn("WARN: Exception caught, retrying...", ex);
                 } else {
-                    log.error("Max retry times reached, aborting...");
+                    log.error("ERROR: Max retry times reached, aborting...");
                     throw ex;
                 }
                 Thread.sleep(retryInterval);

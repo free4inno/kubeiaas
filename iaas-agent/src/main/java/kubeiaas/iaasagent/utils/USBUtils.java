@@ -2,6 +2,7 @@ package kubeiaas.iaasagent.utils;
 
 import kubeiaas.common.bean.Device;
 import kubeiaas.common.enums.device.DeviceTypeEnum;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -9,9 +10,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsbUtils {
+@Slf4j
+public class USBUtils {
 
-    public static List<Device> getUsbDevice () {
+    public static List<Device> getHostDevices () {
         List<Device> deviceList = new ArrayList<>();
         // shell call
         InputStream is = null;
@@ -37,7 +39,8 @@ public class UsbUtils {
                     if (ch != '0' && zeroFlag) zeroFlag = false;
                     if (!zeroFlag) sb.append(ch);
                 }
-                usbDevice.setBus(sb.toString());
+                String busStr = sb.toString();
+                usbDevice.setBus(Integer.parseInt(busStr));
 
                 // - DEV
                 sb.setLength(0);
@@ -47,12 +50,15 @@ public class UsbUtils {
                     if (ch != '0' && zeroFlag) zeroFlag = false;
                     if (!zeroFlag) sb.append(ch);
                 }
-                usbDevice.setDev(sb.toString());
+                String devStr = sb.toString();
+                usbDevice.setDev(Integer.parseInt(devStr));
 
                 // - Vendor
-                usbDevice.setVendor("0x" + devInfo[5].split(":")[0]);
+                String vendorStr = devInfo[5].split(":")[0];
+                usbDevice.setVendor(Integer.parseInt(vendorStr, 16));
                 // - Product
-                usbDevice.setProduct("0x" + devInfo[5].split(":")[1]);
+                String productStr = devInfo[5].split(":")[1];
+                usbDevice.setProduct(Integer.parseInt(productStr, 16));
 
                 // - Name
                 sb.setLength(0);
@@ -62,12 +68,13 @@ public class UsbUtils {
                 usbDevice.setName(sb.toString());
 
                 // exclude root hub
-                if (Integer.parseInt(usbDevice.getDev()) != 1) {
+                if (usbDevice.getDev() != 1) {
                     deviceList.add(usbDevice);
                 }
             }
             proc.destroy();
         } catch (Exception ex) {
+            log.error("ERROR: getHostDevices failed");
             ex.printStackTrace();
         }
         // close BufferedReader
@@ -75,6 +82,7 @@ public class UsbUtils {
             try {
                 br.close();
             } catch (Exception ex) {
+                log.error("ERROR: BufferedReader close failed");
                 ex.printStackTrace();
             }
         }
@@ -83,6 +91,7 @@ public class UsbUtils {
             try {
                 is.close();
             } catch (Exception ex) {
+                log.error("ERROR: InputStream close failed");
                 ex.printStackTrace();
             }
         }

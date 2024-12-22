@@ -1,6 +1,6 @@
 package kubeiaas.resourceoperator.controller;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Host;
 import kubeiaas.common.constants.RequestMappingConstants;
 import kubeiaas.common.constants.RequestParamConstants;
@@ -26,9 +26,9 @@ public class ResourceController {
     public String selectHostByAppoint(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid) {
-        log.info("selectHostByAppoint ==== start ====");
+        log.info("-- start -- selectHostByAppoint");
         Host host = resourceService.selectHostByAppoint(vmUuid, hostUuid);
-        log.info("selectHostByAppoint ==== end ====");
+        log.info("-- end -- selectHostByAppoint");
         return JSON.toJSONString(host);
     }
 
@@ -36,9 +36,9 @@ public class ResourceController {
     @ResponseBody
     public String selectHostByHostUuid(
             @RequestParam(value = RequestParamConstants.HOST_UUID) String hostUuid) {
-        log.info("selectHostByAppoint ==== start ====");
+        log.info("-- start -- selectHostByHostUuid");
         Host host = resourceService.selectHostByHostUuid(hostUuid);
-        log.info("selectHostByAppoint ==== end ====");
+        log.info("-- end -- selectHostByHostUuid");
         return JSON.toJSONString(host);
     }
 
@@ -47,9 +47,9 @@ public class ResourceController {
     public String selectHostByOperator(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(value = RequestParamConstants.STRATEGY) String strategy) {
-        log.info("selectHostByOperator ==== start ====");
+        log.info("-- start -- selectHostByOperator");
         Host host = resourceService.selectHostByStrategy(vmUuid, strategy);
-        log.info("selectHostByOperator ==== end ====");
+        log.info("-- end -- selectHostByOperator");
         return JSON.toJSONString(host);
     }
 
@@ -57,9 +57,9 @@ public class ResourceController {
     @ResponseBody
     public String selectHostByHostOperator(
             @RequestParam(value = RequestParamConstants.STRATEGY) String strategy) {
-        log.info("selectHostByOperator ==== start ====");
+        log.info("-- start -- selectHostByHostOperator");
         Host host = resourceService.selectHostByStrategy(strategy);
-        log.info("selectHostByOperator ==== end ====");
+        log.info("-- end -- selectHostByHostOperator");
         return JSON.toJSONString(host);
     }
 

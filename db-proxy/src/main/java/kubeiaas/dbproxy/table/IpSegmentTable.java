@@ -1,9 +1,11 @@
 package kubeiaas.dbproxy.table;
 
+import kubeiaas.common.bean.HostBridge;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.enums.network.IpTypeEnum;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "ip_segment")
@@ -87,21 +89,12 @@ public class IpSegmentTable extends IpSegment {
         super.setIpRangeEnd(endIp);
     }
 
-    @Column(name = "host_uuid")
-    public String getHostUuid() {
-        return super.getHostUuid();
-    }
-
-    public void setHostUuid(String hostUuid) {
-        super.setHostUuid(hostUuid);
-    }
-
-    @Column(name = "bridge")
-    public String getBridge() {
-        return super.getBridge();
-    }
-
-    public void setBridge(String bridge) {
-        super.setBridge(bridge);
-    }
+//    @OneToMany(targetEntity = HostBridgeTable.class, mappedBy = "ipSegment", fetch = FetchType.EAGER)
+//    private List<HostBridge> hostBridges;
+//    public List<HostBridge> getHostBridges() {
+//        return super.getHostBridges();
+//    }
+//    public void setHostBridges(List<HostBridge> hostBridges) {
+//        super.setHostBridges(hostBridges);
+//    }
 }

@@ -1,0 +1,118 @@
+{{- if .Values.iaasAgent.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: iaas-agent
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: iaas-agent
+  template:
+    metadata:
+      labels:
+        app: iaas-agent
+    spec:
+      hostPID: true
+      hostIPC: true
+      initContainers:
+        - name: iaas-prepare
+          image: {{ .Values.iaasAgent.prepareImage }}
+          imagePullPolicy: {{ .Values.iaasAgent.prepareImagePullPolicy }}
+          securityContext:
+            privileged: true
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DHCP_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nodes.dhcp
+            - name: NFS_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nodes.nfs
+            - name: NFS_DIR_IMG
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nfs.dir.img
+            - name: NFS_DIR_VOL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nfs.dir.vol
+            - name: NFS_DIR_DV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nfs.dir.dv
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: checker
+              mountPath: /checker
+      containers:
+        - name: iaas-agent
+          command: ["sh"]
+          args:
+            - "-c"
+            - "/bin/bash /kubeiaas/RUN.sh"
+          image: {{ .Values.iaasAgent.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 9090
+              hostPort: 32201
+              protocol: TCP
+            - containerPort: 9089
+              protocol: TCP
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: DHCP_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nodes.dhcp
+            - name: NFS_NODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: nodes.nfs
+            - name: NETWORK_BRIDGE_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMapName }}
+                  key: network.bridge.type
+          volumeMounts:
+            - name: host-proc
+              mountPath: /host/proc
+            - name: workdir
+              mountPath: /workdir
+      volumes:
+        - name: host-proc
+          hostPath:
+            path: /proc
+        - name: checker
+          hostPath:
+            path: /usr/local/kubeiaas/workdir/checker
+        - name: workdir
+          hostPath:
+            path: /usr/local/kubeiaas/workdir
+{{- end }}

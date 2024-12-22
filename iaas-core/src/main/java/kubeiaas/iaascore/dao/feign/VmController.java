@@ -65,10 +65,50 @@ public interface VmController {
             @RequestParam(value = RequestParamConstants.CPUS) Integer cpus,
             @RequestParam(value = RequestParamConstants.MEMORY) Integer memory);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.GET_XML_DESC)
+    @ResponseBody
+    String getXmlDesc(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.CREATE_VM_INSTANCE_BY_XML)
+    @ResponseBody
+    String createVmInstanceByXml(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.XML_DESC) String xmlDesc);
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.STATUS)
     @ResponseBody
     String status(
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
 
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.SET_PASSWD)
+    @ResponseBody
+    String setPasswd(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.USER) String user,
+            @RequestParam(value = RequestParamConstants.PASSWD) String passwd);
+
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.SET_VM_BOOT_ORDER)
+    @ResponseBody
+    String setVmBootOrder(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.BOOT_ORDER) String bootOrder);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.GET_VM_BOOT_ORDER)
+    @ResponseBody
+    String getVmBootOrder(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid);
+
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.VM_C + "/" + RequestMappingConstants.LIVE_MIGRATE)
+    @ResponseBody
+    String liveMigrateVm(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.HOST_URI) String targetHostUri);
 }

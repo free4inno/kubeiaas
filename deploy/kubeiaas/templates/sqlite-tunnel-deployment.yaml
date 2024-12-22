@@ -1,0 +1,35 @@
+{{- if .Values.sqliteTunnel.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlite-tunnel
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.sqliteTunnel.replicas }}
+  selector:
+    matchLabels:
+      app: sqlite-tunnel
+  template:
+    metadata:
+      labels:
+        app: sqlite-tunnel
+    spec:
+      containers:
+        - name: sqlite-tunnel
+          image: {{ .Values.sqliteTunnel.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.sqliteTunnel.containerPort }}
+              {{- if .Values.sqliteTunnel.hostPortEnabled }}
+              hostPort: {{ .Values.sqliteTunnel.containerPort }}
+              {{- end }}
+              protocol: TCP
+          volumeMounts:
+            - name: sqlite-db
+              mountPath: /db
+      volumes:
+        - name: sqlite-db
+          nfs:
+            server: {{ .Values.nfs.server }}
+            path: {{ .Values.nfs.paths.sqlite }}
+{{- end }}

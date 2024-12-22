@@ -33,4 +33,10 @@ public interface VncController {
             URI uri,
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
             @RequestParam(RequestParamConstants.ADDRESS) String address);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VNC_C + "/" + RequestMappingConstants.GET_VNC_PORT)
+    @ResponseBody
+    Integer getVncPort(
+            URI uri,
+            @RequestParam(RequestParamConstants.VM_UUID) String uuid);
 }

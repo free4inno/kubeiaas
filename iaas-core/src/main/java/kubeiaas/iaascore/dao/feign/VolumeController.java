@@ -24,13 +24,36 @@ public interface VolumeController {
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
             @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize);
 
+    @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.CREATE_EMPTY_SYSTEM_VOLUME)
+    @ResponseBody
+    String createEmptySystemVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid);
+
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.CREATE_DATA_VOLUME)
     @ResponseBody
     String createDataVolume(
             URI uri,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
             @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
-            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) int extraSize);
+            @RequestParam(value = RequestParamConstants.VOLUME_SIZE) int volumeSize);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.RESIZE_SYSTEM_VOLUME)
+    @ResponseBody
+    String resizeSystemVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.RESIZE_DATA_VOLUME)
+    @ResponseBody
+    String resizeDataVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
+            @RequestParam(value = RequestParamConstants.VOLUME_UUID) String volumeUuid,
+            @RequestParam(value = RequestParamConstants.DISK_SIZE) int diskSize);
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DELETE_SYSTEM_VOLUME)
     @ResponseBody
@@ -60,13 +83,19 @@ public interface VolumeController {
             @RequestParam(value = RequestParamConstants.VM_OBJECT) String vmObjectStr,
             @RequestParam(value = RequestParamConstants.VOLUME_OBJECT) String volumeObjectStr);
 
+    @RequestMapping(method = RequestMethod.PUT, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.ATTACH_ISO)
+    @ResponseBody
+    String attachIsoVolume(
+            URI uri,
+            @RequestParam(value = RequestParamConstants.MOUNT_OBJECT) String mountObjectStr);
+
     @RequestMapping(method = RequestMethod.GET,value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.VOLUME_PUBLISH_IMAGE)
     @ResponseBody
     String volumePublishImage(
             URI uri,
             @RequestParam(value = RequestParamConstants.IMAGE_PATH) String imagePath,
             @RequestParam(value = RequestParamConstants.VOLUME_PATH) String volumePath,
-            @RequestParam(value = RequestParamConstants.IMAGE_OBJECT) String imageObjectStr
+            @RequestParam(value = RequestParamConstants.EXTRA_SIZE) Integer extraSize
     );
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME_C + "/" + RequestMappingConstants.DATA_VOLUME_STORAGE)

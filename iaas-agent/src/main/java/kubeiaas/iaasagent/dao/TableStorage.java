@@ -1,7 +1,8 @@
 package kubeiaas.iaasagent.dao;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.HostBridgeConstants;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
 import kubeiaas.iaasagent.dao.feign.DbProxy;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -143,6 +145,24 @@ public class TableStorage {
         }
     }
 
+    // ========================= host bridge =========================
+    public List<HostBridge> hostBridgeQueryAll() {
+        String jsonString = dbProxy.hostBridgeQueryAll();
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public List<HostBridge> hostBridgeQueryAllByIpSegmentId(String ipSegmentId) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(
+                HostBridgeConstants.IP_SEGMENT_ID, ipSegmentId);
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public HostBridge hostBridgeSave(HostBridge hostBridge) {
+        String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
+        hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
+        return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
+    }
+
     // ========================= ip used =========================
 
     public List<IpUsed> ipUsedQueryAllByInstanceUuid(String instanceUuid) {
@@ -204,6 +224,37 @@ public class TableStorage {
         String volumeObjectStr = JSON.toJSONString(volume);
         volumeObjectStr = dbProxy.volumeSave(volumeObjectStr);
         return JSON.parseObject(volumeObjectStr, Volume.class);
+    }
+
+    // ========================= iso =========================
+    public Mount mountSave(Mount mount) {
+        String mountObjectStr = JSON.toJSONString(mount);
+        mountObjectStr = dbProxy.mountSave(mountObjectStr);
+        return JSON.parseObject(mountObjectStr, Mount.class);
+    }
+
+    public Iso isoSave(Iso iso) {
+        String isoObjectStr = JSON.toJSONString(iso);
+        isoObjectStr = dbProxy.isoSave(isoObjectStr);
+        return JSON.parseObject(isoObjectStr, Iso.class);
+    }
+
+    public Optional<Iso> isoQueryByUuid(String uuid) {
+        String jsonString = dbProxy.isoQueryByUuid(uuid);
+        if (jsonString == null || jsonString.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(JSON.parseObject(jsonString, Iso.class));
+        }
+    }
+
+    public void deleteIsoByUuid(String uuid) {
+        dbProxy.deleteIsoByUuid(uuid);
+    }
+
+    public Integer mountDeleteById(Integer id) {
+        String jsonString = dbProxy.mountDeleteById(id);
+        return JSON.parseObject(jsonString, Integer.class);
     }
 
     // ========================= specConfig =========================

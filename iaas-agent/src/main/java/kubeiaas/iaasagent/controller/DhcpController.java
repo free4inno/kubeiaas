@@ -29,10 +29,12 @@ public class DhcpController {
             @RequestParam(value = RequestParamConstants.VM_UUID) @NotNull @NotEmpty String vmUuid,
             @RequestParam(value = RequestParamConstants.MAC) @NotNull @NotEmpty String mac,
             @RequestParam(value = RequestParamConstants.IP) @NotNull @NotEmpty String ip) {
-        log.info("bindMacAndIp ==== " + "instanceUuid: " + vmUuid + " mac: " + mac + " ip: " + ip);
+        log.info("-- start -- bindMacAndIp");
         if (dhcpService.bindMacAndIp(vmUuid, mac, ip)) {
+            log.info("-- end -- bindMacAndIp -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
+            log.info("-- end -- bindMacAndIp -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -41,10 +43,12 @@ public class DhcpController {
     @ResponseBody
     public String unbindMacAndIp(
             @RequestParam(value = RequestParamConstants.VM_UUID) @NotNull @NotEmpty String vmUuid) {
-        log.info("bindMacAndIp ==== " + "instanceUuid: " + vmUuid);
+        log.info("-- start -- unbindMacAndIp");
         if (dhcpService.unbindMacAndIp(vmUuid)) {
+            log.info("-- end -- unbindMacAndIp -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
+            log.info("-- end -- unbindMacAndIp -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }
@@ -53,10 +57,12 @@ public class DhcpController {
     @ResponseBody
     public String updateIpSeg(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull @NotEmpty String ipSegId) {
-        log.info("updateIpSeg ==== " + "ipSegId: " + ipSegId);
+        log.info("-- start -- updateIpSeg");
         if (dhcpService.updateIpSeg(Integer.parseInt(ipSegId))) {
+            log.info("-- end -- updateIpSeg -- success");
             return ResponseMsgConstants.SUCCESS;
         } else {
+            log.info("-- end -- updateIpSeg -- failed");
             return ResponseMsgConstants.FAILED;
         }
     }

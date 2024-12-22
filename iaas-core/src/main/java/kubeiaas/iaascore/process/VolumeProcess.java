@@ -1,8 +1,12 @@
 package kubeiaas.iaascore.process;
 
+import kubeiaas.common.bean.Image;
+import kubeiaas.common.bean.Mount;
 import kubeiaas.common.bean.Vm;
 import kubeiaas.common.bean.Volume;
 import kubeiaas.common.constants.bean.VolumeConstants;
+import kubeiaas.common.enums.vm.VmBootEnum;
+import kubeiaas.common.enums.vm.VmInstallationMethodEnum;
 import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.enums.volume.VolumeStatusEnum;
@@ -38,140 +42,234 @@ public class VolumeProcess {
 
     @Resource VncProcess vncProcess;
 
+    @Resource
+    ResourceProcess resourceProcess;
+
+    @Resource
+    MountProcess mountProcess;
+
 
     /**
      * Create VM.
      * 2. Create Sys Volume
      */
     public void createVmVolume(Vm newVm) throws VmException {
-        log.info("createVm -- 4. Volume");
-
-        String volumeUuid = volumeScheduler.createSystemVolume(newVm.getUuid());
+        log.debug("createVm -- 4. Volume");
+        log.info("-> invoke volumeScheduler -- createSystemVolume");
+        String volumeUuid;
+        if (newVm.getInstallationMethod() == VmInstallationMethodEnum.ISO) {
+            volumeUuid = volumeScheduler.createEmptySystemVolume(newVm);
+        } else if (newVm.getInstallationMethod() == VmInstallationMethodEnum.SNAPSHOT) {
+            volumeUuid = volumeScheduler.createSystemVolume(newVm);
+        } else {
+            volumeUuid = "";
+        }
+        log.info("<- invoke volumeScheduler -- done");
         if (volumeUuid.isEmpty()) {
+            log.error("ERROR: create system volume failed! (pre error)");
             throw new VmException(newVm,"ERROR: create system volume failed! (pre error)");
         }
         String newVmUuid = newVm.getUuid();
+        String isoUuid = newVm.getImageUuid();
         // Attention: copying image is long-time operation, so start a new Thread to handle this.
         new Thread(() -> {
             Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
 
             int waitLoop = VolumeConstants.CREATING_WAIT_LOOP;
-            try {   // when copy is done, volume status will change in database, so query volume status at regular time.
+            int backOffTime = VolumeConstants.CREATING_WAIT_TIME;
+            try {
+                TimeUnit.SECONDS.sleep(backOffTime);
+                // when copy is done, volume status will change in database, so query volume status at regular time.
                 while (!volume.getStatus().equals(VolumeStatusEnum.AVAILABLE) &&
                         !volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE) &&
                         waitLoop > 0) {
                     waitLoop--;
-                    TimeUnit.SECONDS.sleep(VolumeConstants.CREATING_WAIT_TIME);
+                    backOffTime += VolumeConstants.CREATING_WAIT_TIME;
+                    log.info(String.format("... volume not ready, loop back off ({%s} seconds)", backOffTime));
+                    TimeUnit.SECONDS.sleep(backOffTime);
                     volume = tableStorage.volumeQueryByUuid(volumeUuid);
                 }
                 if (waitLoop == 0 || volume.getStatus().equals(VolumeStatusEnum.ERROR_PREPARE)) {
                     // timeout || volume controller set ERROR to DB
                     log.error("ERROR: create system volume failed! (time out)");
                     newVm.setStatus(VmStatusEnum.ERROR);
+                    log.info(String.format("-> invoke DB -- vmSave, uuid: %s, set status: %s", newVm.getUuid(), newVm.getStatus()));
                     tableStorage.vmSave(newVm);
+                    log.info("<- invoke DB -- done");
                     return;
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("ERROR: create system volume failed! (loop error). ", e);
+
                 newVm.setStatus(VmStatusEnum.ERROR);
+                log.info(String.format("-> invoke DB -- vmSave, uuid: %s, set status: %s", newVm.getUuid(), newVm.getStatus()));
                 tableStorage.vmSave(newVm);
-                log.error("ERROR: create system volume failed! (loop error)");
+                log.info("<- invoke DB -- done");
                 return;
             }
-            log.info("createVm -- 4. volume create success!");
+            log.debug("createVm -- 4. volume create success!");
 
             // Step 5. Create VM (Generate XML for libvirt & Attach volume)
+            log.info("Step 5. Create VM (Generate XML for libvirt & Attach volume)");
             try {
                 vmProcess.createVM(newVmUuid);
             } catch (BaseException e) {
                 newVm.setStatus(VmStatusEnum.ERROR);
+                log.error(String.format("ERROR: failed to create VM -- vmUuid: %s, msg: %s", newVmUuid, e.getMsg()));
+                log.info("-> invoke DB -- vmSave");
                 tableStorage.vmSave(newVm);
-                log.error(e.getMsg());
+                log.info("<- invoke DB -- done");
                 return;
             }
-            AgentConfig.clearSelectedHost(newVmUuid);
 
             //Step 6 . Configuring VNC Service.
             vncProcess.addVncToken(newVm);
 
+            if (newVm.getInstallationMethod() == VmInstallationMethodEnum.ISO) {
+                // Step 7. Attach ISO
+                log.info("Step 7. Attach ISO");
+                Image image = tableStorage.imageQueryByUuid(isoUuid);
+                String source = VolumeConstants.DEFAULT_NFS_SRV_PATH + image.getDirectory();
+                try {
+                    attachIsoVolume(newVm, isoUuid, source);
+                } catch (BaseException e) {
+                    newVm.setStatus(VmStatusEnum.ERROR);
+                    log.error(String.format("ERROR: failed to attach iso -- vmUuid: %s, msg: %s", newVmUuid, e.getMsg()));
+                    return;
+                }
+
+                // Step 8. Change boot order
+                log.info("Step 8. Change boot order");
+                try {
+                    vmProcess.setVmBootOrder(newVm.getUuid(), VmBootEnum.CDROM);
+                } catch (BaseException e) {
+                    newVm.setStatus(VmStatusEnum.ERROR);
+                    log.error(String.format("ERROR: failed to change boot order -- vmUuid: %s, msg: %s", newVmUuid, e.getMsg()));
+                    return;
+                }
+            }
+
+            AgentConfig.clearSelectedHost(newVmUuid);
         }).start();
         log.info("createVm -- newThread begin wait for volume creating...");
     }
 
     public void createDataVolume(Volume newVolume) throws VolumeException {
-        log.info("createVm -- Volume");
-
         String volumeUuid = newVolume.getUuid();
         if (volumeUuid.isEmpty()) {
-            throw new VolumeException(newVolume,"ERROR: create Data volume failed! (pre error)");
+            log.error("ERROR: create Data volume failed! error in preCreate");
+            throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in preCreate");
         }
-        int diskSize = newVolume.getSize();
-        if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, diskSize)){
-            throw new VolumeException(newVolume, "ERROR create Data volume:"+newVolume.getUuid()+" failed!");
+        int volumeSize = newVolume.getSize();
+        log.info(String.format("-> invoke iaas-agent -- createDataVolume, volumeUuid: %s", volumeUuid));
+        if (!volumeScheduler.createDataVolume(newVolume.getProviderLocation(), volumeUuid, volumeSize)){
+            log.error(String.format("ERROR: create Data volume failed! error in agent -- volumeUuid: %s", volumeUuid));
+            throw new VolumeException(newVolume, "ERROR: create Data volume failed! error in agent");
         }
+        log.debug("<- invoke iaas-agent -- done");
         AgentConfig.clearSelectedHost(volumeUuid);
     }
 
+    public void resizeSystemVolume(Volume volume, int diskSize) throws VolumeException {
+        if (!volumeScheduler.resizeSystemVolume(volume.getProviderLocation(), volume.getUuid(), diskSize)) {
+            log.error(String.format("ERROR: resize system volume: %s failed!", volume.getUuid()));
+            throw new VolumeException(volume, "ERROR: resize system volume:" + volume.getUuid() + " failed!");
+        }
+        AgentConfig.clearSelectedHost(volume.getUuid());
+    }
+
+    public void resizeDataVolume(Volume volume, int diskSize) throws VolumeException {
+        if (!volumeScheduler.resizeDataVolume(volume.getProviderLocation(), volume.getUuid(), diskSize)) {
+            log.error(String.format("ERROR: resize data volume: %s failed!", volume.getUuid()));
+            throw new VolumeException(volume, "ERROR: resize data volume:" + volume.getUuid() + " failed!");
+        }
+        AgentConfig.clearSelectedHost(volume.getUuid());
+    }
+
     public void deleteSystemVolume(String vmUuid) throws BaseException {
-        log.info("deleteVolume ==== start ==== vmUuid: " + vmUuid);
         List<Volume> volumes = tableStorage.volumeQueryAllByInstanceUuid(vmUuid);
         for (Volume volume : volumes) {
+            // Set host to execute delete operation
+            resourceProcess.selectHostByVolume(volume);
             VolumeUsageEnum usage = volume.getUsageType();
             switch (usage) {
                 case SYSTEM:
                     if (!volumeScheduler.deleteSystemVolume(vmUuid, volume.getUuid(), volume.getProviderLocation())){
+                        log.error(String.format("ERROR: delete sys volume: %s failed!", volume.getUuid()));
                         throw new BaseException("ERROR: delete sys volume:" + volume.getUuid() + " failed!");
                     }
                     break;
                 case ISO:
                     if (!volumeScheduler.deleteIsoVolume(vmUuid, volume.getUuid())){
+                        log.error(String.format("ERROR: delete iso volume: %s failed!", volume.getUuid()));
                         throw new BaseException("ERROR: delete iso volume:" + volume.getUuid() + " failed!");
                     }
                     break;
                 case DATA:
                     if (!volumeScheduler.deleteDataVolume(volume.getUuid(), volume.getProviderLocation())) {
+                        log.error(String.format("ERROR: delete data volume: %s failed!", volume.getUuid()));
                         throw new BaseException("ERROR: delete data volume:" + volume.getUuid() + " failed!");
                     }
                     break;
                 default:
-                    log.warn("unknown volume type");
+                    log.warn("WARN: unknown volume type");
                     break;
             }
+            // clear selected host
+            AgentConfig.clearSelectedHost(volume.getUuid());
         }
-        log.info("deleteVolume ==== end ==== vmUuid:" + vmUuid);
     }
 
     public void deleteDataVolume(String volumeUuid) throws BaseException {
-        log.info("deleteDataVolume ==== start ====  volumeUuid: " + volumeUuid);
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         if (!volumeScheduler.deleteDataVolume(volumeUuid, volume.getProviderLocation())) {
+            log.error(String.format("ERROR: delete data volume: %s failed!", volume.getUuid()));
             throw new BaseException("ERROR: delete data volume:" + volume.getUuid() + " failed!");
         }
-        log.info("deleteDataVolume ==== end ==== volumeUuid:" + volumeUuid);
         AgentConfig.clearSelectedHost(volumeUuid);
     }
 
     public void attachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
-        log.info("attachDataVolume ==== start ====  volumeUuid: " + volumeUuid + "vmUuid:" + vmUuid);
         if (!volumeScheduler.attachDataVolume(vmUuid, volumeUuid)) {
+            log.error(String.format("ERROR: attach data volume: %s failed!", volumeUuid));
             throw new BaseException("ERROR: attach data volume:" + volumeUuid + " failed!");
         }
-        log.info("attachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
         AgentConfig.clearSelectedHost(volumeUuid);
     }
 
     public void detachDataVolume(String vmUuid, String volumeUuid) throws BaseException {
-        log.info("detachDataVolume ==== start ====  volumeUuid: " + volumeUuid + "vmUuid:" + vmUuid);
         if (!volumeScheduler.detachDataVolume(vmUuid, volumeUuid)) {
+            log.error(String.format("ERROR: detach data volume: %s failed!", volumeUuid));
             throw new BaseException("ERROR: detach data volume:" + volumeUuid + " failed!");
         }
         Volume volume = tableStorage.volumeQueryByUuid(volumeUuid);
         volume.setInstanceUuid("");
         volume.setMountPoint("");
         volume.setBus("");
+        log.info("-> invoke DB -- volumeSave");
         tableStorage.volumeSave(volume);
-        log.info("detachDataVolume ==== end ==== volumeUuid:" + volumeUuid);
+        log.info("<- invoke DB -- done");
         AgentConfig.clearSelectedHost(volumeUuid);
+    }
+
+    private void attachIsoVolume(Vm vm, String isoUuid, String source) throws BaseException {
+        Mount mount = new Mount();
+        mount.setVmUuid(vm.getUuid());
+        mount.setIsoUuid(isoUuid);
+        mount.setType(VolumeConstants.STORAGE_TYPE);
+        mount.setDevice(VolumeConstants.VOLUME_DEVICE_CDROM);
+        mount.setDriverType(VolumeConstants.VOLUME_DRIVER_TYPE_RAW);
+        mount.setSource(source);
+        String mountPoint = mountProcess.getMountPointForIso(vm).orElseThrow(
+                () -> new BaseException("ERROR: get mount point failed!"));
+        mount.setMountPoint(mountPoint);
+        mount.setBus(VolumeConstants.VOLUME_BUS_IDE);
+        mount.setReadonly(true);
+
+        if (!volumeScheduler.attachIsoVolume(mount)) {
+            log.error(String.format("ERROR: attach iso volume: %s failed!", isoUuid));
+            throw new BaseException("ERROR: attach iso volume:" + isoUuid + " failed!");
+        }
     }
 
     /**
@@ -181,11 +279,12 @@ public class VolumeProcess {
             String name,
             String description,
             String hostUUid,
-            Integer diskSize
-    ){
+            Integer diskSize){
         String volumeUuid = UuidUtils.getRandomUuid();
         Volume newVolume = new Volume();
         newVolume.setUuid(volumeUuid);
+        log.info(String.format("uuid allocated -- volumeUuid: %s", volumeUuid));
+
         newVolume.setCreateTime(new Timestamp(System.currentTimeMillis()));
         if (name == null || name.isEmpty()) {
             newVolume.setName(volumeUuid);
@@ -199,9 +298,13 @@ public class VolumeProcess {
         newVolume.setUsageType(VolumeUsageEnum.DATA);
         newVolume.setFormatType(VolumeFormatEnum.QCOW2);
         newVolume.setStatus(VolumeStatusEnum.CREATING);
+        log.info(String.format("volume set status -- status: %s", volumeUuid));
 
         // save into DB
+        log.info(String.format("-> invoke DB -- volume create, volumeUuid: %s", volumeUuid));
         newVolume = tableStorage.volumeSave(newVolume);
+        log.info("<- invoke DB -- done");
+
         return newVolume;
     }
 

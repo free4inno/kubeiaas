@@ -7,7 +7,9 @@ import kubeiaas.common.enums.vm.VmStatusEnum;
 import kubeiaas.iaasagent.config.HostConfig;
 import kubeiaas.iaasagent.config.LibvirtConfig;
 import kubeiaas.iaasagent.config.XmlConfig;
-import kubeiaas.iaasagent.utils.UsbUtils;
+import kubeiaas.iaasagent.utils.MdevUtils;
+import kubeiaas.iaasagent.utils.PCIUtils;
+import kubeiaas.iaasagent.utils.USBUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.libvirt.Connect;
 import org.libvirt.Domain;
@@ -15,6 +17,7 @@ import org.libvirt.LibvirtException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,11 +29,22 @@ public class DeviceService {
     private XmlConfig xmlConfig;
 
     public List<Device> queryAll() {
-        List<Device> devList = UsbUtils.getUsbDevice();
-        for (Device device : devList) {
-            device.setStatus(DeviceStatusEnum.AVAILABLE);
-            device.setHostUuid(HostConfig.thisHost.getUuid());
+        log.info("query all devices");
+        List<Device> devList = new ArrayList<>();
+        devList.addAll(USBUtils.getHostDevices());
+        List<Device> pciDevices = PCIUtils.getHostDevices();
+        List<Device> mdevDevices = MdevUtils.getHostDevices();
+        if (!mdevDevices.isEmpty()) {
+            devList.addAll(mdevDevices);
+        } else {
+            devList.addAll(pciDevices);
         }
+        devList.forEach(
+            d -> {
+                d.setStatus(DeviceStatusEnum.AVAILABLE);
+                d.setHostUuid(HostConfig.thisHost.getUuid());
+            }
+        );
         return devList;
     }
 
@@ -50,22 +64,26 @@ public class DeviceService {
      * @return operate result
      */
     private boolean operate(Device device, Vm vm, int flag) {
-        log.info("operateDevice ---- start ----");
-        log.info(" -- device: " + device.toString() + "vm: " + vm.toString());
+        log.info(String.format("operateDevice info -- device: %s, vm: %s, flag: %d", device, vm, flag));
         String deviceXml = "";
         switch (device.getType()) {
             case USB:
-                log.info(" -- USB Device");
+                log.debug("-- USB Device");
                 deviceXml = xmlConfig.getUsbDevice(device);
                 break;
             case PCI:
-                log.info(" -- PCI Device");
+                log.debug("-- PCI Device");
+                deviceXml = xmlConfig.getPciDevice(device);
+                break;
+            case MDEV:
+                log.debug("-- MDEV Device");
+                deviceXml = xmlConfig.getMdevDevice(device);
                 break;
         }
         if (deviceXml.isEmpty()) {
             return false;
         }
-        log.info(" -- operate device info: " + deviceXml);
+        log.debug("-- operate device info: " + deviceXml);
 
         String vmUuid = vm.getUuid();
         try {
@@ -83,33 +101,36 @@ public class DeviceService {
                 int virtFlag = vm.getStatus().equals(VmStatusEnum.ACTIVE) ? (0b0001 | 0b0010) : (0b0010);
                 switch (flag) {
                     case DeviceOperateFlags.ATTACH:
+                        log.debug("-- attach device");
                         domain.attachDeviceFlags(deviceXml, virtFlag);
                         break;
 
                     case DeviceOperateFlags.DETACH:
+                        log.debug("-- detach device");
                         domain.detachDeviceFlags(deviceXml, virtFlag);
                         break;
 
                     default:
-                        log.info("-- do nothing");
+                        log.debug("-- do nothing");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("operateDevice error: " + e.getMessage());
                 return false;
             }
         } catch (LibvirtException e) {
-            e.printStackTrace();
+            log.error("operateDevice error: " + e.getMessage());
             return false;
         }
-        log.info("operateDevice ---- end ----");
         return true;
     }
 
     public boolean attach(Device device, Vm vm) {
+        log.info(String.format("attachDevice info -- device: %s, vm: %s", device, vm));
         return this.operate(device, vm, DeviceOperateFlags.ATTACH);
     }
 
     public boolean detach(Device device, Vm vm) {
+        log.info(String.format("detachDevice info -- device: %s, vm: %s", device, vm));
         return this.operate(device, vm, DeviceOperateFlags.DETACH);
     }
 }

@@ -26,18 +26,18 @@ public class VncController {
     public void addVncToken(
             @RequestParam(RequestParamConstants.VM_UUID) String uuid,
             @RequestParam(RequestParamConstants.ADDRESS) String address) {
-        log.info("addVncToken ==== start ==== uuid:" + uuid + " address:" + address);
+        log.info("-- start -- addVncToken");
         vncService.addVncToken(uuid, address);
-        log.info("addVncToken ==== end ==== ");
+        log.info("-- end -- addVncToken -- success");
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.DELETE_VNC_TOKEN, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public void deleteVncToken(
             @RequestParam(RequestParamConstants.VM_UUID) String uuid) {
-        log.info("addVncToken ==== start ==== uuid:" + uuid);
+        log.info("-- start -- deleteVncToken");
         vncService.deleteVncToken(uuid);
-        log.info("addVncToken ==== end ==== ");
+        log.info("-- end -- deleteVncToken -- success");
     }
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.FLUSH_VNC_TOKEN, produces = RequestMappingConstants.APP_JSON)
@@ -45,8 +45,18 @@ public class VncController {
     public void flushVncToken(
             @RequestParam(RequestParamConstants.VM_UUID) String uuid,
             @RequestParam(RequestParamConstants.ADDRESS) String address) {
-        log.info("flushVncToken ==== start ==== uuid:" + uuid + " address:" + address);
+        log.info("-- start -- flushVncToken");
         vncService.flushVncToken(uuid, address);
-        log.info("flushVncToken ==== end ==== ");
+        log.info("-- end -- flushVncToken -- success");
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.GET_VNC_PORT, produces = RequestMappingConstants.APP_JSON)
+    @ResponseBody
+    public Integer getVncPort(
+            @RequestParam(RequestParamConstants.VM_UUID) String uuid) {
+        log.info("-- start -- getVncPort");
+        Integer vncPort = vncService.getVncPort(uuid);
+        log.info("-- end -- getVncPort -- success");
+        return vncPort;
     }
 }

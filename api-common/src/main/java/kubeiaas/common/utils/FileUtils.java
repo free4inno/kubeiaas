@@ -4,12 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Optional;
 import java.util.Properties;
 
 @Slf4j
 public class FileUtils {
 
     private static final String FILE_SEPARATOR = "/";
+    private static final String tmpFilePrefix = "fetch";
+    private static final String tmpFileSuffix = ".tmp";
 
     public static boolean exists(String path) {
         File file = new File(path);
@@ -202,5 +207,39 @@ public class FileUtils {
             return properties;
         }
         return properties;
+    }
+
+    public static boolean isIsoFile(String filePath) {
+        if (filePath == null || "".equals(filePath)) {
+            return false;
+        }
+        String suffix = filePath.substring(filePath.lastIndexOf(".") + 1);
+        return "iso".equalsIgnoreCase(suffix);
+    }
+
+    public static Optional<File> fetchFile(URL url, String dirPath, String fileName) throws IOException {
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("mkdir failed");
+            }
+        }
+        if (!dir.isDirectory()) {
+            throw new IOException("dirPath is not a directory");
+        }
+        File targetFile = new File(dir.getAbsolutePath() + File.separator + fileName);
+        if (targetFile.exists()) {
+            throw new IOException("file already exists");
+        }
+        try {
+            org.apache.commons.io.FileUtils.copyURLToFile(url, targetFile);
+        } catch (IOException e) {
+            if (!targetFile.delete()) {
+                log.error("ERROR: delete tmp file failed, target file: {}", targetFile.getAbsolutePath());
+            }
+            throw e;
+        }
+
+        return Optional.of(targetFile);
     }
 }

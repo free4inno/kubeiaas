@@ -3,5 +3,13 @@ FROM free4inno/java-jdk8
 RUN mkdir -p /workdir/
 COPY iaas-front.war /workdir
 
-# docker build -t registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.0-RELEASE .
-# docker push registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.0-RELEASE
+# ------- MODIFY WAR -------
+# spring.datasource.url=jdbc:mysql://front-mysql:3306/hufu-front?serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+# spring.datasource.password=MYSQL@free
+# --------------------------
+
+# ----- Package -----
+# docker build -t registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT .
+# docker push registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT
+# ---
+# docker buildx build --platform linux/amd64 -t registry.cn-beijing.aliyuncs.com/kubeiaas/front-web:1.1.0-SNAPSHOT . --push

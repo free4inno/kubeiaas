@@ -32,20 +32,35 @@ public class NetworkService {
      * 获取网段列表（全部）
      */
     public List<IpSegment> queryAllIpSeg() {
-        List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
         // 建立 uuid -> name 的索引
-        Map<String, String> hostUuidNameMap = new HashMap<>();
-        List<Host> hostList = tableStorage.hostQueryAll();
-        for (Host host : hostList) {
-            hostUuidNameMap.put(host.getUuid(), host.getName());
-        }
-        // set ipSeg hostName
-        for (IpSegment ipSeg : ipSegmentList) {
-            String hostName = hostUuidNameMap.get(ipSeg.getHostUuid());
-            ipSeg.setHostName(hostName);
-        }
+//        Map<String, String> hostUuidNameMap = new HashMap<>();
+//        log.info("-> invoke DB -- hostQueryAll");
+//        List<Host> hostList = tableStorage.hostQueryAll();
+//        log.info("<- invoke DB -- done");
+//        for (Host host : hostList) {
+//            hostUuidNameMap.put(host.getUuid(), host.getName());
+//        }
+
+//        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
+//        //set hostBridge hostName
+//        for (HostBridge hostBridge : hostBridgeList) {
+//            String hostName = hostUuidNameMap.get(hostBridge.getHostUuid());
+//            hostBridge.setHostName(hostName);
+//            tableStorage.hostBridgeSave(hostBridge);
+//        }
+
+        log.info("-> invoke DB -- ipSegmentQueryAll");
+        List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAll();
+        log.info("<- invoke DB -- done");
         return ipSegmentList;
     }
+
+//    public List<HostBridge> queryAllHostBridge() {
+//        log.info("-> invoke DB -- hostBridgeQueryAll");
+//        List<HostBridge> hostBridgeList = tableStorage.hostBridgeQueryAll();
+//        log.info("<- invoke DB -- done");
+//        return hostBridgeList;
+//    }
 
     /**
      * statistics
@@ -69,6 +84,8 @@ public class NetworkService {
     }
 
     public Map<String, Integer> getIpCount(Integer segId) throws BaseException {
+        log.info(String.format("getIpCount info -- segId: %d", segId));
+
         Map<String, Integer> resMap = new HashMap<>();
 
         // 1. 总量
@@ -83,39 +100,50 @@ public class NetworkService {
     }
 
     /**
-     * 新建 & 编辑
+     * 新建编辑
      */
     public IpSegment updateIpSegment(
             Integer ipSegmentId,
             String name,
-            String hostUuid,
+//            String hostUuid,
             String type,
-            String bridge,
+//            String bridge,
             String ipRangeStart,
             String ipRangeEnd,
             String gateway,
             String netmask,
             boolean isNew) throws BaseException {
-
-        if (tableStorage.hostQueryByUuid(hostUuid) == null) {
-            throw new BaseException("can't find host");
-        }
+//        log.info(String.format("updateIpSegment info -- ipSegmentId: %d, name: %s, hostUuid: %s, type: %s, bridge: %s, ipRangeStart: %s, ipRangeEnd: %s, gateway: %s, netmask: %s, isNew: %s",
+//                ipSegmentId, name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask, isNew));
+//        log.info(String.format("-> invoke DB -- hostQueryByUuid, hostUuid: %s", hostUuid));
+//        Host host = tableStorage.hostQueryByUuid(hostUuid);
+//        log.info("<- invoke DB -- done");
+//        if (host == null) {
+//            log.error("ERROR: can't find host");
+//            throw new BaseException("can't find host");
+//        }
 
         IpSegment ipSegment;
         if (isNew) {
             ipSegment = new IpSegment();
         } else {
+            log.info(String.format("-> invoke DB -- ipSegmentQueryById, ipSegmentId: %d", ipSegmentId));
             ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+            log.info("<- invoke DB -- done");
         }
 
-        return networkProcess.saveIpSegment(ipSegment, name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
+//        return networkProcess.saveIpSegment(ipSegment, name, hostUuid, type, bridge, ipRangeStart, ipRangeEnd, gateway, netmask);
+        return networkProcess.saveIpSegment(ipSegment, name, type, ipRangeStart, ipRangeEnd, gateway, netmask);
     }
 
     /**
      * 删除
      */
     public String deleteIpSegment(Integer ipSegmentId){
-        tableStorage.ipSegmentDelete(ipSegmentId);
+        log.info(String.format("deleteIpSegment info -- ipSegmentId: %d", ipSegmentId));
+        log.info(String.format("-> invoke DB -- ipSegmentDelete, ipSegmentId: %d", ipSegmentId));
+        tableStorage.ipSegmentDelete(ipSegmentId);  //todo 是否需要级联删除？
+        log.info("<- invoke DB -- done");
         return ResponseMsgConstants.SUCCESS;
     }
 
@@ -123,10 +151,10 @@ public class NetworkService {
      * 网段基本详情
      */
     public IpSegment queryById(Integer ipSegmentId) {
+        log.info(String.format("queryById info -- ipSegmentId: %d", ipSegmentId));
+        log.info(String.format("-> invoke DB -- ipSegmentQueryById, ipSegmentId: %d", ipSegmentId));
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
-        String hostUuid = ipSegment.getHostUuid();
-        String hostName = tableStorage.hostQueryByUuid(hostUuid).getName();
-        ipSegment.setHostName(hostName);
+        log.info("<- invoke DB -- done");
         return ipSegment;
     }
 
@@ -134,15 +162,20 @@ public class NetworkService {
      * 段内IP分页详情
      */
     public PageResponse<IpUsed> pageQueryById(Integer ipSegmentId, Integer pageNum, Integer pageSize) {
+        log.info(String.format("pageQueryById info -- ipSegmentId: %d, pageNum: %d, pageSize: %d", ipSegmentId, pageNum, pageSize));
         // get ipSegment by ipSegment
+        log.info(String.format("-> invoke DB -- ipSegmentQueryById, ipSegmentId: %d", ipSegmentId));
         IpSegment ipSegment = tableStorage.ipSegmentQueryById(ipSegmentId);
+        log.info("<- invoke DB -- done");
 
         // set ips
         List<IpUsed> ipList = new ArrayList<>();
         int ipBegin = IpUtils.stringToInt(ipSegment.getIpRangeStart());
         int ipEnd = IpUtils.stringToInt(ipSegment.getIpRangeEnd());
         Map<String,IpUsed> ips = new HashMap<>();
+        log.info(String.format("-> invoke DB -- ipUsedQueryAllByIpSegmentId, ipSegmentId: %d", ipSegmentId));
         List<IpUsed> ipUsedList = tableStorage.ipUsedQueryAllByIpSegmentId(ipSegmentId);
+        log.info("<- invoke DB -- done");
         ipUsedList.forEach(t -> ips.put(t.getIp(), t));
 
         for (int ip = ipBegin; ip <= ipEnd; ip++) {
@@ -151,7 +184,10 @@ public class NetworkService {
             if (ips.containsKey(ipStr)) {
                 tempIpUsed = ips.get(ipStr);
                 String tempInstanceUuid = tempIpUsed.getInstanceUuid();
-                tempIpUsed.setInstanceName(tableStorage.vmQueryByUuid(tempInstanceUuid).getName());
+                log.info(String.format("-> invoke DB -- vmQueryByUuid, tempInstanceUuid: %s", tempInstanceUuid));
+                Vm temp = tableStorage.vmQueryByUuid(tempInstanceUuid);
+                log.info("<- invoke DB -- done");
+                tempIpUsed.setInstanceName(temp.getName());
             } else {
                 tempIpUsed = new IpUsed();
                 tempIpUsed.setIp(ipStr);

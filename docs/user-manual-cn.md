@@ -256,3 +256,148 @@ KubeIaaS 官方提供了一些预制镜像，通过链接下载镜像源文件�
 | VM_STATUS     | 控制云主机搜索可选状态       | Enum  <br/> 系统中包含的云主机状态             <br/> 示例：ACTIVE            | String <br/> 选项文字  |
 | VNC_DOMAIN    | 配置 Web noVNC 访问域名 | String <br/> 系统将使用该域名跳转             <br/> 示例：example.novnc.com | String <br/> 无实际意义 |
 | VOLUME_STATUS | 控制云硬盘搜索可选规格       | Enum  <br/> 系统中包含的云硬盘状态            <br/> 示例：ATTACHED           | String <br/> 选项文字  |
+
+## 系统监控（可选）
+
+### 1. 指标监控组件的部署
+
+自由之翼团队提供了包含Prometheus，Grafana和Alertmanager的集群指标监控套件的helm chart包，能够部署一套集群指标监控服务组件，以提供针基础运维能力。具体包括：
+- Prometheus Server v2.47.0（用于完成K8S集群以及KubeIaaS中云主机的运行指标采集）
+- Grafana dashboard v10.1.1（数据可视化和监控工具）
+- Alertmanager v0.26.0（告警管理器，负责对告警信息进行接收、处理和通知）
+
+请访问[虎符运维组件-集群指标监控](http://tcenter.free4inno.com/resource?id=18390)并下载附件(.tgz文件)。
+接下来可以使用helm命令进行部署，具体命令如下：
+```shell
+helm install --name <release-name> <path-to-chart> --namespace <namespace>
+```
+其中，`<release-name>`为部署的release名称，`<path-to-chart>`为helm chart包的路径，`<namespace>`为部署的命名空间。
+
+部署成功后，各个组件开放的NodePort端口如下：
+- Prometheus Server：30092
+- Grafana dashboard：30922
+- Alertmanager：30903
+
+### 2. 指标监控组件的配置
+
+在完成部署后，需要在 ”**用户管理-用户组**“的对应用户组的配置中，添加`ops`字段，并在其中添加
+`prometheus_prefix`，`grafana_url`和`alertmanager_url`字段，分别填写Prometheus的API前缀、Grafana的URL和Alertmanager的URL。
+鉴于部署提供了NodePort端口，因此：
+- `prometheus_prefix`字段填写`http://<node-ip>:30092/api/v1/query?query=`
+- `grafana_url`字段填写`http://<node-ip>:30922`
+- `alertmanager_url`字段填写`http://<node-ip>:30903`
+
+其中，`<node-ip>`为部署集群的任意节点IP。 
+
+完成上述配置后，用户组配置应具有如下内容：
+```json
+{
+  "iaas": {
+    "iaas_server_url":"http://<node-ip>:32210",
+    "image_center_url": "http://zhi.free4inno.com"
+  },
+  "ops": {
+    "prometheus_prefix": "http://<node-ip>:30092/api/v1/query?query=",
+    "grafana_url": "http://<node-ip>:30922",
+    "alertmanager_url": "http://<node-ip>:30903"
+  }
+}
+```
+
+### 3. 云主机指标采集器(Libvirt Exporter)的部署
+
+在完成指标监控组件的部署后，需要在K8S集群中部署云主机指标采集器，以完成对云主机的指标采集。
+自由之翼团队开发了[Prometheus Libvirt Exporter](https://github.com/free4inno/prometheus-libvirt-exporter)
+项目，用于采集云主机的指标。
+
+该项目提供了一个Dockerfile，可以使用该Dockerfile构建一个镜像。镜像默认使用9177端口。
+在完成镜像构建后，可以使用Docker直接在集群中部署该采集器，也可以使用deployment部署该采集器。
+部署完成后，可以通过访问`http://<node-ip>:9177/metrics`来查看采集到的指标。
+以下是一个deployment的yaml文件示例，仅供参考：
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: libvirt-exporter
+  namespace: kubeiaas
+spec:
+  selector:
+    matchLabels:
+      app: libvirt-exporter
+  template:
+    metadata:
+      labels:
+        app: libvirt-exporter
+    spec:
+      imagePullSecrets:
+      - name: <Your Secret>
+      containers:
+      - name: libvirt-exporter
+        image: <Your Image>
+        imagePullPolicy: IfNotPresent
+        args: ["--web.disable-exporter-metrics", "--log.level=debug"]
+        ports:
+        - containerPort: 9177
+          hostPort: 9177
+        volumeMounts:
+        - name: libvirt-volume
+          mountPath: /var/run/libvirt
+      volumes:
+      - name: libvirt-volume
+        hostPath:
+          path: /var/run/libvirt
+          type: Directory
+
+```
+当Libvirt Exporter部署完成后，**需要修改Prometheus的配置**，以完成对云主机指标的采集。
+
+您可以参照[虎符运维组件-集群指标监控](http://tcenter.free4inno.com/resource?id=18390)中的介绍：
+> 修改本模板中 values.yaml 中 “虚拟机监控服务” 相关配置（位于 2561 行）
+> ```yaml
+> additionalScrapeConfigs:
+> - job_name: 'kubeiaas-libvirt-expoter'
+>   scrape_interval: 15s
+>   scrape_timeout: 10s
+>   metrics_path: /metrics
+>   scheme: http
+>   static_configs:
+>   - targets:
+>   # 此部分内容请按该格式填写 <Node_IP>:<Libvirt_Exporter_Port>
+>   # 其中 <NodeIP> 是 KubeIaaS 工作节点的 IP，<Libvirt_Exporter_Port> 是 Libvirt_Exporter 服务暴露的端口号，默认 9177；
+>   # 将所有的节点，以 YAML 数组格式列出，以下是一段示例：
+>     - 192.168.33.1:9177
+>     - 192.168.33.3:9177
+>     - 192.168.33.6:9177
+>     - 192.168.33.7:9177
+> ```
+
+也可以创建一个yaml文件exporter.yaml，使用 -f 参数将新的配置项传递给 helm upgrade 命令：
+```bash
+helm upgrade <release-name> <path-to-chart> --namespace <namespace> -f exporter.yaml
+```
+其中，`<release-name>`为部署的release名称，`<path-to-chart>`为helm chart包的路径，`<namespace>`为部署的命名空间。
+exporter.yaml文件内容示例如下：
+```yaml
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      # 1: kubeiaas-libvirt-expoter
+      - job_name: 'kubeiaas-libvirt-expoter'
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+        - targets:
+          # 此部分内容请按该格式填写 <Node_IP>:<Libvirt_Exporter_Port>
+          # 其中 <NodeIP> 是 KubeIaaS 工作节点的 IP，<Libvirt_Exporter_Port> 是 Libvirt_Exporter 服务暴露的端口号，默认 9177；
+          # 将所有的节点，以 YAML 数组格式列出，以下是一段示例：
+          - 192.168.33.1:9177
+          - 192.168.33.3:9177
+          - 192.168.33.6:9177
+          - 192.168.33.7:9177
+```
+
+完成以上配置后，Prometheus将会自动采集云主机的指标。接下来，您可以在Grafana中创建Dashboard，以展示云主机的指标。
+或者更简单的，您可以在 ”**应用管理-云主机**“ 的任意处于`ACTIVE`状态的云主机的详情页的状态中查看云主机的
+CPU、内存、网络、磁盘等常用指标。

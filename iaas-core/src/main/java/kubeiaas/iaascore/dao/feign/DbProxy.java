@@ -141,6 +141,34 @@ public interface DbProxy {
     );
 
 
+    // ========================= host bridge =========================
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String hostBridgeQueryAll();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
+    @ResponseBody
+    String hostBridgeQueryAllBySingleKey(
+            @RequestParam(value = RequestParamConstants.KEY_1) String key1,
+            @RequestParam(value = RequestParamConstants.VALUE_1) String value1
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String hostBridgeSave(
+            @RequestParam(value = RequestParamConstants.HOST_BRIDGE_OBJECT) String hostBridgeObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.DELETE_BY_ID)
+    @ResponseBody
+    String hostBridgeDeleteById(
+            @RequestParam(value = RequestParamConstants.HOST_BRIDGE_ID) Integer hostBridgeId
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.HOST_BRIDGE + "/" + RequestMappingConstants.MIGRATE_FROM_IP_SEGMENT)
+    void hostBridgeMigrateFromIpSegment();
+
+
     // ========================= ip used =========================
 
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.IP_USED + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)
@@ -161,6 +189,43 @@ public interface DbProxy {
     String ipUsedDeleteByVmUuid(
             @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid
     );
+
+    // ========================= iso =========================
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.QUERY_BY_UUID)
+    @ResponseBody
+    String isoQueryByUuid(
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.QUERY_ALL)
+    @ResponseBody
+    String isoQueryAll();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.SAVE)
+    @ResponseBody
+    String isoSave(
+            @RequestParam(value = RequestParamConstants.ISO_OBJECT) String isoObjectStr
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.QUERY_ALL_MOUNT_POINT_BY_VM_UUID)
+    @ResponseBody
+    String queryAllMountPointsByVmUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid
+    );
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.QUERY_MOUNTS_BY_VM_UUID_AND_ISO_UUID)
+    @ResponseBody
+    String queryMountsByVmUuidAndIsoUuid(
+            @RequestParam(value = RequestParamConstants.VM_UUID) String vmUuid,
+            @RequestParam(value = RequestParamConstants.ISO_UUID) String isoUuid);
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.ISO + "/" + RequestMappingConstants.DELETE)
+    @ResponseBody
+    String deleteIsoTable();
+
+    @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.MOUNT + "/" + RequestMappingConstants.DELETE)
+    @ResponseBody
+    String deleteMountTable();
 
     // ========================= volume =========================
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.VOLUME + "/" + RequestMappingConstants.QUERY_ALL_BY_SINGLE_KEY)

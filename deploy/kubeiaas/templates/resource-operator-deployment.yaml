@@ -1,0 +1,30 @@
+{{- if .Values.resourceOperator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-operator
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.resourceOperator.replicas }}
+  selector:
+    matchLabels:
+      app: resource-operator
+  template:
+    metadata:
+      labels:
+        app: resource-operator
+    spec:
+      containers:
+        - name: resource-operator
+          command: ["sh"]
+          args: ["-c", "java -jar /root/resource-operator.jar"]
+          image: {{ .Values.resourceOperator.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.resourceOperator.service.port }}
+          env:
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+{{- end }}

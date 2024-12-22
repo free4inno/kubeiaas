@@ -1,12 +1,15 @@
 package kubeiaas.iaascore.dao;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import kubeiaas.common.bean.*;
+import kubeiaas.common.constants.HostBridgeConstants;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.common.constants.bean.*;
 import kubeiaas.common.enums.config.SpecTypeEnum;
+import kubeiaas.common.enums.network.IpTypeEnum;
 import kubeiaas.common.enums.volume.VolumeUsageEnum;
+import kubeiaas.common.utils.EnumUtils;
 import kubeiaas.iaascore.dao.feign.DbProxy;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
 import kubeiaas.iaascore.request.image.SaveImageForm;
@@ -15,7 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -112,13 +118,40 @@ public class TableStorage {
         return JSON.parseObject(jsonString, new TypeReference<PageResponse<Image>>(){});
     }
 
+    public Map<String, Integer> imageQueryUseCounts() {
+        Map<String, Integer> useCounts = new HashMap<>();
+        List<Vm> vmList = vmQueryAll();
+        for (Vm vm : vmList) {
+            String imageUuid = vm.getImageUuid();
+            if (useCounts.containsKey(imageUuid)) {
+                useCounts.put(imageUuid, useCounts.get(imageUuid) + 1);
+            } else {
+                useCounts.put(imageUuid, 1);
+            }
+        }
+        return useCounts;
+    }
+
     public String imageGetRaw(String uuid) {
         return imageOperator.imageQueryRawByUuid(uuid);
+    }
+
+    public Optional<String> imageGetUploadStatus(String uuid) {
+        String status = imageOperator.imageQueryUploadStatus(uuid);
+        if (status.equals(ResponseMsgConstants.FAILED)) {
+            return Optional.empty();
+        } else {
+            return Optional.of(status);
+        }
     }
 
     public boolean imageSave(String uuid, String content) {
         SaveImageForm f = new SaveImageForm(uuid, content);
         return imageOperator.imageSaveYaml(f).equals(ResponseMsgConstants.SUCCESS);
+    }
+
+    public boolean imageUpload(int id) {
+        return imageOperator.imageUpload(id).equals(ResponseMsgConstants.SUCCESS);
     }
 
     public boolean imageDelete(String uuid) {
@@ -191,10 +224,28 @@ public class TableStorage {
 
     // ========================= ip segment =========================
 
+//    public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
+//        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
+//                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
+//        return JSON.parseArray(jsonString, IpSegment.class);
+//    }
+
     public List<IpSegment> ipSegmentQueryAllByHostAndType(String hostUuid, String type) {
-        String jsonString = dbProxy.ipSegmentQueryAllByDoubleKey(
-                IpSegmentConstants.HOST_UUID, hostUuid, IpSegmentConstants.TYPE, type);
-        return JSON.parseArray(jsonString, IpSegment.class);
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.HOST_UUID, hostUuid);
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        HostBridge hostBridge = hostBridgeList.get(0);
+
+        String jsonString2 = dbProxy.ipSegmentQueryAllBySingleKey(IpSegmentConstants.ID,
+                Integer.toString(hostBridge.getIpSegmentId()));
+        List<IpSegment> ipSegmentList = JSON.parseArray(jsonString2, IpSegment.class);
+        IpSegment ipSegment = ipSegmentList.get(0);
+
+        if (ipSegment.getType() == EnumUtils.getEnumFromString(IpTypeEnum.class, type)){
+            return ipSegmentList;
+        }
+        else {
+            return null;
+        }
     }
 
     public IpSegment ipSegmentQueryById(int id) {
@@ -223,6 +274,52 @@ public class TableStorage {
     }
 
 
+    // ========================= host bridge =========================
+    public List<HostBridge> hostBridgeQueryAll() {
+        String jsonString = dbProxy.hostBridgeQueryAll();
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public List<HostBridge> hostBridgeQueryAllByIpSegmentId(String ipSegmentId) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(
+                HostBridgeConstants.IP_SEGMENT_ID, ipSegmentId);
+        return JSON.parseArray(jsonString, HostBridge.class);
+    }
+
+    public HostBridge hostBridgeQueryById(int id) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.ID, Integer.toString(id));
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        if (hostBridgeList != null && !hostBridgeList.isEmpty()) {
+            return hostBridgeList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public HostBridge hostBridgeQueryByHostUuid(String hostUuid) {
+        String jsonString = dbProxy.hostBridgeQueryAllBySingleKey(IpSegmentConstants.HOST_UUID, hostUuid);
+        List<HostBridge> hostBridgeList = JSON.parseArray(jsonString, HostBridge.class);
+        if (hostBridgeList != null && !hostBridgeList.isEmpty()) {
+            return hostBridgeList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    public HostBridge hostBridgeSave(HostBridge hostBridge) {
+        String hostBridgeObjectStr = JSON.toJSONString(hostBridge);
+        hostBridgeObjectStr = dbProxy.hostBridgeSave(hostBridgeObjectStr);
+        return JSON.parseObject(hostBridgeObjectStr, HostBridge.class);
+    }
+
+    public void hostBridgeDeleteById(Integer hostBridgeId){
+        dbProxy.hostBridgeDeleteById(hostBridgeId);
+    }
+
+    public void hostBridgeMigrateFromIpSegment(){
+        dbProxy.hostBridgeMigrateFromIpSegment();
+    }
+
 
     // ========================= ip used =========================
 
@@ -230,6 +327,7 @@ public class TableStorage {
         String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.INSTANCE_UUID, instanceUuid);
         return JSON.parseArray(jsonString, IpUsed.class);
     }
+
 
     public List<IpUsed> ipUsedQueryAllByIpSegmentId(int ipSegmentId) {
         String jsonString = dbProxy.ipUsedQueryAllBySingleKey(IpUsedConstants.IP_SEGMENT_ID, Integer.toString(ipSegmentId));
@@ -264,6 +362,44 @@ public class TableStorage {
 
     public void ipUsedDeleteByVmUuid(String vmUuid){
         dbProxy.ipUsedDeleteByVmUuid(vmUuid);
+    }
+
+    // ========================= iso =========================
+    public Optional<Iso> isoQueryByUuid(String isoUuid) {
+        String jsonString = dbProxy.isoQueryByUuid(isoUuid);
+        Iso iso = JSON.parseObject(jsonString, Iso.class);
+        return Optional.ofNullable(iso);
+    }
+
+    public List<Iso> isoQueryAll() {
+        String jsonString = dbProxy.isoQueryAll();
+        return JSON.parseArray(jsonString, Iso.class);
+    }
+
+    public Iso isoSave(Iso iso) {
+        String isoObjectStr = JSON.toJSONString(iso);
+        isoObjectStr = dbProxy.isoSave(isoObjectStr);
+        return JSON.parseObject(isoObjectStr, Iso.class);
+    }
+
+    public List<String> queryAllMountPointsByVmUuid(String instanceUuid) {
+        log.info("queryAllMountPointsByVmUuid ==== start ====");
+        String jsonString = dbProxy.queryAllMountPointsByVmUuid(instanceUuid);
+        log.info("queryAllMountPointsByVmUuid ==== end ====");
+        return JSON.parseArray(jsonString, String.class);
+    }
+
+    public List<Mount> queryMountsByVmUuidAndIsoUuid(String instanceUuid, String isoUuid) {
+        log.info("queryMountsByVmUuidAndIsoUuid ==== start ====");
+        String jsonString = dbProxy.queryMountsByVmUuidAndIsoUuid(instanceUuid, isoUuid);
+        log.info("queryMountsByVmUuidAndIsoUuid ==== end ====");
+        return JSON.parseArray(jsonString, Mount.class);
+    }
+
+    public String clearIsoTableAndMountTable() {
+        dbProxy.deleteIsoTable();
+        dbProxy.deleteMountTable();
+        return "";
     }
 
     // ========================= volume =========================
@@ -361,6 +497,7 @@ public class TableStorage {
 
     public Device deviceSave(Device device) {
         String deviceObjectStr = JSON.toJSONString(device);
+        log.info(String.format("device to save: %s", deviceObjectStr));
         deviceObjectStr = dbProxy.deviceSave(deviceObjectStr);
         return JSON.parseObject(deviceObjectStr, Device.class);
     }

@@ -1,8 +1,6 @@
 package kubeiaas.iaasagent.config;
 
-import kubeiaas.common.bean.Device;
-import kubeiaas.common.bean.IpUsed;
-import kubeiaas.common.bean.Volume;
+import kubeiaas.common.bean.*;
 import kubeiaas.common.constants.bean.VolumeConstants;
 import kubeiaas.common.enums.volume.VolumeFormatEnum;
 import kubeiaas.common.utils.VmCUtils;
@@ -44,28 +42,33 @@ public class XmlConfig {
     }
 
     public String getVolumeDevice(Volume volume) {
-        log.info("getVolumeDevice ---- start ----");
-        String res = libvirtConfig.volumeToDisk(volume);
-        log.info("getVolumeDevice ---- end ----");
-        return res;
+        return libvirtConfig.volumeToDisk(volume);
     }
 
     public String getUsbDevice(Device device) {
-        log.info("getVolumeDevice ---- start ----");
-        String res = libvirtConfig.usbToDevice(device);
-        log.info("getVolumeDevice ---- end ----");
-        return res;
+        return libvirtConfig.usbToDevice(device);
+    }
+
+    public String getPciDevice(Device device) {
+        return libvirtConfig.pciToDevice(device);
+    }
+
+    public String getMdevDevice(Device device) {
+        return libvirtConfig.mdevToDevice(device);
     }
 
     public String getIpDevice(IpUsed ip) {
-        log.info("getIpDevice ---- start ----");
-        String res = libvirtConfig.ipToNetwork(ip);
-        log.info("getIpDevice ---- end ----");
+        return libvirtConfig.ipToNetwork(ip);
+    }
+
+    public String getMountXml(Mount mount) {
+        log.info("getIsoMountXml ---- start ----");
+        String res = libvirtConfig.convertMountToLibvirtXML(mount);
+        log.info("getIsoMountXml ---- end ----");
         return res;
     }
 
     public String modifyXml(String originXML, int newCores, int newMemory) {
-        log.info("modifyXml ---- start ----");
         //1、判断newCores是否为空，不为空再进行修改之后返回String类型的修改结果
         String resultXml = null;
         Document document = stringToDocument(originXML);
@@ -83,13 +86,11 @@ public class XmlConfig {
             currentMemoryElement.setTextContent(memoryString);
         }
         resultXml = documentToString(document);
-        log.info("modifyXml ---- end ----");
         return resultXml;
     }
 
     // ABANDON: no need to edit XML manually.
     public String attachDisk(String originXML, Volume volume) {
-        log.info("attachDisk ---- start ----");
         //1、根据volume信息生成一段xml信息，然后插入到originXml disk之后
         String resultXml = null;
         Document document = stringToDocument(originXML);
@@ -120,13 +121,11 @@ public class XmlConfig {
             nodeDrivers.appendChild(newDiskElement);
             resultXml = documentToString(document);
         }
-        log.info("attachDisk ---- end ----");
         return resultXml;
     }
 
     // ABANDON: no need to edit XML manually.
     public String detachDisk(String originXML, String uuid) {
-        log.info("detachDisk ---- start ----");
         String resultXml = null;
         Document document = stringToDocument(originXML);
         if (uuid != null) {
@@ -145,12 +144,10 @@ public class XmlConfig {
                 }
             }
         }
-        log.info("detachDisk ---- end ----");
         return resultXml;
     }
 
     public Document stringToDocument(String xml) {
-        log.info("stringToDocument ---- start ---- xml");
         StringReader stringReader = new StringReader(xml);
         InputSource inputSource = new InputSource(stringReader);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -159,14 +156,13 @@ public class XmlConfig {
             DocumentBuilder builder = factory.newDocumentBuilder();
             document = builder.parse(inputSource);
         } catch (ParserConfigurationException | IOException | SAXException e) {
+            log.error("ERROR: XML stringToDocument error");
             e.printStackTrace();
         }
-        log.info("stringToDocument ---- end ----");
         return document;
     }
 
     public String documentToString(Document doc) {
-        log.info("documentToString ---- start ---- xml");
         // XML转字符串
         String xmlStr = "";
         try {
@@ -177,19 +173,16 @@ public class XmlConfig {
             transformer.transform(source, result);
             xmlStr = writer.getBuffer().toString();
         } catch (TransformerException e) {
+            log.error("ERROR: XML documentToString error");
             e.printStackTrace();
         }
-        log.info("documentToString ---- end ----");
         return xmlStr;
     }
 
     private String getVolumeDiskDevice(VolumeFormatEnum volumeType) {
-        log.info("getVolumeDiskDevice ---- start ----");
         if (volumeType.equals(VolumeFormatEnum.ISO)) {
-            log.info("getVolumeDiskDevice ---- end ---- ISO");
             return VolumeConstants.VOLUME_DEVICE_CDROM;
         }
-        log.info("getVolumeDiskDevice ---- end ---- not ISO");
         return VolumeConstants.VOLUME_DEVICE_DISK;
     }
 

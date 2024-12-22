@@ -1,6 +1,6 @@
 package kubeiaas.iaascore.scheduler;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.Image;
 import kubeiaas.common.constants.ResponseMsgConstants;
 import kubeiaas.iaascore.dao.feign.ImageOperator;
@@ -21,7 +21,7 @@ public class ImageScheduler {
         try {
             return imageOperator.imageCreateYaml(imageObjectStr).equals(ResponseMsgConstants.SUCCESS);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(String.format("ERROR: imageCreateYaml failed. %s", e));
             return false;
         }
     }

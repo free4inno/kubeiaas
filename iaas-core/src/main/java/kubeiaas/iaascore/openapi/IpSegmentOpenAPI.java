@@ -1,6 +1,6 @@
 package kubeiaas.iaascore.openapi;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import kubeiaas.common.bean.IpSegment;
 import kubeiaas.common.bean.IpUsed;
 import kubeiaas.common.constants.RequestMappingConstants;
@@ -44,9 +44,9 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.QUERY_ALL, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String queryAll() {
-        log.info("ip_segment queryAll ==== start ====");
+        log.info("-- start -- queryAll");
         List<IpSegment> ipSegmentList = networkService.queryAllIpSeg();
-        log.info("ip_segment queryAll ==== end ====");
+        log.info("-- end -- queryAll -- success");
         return JSON.toJSONString(BaseResponse.success(ipSegmentList));
     }
 
@@ -55,9 +55,13 @@ public class IpSegmentOpenAPI {
     public String queryAllByHostAndType(
             @RequestParam(value = RequestParamConstants.HOST_UUID) @NotNull @NotEmpty String hostUuid,
             @RequestParam(value = RequestParamConstants.TYPE) @NotNull @NotEmpty String type) {
-        log.info("ip_segment queryAllByHostAndType ==== start ====");
+        log.info("-- start -- queryAllByHostAndType");
+
+        log.info(String.format("-> invoke DB -- ipSegmentQueryAllByHostAndType. hostUuid: %s, type: %s", hostUuid, type));
         List<IpSegment> ipSegmentList = tableStorage.ipSegmentQueryAllByHostAndType(hostUuid, type);
-        log.info("ip_segment queryAllByHostAndType ==== end ====");
+        log.info("<- invoke DB -- done");
+
+        log.info("-- end -- queryAllByHostAndType -- success");
         return JSON.toJSONString(BaseResponse.success(ipSegmentList));
     }
 
@@ -68,10 +72,9 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.GET, value = RequestMappingConstants.STATISTICS, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String statistics() {
-        log.info("ip_segment statistics ==== start ====");
-        log.info("ip_segment -- getTotal");
+        log.info("-- start -- statistics");
         Map<String, Integer> resMap = networkService.getIpCount();
-        log.info("ip_segment statistics ==== end ====");
+        log.info("-- end -- statistics -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -85,15 +88,15 @@ public class IpSegmentOpenAPI {
     @ResponseBody
     public String statisticsById(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) Integer ipSegmentId) throws BaseException {
-        log.info("ip_segment statistics ==== start ====");
+        log.info("-- start -- statisticsById");
         Map<String, Integer> resMap;
         if (ipSegmentId == null) {
+            log.error("ERROR: ipSegmentId illegal");
             throw new BaseException("err: ipSegmentId illegal");
         } else {
-            log.info("ip_segment -- getSegId: " + ipSegmentId);
             resMap = networkService.getIpCount(ipSegmentId);
         }
-        log.info("ip_segment statistics ==== end ====");
+        log.info("-- end -- statisticsById -- success");
         return JSON.toJSONString(BaseResponse.success(resMap));
     }
 
@@ -103,10 +106,12 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.CREATE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String createIpSegment(@Valid @RequestBody CreateIpSegmentForm f) throws BaseException {
-        log.info("ip_segment create ==== start ====");
+        log.info("-- start -- createIpSegment");
+//        IpSegment newIpSegment = networkService.updateIpSegment(0,
+//                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
         IpSegment newIpSegment = networkService.updateIpSegment(0,
-                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
-        log.info("ip_segment create ==== end ====");
+                f.getName(), f.getType(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), true);
+        log.info("-- end -- createIpSegment -- success");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
 
@@ -116,13 +121,13 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.DELETE_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String deleteIpSegment(@Valid @RequestBody DeleteIpSegmentForm f) {
-        log.info("ip_segment delete ==== start ====");
+        log.info("-- start -- deleteIpSegment");
         String result  = networkService.deleteIpSegment(f.getIpSegmentId());
         if (result.equals(ResponseMsgConstants.SUCCESS)) {
-            log.info("delete ==== end ====");
+            log.info("-- end -- deleteIpSegment -- success");
             return JSON.toJSONString(BaseResponse.success(new SingleMsgResponse(ResponseMsgConstants.SUCCESS)));
         } else {
-            log.info("delete ==== error ====");
+            log.warn("-- end -- deleteIpSegment -- failed");
             return JSON.toJSONString(BaseResponse.error(ResponseEnum.WORK_ERROR));
         }
     }
@@ -133,10 +138,11 @@ public class IpSegmentOpenAPI {
     @RequestMapping(method = RequestMethod.POST, value = RequestMappingConstants.EDIT_IP_SEGMENT, produces = RequestMappingConstants.APP_JSON)
     @ResponseBody
     public String editIpSegment(@Valid @RequestBody EditIpSegmentForm f) throws BaseException {
-        log.info("ip_segment edit ==== start ====");
+        log.info("-- start -- editIpSegment");
         IpSegment newIpSegment = networkService.updateIpSegment(f.getIpSegmentId(),
-                f.getName(), f.getHostUuid(), f.getType(), f.getBridge(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(), false);
-        log.info("ip_segment edit ==== end ====");
+                f.getName(), f.getType(), f.getIpRangeStart(), f.getIpRangeEnd(), f.getGateway(), f.getNetmask(),false);
+
+        log.info("-- end -- editIpSegment -- success");
         return JSON.toJSONString(BaseResponse.success(newIpSegment));
     }
 
@@ -147,9 +153,9 @@ public class IpSegmentOpenAPI {
     @ResponseBody
     public String queryById(
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId) {
-        log.info("queryById ==== start ====");
+        log.info("-- start -- queryById");
         IpSegment ipSegment = networkService.queryById(ipSegmentId);
-        log.info("queryById ==== end ====");
+        log.info("-- end -- queryById -- success");
         return JSON.toJSONString(BaseResponse.success(ipSegment));
     }
 
@@ -162,9 +168,9 @@ public class IpSegmentOpenAPI {
             @RequestParam(value = RequestParamConstants.IP_SEGMENT_ID) @NotNull Integer ipSegmentId,
             @RequestParam(value = RequestParamConstants.PAGE_NUM) @NotNull @Min(1) Integer pageNum,
             @RequestParam(value = RequestParamConstants.PAGE_SIZE) @NotNull @Min(1) Integer pageSize) {
-        log.info("pageQueryIpsById ==== start ====");
+        log.info("-- start -- pageQueryById");
         PageResponse<IpUsed> res = networkService.pageQueryById(ipSegmentId, pageNum, pageSize);
-        log.info("pageQueryById ==== end ====");
+        log.info("-- end -- pageQueryById -- success");
         return JSON.toJSONString(BaseResponse.success(res));
     }
 
